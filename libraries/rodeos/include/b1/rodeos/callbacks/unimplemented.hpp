@@ -14,8 +14,8 @@ struct unimplemented_callbacks {
    // privileged_api
    int  is_feature_active(int64_t) { return unimplemented<int>("is_feature_active"); }
    void activate_feature(int64_t) { return unimplemented<void>("activate_feature"); }
-   void get_resource_limits(int64_t, int, int, int) { return unimplemented<void>("get_resource_limits"); }
-   void set_resource_limits(int64_t, int64_t, int64_t, int64_t) { return unimplemented<void>("set_resource_limits"); }
+   //void get_resource_limits(int64_t, int, int, int) { return unimplemented<void>("get_resource_limits"); }
+   //void set_resource_limits(int64_t, int64_t, int64_t, int64_t) { return unimplemented<void>("set_resource_limits"); }
    int64_t set_proposed_producers(int, int) { return unimplemented<int64_t>("set_proposed_producers"); }
    int     get_blockchain_parameters_packed(int, int) { return unimplemented<int>("get_blockchain_parameters_packed"); }
    void set_blockchain_parameters_packed(int, int) { return unimplemented<void>("set_blockchain_parameters_packed"); }
@@ -143,8 +143,8 @@ struct unimplemented_callbacks {
       // privileged_api
       Rft::template add<&Derived::is_feature_active>("env", "is_feature_active");
       Rft::template add<&Derived::activate_feature>("env", "activate_feature");
-      Rft::template add<&Derived::get_resource_limits>("env", "get_resource_limits");
-      Rft::template add<&Derived::set_resource_limits>("env", "set_resource_limits");
+      //Rft::template add<&Derived::get_resource_limits>("env", "get_resource_limits");
+      //Rft::template add<&Derived::set_resource_limits>("env", "set_resource_limits");
       Rft::template add<&Derived::set_proposed_producers>("env", "set_proposed_producers");
       Rft::template add<&Derived::get_blockchain_parameters_packed>("env", "get_blockchain_parameters_packed");
       Rft::template add<&Derived::set_blockchain_parameters_packed>("env", "set_blockchain_parameters_packed");

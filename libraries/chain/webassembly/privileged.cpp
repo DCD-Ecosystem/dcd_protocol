@@ -2,7 +2,7 @@
 #include <eosio/chain/global_property_object.hpp>
 #include <eosio/chain/protocol_state_object.hpp>
 #include <eosio/chain/transaction_context.hpp>
-#include <eosio/chain/resource_limits.hpp>
+//#include <eosio/chain/resource_limits.hpp>
 #include <eosio/chain/apply_context.hpp>
 
 #include <vector>
@@ -23,65 +23,65 @@ namespace eosio { namespace chain { namespace webassembly {
    /**
     * Deprecated in favor of set_resource_limit.
     */
-   void interface::set_resource_limits( account_name account, int64_t ram_bytes, int64_t net_weight, int64_t cpu_weight ) {
-      EOS_ASSERT(ram_bytes >= -1, wasm_execution_error, "invalid value for ram resource limit expected [-1,INT64_MAX]");
-      EOS_ASSERT(net_weight >= -1, wasm_execution_error, "invalid value for net resource weight expected [-1,INT64_MAX]");
-      EOS_ASSERT(cpu_weight >= -1, wasm_execution_error, "invalid value for cpu resource weight expected [-1,INT64_MAX]");
-      if( context.control.get_mutable_resource_limits_manager().set_account_limits(account, ram_bytes, net_weight, cpu_weight) ) {
-         context.trx_context.validate_ram_usage.insert( account );
-      }
-   }
+//   void interface::set_resource_limits( account_name account, int64_t ram_bytes, int64_t net_weight, int64_t cpu_weight ) {
+//      EOS_ASSERT(ram_bytes >= -1, wasm_execution_error, "invalid value for ram resource limit expected [-1,INT64_MAX]");
+//      EOS_ASSERT(net_weight >= -1, wasm_execution_error, "invalid value for net resource weight expected [-1,INT64_MAX]");
+//      EOS_ASSERT(cpu_weight >= -1, wasm_execution_error, "invalid value for cpu resource weight expected [-1,INT64_MAX]");
+//      if( context.control.get_mutable_resource_limits_manager().set_account_limits(account, ram_bytes, net_weight, cpu_weight) ) {
+//         context.trx_context.validate_ram_usage.insert( account );
+//      }
+//   }
 
    /**
     * Deprecated in favor of get_resource_limit.
     */
-   void interface::get_resource_limits( account_name account, legacy_ptr<int64_t> ram_bytes, legacy_ptr<int64_t> net_weight, legacy_ptr<int64_t> cpu_weight ) const {
-      context.control.get_resource_limits_manager().get_account_limits( account, *ram_bytes, *net_weight, *cpu_weight);
-      (void)legacy_ptr<int64_t>(std::move(ram_bytes));
-      (void)legacy_ptr<int64_t>(std::move(net_weight));
-      (void)legacy_ptr<int64_t>(std::move(cpu_weight));
-   }
+//   void interface::get_resource_limits( account_name account, legacy_ptr<int64_t> ram_bytes, legacy_ptr<int64_t> net_weight, legacy_ptr<int64_t> cpu_weight ) const {
+//      context.control.get_resource_limits_manager().get_account_limits( account, *ram_bytes, *net_weight, *cpu_weight);
+//      (void)legacy_ptr<int64_t>(std::move(ram_bytes));
+//      (void)legacy_ptr<int64_t>(std::move(net_weight));
+//      (void)legacy_ptr<int64_t>(std::move(cpu_weight));
+//   }
 
-   void interface::set_resource_limit( account_name account, name resource, int64_t limit ) {
-      EOS_ASSERT(limit >= -1, wasm_execution_error, "invalid value for ${resource} resource limit expected [-1,INT64_MAX]", ("resource", resource));
-      auto& manager = context.control.get_mutable_resource_limits_manager();
-      if( resource == string_to_name("ram") ) {
-         int64_t ram, net, cpu;
-         manager.get_account_limits(account, ram, net, cpu);
-         if( manager.set_account_limits( account, limit, net, cpu ) ) {
-            context.trx_context.validate_ram_usage.insert( account );
-         }
-      } else if( resource == string_to_name("net") ) {
-         int64_t ram, net, cpu;
-         manager.get_account_limits(account, ram, net, cpu);
-         manager.set_account_limits( account, ram, limit, cpu );
-      } else if( resource == string_to_name("cpu") ) {
-         int64_t ram, net, cpu;
-         manager.get_account_limits(account, ram, net, cpu);
-         manager.set_account_limits( account, ram, net, limit );
-      } else {
-         EOS_THROW(wasm_execution_error, "unknown resource ${resource}", ("resource", resource));
-      }
-   }
+//   void interface::set_resource_limit( account_name account, name resource, int64_t limit ) {
+//      EOS_ASSERT(limit >= -1, wasm_execution_error, "invalid value for ${resource} resource limit expected [-1,INT64_MAX]", ("resource", resource));
+//      auto& manager = context.control.get_mutable_resource_limits_manager();
+//      if( resource == string_to_name("ram") ) {
+//         int64_t ram, net, cpu;
+//         manager.get_account_limits(account, ram, net, cpu);
+//         if( manager.set_account_limits( account, limit, net, cpu ) ) {
+//            context.trx_context.validate_ram_usage.insert( account );
+//         }
+//      } else if( resource == string_to_name("net") ) {
+//         int64_t ram, net, cpu;
+//         manager.get_account_limits(account, ram, net, cpu);
+//         manager.set_account_limits( account, ram, limit, cpu );
+//      } else if( resource == string_to_name("cpu") ) {
+//         int64_t ram, net, cpu;
+//         manager.get_account_limits(account, ram, net, cpu);
+//         manager.set_account_limits( account, ram, net, limit );
+//      } else {
+//         EOS_THROW(wasm_execution_error, "unknown resource ${resource}", ("resource", resource));
+//      }
+//   }
 
-   int64_t interface::get_resource_limit( account_name account, name resource ) const {
-      const auto& manager = context.control.get_resource_limits_manager();
-      if( resource == string_to_name("ram") ) {
-         int64_t ram, net, cpu;
-         manager.get_account_limits( account, ram, net, cpu );
-         return ram;
-      } else if( resource == string_to_name("net") ) {
-         int64_t ram, net, cpu;
-         manager.get_account_limits( account, ram, net, cpu );
-         return net;
-      } else if( resource == string_to_name("cpu") ) {
-         int64_t ram, net, cpu;
-         manager.get_account_limits( account, ram, net, cpu );
-         return cpu;
-      } else {
-         EOS_THROW(wasm_execution_error, "unknown resource ${resource}", ("resource", resource));
-      }
-   }
+//   int64_t interface::get_resource_limit( account_name account, name resource ) const {
+//      const auto& manager = context.control.get_resource_limits_manager();
+//      if( resource == string_to_name("ram") ) {
+//         int64_t ram, net, cpu;
+//         manager.get_account_limits( account, ram, net, cpu );
+//         return ram;
+//      } else if( resource == string_to_name("net") ) {
+//         int64_t ram, net, cpu;
+//         manager.get_account_limits( account, ram, net, cpu );
+//         return net;
+//      } else if( resource == string_to_name("cpu") ) {
+//         int64_t ram, net, cpu;
+//         manager.get_account_limits( account, ram, net, cpu );
+//         return cpu;
+//      } else {
+//         EOS_THROW(wasm_execution_error, "unknown resource ${resource}", ("resource", resource));
+//      }
+//   }
 
    int64_t set_proposed_producers_common( apply_context& context, vector<producer_authority> && producers, bool validate_keys ) {
       EOS_ASSERT(producers.size() <= config::max_producers, wasm_execution_error, "Producer schedule exceeds the maximum producer count for this chain");

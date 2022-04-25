@@ -29,9 +29,9 @@ namespace eosio { namespace chain {
 
    class authorization_manager;
 
-   namespace resource_limits {
-      class resource_limits_manager;
-   };
+//   namespace resource_limits {
+//      class resource_limits_manager;
+//   };
 
    class combined_database;
 
@@ -44,7 +44,7 @@ namespace eosio { namespace chain {
    class global_property_object;
    class permission_object;
    class account_object;
-   using resource_limits::resource_limits_manager;
+//   using resource_limits::resource_limits_manager;
    using apply_handler = std::function<void(apply_context&)>;
    using forked_branch_callback = std::function<void(const branch_type&)>;
    // lookup transaction_metadata via supplied function to avoid re-creation
@@ -111,9 +111,9 @@ namespace eosio { namespace chain {
 
             pinnable_mapped_file::map_mode db_map_mode      = pinnable_mapped_file::map_mode::mapped;
 
-            flat_set<account_name>   resource_greylist;
+            //flat_set<account_name>   resource_greylist;
             flat_set<account_name>   trusted_producers;
-            uint32_t                 greylist_limit         = chain::config::maximum_elastic_resource_multiplier;
+            //uint32_t                 greylist_limit         = chain::config::maximum_elastic_resource_multiplier;
          };
 
          enum class block_status {
@@ -163,9 +163,9 @@ namespace eosio { namespace chain {
          /**
           *
           */
-         transaction_trace_ptr push_transaction( const transaction_metadata_ptr& trx, fc::time_point deadline,
-                                                 uint32_t billed_cpu_time_us, bool explicit_billed_cpu_time,
-                                                 uint32_t subjective_cpu_bill_us );
+         transaction_trace_ptr push_transaction(const transaction_metadata_ptr& trx, fc::time_point deadline ,
+                                                uint32_t billed_cpu_time_us, bool explicit_billed_cpu_time,
+                                                uint32_t subjective_cpu_bill_us);
 
          /**
           * Attempt to execute a specific transaction in our deferred trx database
@@ -199,8 +199,8 @@ namespace eosio { namespace chain {
          const account_object&                 get_account( account_name n )const;
          const global_property_object&         get_global_properties()const;
          const dynamic_global_property_object& get_dynamic_global_properties()const;
-         const resource_limits_manager&        get_resource_limits_manager()const;
-         resource_limits_manager&              get_mutable_resource_limits_manager();
+         //const resource_limits_manager&        get_resource_limits_manager()const;
+         //resource_limits_manager&              get_mutable_resource_limits_manager();
          const authorization_manager&          get_authorization_manager()const;
          authorization_manager&                get_mutable_authorization_manager();
          const protocol_feature_manager&       get_protocol_feature_manager()const;
@@ -280,10 +280,10 @@ namespace eosio { namespace chain {
          // producing a block
          uint32_t configured_subjective_signature_length_limit()const;
 
-         void add_resource_greylist(const account_name &name);
-         void remove_resource_greylist(const account_name &name);
-         bool is_resource_greylisted(const account_name &name) const;
-         const flat_set<account_name> &get_resource_greylist() const;
+//         void add_resource_greylist(const account_name &name);
+//         void remove_resource_greylist(const account_name &name);
+//         bool is_resource_greylisted(const account_name &name) const;
+//         const flat_set<account_name> &get_resource_greylist() const;
 
          void validate_expiration( const transaction& t )const;
          void validate_tapos( const transaction& t )const;
@@ -315,12 +315,12 @@ namespace eosio { namespace chain {
 
          void set_subjective_cpu_leeway(fc::microseconds leeway);
          std::optional<fc::microseconds> get_subjective_cpu_leeway() const;
-         void set_greylist_limit( uint32_t limit );
-         uint32_t get_greylist_limit()const;
+//         void set_greylist_limit( uint32_t limit );
+//         uint32_t get_greylist_limit()const;
 
          fc::microseconds get_abi_serializer_max_time() const;
 
-         void add_to_ram_correction( account_name account, uint64_t ram_bytes, uint32_t action_id, const char* event_id );
+         //void add_to_ram_correction( account_name account, uint64_t ram_bytes, uint32_t action_id, const char* event_id );
          bool all_subjective_mitigations_disabled()const;
 
          fc::logger* get_deep_mind_logger() const;

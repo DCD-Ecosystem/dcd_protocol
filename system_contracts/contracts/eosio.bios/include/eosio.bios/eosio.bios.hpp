@@ -68,7 +68,7 @@ namespace eosiobios {
 
    /**
     * The `eosio.bios` is the first sample of system contract provided by `block.one` through the EOSIO platform. It is a minimalist system contract because it only supplies the actions that are absolutely critical to bootstrap a chain and nothing more. This allows for a chain agnostic approach to bootstrapping a chain.
-    * 
+    *
     * Just like in the `eosio.system` sample contract implementation, there are a few actions which are not implemented at the contract level (`newaccount`, `updateauth`, `deleteauth`, `linkauth`, `unlinkauth`, `canceldelay`, `onerror`, `setabi`, `setcode`), they are just declared in the contract so they will show in the contract's ABI and users will be able to push those actions to the chain via the account holding the `eosio.system` contract, but the implementation is at the EOSIO core level. They are referred to as EOSIO native actions.
     */
    class [[eosio::contract("eosio.bios")]] bios : public eosio::contract {
@@ -206,8 +206,8 @@ namespace eosiobios {
           * @param net_weight - fractionally proportionate net limit of available resources based on (weight / total_weight_of_all_accounts)
           * @param cpu_weight - fractionally proportionate cpu limit of available resources based on (weight / total_weight_of_all_accounts)
           */
-         [[eosio::action]]
-         void setalimits( name account, int64_t ram_bytes, int64_t net_weight, int64_t cpu_weight );
+         //[[eosio::action]]
+         //void setalimits( name account, int64_t ram_bytes, int64_t net_weight, int64_t cpu_weight );
 
          /**
           * Set producers action, sets a new list of active producers, by proposing a schedule change, once the block that
@@ -227,6 +227,22 @@ namespace eosiobios {
           */
          [[eosio::action]]
          void setparams( const eosio::blockchain_parameters& params );
+
+         /**
+          * Set params action, sets the blockchain parameters. By tuning these parameters, various degrees of customization can be achieved.
+          *
+          * @param params - New blockchain parameters to set
+          */
+         [[eosio::action]]
+         void setpparams( const std::vector<char>& bytes);
+
+         /**
+          * Set KV params action, sets the KV  parameters. By tuning these parameters, various degrees of customization can be achieved.
+          *
+          * @param params - New KV parameters to set
+          */
+         [[eosio::action]]
+         void setkvparams( const eosio::kv_parameters& params );
 
          /**
           * Require authorization action, checks if the account name `from` passed in as param has authorization to access
@@ -272,9 +288,11 @@ namespace eosiobios {
          using setcode_action = action_wrapper<"setcode"_n, &bios::setcode>;
          using setabi_action = action_wrapper<"setabi"_n, &bios::setabi>;
          using setpriv_action = action_wrapper<"setpriv"_n, &bios::setpriv>;
-         using setalimits_action = action_wrapper<"setalimits"_n, &bios::setalimits>;
+         //using setalimits_action = action_wrapper<"setalimits"_n, &bios::setalimits>;
          using setprods_action = action_wrapper<"setprods"_n, &bios::setprods>;
          using setparams_action = action_wrapper<"setparams"_n, &bios::setparams>;
+         using setpparams_action = action_wrapper<"setpparams"_n, &bios::setpparams>;
+         using setkvparams_action = action_wrapper<"setkvparams"_n, &bios::setkvparams>;
          using reqauth_action = action_wrapper<"reqauth"_n, &bios::reqauth>;
          using activate_action = action_wrapper<"activate"_n, &bios::activate>;
          using reqactivated_action = action_wrapper<"reqactivated"_n, &bios::reqactivated>;

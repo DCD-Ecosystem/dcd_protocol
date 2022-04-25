@@ -4,7 +4,7 @@
 #pragma GCC diagnostic pop
 
 #include <eosio/chain/exceptions.hpp>
-#include <eosio/chain/resource_limits.hpp>
+//#include <eosio/chain/resource_limits.hpp>
 #include <eosio/testing/tester.hpp>
 
 #include <fc/exception/exception.hpp>
@@ -65,13 +65,13 @@ BOOST_FIXTURE_TEST_CASE(ram_tests, eosio_system::eosio_system_tester) { try {
    auto total = get_total_stake( "testram11111"_n );
    const auto init_bytes =  total["ram_bytes"].as_uint64();
 
-   auto rlm = control->get_resource_limits_manager();
-   auto initial_ram_usage = rlm.get_account_ram_usage("testram11111"_n);
+//   auto rlm = control->get_resource_limits_manager();
+//   auto initial_ram_usage = rlm.get_account_ram_usage("testram11111"_n);
 
    // calculate how many more bytes we need to have table_allocation_bytes for database stores
    auto more_ram = table_allocation_bytes + init_bytes - init_request_bytes;
    BOOST_REQUIRE_MESSAGE(more_ram >= 0, "Underlying understanding changed, need to reduce size of init_request_bytes");
-   wdump((init_bytes)(initial_ram_usage)(init_request_bytes)(more_ram) );
+//   wdump((init_bytes)(initial_ram_usage)(init_request_bytes)(more_ram) );
    buyrambytes(config::system_account_name, "testram11111"_n, more_ram);
    buyrambytes(config::system_account_name, "testram22222"_n, more_ram);
 
@@ -83,11 +83,11 @@ BOOST_FIXTURE_TEST_CASE(ram_tests, eosio_system::eosio_system_tester) { try {
                         ("to", 10)
                         ("size", 1780 /*1910*/));
    produce_blocks(1);
-   auto ram_usage = rlm.get_account_ram_usage("testram11111"_n);
+//   auto ram_usage = rlm.get_account_ram_usage("testram11111"_n);
 
    total = get_total_stake( "testram11111"_n );
    const auto ram_bytes =  total["ram_bytes"].as_uint64();
-   wdump((ram_bytes)(ram_usage)(initial_ram_usage)(init_bytes)(ram_usage - initial_ram_usage)(init_bytes - ram_usage) );
+//   wdump((ram_bytes)(ram_usage)(initial_ram_usage)(init_bytes)(ram_usage - initial_ram_usage)(init_bytes - ram_usage) );
 
    wlog("ram_tests 1    %%%%%%");
    // allocate just beyond the allocated bytes
@@ -101,7 +101,7 @@ BOOST_FIXTURE_TEST_CASE(ram_tests, eosio_system::eosio_system_tester) { try {
                            fc_exception_message_starts_with("account testram11111 has insufficient ram"));
    wlog("ram_tests 2    %%%%%%");
    produce_blocks(1);
-   BOOST_REQUIRE_EQUAL(ram_usage, rlm.get_account_ram_usage("testram11111"_n));
+//   BOOST_REQUIRE_EQUAL(ram_usage, rlm.get_account_ram_usage("testram11111"_n));
 
    // update the entries with smaller allocations so that we can verify space is freed and new allocations can be made
    tester->push_action( "testram11111"_n, "setentry"_n, "testram11111"_n, mvo()
@@ -110,7 +110,7 @@ BOOST_FIXTURE_TEST_CASE(ram_tests, eosio_system::eosio_system_tester) { try {
                         ("to", 10)
                         ("size", 1680/*1810*/));
    produce_blocks(1);
-   BOOST_REQUIRE_EQUAL(ram_usage - 1000, rlm.get_account_ram_usage("testram11111"_n));
+//   BOOST_REQUIRE_EQUAL(ram_usage - 1000, rlm.get_account_ram_usage("testram11111"_n));
 
    // verify the added entry is beyond the allocation bytes limit
    BOOST_REQUIRE_EXCEPTION(
@@ -122,7 +122,7 @@ BOOST_FIXTURE_TEST_CASE(ram_tests, eosio_system::eosio_system_tester) { try {
                            ram_usage_exceeded,
                            fc_exception_message_starts_with("account testram11111 has insufficient ram"));
    produce_blocks(1);
-   BOOST_REQUIRE_EQUAL(ram_usage - 1000, rlm.get_account_ram_usage("testram11111"_n));
+//   BOOST_REQUIRE_EQUAL(ram_usage - 1000, rlm.get_account_ram_usage("testram11111"_n));
 
    // verify the new entry's bytes minus the freed up bytes for existing entries still exceeds the allocation bytes limit
    BOOST_REQUIRE_EXCEPTION(
@@ -134,7 +134,7 @@ BOOST_FIXTURE_TEST_CASE(ram_tests, eosio_system::eosio_system_tester) { try {
                            ram_usage_exceeded,
                            fc_exception_message_starts_with("account testram11111 has insufficient ram"));
    produce_blocks(1);
-   BOOST_REQUIRE_EQUAL(ram_usage - 1000, rlm.get_account_ram_usage("testram11111"_n));
+//   BOOST_REQUIRE_EQUAL(ram_usage - 1000, rlm.get_account_ram_usage("testram11111"_n));
 
    // verify the new entry's bytes minus the freed up bytes for existing entries are under the allocation bytes limit
    tester->push_action( "testram11111"_n, "setentry"_n, "testram11111"_n, mvo()

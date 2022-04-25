@@ -6,7 +6,7 @@
 #include <eosio/chain/chain_snapshot.hpp>
 #include <eosio/chain/fork_database.hpp>
 #include <eosio/chain/genesis_state.hpp>
-#include <eosio/chain/resource_limits.hpp>
+//#include <eosio/chain/resource_limits.hpp>
 #include <eosio/chain/snapshot.hpp>
 
 #include <eosio/chain/account_object.hpp>
@@ -43,7 +43,7 @@ namespace eosio { namespace chain {
    using kv_undo_stack_ptr = std::unique_ptr<eosio::session::undo_stack<rocks_db_type>>;
 
    using controller_index_set =
-         index_set<account_index, account_metadata_index, account_ram_correction_index, global_property_multi_index,
+         index_set<account_index, account_metadata_index, /*account_ram_correction_index,*/ global_property_multi_index,
                    protocol_state_multi_index, dynamic_global_property_multi_index, block_summary_multi_index,
                    transaction_multi_index, generated_transaction_multi_index, table_id_multi_index, code_index,
                    database_header_multi_index, kv_db_config_index>;
@@ -121,12 +121,10 @@ namespace eosio { namespace chain {
       std::unique_ptr<db_context> create_db_context(apply_context& context, name receiver);
 
       void add_to_snapshot(const eosio::chain::snapshot_writer_ptr& snapshot, const eosio::chain::block_state& head,
-                           const eosio::chain::authorization_manager&                    authorization,
-                           const eosio::chain::resource_limits::resource_limits_manager& resource_limits) const;
+                           const eosio::chain::authorization_manager&                    authorization) const;
 
       void read_from_snapshot(const snapshot_reader_ptr& snapshot, uint32_t blog_start, uint32_t blog_end,
                               eosio::chain::authorization_manager& authorization,
-                              eosio::chain::resource_limits::resource_limits_manager& resource_limits,
                               eosio::chain::fork_database& fork_db, eosio::chain::block_state_ptr& head,
                               uint32_t& snapshot_head_block, const eosio::chain::chain_id_type& chain_id);
 

@@ -7,7 +7,7 @@
 #include <eosio/chain/code_object.hpp>
 #include <eosio/chain/config.hpp>
 #include <eosio/chain/wasm_interface.hpp>
-#include <eosio/chain/resource_limits.hpp>
+//#include <eosio/chain/resource_limits.hpp>
 #include <eosio/chain/reversible_block_object.hpp>
 #include <eosio/chain/controller.hpp>
 #include <eosio/chain/generated_transaction_object.hpp>
@@ -1705,7 +1705,7 @@ std::string itoh(I n, size_t hlen = sizeof(I)<<1) {
 }
 
 read_only::get_info_results read_only::get_info(const read_only::get_info_params&) const {
-   const auto& rm = db.get_resource_limits_manager();
+//   const auto& rm = db.get_resource_limits_manager();
    return {
       itoh(static_cast<uint32_t>(app().version())),
       db.get_chain_id(),
@@ -1715,10 +1715,10 @@ read_only::get_info_results read_only::get_info(const read_only::get_info_params
       db.head_block_id(),
       db.head_block_time(),
       db.head_block_producer(),
-      rm.get_virtual_block_cpu_limit(),
-      rm.get_virtual_block_net_limit(),
-      rm.get_block_cpu_limit(),
-      rm.get_block_net_limit(),
+//      rm.get_virtual_block_cpu_limit(),
+//      rm.get_virtual_block_net_limit(),
+//      rm.get_block_cpu_limit(),
+//      rm.get_block_net_limit(),
       //std::bitset<64>(db.get_dynamic_global_properties().recent_slots_filled).to_string(),
       //__builtin_popcountll(db.get_dynamic_global_properties().recent_slots_filled) / 64.0,
       app().version_string(),
@@ -3288,12 +3288,12 @@ read_only::get_account_results read_only::get_account( const get_account_params&
    result.account_name = params.account_name;
 
    const auto& d = db.db();
-   const auto& rm = db.get_resource_limits_manager();
+//   const auto& rm = db.get_resource_limits_manager();
 
    result.head_block_num  = db.head_block_num();
    result.head_block_time = db.head_block_time();
 
-   rm.get_account_limits( result.account_name, result.ram_quota, result.net_weight, result.cpu_weight );
+//   rm.get_account_limits( result.account_name, result.ram_quota, result.net_weight, result.cpu_weight );
 
    const auto& accnt_obj = db.get_account( result.account_name );
    const auto& accnt_metadata_obj = db.db().get<account_metadata_object,by_name>( result.account_name );
@@ -3302,17 +3302,17 @@ read_only::get_account_results read_only::get_account( const get_account_params&
    result.last_code_update = accnt_metadata_obj.last_code_update;
    result.created          = accnt_obj.creation_date;
 
-   uint32_t greylist_limit = db.is_resource_greylisted(result.account_name) ? 1 : config::maximum_elastic_resource_multiplier;
+//   uint32_t greylist_limit = db.is_resource_greylisted(result.account_name) ? 1 : config::maximum_elastic_resource_multiplier;
    const block_timestamp_type current_usage_time (db.head_block_time());
-   result.net_limit.set( rm.get_account_net_limit_ex( result.account_name, greylist_limit, current_usage_time).first );
-   if ( result.net_limit.last_usage_update_time && (result.net_limit.last_usage_update_time->slot == 0) ) {   // account has no action yet
-      result.net_limit.last_usage_update_time = accnt_obj.creation_date;
-   }
-   result.cpu_limit.set( rm.get_account_cpu_limit_ex( result.account_name, greylist_limit, current_usage_time).first );
-   if ( result.cpu_limit.last_usage_update_time && (result.cpu_limit.last_usage_update_time->slot == 0) ) {   // account has no action yet
-      result.cpu_limit.last_usage_update_time = accnt_obj.creation_date;
-   }
-   result.ram_usage = rm.get_account_ram_usage( result.account_name );
+//   result.net_limit.set( rm.get_account_net_limit_ex( result.account_name, greylist_limit, current_usage_time).first );
+//   if ( result.net_limit.last_usage_update_time && (result.net_limit.last_usage_update_time->slot == 0) ) {   // account has no action yet
+//      result.net_limit.last_usage_update_time = accnt_obj.creation_date;
+//   }
+//   result.cpu_limit.set( rm.get_account_cpu_limit_ex( result.account_name, greylist_limit, current_usage_time).first );
+//   if ( result.cpu_limit.last_usage_update_time && (result.cpu_limit.last_usage_update_time->slot == 0) ) {   // account has no action yet
+//      result.cpu_limit.last_usage_update_time = accnt_obj.creation_date;
+//   }
+//   result.ram_usage = rm.get_account_ram_usage( result.account_name );
 
    const auto& permissions = d.get_index<permission_index,by_owner>();
    auto perm = permissions.lower_bound( boost::make_tuple( params.account_name ) );

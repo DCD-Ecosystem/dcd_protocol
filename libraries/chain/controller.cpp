@@ -9,7 +9,7 @@
 
 #include <eosio/chain/protocol_feature_manager.hpp>
 #include <eosio/chain/authorization_manager.hpp>
-#include <eosio/chain/resource_limits.hpp>
+//#include <eosio/chain/resource_limits.hpp>
 #include <eosio/chain/thread_utils.hpp>
 #include <eosio/chain/platform_timer.hpp>
 
@@ -28,7 +28,7 @@
 
 namespace eosio { namespace chain {
 
-using resource_limits::resource_limits_manager;
+//using resource_limits::resource_limits_manager;
 
 struct building_block {
    building_block( const block_header_state& prev,
@@ -158,7 +158,7 @@ struct controller_impl {
    block_state_ptr                     head;
    fork_database                       fork_db;
    wasm_interface                      wasmif;
-   resource_limits_manager             resource_limits;
+//   resource_limits_manager             resource_limits;
    authorization_manager               authorization;
    protocol_feature_manager            protocol_features;
    controller::config                  conf;
@@ -238,7 +238,7 @@ struct controller_impl {
     blog( cfg.blog ),
     fork_db( cfg.state_dir ),
     wasmif( cfg.wasm_runtime, cfg.eosvmoc_tierup, db, cfg.state_dir, cfg.eosvmoc_config ),
-    resource_limits( db, [&s]() { return s.get_deep_mind_logger(); }),
+    //resource_limits( db, [&s]() { return s.get_deep_mind_logger(); }),
     authorization( s, db ),
     protocol_features( std::move(pfs), [&s]() { return s.get_deep_mind_logger(); } ),
     conf( cfg ),
@@ -495,11 +495,11 @@ struct controller_impl {
          snapshot->validate();
          if( blog.head() ) {
             kv_db.read_from_snapshot( snapshot, blog.first_block_num(), blog.head()->block_num(),
-                                      authorization, resource_limits,
+                                      authorization, /*resource_limits,*/
                                       fork_db, head, snapshot_head_block, chain_id );
          } else {
             kv_db.read_from_snapshot( snapshot, 0, std::numeric_limits<uint32_t>::max(),
-                                      authorization, resource_limits,
+                                      authorization, /*resource_limits,*/
                                       fork_db, head, snapshot_head_block, chain_id );
             const uint32_t lib_num = head->block_num;
             EOS_ASSERT( lib_num > 0, snapshot_exception,
@@ -757,13 +757,13 @@ struct controller_impl {
       contract_database_index_set::add_indices(db);
 
       authorization.add_indices();
-      resource_limits.add_indices();
+//      resource_limits.add_indices();
    }
 
    sha256 calculate_integrity_hash() const {
       sha256::encoder enc;
       auto hash_writer = std::make_shared<integrity_hash_snapshot_writer>(enc);
-      kv_db.add_to_snapshot(hash_writer, *fork_db.head(), authorization, resource_limits);
+      kv_db.add_to_snapshot(hash_writer, *fork_db.head(), authorization/*, resource_limits*/);
       hash_writer->finalize();
 
       return enc.result();
@@ -790,7 +790,7 @@ struct controller_impl {
       const auto& active_permission = authorization.create_permission(name, config::active_name, owner_permission.id,
                                                                       active, 0, initial_timestamp );
 
-      resource_limits.initialize_account(name);
+//      resource_limits.initialize_account(name);
 
       int64_t ram_delta = config::overhead_per_account_ram_bytes;
       ram_delta += 2*config::billable_size_v<permission_object>;
@@ -802,8 +802,8 @@ struct controller_impl {
          event_id = STORAGE_EVENT_ID("${name}", ("name", name));
       }
 
-      resource_limits.add_pending_ram_usage(name, ram_delta, storage_usage_trace(0, std::move(event_id), "account", "add", "newaccount"));
-      resource_limits.verify_account_ram_usage(name);
+//      resource_limits.add_pending_ram_usage(name, ram_delta, storage_usage_trace(0, std::move(event_id), "account", "add", "newaccount"));
+//      resource_limits.verify_account_ram_usage(name);
    }
 
    void initialize_database(const genesis_state& genesis) {
@@ -841,7 +841,7 @@ struct controller_impl {
       db.create<kv_db_config_object>([](auto&){});
 
       authorization.initialize_database();
-      resource_limits.initialize_database();
+//      resource_limits.initialize_database();
 
       authority system_auth(genesis.initial_key);
       create_native_account( genesis.initial_timestamp, config::system_account_name, system_auth, system_auth, true );
@@ -978,7 +978,7 @@ struct controller_impl {
       }
 
       int64_t ram_delta = -(config::billable_size_v<generated_transaction_object> + gto.packed_trx.size());
-      resource_limits.add_pending_ram_usage( gto.payer, ram_delta, storage_usage_trace(0, std::move(event_id), "deferred_trx", "remove", "deferred_trx_removed") );
+//      resource_limits.add_pending_ram_usage( gto.payer, ram_delta, storage_usage_trace(0, std::move(event_id), "deferred_trx", "remove", "deferred_trx_removed") );
       // No need to verify_account_ram_usage since we are only reducing memory
 
       db.remove( gto );
@@ -1014,7 +1014,7 @@ struct controller_impl {
       const auto& idx = db.get_index<generated_transaction_multi_index,by_trx_id>();
       auto itr = idx.find( trxid );
       EOS_ASSERT( itr != idx.end(), unknown_transaction_exception, "unknown transaction" );
-      return push_scheduled_transaction( *itr, deadline, billed_cpu_time_us, explicit_billed_cpu_time );
+      return push_scheduled_transaction( *itr, deadline, billed_cpu_time_us, explicit_billed_cpu_time);
    }
 
    transaction_trace_ptr push_scheduled_transaction( const generated_transaction_object& gto, fc::time_point deadline, uint32_t billed_cpu_time_us, bool explicit_billed_cpu_time = false )
@@ -1179,22 +1179,22 @@ struct controller_impl {
       if ( !subjective ) {
          // hard failure logic
 
-         if( !validating ) {
-            auto& rl = self.get_mutable_resource_limits_manager();
-            rl.update_account_usage( trx_context.bill_to_accounts, block_timestamp_type(self.pending_block_time()).slot );
-            int64_t account_cpu_limit = 0;
-            std::tie( std::ignore, account_cpu_limit, std::ignore, std::ignore ) = trx_context.max_bandwidth_billed_accounts_can_pay( true );
+//         if( !validating ) {
+//            auto& rl = self.get_mutable_resource_limits_manager();
+//            rl.update_account_usage( trx_context.bill_to_accounts, block_timestamp_type(self.pending_block_time()).slot );
+//            int64_t account_cpu_limit = 0;
+//            std::tie( std::ignore, account_cpu_limit, std::ignore, std::ignore ) = trx_context.max_bandwidth_billed_accounts_can_pay( true );
 
-            uint32_t limited_cpu_time_to_bill_us = static_cast<uint32_t>( std::min(
-                  std::min( static_cast<int64_t>(cpu_time_to_bill_us), account_cpu_limit ),
-                  trx_context.initial_objective_duration_limit.count() ) );
-            EOS_ASSERT( !explicit_billed_cpu_time || (cpu_time_to_bill_us == limited_cpu_time_to_bill_us),
-                        transaction_exception, "cpu to bill ${cpu} != limited ${limit}", ("cpu", cpu_time_to_bill_us)("limit", limited_cpu_time_to_bill_us) );
-            cpu_time_to_bill_us = limited_cpu_time_to_bill_us;
-         }
+//            uint32_t limited_cpu_time_to_bill_us = static_cast<uint32_t>( std::min(
+//                  std::min( static_cast<int64_t>(cpu_time_to_bill_us), account_cpu_limit ),
+//                  trx_context.initial_objective_duration_limit.count() ) );
+//            EOS_ASSERT( !explicit_billed_cpu_time || (cpu_time_to_bill_us == limited_cpu_time_to_bill_us),
+//                        transaction_exception, "cpu to bill ${cpu} != limited ${limit}", ("cpu", cpu_time_to_bill_us)("limit", limited_cpu_time_to_bill_us) );
+//            cpu_time_to_bill_us = limited_cpu_time_to_bill_us;
+//         }
 
-         resource_limits.add_transaction_usage( trx_context.bill_to_accounts, cpu_time_to_bill_us, 0,
-                                                block_timestamp_type(self.pending_block_time()).slot ); // Should never fail
+//         resource_limits.add_transaction_usage( trx_context.bill_to_accounts, cpu_time_to_bill_us, 0,
+//                                                block_timestamp_type(self.pending_block_time()).slot ); // Should never fail
 
          trace->receipt = push_receipt(gtrx.trx_id, transaction_receipt::hard_fail, cpu_time_to_bill_us, 0);
          trace->account_ram_delta = account_delta( gtrx.payer, trx_removal_ram_delta );
@@ -1306,7 +1306,7 @@ struct controller_impl {
                        trx->recovered_keys(),
                        {},
                        trx_context.delay,
-                       [&trx_context](){ trx_context.checktime(); },
+                       //[&trx_context](){ trx_context.checktime(); },
                        false
                );
             }
@@ -1377,7 +1377,7 @@ struct controller_impl {
                      controller::block_status s,
                      const std::optional<block_id_type>& producer_block_id )
    {
-      EOS_ASSERT( !pending, block_validate_exception, "pending block already exists" );
+      EOS_ASSERT( !pending, block_validate_exception, "pending block already exists" ); /// TODO: 6
 
       if (auto dm_logger = get_deep_mind_logger()) {
          // The head block represents the block just before this one that is about to start, so add 1 to get this block num
@@ -1508,7 +1508,7 @@ struct controller_impl {
                   in_trx_requiring_checks = old_value;
                });
             in_trx_requiring_checks = true;
-            push_transaction( onbtrx, fc::time_point::maximum(), gpo.configuration.min_transaction_cpu_usage, true, {}, 0 );
+            push_transaction( onbtrx, fc::time_point::maximum(), gpo.configuration.min_transaction_cpu_usage, true, {}, 0);
          } catch( const std::bad_alloc& e ) {
             elog( "on block transaction failed due to a std::bad_alloc" );
             throw;
@@ -1557,14 +1557,14 @@ struct controller_impl {
       }
 
       // Update resource limits:
-      resource_limits.process_account_limit_updates();
-      const auto& chain_config = self.get_global_properties().configuration;
-      uint64_t CPU_TARGET = EOS_PERCENT(chain_config.max_block_cpu_usage, chain_config.target_block_cpu_usage_pct);
-      resource_limits.set_block_parameters(
-         { CPU_TARGET, chain_config.max_block_cpu_usage, config::block_cpu_usage_average_window_ms / config::block_interval_ms, config::maximum_elastic_resource_multiplier, {99, 100}, {1000, 999}},
-         {EOS_PERCENT(chain_config.max_block_net_usage, chain_config.target_block_net_usage_pct), chain_config.max_block_net_usage, config::block_size_average_window_ms / config::block_interval_ms, config::maximum_elastic_resource_multiplier, {99, 100}, {1000, 999}}
-      );
-      resource_limits.process_block_usage(pbhs.block_num);
+//      resource_limits.process_account_limit_updates();
+//      const auto& chain_config = self.get_global_properties().configuration;
+//      uint64_t CPU_TARGET = EOS_PERCENT(chain_config.max_block_cpu_usage, chain_config.target_block_cpu_usage_pct);
+//      resource_limits.set_block_parameters(
+//         { CPU_TARGET, chain_config.max_block_cpu_usage, config::block_cpu_usage_average_window_ms / config::block_interval_ms, config::maximum_elastic_resource_multiplier, {99, 100}, {1000, 999}},
+//         {EOS_PERCENT(chain_config.max_block_net_usage, chain_config.target_block_net_usage_pct), chain_config.max_block_net_usage, config::block_size_average_window_ms / config::block_interval_ms, config::maximum_elastic_resource_multiplier, {99, 100}, {1000, 999}}
+//      );
+//      resource_limits.process_block_usage(pbhs.block_num);
 
       // Create (unsigned) block:
       auto block_ptr = std::make_shared<signed_block>( pbhs.make_block_header(
@@ -1609,8 +1609,8 @@ struct controller_impl {
     * @post regardless of the success of commit block there is no active pending block
     */
    void commit_block( bool add_to_fork_db ) {
-      auto reset_pending_on_exit = fc::make_scoped_exit([this]{
-         pending.reset();
+      auto reset_pending_on_exit = fc::make_scoped_exit([this]{ /// TODO: 8 after
+         pending.reset(); /// TODO: !!! reset
       });
 
       try {
@@ -1771,7 +1771,7 @@ struct controller_impl {
                if( explicit_net ) {
                   explicit_net_usage_words = receipt.net_usage_words.value;
                }
-               trace = push_transaction( trx_meta, fc::time_point::maximum(), receipt.cpu_usage_us, true, explicit_net_usage_words, 0 );
+               trace = push_transaction( trx_meta, fc::time_point::maximum(), receipt.cpu_usage_us, true, explicit_net_usage_words, 0);
                ++packed_idx;
             } else if( std::holds_alternative<transaction_id_type>(receipt.trx) ) {
                trace = push_scheduled_transaction( std::get<transaction_id_type>(receipt.trx), fc::time_point::maximum(), receipt.cpu_usage_us, true );
@@ -2310,14 +2310,14 @@ struct controller_impl {
 
 }; /// controller_impl
 
-const resource_limits_manager&   controller::get_resource_limits_manager()const
-{
-   return my->resource_limits;
-}
-resource_limits_manager&         controller::get_mutable_resource_limits_manager()
-{
-   return my->resource_limits;
-}
+//const resource_limits_manager&   controller::get_resource_limits_manager()const
+//{
+//   return my->resource_limits;
+//}
+//resource_limits_manager&         controller::get_mutable_resource_limits_manager()
+//{
+//   return my->resource_limits;
+//}
 
 const authorization_manager&   controller::get_authorization_manager()const
 {
@@ -2549,7 +2549,7 @@ void controller::start_block( block_timestamp_type when,
                               uint16_t confirm_block_count,
                               const vector<digest_type>& new_protocol_feature_activations )
 {
-   validate_db_available_size();
+   validate_db_available_size(); /// TODO: 5
 
    if( new_protocol_feature_activations.size() > 0 ) {
       validate_protocol_features( new_protocol_feature_activations );
@@ -2611,19 +2611,19 @@ block_state_ptr controller::push_block( std::future<block_state_ptr>& block_stat
 
 transaction_trace_ptr controller::push_transaction( const transaction_metadata_ptr& trx, fc::time_point deadline,
                                                     uint32_t billed_cpu_time_us, bool explicit_billed_cpu_time,
-                                                    uint32_t subjective_cpu_bill_us ) {
+                                                    uint32_t subjective_cpu_bill_us  ) {
    validate_db_available_size();
    EOS_ASSERT( get_read_mode() != db_read_mode::IRREVERSIBLE, transaction_type_exception, "push transaction not allowed in irreversible mode" );
    EOS_ASSERT( trx && !trx->implicit && !trx->scheduled, transaction_type_exception, "Implicit/Scheduled transaction not allowed" );
-   return my->push_transaction(trx, deadline, billed_cpu_time_us, explicit_billed_cpu_time, {}, subjective_cpu_bill_us );
+   return my->push_transaction(trx, deadline, billed_cpu_time_us, explicit_billed_cpu_time, {}, subjective_cpu_bill_us  );
 }
 
 transaction_trace_ptr controller::push_scheduled_transaction( const transaction_id_type& trxid, fc::time_point deadline,
-                                                              uint32_t billed_cpu_time_us, bool explicit_billed_cpu_time )
+                                                              uint32_t billed_cpu_time_us, bool explicit_billed_cpu_time  )
 {
    EOS_ASSERT( get_read_mode() != db_read_mode::IRREVERSIBLE, transaction_type_exception, "push scheduled transaction not allowed in irreversible mode" );
    validate_db_available_size();
-   return my->push_scheduled_transaction( trxid, deadline, billed_cpu_time_us, explicit_billed_cpu_time );
+   return my->push_scheduled_transaction(  trxid, deadline, billed_cpu_time_us, explicit_billed_cpu_time  );
 }
 
 const flat_set<account_name>& controller::get_actor_whitelist() const {
@@ -2856,7 +2856,7 @@ sha256 controller::calculate_integrity_hash()const { try {
 
 void controller::write_snapshot( const snapshot_writer_ptr& snapshot ) const {
    EOS_ASSERT( !my->pending, block_validate_exception, "cannot take a consistent snapshot with a pending block" );
-   return my->kv_db.add_to_snapshot(snapshot, *my->fork_db.head(), my->authorization, my->resource_limits);
+   return my->kv_db.add_to_snapshot(snapshot, *my->fork_db.head(), my->authorization/*, my->resource_limits*/);
 }
 
 int64_t controller::set_proposed_producers( vector<producer_authority> producers ) {
@@ -3144,63 +3144,63 @@ std::optional<fc::microseconds> controller::get_subjective_cpu_leeway() const {
     return my->subjective_cpu_leeway;
 }
 
-void controller::set_greylist_limit( uint32_t limit ) {
-   EOS_ASSERT( 0 < limit && limit <= chain::config::maximum_elastic_resource_multiplier,
-               misc_exception,
-               "Invalid limit (${limit}) passed into set_greylist_limit. "
-               "Must be between 1 and ${max}.",
-               ("limit", limit)("max", chain::config::maximum_elastic_resource_multiplier)
-   );
-   my->conf.greylist_limit = limit;
-}
+//void controller::set_greylist_limit( uint32_t limit ) {
+//   EOS_ASSERT( 0 < limit && limit <= chain::config::maximum_elastic_resource_multiplier,
+//               misc_exception,
+//               "Invalid limit (${limit}) passed into set_greylist_limit. "
+//               "Must be between 1 and ${max}.",
+//               ("limit", limit)("max", chain::config::maximum_elastic_resource_multiplier)
+//   );
+//   my->conf.greylist_limit = limit;
+//}
 
-uint32_t controller::get_greylist_limit()const {
-   return my->conf.greylist_limit;
-}
+//uint32_t controller::get_greylist_limit()const {
+//   return my->conf.greylist_limit;
+//}
 
-void controller::add_resource_greylist(const account_name &name) {
-   my->conf.resource_greylist.insert(name);
-}
+//void controller::add_resource_greylist(const account_name &name) {
+//   my->conf.resource_greylist.insert(name);
+//}
 
-void controller::remove_resource_greylist(const account_name &name) {
-   my->conf.resource_greylist.erase(name);
-}
+//void controller::remove_resource_greylist(const account_name &name) {
+//   my->conf.resource_greylist.erase(name);
+//}
 
-bool controller::is_resource_greylisted(const account_name &name) const {
-   return my->conf.resource_greylist.find(name) !=  my->conf.resource_greylist.end();
-}
+//bool controller::is_resource_greylisted(const account_name &name) const {
+//   return my->conf.resource_greylist.find(name) !=  my->conf.resource_greylist.end();
+//}
 
-const flat_set<account_name> &controller::get_resource_greylist() const {
-   return  my->conf.resource_greylist;
-}
+//const flat_set<account_name> &controller::get_resource_greylist() const {
+//   return  my->conf.resource_greylist;
+//}
 
 
-void controller::add_to_ram_correction( account_name account, uint64_t ram_bytes, uint32_t action_id, const char* event_id ) {
-   int64_t correction_object_id = 0;
+//void controller::add_to_ram_correction( account_name account, uint64_t ram_bytes, uint32_t action_id, const char* event_id ) {
+//   int64_t correction_object_id = 0;
 
-   if( auto ptr = my->db.find<account_ram_correction_object, by_name>( account ) ) {
-      my->db.modify<account_ram_correction_object>( *ptr, [&]( auto& rco ) {
-         correction_object_id = rco.id._id;
-         rco.ram_correction += ram_bytes;
-      } );
-   } else {
-      my->db.create<account_ram_correction_object>( [&]( auto& rco ) {
-         correction_object_id = rco.id._id;
-         rco.name = account;
-         rco.ram_correction = ram_bytes;
-      } );
-   }
+//   if( auto ptr = my->db.find<account_ram_correction_object, by_name>( account ) ) {
+//      my->db.modify<account_ram_correction_object>( *ptr, [&]( auto& rco ) {
+//         correction_object_id = rco.id._id;
+//         rco.ram_correction += ram_bytes;
+//      } );
+//   } else {
+//      my->db.create<account_ram_correction_object>( [&]( auto& rco ) {
+//         correction_object_id = rco.id._id;
+//         rco.name = account;
+//         rco.ram_correction = ram_bytes;
+//      } );
+//   }
 
-   if (auto dm_logger = get_deep_mind_logger()) {
-      fc_dlog(*dm_logger, "RAM_CORRECTION_OP ${action_id} ${correction_id} ${event_id} ${payer} ${delta}",
-         ("action_id", action_id)
-         ("correction_id", correction_object_id)
-         ("event_id", event_id)
-         ("payer", account)
-         ("delta", ram_bytes)
-      );
-   }
-}
+//   if (auto dm_logger = get_deep_mind_logger()) {
+//      fc_dlog(*dm_logger, "RAM_CORRECTION_OP ${action_id} ${correction_id} ${event_id} ${payer} ${delta}",
+//         ("action_id", action_id)
+//         ("correction_id", correction_object_id)
+//         ("event_id", event_id)
+//         ("payer", account)
+//         ("delta", ram_bytes)
+//      );
+//   }
+//}
 
 fc::microseconds controller::get_abi_serializer_max_time()const {
    return my->conf.abi_serializer_max_time_us;
@@ -3308,7 +3308,7 @@ void controller::replace_producer_keys( const public_key_type& key ) {
 }
 
 void controller::replace_account_keys( name account, name permission, const public_key_type& key ) {
-   auto& rlm = get_mutable_resource_limits_manager();
+   //auto& rlm = get_mutable_resource_limits_manager();
    auto* perm = db().find<permission_object, by_owner>(boost::make_tuple(account, permission));
    if (!perm)
       return;
@@ -3317,8 +3317,8 @@ void controller::replace_account_keys( name account, name permission, const publ
       p.auth = authority(key);
    });
    int64_t new_size = (int64_t)(chain::config::billable_size_v<permission_object> + perm->auth.get_billable_size());
-   rlm.add_pending_ram_usage(account, new_size - old_size, generic_storage_usage_trace(0));
-   rlm.verify_account_ram_usage(account);
+//   rlm.add_pending_ram_usage(account, new_size - old_size, generic_storage_usage_trace(0));
+//   rlm.verify_account_ram_usage(account);
 }
 
 /// Protocol feature activation handlers:
@@ -3340,24 +3340,25 @@ void controller_impl::on_activation<builtin_protocol_feature_t::get_sender>() {
 
 template<>
 void controller_impl::on_activation<builtin_protocol_feature_t::replace_deferred>() {
-   const auto& indx = db.get_index<account_ram_correction_index, by_id>();
-   for( auto itr = indx.begin(); itr != indx.end(); itr = indx.begin() ) {
-      int64_t current_ram_usage = resource_limits.get_account_ram_usage( itr->name );
-      int64_t ram_delta = -static_cast<int64_t>(itr->ram_correction);
-      if( itr->ram_correction > static_cast<uint64_t>(current_ram_usage) ) {
-         ram_delta = -current_ram_usage;
-         elog( "account ${name} was to be reduced by ${adjust} bytes of RAM despite only using ${current} bytes of RAM",
-               ("name", itr->name)("adjust", itr->ram_correction)("current", current_ram_usage) );
-      }
+/// TODO: comment_resource
+    //   const auto& indx = db.get_index<account_ram_correction_index, by_id>();
+//   for( auto itr = indx.begin(); itr != indx.end(); itr = indx.begin() ) {
+//      //int64_t current_ram_usage = resource_limits.get_account_ram_usage( itr->name );
+//      int64_t ram_delta = -static_cast<int64_t>(itr->ram_correction);
+//      if( itr->ram_correction > static_cast<uint64_t>(current_ram_usage) ) {
+//         ram_delta = -current_ram_usage;
+//         elog( "account ${name} was to be reduced by ${adjust} bytes of RAM despite only using ${current} bytes of RAM",
+//               ("name", itr->name)("adjust", itr->ram_correction)("current", current_ram_usage) );
+//      }
 
-      std::string event_id;
-      if (get_deep_mind_logger() != nullptr) {
-         event_id = STORAGE_EVENT_ID("${id}", ("id", itr->id._id));
-      }
+//      std::string event_id;
+//      if (get_deep_mind_logger() != nullptr) {
+//         event_id = STORAGE_EVENT_ID("${id}", ("id", itr->id._id));
+//      }
 
-      resource_limits.add_pending_ram_usage( itr->name, ram_delta, storage_usage_trace(0, std::move(event_id), "deferred_trx", "correction", "deferred_trx_ram_correction") );
-      db.remove( *itr );
-   }
+//      resource_limits.add_pending_ram_usage( itr->name, ram_delta, storage_usage_trace(0, std::move(event_id), "deferred_trx", "correction", "deferred_trx_ram_correction") );
+//      db.remove( *itr );
+//   }
 }
 
 template<>
@@ -3400,8 +3401,8 @@ void controller_impl::on_activation<builtin_protocol_feature_t::kv_database>() {
       add_intrinsic_to_whitelist( ps.whitelisted_intrinsics, "kv_it_key" );
       add_intrinsic_to_whitelist( ps.whitelisted_intrinsics, "kv_it_value" );
       // resource management
-      add_intrinsic_to_whitelist( ps.whitelisted_intrinsics, "set_resource_limit" );
-      add_intrinsic_to_whitelist( ps.whitelisted_intrinsics, "get_resource_limit" );
+//      add_intrinsic_to_whitelist( ps.whitelisted_intrinsics, "set_resource_limit" );
+//      add_intrinsic_to_whitelist( ps.whitelisted_intrinsics, "get_resource_limit" );
       add_intrinsic_to_whitelist( ps.whitelisted_intrinsics, "set_kv_parameters_packed" );
       add_intrinsic_to_whitelist( ps.whitelisted_intrinsics, "get_kv_parameters_packed" );
    } );

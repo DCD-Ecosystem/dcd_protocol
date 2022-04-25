@@ -68,7 +68,7 @@ namespace webassembly {
           * @param net_weight - fractionally proportionate net limit of available resources based on (weight / total_weight_of_all_accounts).
           * @param cpu_weight - fractionally proportionate cpu limit of available resources based on (weight / total_weight_of_all_accounts).
          */
-         void set_resource_limits(account_name account, int64_t ram_bytes, int64_t net_weight, int64_t cpu_weight);
+//         void set_resource_limits(account_name account, int64_t ram_bytes, int64_t net_weight, int64_t cpu_weight);
 
          /**
           * Get the resource limits of an account
@@ -80,7 +80,7 @@ namespace webassembly {
           * @param[out] net_weight - output to hold net weight.
           * @param[out] cpu_weight - output to hold cpu weight.
          */
-         void get_resource_limits(account_name account, legacy_ptr<int64_t, 8> ram_bytes, legacy_ptr<int64_t, 8> net_weight, legacy_ptr<int64_t, 8> cpu_weight) const;
+//         void get_resource_limits(account_name account, legacy_ptr<int64_t, 8> ram_bytes, legacy_ptr<int64_t, 8> net_weight, legacy_ptr<int64_t, 8> cpu_weight) const;
 
           /**
            * Get the current wasm limits configuration.
@@ -156,7 +156,7 @@ namespace webassembly {
           *
           * @pre limit >= -1
          */
-         void set_resource_limit(account_name account, name resource, int64_t limit);
+//         void set_resource_limit(account_name account, name resource, int64_t limit);
 
          /**
           * Get a single resource limit associated with an account.
@@ -168,7 +168,7 @@ namespace webassembly {
           *
           * @return the limit on the resource requested.
          */
-         int64_t get_resource_limit(account_name account, name resource) const;
+//         int64_t get_resource_limit(account_name account, name resource) const;
 
          /**
           * Proposes a schedule change using the legacy producer key format.

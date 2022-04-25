@@ -77,7 +77,7 @@ namespace eosiosystem {
          }
       }
 
-      update_resource_limits( name(0), receiver, -from_net.amount, -from_cpu.amount );
+//      update_resource_limits( name(0), receiver, -from_net.amount, -from_cpu.amount );
 
       const asset payment = from_net + from_cpu;
       // inline transfer from stake_account to rex_account
@@ -159,7 +159,7 @@ namespace eosiosystem {
 
       rex_cpu_loan_table cpu_loans( get_self(), get_self().value );
       int64_t rented_tokens = rent_rex( cpu_loans, from, receiver, loan_payment, loan_fund );
-      update_resource_limits( from, receiver, 0, rented_tokens );
+//      update_resource_limits( from, receiver, 0, rented_tokens );
    }
 
    void system_contract::rentnet( const name& from, const name& receiver, const asset& loan_payment, const asset& loan_fund )
@@ -168,7 +168,7 @@ namespace eosiosystem {
 
       rex_net_loan_table net_loans( get_self(), get_self().value );
       int64_t rented_tokens = rent_rex( net_loans, from, receiver, loan_payment, loan_fund );
-      update_resource_limits( from, receiver, rented_tokens, 0 );
+//      update_resource_limits( from, receiver, rented_tokens, 0 );
    }
 
    void system_contract::fundcpuloan( const name& from, uint64_t loan_num, const asset& payment )
@@ -361,55 +361,55 @@ namespace eosiosystem {
     * @param delta_net - change in NET bandwidth limit
     * @param delta_cpu - change in CPU bandwidth limit
     */
-   void system_contract::update_resource_limits( const name& from, const name& receiver, int64_t delta_net, int64_t delta_cpu )
-   {
-      if ( delta_cpu == 0 && delta_net == 0 ) { // nothing to update
-         return;
-      }
+//   void system_contract::update_resource_limits( const name& from, const name& receiver, int64_t delta_net, int64_t delta_cpu )
+//   {
+//      if ( delta_cpu == 0 && delta_net == 0 ) { // nothing to update
+//         return;
+//      }
 
-      user_resources_table totals_tbl( get_self(), receiver.value );
-      auto tot_itr = totals_tbl.find( receiver.value );
-      if ( tot_itr == totals_tbl.end() ) {
-         check( 0 <= delta_net && 0 <= delta_cpu, "logic error, should not occur");
-         tot_itr = totals_tbl.emplace( from, [&]( auto& tot ) {
-            tot.owner      = receiver;
-            tot.net_weight = asset( delta_net, core_symbol() );
-            tot.cpu_weight = asset( delta_cpu, core_symbol() );
-         });
-      } else {
-         totals_tbl.modify( tot_itr, same_payer, [&]( auto& tot ) {
-            tot.net_weight.amount += delta_net;
-            tot.cpu_weight.amount += delta_cpu;
-         });
-      }
-      check( 0 <= tot_itr->net_weight.amount, "insufficient staked total net bandwidth" );
-      check( 0 <= tot_itr->cpu_weight.amount, "insufficient staked total cpu bandwidth" );
+//      user_resources_table totals_tbl( get_self(), receiver.value );
+//      auto tot_itr = totals_tbl.find( receiver.value );
+//      if ( tot_itr == totals_tbl.end() ) {
+//         check( 0 <= delta_net && 0 <= delta_cpu, "logic error, should not occur");
+//         tot_itr = totals_tbl.emplace( from, [&]( auto& tot ) {
+//            tot.owner      = receiver;
+//            tot.net_weight = asset( delta_net, core_symbol() );
+//            tot.cpu_weight = asset( delta_cpu, core_symbol() );
+//         });
+//      } else {
+//         totals_tbl.modify( tot_itr, same_payer, [&]( auto& tot ) {
+//            tot.net_weight.amount += delta_net;
+//            tot.cpu_weight.amount += delta_cpu;
+//         });
+//      }
+//      check( 0 <= tot_itr->net_weight.amount, "insufficient staked total net bandwidth" );
+//      check( 0 <= tot_itr->cpu_weight.amount, "insufficient staked total cpu bandwidth" );
 
-      {
-         bool net_managed = false;
-         bool cpu_managed = false;
+//      {
+//         bool net_managed = false;
+//         bool cpu_managed = false;
 
-         auto voter_itr = _voters.find( receiver.value );
-         if( voter_itr != _voters.end() ) {
-            net_managed = has_field( voter_itr->flags1, voter_info::flags1_fields::net_managed );
-            cpu_managed = has_field( voter_itr->flags1, voter_info::flags1_fields::cpu_managed );
-         }
+//         auto voter_itr = _voters.find( receiver.value );
+//         if( voter_itr != _voters.end() ) {
+//            net_managed = has_field( voter_itr->flags1, voter_info::flags1_fields::net_managed );
+//            cpu_managed = has_field( voter_itr->flags1, voter_info::flags1_fields::cpu_managed );
+//         }
 
-         if( !(net_managed && cpu_managed) ) {
-            int64_t ram_bytes = 0, net = 0, cpu = 0;
-            get_resource_limits( receiver, ram_bytes, net, cpu );
+//         if( !(net_managed && cpu_managed) ) {
+//            int64_t ram_bytes = 0, net = 0, cpu = 0;
+//            get_resource_limits( receiver, ram_bytes, net, cpu );
 
-            set_resource_limits( receiver,
-                                 ram_bytes,
-                                 net_managed ? net : tot_itr->net_weight.amount,
-                                 cpu_managed ? cpu : tot_itr->cpu_weight.amount );
-         }
-      }
+//            set_resource_limits( receiver,
+//                                 ram_bytes,
+//                                 net_managed ? net : tot_itr->net_weight.amount,
+//                                 cpu_managed ? cpu : tot_itr->cpu_weight.amount );
+//         }
+//      }
 
-      if ( tot_itr->is_empty() ) {
-         totals_tbl.erase( tot_itr );
-      }
-   }
+//      if ( tot_itr->is_empty() ) {
+//         totals_tbl.erase( tot_itr );
+//      }
+//   }
 
    /**
     * @brief Checks if account satisfies voting requirement (voting for a proxy or 21 producers)
@@ -563,8 +563,8 @@ namespace eosiosystem {
             if ( itr == cpu_idx.end() || itr->expiration > current_time_point() ) break;
 
             auto result = process_expired_loan( cpu_idx, itr );
-            if ( result.second != 0 )
-               update_resource_limits( itr->from, itr->receiver, 0, result.second );
+//            if ( result.second != 0 )
+//               update_resource_limits( itr->from, itr->receiver, 0, result.second );
 
             if ( result.first )
                cpu_idx.erase( itr );
@@ -580,8 +580,8 @@ namespace eosiosystem {
             if ( itr == net_idx.end() || itr->expiration > current_time_point() ) break;
 
             auto result = process_expired_loan( net_idx, itr );
-            if ( result.second != 0 )
-               update_resource_limits( itr->from, itr->receiver, result.second, 0 );
+//            if ( result.second != 0 )
+//               update_resource_limits( itr->from, itr->receiver, result.second, 0 );
 
             if ( result.first )
                net_idx.erase( itr );

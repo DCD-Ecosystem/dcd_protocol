@@ -741,8 +741,8 @@ namespace eosiosystem {
           * @param net_weight - fractionally proportionate net limit of available resources based on (weight / total_weight_of_all_accounts),
           * @param cpu_weight - fractionally proportionate cpu limit of available resources based on (weight / total_weight_of_all_accounts).
           */
-         [[eosio::action]]
-         void setalimits( const name& account, int64_t ram_bytes, int64_t net_weight, int64_t cpu_weight );
+//         [[eosio::action]]
+//         void setalimits( const name& account, int64_t ram_bytes, int64_t net_weight, int64_t cpu_weight );
 
          /**
           * Set account RAM limits action, which sets the RAM limits of an account
@@ -750,8 +750,8 @@ namespace eosiosystem {
           * @param account - name of the account whose resource limit to be set,
           * @param ram_bytes - ram limit in absolute bytes.
           */
-         [[eosio::action]]
-         void setacctram( const name& account, const std::optional<int64_t>& ram_bytes );
+//         [[eosio::action]]
+//         void setacctram( const name& account, const std::optional<int64_t>& ram_bytes );
 
          /**
           * Set account NET limits action, which sets the NET limits of an account
@@ -759,8 +759,8 @@ namespace eosiosystem {
           * @param account - name of the account whose resource limit to be set,
           * @param net_weight - fractionally proportionate net limit of available resources based on (weight / total_weight_of_all_accounts).
           */
-         [[eosio::action]]
-         void setacctnet( const name& account, const std::optional<int64_t>& net_weight );
+//         [[eosio::action]]
+//         void setacctnet( const name& account, const std::optional<int64_t>& net_weight );
 
          /**
           * Set account CPU limits action, which sets the CPU limits of an account
@@ -768,8 +768,8 @@ namespace eosiosystem {
           * @param account - name of the account whose resource limit to be set,
           * @param cpu_weight - fractionally proportionate cpu limit of available resources based on (weight / total_weight_of_all_accounts).
           */
-         [[eosio::action]]
-         void setacctcpu( const name& account, const std::optional<int64_t>& cpu_weight );
+//         [[eosio::action]]
+//         void setacctcpu( const name& account, const std::optional<int64_t>& cpu_weight );
 
 
          /**
@@ -1329,9 +1329,9 @@ namespace eosiosystem {
          void powerup( const name& payer, const name& receiver, uint32_t days, int64_t net_frac, int64_t cpu_frac, const asset& max_payment );
 
          using init_action = eosio::action_wrapper<"init"_n, &system_contract::init>;
-         using setacctram_action = eosio::action_wrapper<"setacctram"_n, &system_contract::setacctram>;
-         using setacctnet_action = eosio::action_wrapper<"setacctnet"_n, &system_contract::setacctnet>;
-         using setacctcpu_action = eosio::action_wrapper<"setacctcpu"_n, &system_contract::setacctcpu>;
+//         using setacctram_action = eosio::action_wrapper<"setacctram"_n, &system_contract::setacctram>;
+//         using setacctnet_action = eosio::action_wrapper<"setacctnet"_n, &system_contract::setacctnet>;
+//         using setacctcpu_action = eosio::action_wrapper<"setacctcpu"_n, &system_contract::setacctcpu>;
          using activate_action = eosio::action_wrapper<"activate"_n, &system_contract::activate>;
          using delegatebw_action = eosio::action_wrapper<"delegatebw"_n, &system_contract::delegatebw>;
          using deposit_action = eosio::action_wrapper<"deposit"_n, &system_contract::deposit>;
@@ -1371,7 +1371,7 @@ namespace eosiosystem {
          using bidname_action = eosio::action_wrapper<"bidname"_n, &system_contract::bidname>;
          using bidrefund_action = eosio::action_wrapper<"bidrefund"_n, &system_contract::bidrefund>;
          using setpriv_action = eosio::action_wrapper<"setpriv"_n, &system_contract::setpriv>;
-         using setalimits_action = eosio::action_wrapper<"setalimits"_n, &system_contract::setalimits>;
+//         using setalimits_action = eosio::action_wrapper<"setalimits"_n, &system_contract::setalimits>;
          using setparams_action = eosio::action_wrapper<"setparams"_n, &system_contract::setparams>;
          using setinflation_action = eosio::action_wrapper<"setinflation"_n, &system_contract::setinflation>;
          using cfgpowerup_action = eosio::action_wrapper<"cfgpowerup"_n, &system_contract::cfgpowerup>;
@@ -1396,7 +1396,7 @@ namespace eosiosystem {
          // defined in rex.cpp
          void runrex( uint16_t max );
          void update_rex_pool();
-         void update_resource_limits( const name& from, const name& receiver, int64_t delta_net, int64_t delta_cpu );
+//         void update_resource_limits( const name& from, const name& receiver, int64_t delta_net, int64_t delta_cpu );
          void check_voting_requirement( const name& owner,
                                         const char* error_msg = "must vote for at least 21 producers or for a proxy before buying REX" )const;
          rex_order_outcome fill_rex_order( const rex_balance_table::const_iterator& bitr, const asset& rex );

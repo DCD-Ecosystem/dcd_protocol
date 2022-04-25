@@ -185,24 +185,6 @@
             ]
         },
         {
-            "name": "kv_parameters",
-            "base": "",
-            "fields": [
-                {
-                    "name": "max_key_size",
-                    "type": "uint32"
-                },
-                {
-                    "name": "max_value_size",
-                    "type": "uint32"
-                },
-                {
-                    "name": "max_iterators",
-                    "type": "uint32"
-                }
-            ]
-        },
-        {
             "name": "linkauth",
             "base": "",
             "fields": [
@@ -337,28 +319,6 @@
             ]
         },
         {
-            "name": "setalimits",
-            "base": "",
-            "fields": [
-                {
-                    "name": "account",
-                    "type": "name"
-                },
-                {
-                    "name": "ram_bytes",
-                    "type": "int64"
-                },
-                {
-                    "name": "net_weight",
-                    "type": "int64"
-                },
-                {
-                    "name": "cpu_weight",
-                    "type": "int64"
-                }
-            ]
-        },
-        {
             "name": "setcode",
             "base": "",
             "fields": [
@@ -381,32 +341,12 @@
             ]
         },
         {
-            "name": "setkvparams",
-            "base": "",
-            "fields": [
-                {
-                    "name": "params",
-                    "type": "kv_parameters"
-                }
-            ]
-        },
-        {
             "name": "setparams",
             "base": "",
             "fields": [
                 {
                     "name": "params",
                     "type": "blockchain_parameters"
-                }
-            ]
-        },
-        {
-            "name": "setpparams",
-            "base": "",
-            "fields": [
-                {
-                    "name": "bytes",
-                    "type": "bytes"
                 }
             ]
         },
@@ -536,28 +476,13 @@
             "ricardian_contract": ""
         },
         {
-            "name": "setalimits",
-            "type": "setalimits",
-            "ricardian_contract": ""
-        },
-        {
             "name": "setcode",
             "type": "setcode",
             "ricardian_contract": ""
         },
         {
-            "name": "setkvparams",
-            "type": "setkvparams",
-            "ricardian_contract": ""
-        },
-        {
             "name": "setparams",
             "type": "setparams",
-            "ricardian_contract": ""
-        },
-        {
-            "name": "setpparams",
-            "type": "setpparams",
             "ricardian_contract": ""
         },
         {

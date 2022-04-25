@@ -353,8 +353,7 @@ namespace eosio { namespace chain {
 
    void combined_database::add_to_snapshot(
          const eosio::chain::snapshot_writer_ptr& snapshot, const eosio::chain::block_state& head,
-         const eosio::chain::authorization_manager&                    authorization,
-         const eosio::chain::resource_limits::resource_limits_manager& resource_limits) const {
+         const eosio::chain::authorization_manager&                    authorization) const {
       snapshot->write_section<chain_snapshot_header>(
             [this](auto& section) { section.add_row(chain_snapshot_header(), db); });
 
@@ -373,14 +372,12 @@ namespace eosio { namespace chain {
       add_contract_tables_to_snapshot(snapshot);
 
       authorization.add_to_snapshot(snapshot);
-      resource_limits.add_to_snapshot(snapshot);
    }
 
    void combined_database::read_from_snapshot(const snapshot_reader_ptr& snapshot,
                                               uint32_t blog_start,
                                               uint32_t blog_end,
                                               eosio::chain::authorization_manager& authorization,
-                                              eosio::chain::resource_limits::resource_limits_manager& resource_limits,
                                               eosio::chain::fork_database& fork_db, eosio::chain::block_state_ptr& head,
                                               uint32_t&                          snapshot_head_block,
                                               const eosio::chain::chain_id_type& chain_id) {
@@ -500,8 +497,7 @@ namespace eosio { namespace chain {
       read_kv_table_from_snapshot(snapshot, db, kv_database, header.version, backing_store);
       read_contract_tables_from_snapshot(snapshot);
 
-      authorization.read_from_snapshot(snapshot);
-      resource_limits.read_from_snapshot(snapshot, header.version);
+      authorization.read_from_snapshot(snapshot);      
 
       set_revision(head->block_num);
       db.create<database_header_object>([](const auto& header) {

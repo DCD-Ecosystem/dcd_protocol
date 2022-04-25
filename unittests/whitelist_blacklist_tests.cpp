@@ -1,5 +1,5 @@
 #include <eosio/chain/generated_transaction_object.hpp>
-#include <eosio/chain/resource_limits.hpp>
+//#include <eosio/chain/resource_limits.hpp>
 #include <eosio/testing/tester.hpp>
 
 #include <fc/variant_object.hpp>
@@ -732,7 +732,7 @@ BOOST_AUTO_TEST_CASE( greylist_limit_tests ) { try {
    tester c( conf_genesis.first, conf_genesis.second );
    c.execute_setup_policy( setup_policy::full );
 
-   const resource_limits_manager& rm = c.control->get_resource_limits_manager();
+//   const resource_limits_manager& rm = c.control->get_resource_limits_manager();
 
    const auto& user_account  = "user"_n;
    const auto& other_account = "other"_n;
@@ -774,8 +774,8 @@ BOOST_AUTO_TEST_CASE( greylist_limit_tests ) { try {
       c.produce_block();
    }
 
-   BOOST_REQUIRE_EQUAL( rm.get_virtual_block_cpu_limit(), cfg.max_block_cpu_usage );
-   BOOST_REQUIRE_EQUAL( rm.get_virtual_block_net_limit(), cfg.max_block_net_usage );
+//   BOOST_REQUIRE_EQUAL( rm.get_virtual_block_cpu_limit(), cfg.max_block_cpu_usage );
+//   BOOST_REQUIRE_EQUAL( rm.get_virtual_block_net_limit(), cfg.max_block_net_usage );
 
    uint64_t blocks_per_day = 2*60*60*24;
 
@@ -783,10 +783,10 @@ BOOST_AUTO_TEST_CASE( greylist_limit_tests ) { try {
    uint64_t user_net_per_day = (cfg.max_block_net_usage * blocks_per_day / 250'000'000); // 90 bytes
    wdump((user_cpu_per_day)(user_net_per_day));
 
-   BOOST_REQUIRE_EQUAL( rm.get_account_cpu_limit_ex(user_account).first.max, user_cpu_per_day );
-   BOOST_REQUIRE_EQUAL( rm.get_account_net_limit_ex(user_account).first.max, user_net_per_day );
-   BOOST_REQUIRE_EQUAL( rm.get_account_cpu_limit_ex(user_account, 1).first.max, user_cpu_per_day );
-   BOOST_REQUIRE_EQUAL( rm.get_account_net_limit_ex(user_account, 1).first.max, user_net_per_day );
+//   BOOST_REQUIRE_EQUAL( rm.get_account_cpu_limit_ex(user_account).first.max, user_cpu_per_day );
+//   BOOST_REQUIRE_EQUAL( rm.get_account_net_limit_ex(user_account).first.max, user_net_per_day );
+//   BOOST_REQUIRE_EQUAL( rm.get_account_cpu_limit_ex(user_account, 1).first.max, user_cpu_per_day );
+//   BOOST_REQUIRE_EQUAL( rm.get_account_net_limit_ex(user_account, 1).first.max, user_net_per_day );
 
    // The reqauth transaction will use more NET than the user can currently support under full congestion.
    BOOST_REQUIRE_EXCEPTION(
@@ -795,16 +795,16 @@ BOOST_AUTO_TEST_CASE( greylist_limit_tests ) { try {
       fc_exception_message_starts_with("transaction net usage is too high")
    );
 
-   wdump((rm.get_account_net_limit(user_account).first));
+//   wdump((rm.get_account_net_limit(user_account).first));
 
    // Allow congestion to reduce a little bit.
    c.produce_blocks(1400);
 
-   BOOST_REQUIRE( rm.get_virtual_block_net_limit() > (3*cfg.max_block_net_usage) );
-   BOOST_REQUIRE( rm.get_virtual_block_net_limit() < (4*cfg.max_block_net_usage) );
-   wdump((rm.get_account_net_limit_ex(user_account)));
-   BOOST_REQUIRE( rm.get_account_net_limit_ex(user_account).first.max > 3*reqauth_net_charge );
-   BOOST_REQUIRE( rm.get_account_net_limit_ex(user_account).first.max < 4*reqauth_net_charge );
+//   BOOST_REQUIRE( rm.get_virtual_block_net_limit() > (3*cfg.max_block_net_usage) );
+//   BOOST_REQUIRE( rm.get_virtual_block_net_limit() < (4*cfg.max_block_net_usage) );
+//   wdump((rm.get_account_net_limit_ex(user_account)));
+//   BOOST_REQUIRE( rm.get_account_net_limit_ex(user_account).first.max > 3*reqauth_net_charge );
+//   BOOST_REQUIRE( rm.get_account_net_limit_ex(user_account).first.max < 4*reqauth_net_charge );
 
 
    // User can only push three reqauths per day even at this relaxed congestion level.
@@ -831,28 +831,28 @@ BOOST_AUTO_TEST_CASE( greylist_limit_tests ) { try {
    // Reducing the greylist limit from 1000 to 4 should not make a difference since it would not be the
    // bottleneck at this level of congestion. But dropping it to 3 would make a difference.
    {
-      auto user_elastic_cpu_limit = rm.get_account_cpu_limit_ex(user_account).first.max;
-      auto user_elastic_net_limit = rm.get_account_net_limit_ex(user_account).first.max;
+//      auto user_elastic_cpu_limit = rm.get_account_cpu_limit_ex(user_account).first.max;
+//      auto user_elastic_net_limit = rm.get_account_net_limit_ex(user_account).first.max;
 
-      auto user_cpu_res1 = rm.get_account_cpu_limit_ex(user_account, 4);
-      BOOST_REQUIRE_EQUAL( user_cpu_res1.first.max, user_elastic_cpu_limit );
-      BOOST_REQUIRE_EQUAL( user_cpu_res1.second, false );
-      auto user_net_res1 = rm.get_account_net_limit_ex(user_account, 4);
-      BOOST_REQUIRE_EQUAL( user_net_res1.first.max, user_elastic_net_limit );
-      BOOST_REQUIRE_EQUAL( user_net_res1.second, false );
+//      auto user_cpu_res1 = rm.get_account_cpu_limit_ex(user_account, 4);
+//      BOOST_REQUIRE_EQUAL( user_cpu_res1.first.max, user_elastic_cpu_limit );
+//      BOOST_REQUIRE_EQUAL( user_cpu_res1.second, false );
+//      auto user_net_res1 = rm.get_account_net_limit_ex(user_account, 4);
+//      BOOST_REQUIRE_EQUAL( user_net_res1.first.max, user_elastic_net_limit );
+//      BOOST_REQUIRE_EQUAL( user_net_res1.second, false );
 
-      auto user_cpu_res2 = rm.get_account_cpu_limit_ex(user_account, 3);
-      BOOST_REQUIRE( user_cpu_res2.first.max < user_elastic_cpu_limit );
-      BOOST_REQUIRE_EQUAL( user_cpu_res2.second, true );
-      auto user_net_res2 = rm.get_account_net_limit_ex(user_account, 3);
-      BOOST_REQUIRE( user_net_res2.first.max < user_elastic_net_limit );
-      BOOST_REQUIRE_EQUAL( user_net_res2.second, true );
-      BOOST_REQUIRE( 2*reqauth_net_charge < user_net_res2.first.max );
-      BOOST_REQUIRE( user_net_res2.first.max < 3*reqauth_net_charge );
+//      auto user_cpu_res2 = rm.get_account_cpu_limit_ex(user_account, 3);
+//      BOOST_REQUIRE( user_cpu_res2.first.max < user_elastic_cpu_limit );
+//      BOOST_REQUIRE_EQUAL( user_cpu_res2.second, true );
+//      auto user_net_res2 = rm.get_account_net_limit_ex(user_account, 3);
+//      BOOST_REQUIRE( user_net_res2.first.max < user_elastic_net_limit );
+//      BOOST_REQUIRE_EQUAL( user_net_res2.second, true );
+//      BOOST_REQUIRE( 2*reqauth_net_charge < user_net_res2.first.max );
+//      BOOST_REQUIRE( user_net_res2.first.max < 3*reqauth_net_charge );
    }
 
    ilog("setting greylist limit to 4");
-   c.control->set_greylist_limit( 4 );
+//   c.control->set_greylist_limit( 4 );
    c.produce_block();
 
    push_reqauth( user_account, config::active_name, cfg.min_transaction_cpu_usage );
@@ -863,7 +863,7 @@ BOOST_AUTO_TEST_CASE( greylist_limit_tests ) { try {
    c.produce_block();
 
    ilog("setting greylist limit to 3");
-   c.control->set_greylist_limit( 3 );
+//   c.control->set_greylist_limit( 3 );
    c.produce_block( fc::days(1) );
 
    push_reqauth( user_account, config::active_name, cfg.min_transaction_cpu_usage );
@@ -885,15 +885,15 @@ BOOST_AUTO_TEST_CASE( greylist_limit_tests ) { try {
    // cannot push even a single reqauth just like when they were under full congestion.
    // However, this time the exception will be due to greylist_net_usage_exceeded rather than tx_net_usage_exceeded.
    ilog("setting greylist limit to 1");
-   c.control->set_greylist_limit( 1 );
+//   c.control->set_greylist_limit( 1 );
    c.produce_block( fc::days(1) );
-   BOOST_REQUIRE_EQUAL( rm.get_account_cpu_limit_ex(user_account, 1).first.max, user_cpu_per_day  );
-   BOOST_REQUIRE_EQUAL( rm.get_account_net_limit_ex(user_account, 1).first.max, user_net_per_day  );
-   BOOST_REQUIRE_EXCEPTION(
-      push_reqauth( user_account, config::active_name, cfg.min_transaction_cpu_usage ),
-      greylist_net_usage_exceeded,
-      fc_exception_message_starts_with("greylisted transaction net usage is too high")
-   );
+//   BOOST_REQUIRE_EQUAL( rm.get_account_cpu_limit_ex(user_account, 1).first.max, user_cpu_per_day  );
+//   BOOST_REQUIRE_EQUAL( rm.get_account_net_limit_ex(user_account, 1).first.max, user_net_per_day  );
+//   BOOST_REQUIRE_EXCEPTION(
+//      push_reqauth( user_account, config::active_name, cfg.min_transaction_cpu_usage ),
+//      greylist_net_usage_exceeded,
+//      fc_exception_message_starts_with("greylisted transaction net usage is too high")
+//   );
 } FC_LOG_AND_RETHROW() }
 
 BOOST_AUTO_TEST_SUITE_END()

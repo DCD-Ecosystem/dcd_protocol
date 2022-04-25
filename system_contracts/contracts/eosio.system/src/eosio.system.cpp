@@ -121,156 +121,156 @@ namespace eosiosystem {
       set_privileged( account, ispriv );
    }
 
-   void system_contract::setalimits( const name& account, int64_t ram, int64_t net, int64_t cpu ) {
-      require_auth( get_self() );
+//   void system_contract::setalimits( const name& account, int64_t ram, int64_t net, int64_t cpu ) {
+//      require_auth( get_self() );
 
-      user_resources_table userres( get_self(), account.value );
-      auto ritr = userres.find( account.value );
-      check( ritr == userres.end(), "only supports unlimited accounts" );
+//      user_resources_table userres( get_self(), account.value );
+//      auto ritr = userres.find( account.value );
+//      check( ritr == userres.end(), "only supports unlimited accounts" );
 
-      auto vitr = _voters.find( account.value );
-      if( vitr != _voters.end() ) {
-         bool ram_managed = has_field( vitr->flags1, voter_info::flags1_fields::ram_managed );
-         bool net_managed = has_field( vitr->flags1, voter_info::flags1_fields::net_managed );
-         bool cpu_managed = has_field( vitr->flags1, voter_info::flags1_fields::cpu_managed );
-         check( !(ram_managed || net_managed || cpu_managed), "cannot use setalimits on an account with managed resources" );
-      }
+//      auto vitr = _voters.find( account.value );
+//      if( vitr != _voters.end() ) {
+//         bool ram_managed = has_field( vitr->flags1, voter_info::flags1_fields::ram_managed );
+//         bool net_managed = has_field( vitr->flags1, voter_info::flags1_fields::net_managed );
+//         bool cpu_managed = has_field( vitr->flags1, voter_info::flags1_fields::cpu_managed );
+//         check( !(ram_managed || net_managed || cpu_managed), "cannot use setalimits on an account with managed resources" );
+//      }
 
-      set_resource_limits( account, ram, net, cpu );
-   }
+//      set_resource_limits( account, ram, net, cpu );
+//   }
 
-   void system_contract::setacctram( const name& account, const std::optional<int64_t>& ram_bytes ) {
-      require_auth( get_self() );
+//   void system_contract::setacctram( const name& account, const std::optional<int64_t>& ram_bytes ) {
+//      require_auth( get_self() );
 
-      int64_t current_ram, current_net, current_cpu;
-      get_resource_limits( account, current_ram, current_net, current_cpu );
+//      int64_t current_ram, current_net, current_cpu;
+//      get_resource_limits( account, current_ram, current_net, current_cpu );
 
-      int64_t ram = 0;
+//      int64_t ram = 0;
 
-      if( !ram_bytes ) {
-         auto vitr = _voters.find( account.value );
-         check( vitr != _voters.end() && has_field( vitr->flags1, voter_info::flags1_fields::ram_managed ),
-                "RAM of account is already unmanaged" );
+//      if( !ram_bytes ) {
+//         auto vitr = _voters.find( account.value );
+//         check( vitr != _voters.end() && has_field( vitr->flags1, voter_info::flags1_fields::ram_managed ),
+//                "RAM of account is already unmanaged" );
 
-         user_resources_table userres( get_self(), account.value );
-         auto ritr = userres.find( account.value );
+//         user_resources_table userres( get_self(), account.value );
+//         auto ritr = userres.find( account.value );
 
-         ram = ram_gift_bytes;
-         if( ritr != userres.end() ) {
-            ram += ritr->ram_bytes;
-         }
+//         ram = ram_gift_bytes;
+//         if( ritr != userres.end() ) {
+//            ram += ritr->ram_bytes;
+//         }
 
-         _voters.modify( vitr, same_payer, [&]( auto& v ) {
-            v.flags1 = set_field( v.flags1, voter_info::flags1_fields::ram_managed, false );
-         });
-      } else {
-         check( *ram_bytes >= 0, "not allowed to set RAM limit to unlimited" );
+//         _voters.modify( vitr, same_payer, [&]( auto& v ) {
+//            v.flags1 = set_field( v.flags1, voter_info::flags1_fields::ram_managed, false );
+//         });
+//      } else {
+//         check( *ram_bytes >= 0, "not allowed to set RAM limit to unlimited" );
 
-         auto vitr = _voters.find( account.value );
-         if ( vitr != _voters.end() ) {
-            _voters.modify( vitr, same_payer, [&]( auto& v ) {
-               v.flags1 = set_field( v.flags1, voter_info::flags1_fields::ram_managed, true );
-            });
-         } else {
-            _voters.emplace( account, [&]( auto& v ) {
-               v.owner  = account;
-               v.flags1 = set_field( v.flags1, voter_info::flags1_fields::ram_managed, true );
-            });
-         }
+//         auto vitr = _voters.find( account.value );
+//         if ( vitr != _voters.end() ) {
+//            _voters.modify( vitr, same_payer, [&]( auto& v ) {
+//               v.flags1 = set_field( v.flags1, voter_info::flags1_fields::ram_managed, true );
+//            });
+//         } else {
+//            _voters.emplace( account, [&]( auto& v ) {
+//               v.owner  = account;
+//               v.flags1 = set_field( v.flags1, voter_info::flags1_fields::ram_managed, true ); /// TODO: Flag setting!!!!
+//            });
+//         }
 
-         ram = *ram_bytes;
-      }
+//         ram = *ram_bytes;
+//      }
 
-      set_resource_limits( account, ram, current_net, current_cpu );
-   }
+//      set_resource_limits( account, ram, current_net, current_cpu );
+//   }
 
-   void system_contract::setacctnet( const name& account, const std::optional<int64_t>& net_weight ) {
-      require_auth( get_self() );
+//   void system_contract::setacctnet( const name& account, const std::optional<int64_t>& net_weight ) {
+//      require_auth( get_self() );
 
-      int64_t current_ram, current_net, current_cpu;
-      get_resource_limits( account, current_ram, current_net, current_cpu );
+//      int64_t current_ram, current_net, current_cpu;
+//      get_resource_limits( account, current_ram, current_net, current_cpu );
 
-      int64_t net = 0;
+//      int64_t net = 0;
 
-      if( !net_weight ) {
-         auto vitr = _voters.find( account.value );
-         check( vitr != _voters.end() && has_field( vitr->flags1, voter_info::flags1_fields::net_managed ),
-                "Network bandwidth of account is already unmanaged" );
+//      if( !net_weight ) {
+//         auto vitr = _voters.find( account.value );
+//         check( vitr != _voters.end() && has_field( vitr->flags1, voter_info::flags1_fields::net_managed ),
+//                "Network bandwidth of account is already unmanaged" );
 
-         user_resources_table userres( get_self(), account.value );
-         auto ritr = userres.find( account.value );
+//         user_resources_table userres( get_self(), account.value );
+//         auto ritr = userres.find( account.value );
 
-         if( ritr != userres.end() ) {
-            net = ritr->net_weight.amount;
-         }
+//         if( ritr != userres.end() ) {
+//            net = ritr->net_weight.amount;
+//         }
 
-         _voters.modify( vitr, same_payer, [&]( auto& v ) {
-            v.flags1 = set_field( v.flags1, voter_info::flags1_fields::net_managed, false );
-         });
-      } else {
-         check( *net_weight >= -1, "invalid value for net_weight" );
+//         _voters.modify( vitr, same_payer, [&]( auto& v ) {
+//            v.flags1 = set_field( v.flags1, voter_info::flags1_fields::net_managed, false );
+//         });
+//      } else {
+//         check( *net_weight >= -1, "invalid value for net_weight" );
 
-         auto vitr = _voters.find( account.value );
-         if ( vitr != _voters.end() ) {
-            _voters.modify( vitr, same_payer, [&]( auto& v ) {
-               v.flags1 = set_field( v.flags1, voter_info::flags1_fields::net_managed, true );
-            });
-         } else {
-            _voters.emplace( account, [&]( auto& v ) {
-               v.owner  = account;
-               v.flags1 = set_field( v.flags1, voter_info::flags1_fields::net_managed, true );
-            });
-         }
+//         auto vitr = _voters.find( account.value );
+//         if ( vitr != _voters.end() ) {
+//            _voters.modify( vitr, same_payer, [&]( auto& v ) {
+//               v.flags1 = set_field( v.flags1, voter_info::flags1_fields::net_managed, true );
+//            });
+//         } else {
+//            _voters.emplace( account, [&]( auto& v ) {
+//               v.owner  = account;
+//               v.flags1 = set_field( v.flags1, voter_info::flags1_fields::net_managed, true );
+//            });
+//         }
 
-         net = *net_weight;
-      }
+//         net = *net_weight;
+//      }
 
-      set_resource_limits( account, current_ram, net, current_cpu );
-   }
+//      set_resource_limits( account, current_ram, net, current_cpu );
+//   }
 
-   void system_contract::setacctcpu( const name& account, const std::optional<int64_t>& cpu_weight ) {
-      require_auth( get_self() );
+//   void system_contract::setacctcpu( const name& account, const std::optional<int64_t>& cpu_weight ) {
+//      require_auth( get_self() );
 
-      int64_t current_ram, current_net, current_cpu;
-      get_resource_limits( account, current_ram, current_net, current_cpu );
+//      int64_t current_ram, current_net, current_cpu;
+//      get_resource_limits( account, current_ram, current_net, current_cpu );
 
-      int64_t cpu = 0;
+//      int64_t cpu = 0;
 
-      if( !cpu_weight ) {
-         auto vitr = _voters.find( account.value );
-         check( vitr != _voters.end() && has_field( vitr->flags1, voter_info::flags1_fields::cpu_managed ),
-                "CPU bandwidth of account is already unmanaged" );
+//      if( !cpu_weight ) {
+//         auto vitr = _voters.find( account.value );
+//         check( vitr != _voters.end() && has_field( vitr->flags1, voter_info::flags1_fields::cpu_managed ),
+//                "CPU bandwidth of account is already unmanaged" );
 
-         user_resources_table userres( get_self(), account.value );
-         auto ritr = userres.find( account.value );
+//         user_resources_table userres( get_self(), account.value );
+//         auto ritr = userres.find( account.value );
 
-         if( ritr != userres.end() ) {
-            cpu = ritr->cpu_weight.amount;
-         }
+//         if( ritr != userres.end() ) {
+//            cpu = ritr->cpu_weight.amount;
+//         }
 
-         _voters.modify( vitr, same_payer, [&]( auto& v ) {
-            v.flags1 = set_field( v.flags1, voter_info::flags1_fields::cpu_managed, false );
-         });
-      } else {
-         check( *cpu_weight >= -1, "invalid value for cpu_weight" );
+//         _voters.modify( vitr, same_payer, [&]( auto& v ) {
+//            v.flags1 = set_field( v.flags1, voter_info::flags1_fields::cpu_managed, false );
+//         });
+//      } else {
+//         check( *cpu_weight >= -1, "invalid value for cpu_weight" );
 
-         auto vitr = _voters.find( account.value );
-         if ( vitr != _voters.end() ) {
-            _voters.modify( vitr, same_payer, [&]( auto& v ) {
-               v.flags1 = set_field( v.flags1, voter_info::flags1_fields::cpu_managed, true );
-            });
-         } else {
-            _voters.emplace( account, [&]( auto& v ) {
-               v.owner  = account;
-               v.flags1 = set_field( v.flags1, voter_info::flags1_fields::cpu_managed, true );
-            });
-         }
+//         auto vitr = _voters.find( account.value );
+//         if ( vitr != _voters.end() ) {
+//            _voters.modify( vitr, same_payer, [&]( auto& v ) {
+//               v.flags1 = set_field( v.flags1, voter_info::flags1_fields::cpu_managed, true );
+//            });
+//         } else {
+//            _voters.emplace( account, [&]( auto& v ) {
+//               v.owner  = account;
+//               v.flags1 = set_field( v.flags1, voter_info::flags1_fields::cpu_managed, true );
+//            });
+//         }
 
-         cpu = *cpu_weight;
-      }
+//         cpu = *cpu_weight;
+//      }
 
-      set_resource_limits( account, current_ram, current_net, cpu );
-   }
+//      set_resource_limits( account, current_ram, current_net, cpu );
+//   }
 
    void system_contract::activate( const eosio::checksum256& feature_digest ) {
       require_auth( get_self() );
@@ -355,7 +355,7 @@ namespace eosiosystem {
         res.cpu_weight = asset( 0, system_contract::get_core_symbol() );
       });
 
-      set_resource_limits( newact, 0, 0, 0 );
+//      set_resource_limits( newact, 0, 0, 0 );
    }
 
    void native::setabi( const name& acnt, const std::vector<char>& abi ) {

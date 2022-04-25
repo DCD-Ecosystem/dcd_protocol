@@ -575,15 +575,15 @@ namespace eosio { namespace testing {
             fc::microseconds::maximum() :
             fc::microseconds( deadline - fc::time_point::now() );
       auto fut = transaction_metadata::start_recover_keys( ptrx, control->get_thread_pool(), control->get_chain_id(), time_limit );
-      auto r = control->push_transaction( fut.get(), deadline, billed_cpu_time_us, billed_cpu_time_us > 0, 0 );
+      auto r = control->push_transaction( fut.get(), deadline, billed_cpu_time_us, billed_cpu_time_us > 0, 0  );
       if( r->except_ptr ) std::rethrow_exception( r->except_ptr );
       if( r->except ) throw *r->except;
       return r;
    } FC_RETHROW_EXCEPTIONS( warn, "transaction_header: ${header}", ("header", transaction_header(trx.get_transaction()) )) }
 
-   transaction_trace_ptr base_tester::push_transaction( const signed_transaction& trx,
+   transaction_trace_ptr base_tester::push_transaction(const signed_transaction& trx,
                                                         fc::time_point deadline,
-                                                        uint32_t billed_cpu_time_us,
+                                                       uint32_t billed_cpu_time_us,
                                                         bool no_throw
                                                       )
    { try {
@@ -600,13 +600,13 @@ namespace eosio { namespace testing {
             fc::microseconds( deadline - fc::time_point::now() );
       auto ptrx = std::make_shared<packed_transaction>( signed_transaction(trx), true, c );
       auto fut = transaction_metadata::start_recover_keys( std::move( ptrx ), control->get_thread_pool(), control->get_chain_id(), time_limit );
-      auto r = control->push_transaction( fut.get(), deadline, billed_cpu_time_us, billed_cpu_time_us > 0, 0 );
+      auto r = control->push_transaction( fut.get(), deadline, billed_cpu_time_us, billed_cpu_time_us > 0, 0);
       if (no_throw) return r;
       if( r->except_ptr ) std::rethrow_exception( r->except_ptr );
       if( r->except)  throw *r->except;
       return r;
    } FC_RETHROW_EXCEPTIONS( warn, "transaction_header: ${header}, billed_cpu_time_us: ${billed}",
-                            ("header", transaction_header(trx) ) ("billed", billed_cpu_time_us))
+                            ("header", transaction_header(trx) ))
    }
 
    typename base_tester::action_result base_tester::push_action(action&& act, uint64_t authorizer) {

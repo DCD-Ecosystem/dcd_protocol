@@ -55,10 +55,10 @@ void system_contract::adjust_resources(name payer, name account, symbol core_sym
 
       if (!(net_managed && cpu_managed)) {
          int64_t ram_bytes, net, cpu;
-         get_resource_limits(account, ram_bytes, net, cpu);
-         set_resource_limits(
-               account, ram_managed ? ram_bytes : std::max(tot_itr->ram_bytes + ram_gift_bytes, ram_bytes),
-               net_managed ? net : tot_itr->net_weight.amount, cpu_managed ? cpu : tot_itr->cpu_weight.amount);
+//         get_resource_limits(account, ram_bytes, net, cpu);
+//         set_resource_limits(
+//               account, ram_managed ? ram_bytes : std::max(tot_itr->ram_bytes + ram_gift_bytes, ram_bytes),
+//               net_managed ? net : tot_itr->net_weight.amount, cpu_managed ? cpu : tot_itr->cpu_weight.amount);
       }
    }
 

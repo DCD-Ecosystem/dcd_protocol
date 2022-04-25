@@ -10,8 +10,8 @@
 #include <eosio/chain/permission_link_object.hpp>
 #include <eosio/chain/permission_object.hpp>
 #include <eosio/chain/protocol_state_object.hpp>
-#include <eosio/chain/resource_limits.hpp>
-#include <eosio/chain/resource_limits_private.hpp>
+//#include <eosio/chain/resource_limits.hpp>
+//#include <eosio/chain/resource_limits_private.hpp>
 #include <eosio/chain/trace.hpp>
 #include <eosio/chain/backing_store/db_combined.hpp>
 #include <eosio/state_history/types.hpp>
@@ -468,90 +468,90 @@ ST& operator<<(ST& ds, const history_serial_wrapper<eosio::chain::permission_lin
    return ds;
 }
 
-template <typename ST>
-ST& operator<<(ST& ds, const history_serial_wrapper<eosio::chain::resource_limits::resource_limits_object>& obj) {
-   EOS_ASSERT(!obj.obj.pending, eosio::chain::plugin_exception,
-              "accepted_block sent while resource_limits_object in pending state");
-   fc::raw::pack(ds, fc::unsigned_int(0));
-   fc::raw::pack(ds, as_type<uint64_t>(obj.obj.owner.to_uint64_t()));
-   fc::raw::pack(ds, as_type<int64_t>(obj.obj.net_weight));
-   fc::raw::pack(ds, as_type<int64_t>(obj.obj.cpu_weight));
-   fc::raw::pack(ds, as_type<int64_t>(obj.obj.ram_bytes));
-   return ds;
-}
+//template <typename ST>
+//ST& operator<<(ST& ds, const history_serial_wrapper<eosio::chain::resource_limits::resource_limits_object>& obj) {
+//   EOS_ASSERT(!obj.obj.pending, eosio::chain::plugin_exception,
+//              "accepted_block sent while resource_limits_object in pending state");
+//   fc::raw::pack(ds, fc::unsigned_int(0));
+//   fc::raw::pack(ds, as_type<uint64_t>(obj.obj.owner.to_uint64_t()));
+//   fc::raw::pack(ds, as_type<int64_t>(obj.obj.net_weight));
+//   fc::raw::pack(ds, as_type<int64_t>(obj.obj.cpu_weight));
+//   fc::raw::pack(ds, as_type<int64_t>(obj.obj.ram_bytes));
+//   return ds;
+//}
 
-template <typename ST>
-ST& operator<<(ST& ds, const history_serial_wrapper<eosio::chain::resource_limits::usage_accumulator>& obj) {
-   fc::raw::pack(ds, fc::unsigned_int(0));
-   fc::raw::pack(ds, as_type<uint32_t>(obj.obj.last_ordinal));
-   fc::raw::pack(ds, as_type<uint64_t>(obj.obj.value_ex));
-   fc::raw::pack(ds, as_type<uint64_t>(obj.obj.consumed));
-   return ds;
-}
+//template <typename ST>
+//ST& operator<<(ST& ds, const history_serial_wrapper<eosio::chain::resource_limits::usage_accumulator>& obj) {
+//   fc::raw::pack(ds, fc::unsigned_int(0));
+//   fc::raw::pack(ds, as_type<uint32_t>(obj.obj.last_ordinal));
+//   fc::raw::pack(ds, as_type<uint64_t>(obj.obj.value_ex));
+//   fc::raw::pack(ds, as_type<uint64_t>(obj.obj.consumed));
+//   return ds;
+//}
 
-template <typename ST>
-ST& operator<<(ST& ds, const history_serial_wrapper<eosio::chain::resource_limits::resource_usage_object>& obj) {
-   fc::raw::pack(ds, fc::unsigned_int(0));
-   fc::raw::pack(ds, as_type<uint64_t>(obj.obj.owner.to_uint64_t()));
-   fc::raw::pack(ds, make_history_serial_wrapper(
-                         obj.db, as_type<eosio::chain::resource_limits::usage_accumulator>(obj.obj.net_usage)));
-   fc::raw::pack(ds, make_history_serial_wrapper(
-                         obj.db, as_type<eosio::chain::resource_limits::usage_accumulator>(obj.obj.cpu_usage)));
-   fc::raw::pack(ds, as_type<uint64_t>(obj.obj.ram_usage));
-   return ds;
-}
+//template <typename ST>
+//ST& operator<<(ST& ds, const history_serial_wrapper<eosio::chain::resource_limits::resource_usage_object>& obj) {
+//   fc::raw::pack(ds, fc::unsigned_int(0));
+//   fc::raw::pack(ds, as_type<uint64_t>(obj.obj.owner.to_uint64_t()));
+//   fc::raw::pack(ds, make_history_serial_wrapper(
+//                         obj.db, as_type<eosio::chain::resource_limits::usage_accumulator>(obj.obj.net_usage)));
+//   fc::raw::pack(ds, make_history_serial_wrapper(
+//                         obj.db, as_type<eosio::chain::resource_limits::usage_accumulator>(obj.obj.cpu_usage)));
+//   fc::raw::pack(ds, as_type<uint64_t>(obj.obj.ram_usage));
+//   return ds;
+//}
 
-template <typename ST>
-ST& operator<<(ST& ds, const history_serial_wrapper<eosio::chain::resource_limits::resource_limits_state_object>& obj) {
-   fc::raw::pack(ds, fc::unsigned_int(0));
-   fc::raw::pack(ds, make_history_serial_wrapper(obj.db, as_type<eosio::chain::resource_limits::usage_accumulator>(
-                                                             obj.obj.average_block_net_usage)));
-   fc::raw::pack(ds, make_history_serial_wrapper(obj.db, as_type<eosio::chain::resource_limits::usage_accumulator>(
-                                                             obj.obj.average_block_cpu_usage)));
-   fc::raw::pack(ds, as_type<uint64_t>(obj.obj.total_net_weight));
-   fc::raw::pack(ds, as_type<uint64_t>(obj.obj.total_cpu_weight));
-   fc::raw::pack(ds, as_type<uint64_t>(obj.obj.total_ram_bytes));
-   fc::raw::pack(ds, as_type<uint64_t>(obj.obj.virtual_net_limit));
-   fc::raw::pack(ds, as_type<uint64_t>(obj.obj.virtual_cpu_limit));
-   return ds;
-}
+//template <typename ST>
+//ST& operator<<(ST& ds, const history_serial_wrapper<eosio::chain::resource_limits::resource_limits_state_object>& obj) {
+//   fc::raw::pack(ds, fc::unsigned_int(0));
+//   fc::raw::pack(ds, make_history_serial_wrapper(obj.db, as_type<eosio::chain::resource_limits::usage_accumulator>(
+//                                                             obj.obj.average_block_net_usage)));
+//   fc::raw::pack(ds, make_history_serial_wrapper(obj.db, as_type<eosio::chain::resource_limits::usage_accumulator>(
+//                                                             obj.obj.average_block_cpu_usage)));
+//   fc::raw::pack(ds, as_type<uint64_t>(obj.obj.total_net_weight));
+//   fc::raw::pack(ds, as_type<uint64_t>(obj.obj.total_cpu_weight));
+//   fc::raw::pack(ds, as_type<uint64_t>(obj.obj.total_ram_bytes));
+//   fc::raw::pack(ds, as_type<uint64_t>(obj.obj.virtual_net_limit));
+//   fc::raw::pack(ds, as_type<uint64_t>(obj.obj.virtual_cpu_limit));
+//   return ds;
+//}
 
-template <typename ST>
-ST& operator<<(ST& ds, const history_serial_wrapper<eosio::chain::resource_limits::ratio>& obj) {
-   fc::raw::pack(ds, fc::unsigned_int(0));
-   fc::raw::pack(ds, as_type<uint64_t>(obj.obj.numerator));
-   fc::raw::pack(ds, as_type<uint64_t>(obj.obj.denominator));
-   return ds;
-}
+//template <typename ST>
+//ST& operator<<(ST& ds, const history_serial_wrapper<eosio::chain::resource_limits::ratio>& obj) {
+//   fc::raw::pack(ds, fc::unsigned_int(0));
+//   fc::raw::pack(ds, as_type<uint64_t>(obj.obj.numerator));
+//   fc::raw::pack(ds, as_type<uint64_t>(obj.obj.denominator));
+//   return ds;
+//}
 
-template <typename ST>
-ST& operator<<(ST& ds, const history_serial_wrapper<eosio::chain::resource_limits::elastic_limit_parameters>& obj) {
-   fc::raw::pack(ds, fc::unsigned_int(0));
-   fc::raw::pack(ds, as_type<uint64_t>(obj.obj.target));
-   fc::raw::pack(ds, as_type<uint64_t>(obj.obj.max));
-   fc::raw::pack(ds, as_type<uint32_t>(obj.obj.periods));
-   fc::raw::pack(ds, as_type<uint32_t>(obj.obj.max_multiplier));
-   fc::raw::pack(
-       ds, make_history_serial_wrapper(obj.db, as_type<eosio::chain::resource_limits::ratio>(obj.obj.contract_rate)));
-   fc::raw::pack(
-       ds, make_history_serial_wrapper(obj.db, as_type<eosio::chain::resource_limits::ratio>(obj.obj.expand_rate)));
-   return ds;
-}
+//template <typename ST>
+//ST& operator<<(ST& ds, const history_serial_wrapper<eosio::chain::resource_limits::elastic_limit_parameters>& obj) {
+//   fc::raw::pack(ds, fc::unsigned_int(0));
+//   fc::raw::pack(ds, as_type<uint64_t>(obj.obj.target));
+//   fc::raw::pack(ds, as_type<uint64_t>(obj.obj.max));
+//   fc::raw::pack(ds, as_type<uint32_t>(obj.obj.periods));
+//   fc::raw::pack(ds, as_type<uint32_t>(obj.obj.max_multiplier));
+//   fc::raw::pack(
+//       ds, make_history_serial_wrapper(obj.db, as_type<eosio::chain::resource_limits::ratio>(obj.obj.contract_rate)));
+//   fc::raw::pack(
+//       ds, make_history_serial_wrapper(obj.db, as_type<eosio::chain::resource_limits::ratio>(obj.obj.expand_rate)));
+//   return ds;
+//}
 
-template <typename ST>
-ST& operator<<(ST&                                                                                         ds,
-               const history_serial_wrapper<eosio::chain::resource_limits::resource_limits_config_object>& obj) {
-   fc::raw::pack(ds, fc::unsigned_int(0));
-   fc::raw::pack(
-       ds, make_history_serial_wrapper(
-               obj.db, as_type<eosio::chain::resource_limits::elastic_limit_parameters>(obj.obj.cpu_limit_parameters)));
-   fc::raw::pack(
-       ds, make_history_serial_wrapper(
-               obj.db, as_type<eosio::chain::resource_limits::elastic_limit_parameters>(obj.obj.net_limit_parameters)));
-   fc::raw::pack(ds, as_type<uint32_t>(obj.obj.account_cpu_usage_average_window));
-   fc::raw::pack(ds, as_type<uint32_t>(obj.obj.account_net_usage_average_window));
-   return ds;
-};
+//template <typename ST>
+//ST& operator<<(ST&                                                                                         ds,
+//               const history_serial_wrapper<eosio::chain::resource_limits::resource_limits_config_object>& obj) {
+//   fc::raw::pack(ds, fc::unsigned_int(0));
+//   fc::raw::pack(
+//       ds, make_history_serial_wrapper(
+//               obj.db, as_type<eosio::chain::resource_limits::elastic_limit_parameters>(obj.obj.cpu_limit_parameters)));
+//   fc::raw::pack(
+//       ds, make_history_serial_wrapper(
+//               obj.db, as_type<eosio::chain::resource_limits::elastic_limit_parameters>(obj.obj.net_limit_parameters)));
+//   fc::raw::pack(ds, as_type<uint32_t>(obj.obj.account_cpu_usage_average_window));
+//   fc::raw::pack(ds, as_type<uint32_t>(obj.obj.account_net_usage_average_window));
+//   return ds;
+//};
 
 template <typename ST>
 ST& operator<<(ST& ds, const history_serial_wrapper<eosio::chain::action>& obj) {

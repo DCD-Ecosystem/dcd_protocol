@@ -1,5 +1,5 @@
 #include <eosio/chain/abi_serializer.hpp>
-#include <eosio/chain/resource_limits.hpp>
+//#include <eosio/chain/resource_limits.hpp>
 #include <eosio/chain/generated_transaction_object.hpp>
 #include <eosio/testing/tester.hpp>
 
@@ -378,7 +378,7 @@ BOOST_AUTO_TEST_CASE( replace_deferred_test ) try {
    c.set_abi( "test"_n, contracts::deferred_test_abi().data() );
    c.produce_block();
 
-   auto alice_ram_usage0 = c.control->get_resource_limits_manager().get_account_ram_usage( "alice"_n );
+//   auto alice_ram_usage0 = c.control->get_resource_limits_manager().get_account_ram_usage( "alice"_n );
 
    c.push_action( "test"_n, "defercall"_n, "alice"_n, fc::mutable_variant_object()
       ("payer", "alice")
@@ -387,7 +387,7 @@ BOOST_AUTO_TEST_CASE( replace_deferred_test ) try {
       ("payload", 100)
    );
 
-   auto alice_ram_usage1 = c.control->get_resource_limits_manager().get_account_ram_usage( "alice"_n );
+//   auto alice_ram_usage1 = c.control->get_resource_limits_manager().get_account_ram_usage( "alice"_n );
 
    // Verify subjective mitigation is in place
    BOOST_CHECK_EXCEPTION(
@@ -401,7 +401,7 @@ BOOST_AUTO_TEST_CASE( replace_deferred_test ) try {
       fc_exception_message_is( "Replacing a deferred transaction is temporarily disabled." )
    );
 
-   BOOST_CHECK_EQUAL( c.control->get_resource_limits_manager().get_account_ram_usage( "alice"_n ), alice_ram_usage1 );
+//   BOOST_CHECK_EQUAL( c.control->get_resource_limits_manager().get_account_ram_usage( "alice"_n ), alice_ram_usage1 );
 
    c.control->abort_block();
 
@@ -410,7 +410,7 @@ BOOST_AUTO_TEST_CASE( replace_deferred_test ) try {
    cfg.disable_all_subjective_mitigations = true;
    c.init( cfg );
 
-   BOOST_CHECK_EQUAL( c.control->get_resource_limits_manager().get_account_ram_usage( "alice"_n ), alice_ram_usage0 );
+//   BOOST_CHECK_EQUAL( c.control->get_resource_limits_manager().get_account_ram_usage( "alice"_n ), alice_ram_usage0 );
 
    c.push_action( "test"_n, "defercall"_n, "alice"_n, fc::mutable_variant_object()
       ("payer", "alice")
@@ -419,7 +419,7 @@ BOOST_AUTO_TEST_CASE( replace_deferred_test ) try {
       ("payload", 100)
    );
 
-   BOOST_CHECK_EQUAL( c.control->get_resource_limits_manager().get_account_ram_usage( "alice"_n ), alice_ram_usage1 );
+//   BOOST_CHECK_EQUAL( c.control->get_resource_limits_manager().get_account_ram_usage( "alice"_n ), alice_ram_usage1 );
    auto dtrxs = c.get_scheduled_transactions();
    BOOST_CHECK_EQUAL( dtrxs.size(), 1 );
    auto first_dtrx_id = dtrxs[0];
@@ -432,8 +432,8 @@ BOOST_AUTO_TEST_CASE( replace_deferred_test ) try {
       ("payload", 101)
    );
 
-   auto alice_ram_usage2 = c.control->get_resource_limits_manager().get_account_ram_usage( "alice"_n );
-   BOOST_CHECK_EQUAL( alice_ram_usage2, alice_ram_usage1 + (alice_ram_usage1 - alice_ram_usage0) );
+//   auto alice_ram_usage2 = c.control->get_resource_limits_manager().get_account_ram_usage( "alice"_n );
+//   BOOST_CHECK_EQUAL( alice_ram_usage2, alice_ram_usage1 + (alice_ram_usage1 - alice_ram_usage0) );
 
    dtrxs = c.get_scheduled_transactions();
    BOOST_CHECK_EQUAL( dtrxs.size(), 1 );
@@ -441,8 +441,8 @@ BOOST_AUTO_TEST_CASE( replace_deferred_test ) try {
 
    c.produce_block();
 
-   auto alice_ram_usage3 = c.control->get_resource_limits_manager().get_account_ram_usage( "alice"_n );
-   BOOST_CHECK_EQUAL( alice_ram_usage3, alice_ram_usage1 );
+//   auto alice_ram_usage3 = c.control->get_resource_limits_manager().get_account_ram_usage( "alice"_n );
+//   BOOST_CHECK_EQUAL( alice_ram_usage3, alice_ram_usage1 );
 
    dtrxs = c.get_scheduled_transactions();
    BOOST_CHECK_EQUAL( dtrxs.size(), 0 );
@@ -461,7 +461,7 @@ BOOST_AUTO_TEST_CASE( replace_deferred_test ) try {
    c.preactivate_protocol_features( {*d} );
    c.produce_block();
 
-   BOOST_CHECK_EQUAL( c.control->get_resource_limits_manager().get_account_ram_usage( "alice"_n ), alice_ram_usage0 );
+//   BOOST_CHECK_EQUAL( c.control->get_resource_limits_manager().get_account_ram_usage( "alice"_n ), alice_ram_usage0 );
 
    c.push_action( "test"_n, "defercall"_n, "alice"_n, fc::mutable_variant_object()
       ("payer", "alice")
@@ -470,7 +470,7 @@ BOOST_AUTO_TEST_CASE( replace_deferred_test ) try {
       ("payload", 100)
    );
 
-   BOOST_CHECK_EQUAL( c.control->get_resource_limits_manager().get_account_ram_usage( "alice"_n ), alice_ram_usage1 );
+//   BOOST_CHECK_EQUAL( c.control->get_resource_limits_manager().get_account_ram_usage( "alice"_n ), alice_ram_usage1 );
 
    dtrxs = c.get_scheduled_transactions();
    BOOST_CHECK_EQUAL( dtrxs.size(), 1 );
@@ -484,7 +484,7 @@ BOOST_AUTO_TEST_CASE( replace_deferred_test ) try {
       ("payload", 101)
    );
 
-   BOOST_CHECK_EQUAL( c.control->get_resource_limits_manager().get_account_ram_usage( "alice"_n ), alice_ram_usage1 );
+//   BOOST_CHECK_EQUAL( c.control->get_resource_limits_manager().get_account_ram_usage( "alice"_n ), alice_ram_usage1 );
 
    dtrxs = c.get_scheduled_transactions();
    BOOST_CHECK_EQUAL( dtrxs.size(), 1 );
@@ -499,7 +499,7 @@ BOOST_AUTO_TEST_CASE( replace_deferred_test ) try {
       100 // Needed to make this input transaction unique
    );
 
-   BOOST_CHECK_EQUAL( c.control->get_resource_limits_manager().get_account_ram_usage( "alice"_n ), alice_ram_usage1 );
+//   BOOST_CHECK_EQUAL( c.control->get_resource_limits_manager().get_account_ram_usage( "alice"_n ), alice_ram_usage1 );
 
    dtrxs = c.get_scheduled_transactions();
    BOOST_CHECK_EQUAL( dtrxs.size(), 1 );
@@ -860,7 +860,7 @@ BOOST_AUTO_TEST_CASE( only_bill_to_first_authorizer ) { try {
       ("net_weight", 1000)
       ("cpu_weight", 1000));
 
-   const resource_limits_manager& mgr = chain.control->get_resource_limits_manager();
+//   const resource_limits_manager& mgr = chain.control->get_resource_limits_manager();
 
    chain.produce_blocks();
 
@@ -881,25 +881,25 @@ BOOST_AUTO_TEST_CASE( only_bill_to_first_authorizer ) { try {
       trx.sign(get_private_key(tester_account2, "active"), chain.control->get_chain_id());
 
 
-      auto tester_cpu_limit0  = mgr.get_account_cpu_limit_ex(tester_account).first;
-      auto tester2_cpu_limit0 = mgr.get_account_cpu_limit_ex(tester_account2).first;
-      auto tester_net_limit0  = mgr.get_account_net_limit_ex(tester_account).first;
-      auto tester2_net_limit0 = mgr.get_account_net_limit_ex(tester_account2).first;
+//      auto tester_cpu_limit0  = mgr.get_account_cpu_limit_ex(tester_account).first;
+//      auto tester2_cpu_limit0 = mgr.get_account_cpu_limit_ex(tester_account2).first;
+//      auto tester_net_limit0  = mgr.get_account_net_limit_ex(tester_account).first;
+//      auto tester2_net_limit0 = mgr.get_account_net_limit_ex(tester_account2).first;
 
       chain.push_transaction(trx);
 
-      auto tester_cpu_limit1  = mgr.get_account_cpu_limit_ex(tester_account).first;
-      auto tester2_cpu_limit1 = mgr.get_account_cpu_limit_ex(tester_account2).first;
-      auto tester_net_limit1  = mgr.get_account_net_limit_ex(tester_account).first;
-      auto tester2_net_limit1 = mgr.get_account_net_limit_ex(tester_account2).first;
+//      auto tester_cpu_limit1  = mgr.get_account_cpu_limit_ex(tester_account).first;
+//      auto tester2_cpu_limit1 = mgr.get_account_cpu_limit_ex(tester_account2).first;
+//      auto tester_net_limit1  = mgr.get_account_net_limit_ex(tester_account).first;
+//      auto tester2_net_limit1 = mgr.get_account_net_limit_ex(tester_account2).first;
 
-      BOOST_CHECK(tester_cpu_limit1.used > tester_cpu_limit0.used);
-      BOOST_CHECK(tester2_cpu_limit1.used > tester2_cpu_limit0.used);
-      BOOST_CHECK(tester_net_limit1.used > tester_net_limit0.used);
-      BOOST_CHECK(tester2_net_limit1.used > tester2_net_limit0.used);
+//      BOOST_CHECK(tester_cpu_limit1.used > tester_cpu_limit0.used);
+//      BOOST_CHECK(tester2_cpu_limit1.used > tester2_cpu_limit0.used);
+//      BOOST_CHECK(tester_net_limit1.used > tester_net_limit0.used);
+//      BOOST_CHECK(tester2_net_limit1.used > tester2_net_limit0.used);
 
-      BOOST_CHECK_EQUAL(tester_cpu_limit1.used - tester_cpu_limit0.used, tester2_cpu_limit1.used - tester2_cpu_limit0.used);
-      BOOST_CHECK_EQUAL(tester_net_limit1.used - tester_net_limit0.used, tester2_net_limit1.used - tester2_net_limit0.used);
+//      BOOST_CHECK_EQUAL(tester_cpu_limit1.used - tester_cpu_limit0.used, tester2_cpu_limit1.used - tester2_cpu_limit0.used);
+//      BOOST_CHECK_EQUAL(tester_net_limit1.used - tester_net_limit0.used, tester2_net_limit1.used - tester2_net_limit0.used);
    }
 
    const auto& pfm = chain.control->get_protocol_feature_manager();
@@ -925,22 +925,22 @@ BOOST_AUTO_TEST_CASE( only_bill_to_first_authorizer ) { try {
       trx.sign(get_private_key(tester_account, "active"), chain.control->get_chain_id());
       trx.sign(get_private_key(tester_account2, "active"), chain.control->get_chain_id());
 
-      auto tester_cpu_limit0  = mgr.get_account_cpu_limit_ex(tester_account).first;
-      auto tester2_cpu_limit0 = mgr.get_account_cpu_limit_ex(tester_account2).first;
-      auto tester_net_limit0  = mgr.get_account_net_limit_ex(tester_account).first;
-      auto tester2_net_limit0 = mgr.get_account_net_limit_ex(tester_account2).first;
+//      auto tester_cpu_limit0  = mgr.get_account_cpu_limit_ex(tester_account).first;
+//      auto tester2_cpu_limit0 = mgr.get_account_cpu_limit_ex(tester_account2).first;
+//      auto tester_net_limit0  = mgr.get_account_net_limit_ex(tester_account).first;
+//      auto tester2_net_limit0 = mgr.get_account_net_limit_ex(tester_account2).first;
 
       chain.push_transaction(trx);
 
-      auto tester_cpu_limit1  = mgr.get_account_cpu_limit_ex(tester_account).first;
-      auto tester2_cpu_limit1 = mgr.get_account_cpu_limit_ex(tester_account2).first;
-      auto tester_net_limit1  = mgr.get_account_net_limit_ex(tester_account).first;
-      auto tester2_net_limit1 = mgr.get_account_net_limit_ex(tester_account2).first;
+//      auto tester_cpu_limit1  = mgr.get_account_cpu_limit_ex(tester_account).first;
+//      auto tester2_cpu_limit1 = mgr.get_account_cpu_limit_ex(tester_account2).first;
+//      auto tester_net_limit1  = mgr.get_account_net_limit_ex(tester_account).first;
+//      auto tester2_net_limit1 = mgr.get_account_net_limit_ex(tester_account2).first;
 
-      BOOST_CHECK(tester_cpu_limit1.used > tester_cpu_limit0.used);
-      BOOST_CHECK(tester2_cpu_limit1.used == tester2_cpu_limit0.used);
-      BOOST_CHECK(tester_net_limit1.used > tester_net_limit0.used);
-      BOOST_CHECK(tester2_net_limit1.used == tester2_net_limit0.used);
+//      BOOST_CHECK(tester_cpu_limit1.used > tester_cpu_limit0.used);
+//      BOOST_CHECK(tester2_cpu_limit1.used == tester2_cpu_limit0.used);
+//      BOOST_CHECK(tester_net_limit1.used > tester_net_limit0.used);
+//      BOOST_CHECK(tester2_net_limit1.used == tester2_net_limit0.used);
    }
 
 } FC_LOG_AND_RETHROW() }

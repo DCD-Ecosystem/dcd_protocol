@@ -16,29 +16,29 @@ bool include_delta(const chain::table_id_object& old, const chain::table_id_obje
    return old.payer != curr.payer;
 }
 
-bool include_delta(const chain::resource_limits::resource_limits_object& old,
-                   const chain::resource_limits::resource_limits_object& curr) {
-   return                                   //
-       old.net_weight != curr.net_weight || //
-       old.cpu_weight != curr.cpu_weight || //
-       old.ram_bytes != curr.ram_bytes;
-}
+//bool include_delta(const chain::resource_limits::resource_limits_object& old,
+//                   const chain::resource_limits::resource_limits_object& curr) {
+//   return                                   //
+//       old.net_weight != curr.net_weight || //
+//       old.cpu_weight != curr.cpu_weight || //
+//       old.ram_bytes != curr.ram_bytes;
+//}
 
-bool include_delta(const chain::resource_limits::resource_limits_state_object& old,
-                   const chain::resource_limits::resource_limits_state_object& curr) {
-   return                                                                                       //
-       old.average_block_net_usage.last_ordinal != curr.average_block_net_usage.last_ordinal || //
-       old.average_block_net_usage.value_ex != curr.average_block_net_usage.value_ex ||         //
-       old.average_block_net_usage.consumed != curr.average_block_net_usage.consumed ||         //
-       old.average_block_cpu_usage.last_ordinal != curr.average_block_cpu_usage.last_ordinal || //
-       old.average_block_cpu_usage.value_ex != curr.average_block_cpu_usage.value_ex ||         //
-       old.average_block_cpu_usage.consumed != curr.average_block_cpu_usage.consumed ||         //
-       old.total_net_weight != curr.total_net_weight ||                                         //
-       old.total_cpu_weight != curr.total_cpu_weight ||                                         //
-       old.total_ram_bytes != curr.total_ram_bytes ||                                           //
-       old.virtual_net_limit != curr.virtual_net_limit ||                                       //
-       old.virtual_cpu_limit != curr.virtual_cpu_limit;
-}
+//bool include_delta(const chain::resource_limits::resource_limits_state_object& old,
+//                   const chain::resource_limits::resource_limits_state_object& curr) {
+//   return                                                                                       //
+//       old.average_block_net_usage.last_ordinal != curr.average_block_net_usage.last_ordinal || //
+//       old.average_block_net_usage.value_ex != curr.average_block_net_usage.value_ex ||         //
+//       old.average_block_net_usage.consumed != curr.average_block_net_usage.consumed ||         //
+//       old.average_block_cpu_usage.last_ordinal != curr.average_block_cpu_usage.last_ordinal || //
+//       old.average_block_cpu_usage.value_ex != curr.average_block_cpu_usage.value_ex ||         //
+//       old.average_block_cpu_usage.consumed != curr.average_block_cpu_usage.consumed ||         //
+//       old.total_net_weight != curr.total_net_weight ||                                         //
+//       old.total_cpu_weight != curr.total_cpu_weight ||                                         //
+//       old.total_ram_bytes != curr.total_ram_bytes ||                                           //
+//       old.virtual_net_limit != curr.virtual_net_limit ||                                       //
+//       old.virtual_cpu_limit != curr.virtual_cpu_limit;
+//}
 
 bool include_delta(const chain::account_metadata_object& old, const chain::account_metadata_object& curr) {
    return                                               //
@@ -133,12 +133,12 @@ std::vector<table_delta> create_deltas(const chainbase::database& db, bool full_
    process_table("permission", db.get_index<chain::permission_index>(), pack_row);
    process_table("permission_link", db.get_index<chain::permission_link_index>(), pack_row);
 
-   process_table("resource_limits", db.get_index<chain::resource_limits::resource_limits_index>(), pack_row);
-   process_table("resource_usage", db.get_index<chain::resource_limits::resource_usage_index>(), pack_row);
-   process_table("resource_limits_state", db.get_index<chain::resource_limits::resource_limits_state_index>(),
-                 pack_row);
-   process_table("resource_limits_config", db.get_index<chain::resource_limits::resource_limits_config_index>(),
-                 pack_row);
+//   process_table("resource_limits", db.get_index<chain::resource_limits::resource_limits_index>(), pack_row);
+//   process_table("resource_usage", db.get_index<chain::resource_limits::resource_usage_index>(), pack_row);
+//   process_table("resource_limits_state", db.get_index<chain::resource_limits::resource_limits_state_index>(),
+//                 pack_row);
+//   process_table("resource_limits_config", db.get_index<chain::resource_limits::resource_limits_config_index>(),
+//                 pack_row);
 
    return deltas;
 }

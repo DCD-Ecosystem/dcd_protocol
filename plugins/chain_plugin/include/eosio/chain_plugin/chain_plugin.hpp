@@ -6,7 +6,7 @@
 #include <eosio/chain/block.hpp>
 #include <eosio/chain/controller.hpp>
 #include <eosio/chain/contract_table_objects.hpp>
-#include <eosio/chain/resource_limits.hpp>
+//#include <eosio/chain/resource_limits.hpp>
 #include <eosio/chain/transaction.hpp>
 #include <eosio/chain/abi_serializer.hpp>
 #include <eosio/chain/plugin_interface.hpp>
@@ -126,11 +126,11 @@ public:
       fc::time_point                       head_block_time;
       account_name                         head_block_producer;
 
-      uint64_t                             virtual_block_cpu_limit = 0;
-      uint64_t                             virtual_block_net_limit = 0;
+//      uint64_t                             virtual_block_cpu_limit = 0;
+//      uint64_t                             virtual_block_net_limit = 0;
 
-      uint64_t                             block_cpu_limit = 0;
-      uint64_t                             block_net_limit = 0;
+//      uint64_t                             block_cpu_limit = 0;
+//      uint64_t                             block_net_limit = 0;
       //string                               recent_slots;
       //double                               participation_rate = 0;
       std::optional<string>                server_version_string;
@@ -161,21 +161,21 @@ public:
    };
 
    // account_resource_info holds similar data members as in account_resource_limit, but decoupling making them independently to be refactored in future
-   struct account_resource_info {
-      int64_t used = 0;
-      int64_t available = 0;
-      int64_t max = 0;
-      std::optional<chain::block_timestamp_type> last_usage_update_time;    // optional for backward nodeos support
-      std::optional<int64_t> current_used;  // optional for backward nodeos support
-      void set( const chain::resource_limits::account_resource_limit& arl)
-      {
-         used = arl.used;
-         available = arl.available;
-         max = arl.max;
-         last_usage_update_time = arl.last_usage_update_time;
-         current_used = arl.current_used;
-      }
-   };
+   //struct account_resource_info { ///TODO: delete?
+   //   int64_t used = 0;
+   //   int64_t available = 0;
+   //   int64_t max = 0;
+   //   std::optional<chain::block_timestamp_type> last_usage_update_time;    // optional for backward nodeos support
+   //   std::optional<int64_t> current_used;  // optional for backward nodeos support
+//      void set( const chain::resource_limits::account_resource_limit& arl)
+//      {
+//         used = arl.used;
+//         available = arl.available;
+//         max = arl.max;
+//         last_usage_update_time = arl.last_usage_update_time;
+//         current_used = arl.current_used;
+//      }
+  // };
 
    struct get_account_results {
       name                       account_name;
@@ -188,13 +188,13 @@ public:
 
       std::optional<asset>       core_liquid_balance;
 
-      int64_t                    ram_quota  = 0;
-      int64_t                    net_weight = 0;
-      int64_t                    cpu_weight = 0;
+//      int64_t                    ram_quota  = 0;
+//      int64_t                    net_weight = 0;
+//      int64_t                    cpu_weight = 0;
 
-      account_resource_info      net_limit;
-      account_resource_info      cpu_limit;
-      int64_t                    ram_usage = 0;
+//      account_resource_info      net_limit;
+//      account_resource_info      cpu_limit;
+//      int64_t                    ram_usage = 0;
 
       vector<permission>         permissions;
 
@@ -202,7 +202,7 @@ public:
       fc::variant                self_delegated_bandwidth;
       fc::variant                refund_request;
       fc::variant                voter_info;
-      fc::variant                rex_info;
+      fc::variant                rex_info; /// TODO: to_delete!!!
    };
 
    struct get_account_params {
@@ -1082,7 +1082,7 @@ FC_REFLECT(eosio::chain_apis::empty, )
 FC_REFLECT(eosio::chain_apis::read_only::get_info_results,
            (server_version)(chain_id)(head_block_num)(last_irreversible_block_num)(last_irreversible_block_id)
            (head_block_id)(head_block_time)(head_block_producer)
-           (virtual_block_cpu_limit)(virtual_block_net_limit)(block_cpu_limit)(block_net_limit)
+//           (virtual_block_cpu_limit)(virtual_block_net_limit)(block_cpu_limit)(block_net_limit)
            (server_version_string)(fork_db_head_block_num)(fork_db_head_block_id)(server_full_version_string)
            (last_irreversible_block_time) )
 FC_REFLECT(eosio::chain_apis::read_only::get_activated_protocol_features_params, (lower_bound)(upper_bound)(limit)(search_by_block_num)(reverse) )
@@ -1114,10 +1114,10 @@ FC_REFLECT( eosio::chain_apis::read_only::get_producer_schedule_result, (active)
 FC_REFLECT( eosio::chain_apis::read_only::get_scheduled_transactions_params, (json)(lower_bound)(limit) )
 FC_REFLECT( eosio::chain_apis::read_only::get_scheduled_transactions_result, (transactions)(more) );
 
-FC_REFLECT( eosio::chain_apis::read_only::account_resource_info, (used)(available)(max)(last_usage_update_time)(current_used) )
+//FC_REFLECT( eosio::chain_apis::read_only::account_resource_info, (used)(available)(max)(last_usage_update_time)(current_used) )
 FC_REFLECT( eosio::chain_apis::read_only::get_account_results,
             (account_name)(head_block_num)(head_block_time)(privileged)(last_code_update)(created)
-            (core_liquid_balance)(ram_quota)(net_weight)(cpu_weight)(net_limit)(cpu_limit)(ram_usage)(permissions)
+            (core_liquid_balance)/*(ram_quota)(net_weight)(cpu_weight)(net_limit)(cpu_limit)(ram_usage)*/(permissions)
             (total_resources)(self_delegated_bandwidth)(refund_request)(voter_info)(rex_info) )
 // @swap code_hash
 FC_REFLECT( eosio::chain_apis::read_only::get_code_results, (account_name)(code_hash)(wast)(wasm)(abi) )

@@ -21,7 +21,7 @@ public:
       std::optional<int32_t>   max_scheduled_transaction_time_per_block_ms;
       std::optional<int32_t>   subjective_cpu_leeway_us;
       std::optional<double>    incoming_defer_ratio;
-      std::optional<uint32_t>  greylist_limit;
+      //std::optional<uint32_t>  greylist_limit;
    };
 
    struct whitelist_blacklist {
@@ -33,9 +33,9 @@ public:
       std::optional< flat_set<public_key_type> > key_blacklist;
    };
 
-   struct greylist_params {
-      std::vector<account_name> accounts;
-   };
+//   struct greylist_params {
+//      std::vector<account_name> accounts;
+//   };
 
    struct integrity_hash_information {
       chain::block_id_type head_block_id;
@@ -96,9 +96,9 @@ public:
    void update_runtime_options(const runtime_options& options);
    runtime_options get_runtime_options() const;
 
-   void add_greylist_accounts(const greylist_params& params);
-   void remove_greylist_accounts(const greylist_params& params);
-   greylist_params get_greylist() const;
+//   void add_greylist_accounts(const greylist_params& params);
+//   void remove_greylist_accounts(const greylist_params& params);
+//   greylist_params get_greylist() const;
 
    whitelist_blacklist get_whitelist_blacklist() const;
    void set_whitelist_blacklist(const whitelist_blacklist& params);
@@ -111,7 +111,7 @@ public:
 
    fc::variants get_supported_protocol_features( const get_supported_protocol_features_params& params ) const;
 
-   get_account_ram_corrections_result  get_account_ram_corrections( const get_account_ram_corrections_params& params ) const;
+//   get_account_ram_corrections_result  get_account_ram_corrections( const get_account_ram_corrections_params& params ) const;
 
    void log_failed_transaction(const transaction_id_type& trx_id, const char* reason) const;
 
@@ -121,8 +121,8 @@ public:
 
 } //eosio
 
-FC_REFLECT(eosio::producer_plugin::runtime_options, (max_transaction_time)(max_irreversible_block_age)(produce_time_offset_us)(last_block_time_offset_us)(max_scheduled_transaction_time_per_block_ms)(subjective_cpu_leeway_us)(incoming_defer_ratio)(greylist_limit));
-FC_REFLECT(eosio::producer_plugin::greylist_params, (accounts));
+FC_REFLECT(eosio::producer_plugin::runtime_options, (max_transaction_time)(max_irreversible_block_age)(produce_time_offset_us)(last_block_time_offset_us)(max_scheduled_transaction_time_per_block_ms)(subjective_cpu_leeway_us)(incoming_defer_ratio)/*(greylist_limit)*/);
+//FC_REFLECT(eosio::producer_plugin::greylist_params, (accounts));
 FC_REFLECT(eosio::producer_plugin::whitelist_blacklist, (actor_whitelist)(actor_blacklist)(contract_whitelist)(contract_blacklist)(action_blacklist)(key_blacklist) )
 FC_REFLECT(eosio::producer_plugin::integrity_hash_information, (head_block_id)(integrity_hash))
 FC_REFLECT(eosio::producer_plugin::snapshot_information, (head_block_id)(head_block_num)(head_block_time)(version)(snapshot_name))

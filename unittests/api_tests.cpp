@@ -21,7 +21,7 @@
 #include <eosio/chain/block_summary_object.hpp>
 #include <eosio/chain/global_property_object.hpp>
 #include <eosio/chain/generated_transaction_object.hpp>
-#include <eosio/chain/resource_limits.hpp>
+//#include <eosio/chain/resource_limits.hpp>
 
 #include <fc/crypto/digest.hpp>
 #include <fc/exception/exception.hpp>
@@ -976,7 +976,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(checktime_fail_tests, TESTER_T, backing_store_ts) 
    t.produce_blocks(1);
 
    int64_t x; int64_t net; int64_t cpu;
-   t.control->get_resource_limits_manager().get_account_limits( "testapi"_n, x, net, cpu );
+//   t.control->get_resource_limits_manager().get_account_limits( "testapi"_n, x, net, cpu );
    wdump((net)(cpu));
 
 #warning TODO call the contract before testing to cache it, and validate that it was cached

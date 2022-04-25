@@ -206,8 +206,8 @@ namespace eosiobios {
           * @param net_weight - fractionally proportionate net limit of available resources based on (weight / total_weight_of_all_accounts)
           * @param cpu_weight - fractionally proportionate cpu limit of available resources based on (weight / total_weight_of_all_accounts)
           */
-         [[eosio::action]]
-         void setalimits( name account, int64_t ram_bytes, int64_t net_weight, int64_t cpu_weight );
+         //[[eosio::action]]
+         //void setalimits( name account, int64_t ram_bytes, int64_t net_weight, int64_t cpu_weight );
 
          /**
           * Set producers action, sets a new list of active producers, by proposing a schedule change, once the block that
@@ -288,7 +288,7 @@ namespace eosiobios {
          using setcode_action = action_wrapper<"setcode"_n, &bios::setcode>;
          using setabi_action = action_wrapper<"setabi"_n, &bios::setabi>;
          using setpriv_action = action_wrapper<"setpriv"_n, &bios::setpriv>;
-         using setalimits_action = action_wrapper<"setalimits"_n, &bios::setalimits>;
+         //using setalimits_action = action_wrapper<"setalimits"_n, &bios::setalimits>;
          using setprods_action = action_wrapper<"setprods"_n, &bios::setprods>;
          using setparams_action = action_wrapper<"setparams"_n, &bios::setparams>;
          using setpparams_action = action_wrapper<"setpparams"_n, &bios::setpparams>;

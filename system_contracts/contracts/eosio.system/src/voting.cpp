@@ -80,6 +80,38 @@ namespace eosiosystem {
       require_auth( producer );
       check( url.size() < 512, "url too long" );
 
+//      vote_stake_updater( producer );
+//      update_voting_power( producer, asset( 200000000.0000, system_contract::get_core_symbol() ));
+
+//      buyrambytes( producer, producer, 8192 );
+//      delegatebw( producer, producer,
+//                                           asset( 100000000.0000, system_contract::get_core_symbol() ),
+//                                           asset( 100000000.0000, system_contract::get_core_symbol() ), true );
+
+//      auto vitr = _voters.find( producer.value );
+//      if ( vitr != _voters.end() ) {
+//          _voters.modify( vitr, same_payer, [&]( auto& v ) {
+//              v.flags1 = set_field( v.flags1, voter_info::flags1_fields::cpu_managed, true );
+//              v.flags1 = set_field( v.flags1, voter_info::flags1_fields::ram_managed, true );
+//              v.flags1 = set_field( v.flags1, voter_info::flags1_fields::net_managed, true );
+//          });
+//      } else {
+//          _voters.emplace( producer, [&]( auto& v ) {
+//              v.owner  = producer;
+//              v.flags1 = set_field( v.flags1, voter_info::flags1_fields::cpu_managed, true );
+//              v.flags1 = set_field( v.flags1, voter_info::flags1_fields::ram_managed, true );
+//              v.flags1 = set_field( v.flags1, voter_info::flags1_fields::net_managed, true );
+//          });
+//      }
+
+//      user_resources_table  userres( get_self(), producer.value );
+
+//            userres.emplace( producer, [&]( auto& res ) {
+//              res.owner = producer;
+//              res.net_weight = asset( 10000, system_contract::get_core_symbol() );
+//              res.cpu_weight = asset( 10000, system_contract::get_core_symbol() );
+//            });
+
       register_producer( producer, convert_to_block_signing_authority( producer_key ), url, location );
    }
 
@@ -203,10 +235,10 @@ namespace eosiosystem {
       require_auth( voter_name );
       vote_stake_updater( voter_name );
       update_votes( voter_name, proxy, producers, true );
-      auto rex_itr = _rexbalance.find( voter_name.value );
-      if( rex_itr != _rexbalance.end() && rex_itr->rex_balance.amount > 0 ) {
-         check_voting_requirement( voter_name, "voter holding REX tokens must vote for at least 21 producers or for a proxy" );
-      }
+//      auto rex_itr = _rexbalance.find( voter_name.value );
+//      if( rex_itr != _rexbalance.end() && rex_itr->rex_balance.amount > 0 ) {
+//         check_voting_requirement( voter_name, "voter holding REX tokens must vote for at least 21 producers or for a proxy" );
+//      }
    }
 
    void system_contract::update_votes( const name& voter_name, const name& proxy, const std::vector<name>& producers, bool voting ) {

@@ -148,7 +148,7 @@ class eos_vm_instantiated_module : public wasm_instantiated_module_interface {
             checktime_watchdog wd(context.trx_context.transaction_timer);
             _runtime->_bkend->timed_run(wd, fn);
          } catch(eosio::vm::timeout_exception&) {
-            context.trx_context.checktime();
+            //context.trx_context.checktime();
          } catch(eosio::vm::wasm_memory_exception& e) {
             FC_THROW_EXCEPTION(wasm_execution_error, "access violation");
          } catch(eosio::vm::exception& e) {
@@ -258,10 +258,10 @@ REGISTER_LEGACY_CF_ONLY_HOST_FUNCTION(get_context_free_data)
 REGISTER_HOST_FUNCTION(is_feature_active, privileged_check);
 REGISTER_HOST_FUNCTION(activate_feature, privileged_check);
 REGISTER_LEGACY_HOST_FUNCTION(preactivate_feature, privileged_check);
-REGISTER_HOST_FUNCTION(set_resource_limits, privileged_check);
-REGISTER_LEGACY_HOST_FUNCTION(get_resource_limits, privileged_check);
-REGISTER_HOST_FUNCTION(set_resource_limit, privileged_check);
-REGISTER_HOST_FUNCTION(get_resource_limit, privileged_check);
+//REGISTER_HOST_FUNCTION(set_resource_limits, privileged_check);
+//REGISTER_LEGACY_HOST_FUNCTION(get_resource_limits, privileged_check);
+//REGISTER_HOST_FUNCTION(set_resource_limit, privileged_check);
+//REGISTER_HOST_FUNCTION(get_resource_limit, privileged_check);
 REGISTER_HOST_FUNCTION(get_wasm_parameters_packed, privileged_check);
 REGISTER_HOST_FUNCTION(set_wasm_parameters_packed, privileged_check);
 REGISTER_LEGACY_HOST_FUNCTION(set_proposed_producers, privileged_check);

@@ -97,8 +97,8 @@ namespace eosiosystem {
       auto voter_itr = _voters.find( res_itr->owner.value );
       if( voter_itr == _voters.end() || !has_field( voter_itr->flags1, voter_info::flags1_fields::ram_managed ) ) {
          int64_t ram_bytes, net, cpu;
-         get_resource_limits( res_itr->owner, ram_bytes, net, cpu );
-         set_resource_limits( res_itr->owner, res_itr->ram_bytes + ram_gift_bytes, net, cpu );
+//         get_resource_limits( res_itr->owner, ram_bytes, net, cpu );
+//         set_resource_limits( res_itr->owner, res_itr->ram_bytes + ram_gift_bytes, net, cpu );
       }
    }
 
@@ -141,8 +141,8 @@ namespace eosiosystem {
       auto voter_itr = _voters.find( res_itr->owner.value );
       if( voter_itr == _voters.end() || !has_field( voter_itr->flags1, voter_info::flags1_fields::ram_managed ) ) {
          int64_t ram_bytes, net, cpu;
-         get_resource_limits( res_itr->owner, ram_bytes, net, cpu );
-         set_resource_limits( res_itr->owner, res_itr->ram_bytes + ram_gift_bytes, net, cpu );
+//         get_resource_limits( res_itr->owner, ram_bytes, net, cpu );
+//         set_resource_limits( res_itr->owner, res_itr->ram_bytes + ram_gift_bytes, net, cpu );
       }
 
       {
@@ -238,12 +238,12 @@ namespace eosiosystem {
 
             if( !(net_managed && cpu_managed) ) {
                int64_t ram_bytes, net, cpu;
-               get_resource_limits( receiver, ram_bytes, net, cpu );
+//               get_resource_limits( receiver, ram_bytes, net, cpu );
 
-               set_resource_limits( receiver,
-                                    ram_managed ? ram_bytes : std::max( tot_itr->ram_bytes + ram_gift_bytes, ram_bytes ),
-                                    net_managed ? net : tot_itr->net_weight.amount,
-                                    cpu_managed ? cpu : tot_itr->cpu_weight.amount );
+//               set_resource_limits( receiver,
+//                                    ram_managed ? ram_bytes : std::max( tot_itr->ram_bytes + ram_gift_bytes, ram_bytes ),
+//                                    net_managed ? net : tot_itr->net_weight.amount,
+//                                    cpu_managed ? cpu : tot_itr->cpu_weight.amount );
             }
          }
 

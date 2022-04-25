@@ -78,18 +78,18 @@ namespace eosio { namespace chain {
          inline void add_net_usage( uint64_t u ) {
             if( explicit_net_usage ) return;
             net_usage += u;
-            check_net_usage();
+//            check_net_usage();
          }
 
          inline void round_up_net_usage() {
             if( explicit_net_usage ) return;
             net_usage = ((net_usage + 7)/8)*8; // Round up to nearest multiple of word size (8 bytes)
-            check_net_usage();
+//            check_net_usage();
          }
 
-         void check_net_usage()const;
+         //void check_net_usage()const;
 
-         void checktime()const;
+//         void checktime()const;
 
          template <typename DigestType>
          inline DigestType hash_with_checktime( const char* data, uint32_t datalen )const {
@@ -99,7 +99,7 @@ namespace eosio { namespace chain {
                enc.write( data, bs );
                data    += bs;
                datalen -= bs;
-               checktime();
+//               checktime();
             }
             enc.write( data, datalen );
             return enc.result();
@@ -110,7 +110,7 @@ namespace eosio { namespace chain {
 
          uint32_t update_billed_cpu_time( fc::time_point now );
 
-         std::tuple<int64_t, int64_t, bool, bool> max_bandwidth_billed_accounts_can_pay( bool force_elastic_limits = false )const;
+//         std::tuple<int64_t, int64_t, bool, bool> max_bandwidth_billed_accounts_can_pay( bool force_elastic_limits = false )const;
 
          void validate_referenced_accounts( const transaction& trx, bool enforce_actor_whitelist_blacklist )const;
 
@@ -121,7 +121,7 @@ namespace eosio { namespace chain {
          friend struct controller_impl;
          friend class apply_context;
 
-         void add_ram_usage( account_name account, int64_t ram_delta, const storage_usage_trace& trace );
+         //void add_ram_usage( account_name account, int64_t ram_delta, const storage_usage_trace& trace );
 
          action_trace& get_action_trace( uint32_t action_ordinal );
          const action_trace& get_action_trace( uint32_t action_ordinal )const;
@@ -143,9 +143,9 @@ namespace eosio { namespace chain {
          void schedule_transaction();
          void record_transaction( const transaction_id_type& id, fc::time_point_sec expire );
 
-         void validate_cpu_usage_to_bill( int64_t billed_us, int64_t account_cpu_limit, bool check_minimum )const;
-         void validate_account_cpu_usage( int64_t billed_us, int64_t account_cpu_limit )const;
-         void validate_account_cpu_usage_estimate( int64_t billed_us, int64_t account_cpu_limit )const;
+//         void validate_cpu_usage_to_bill( int64_t billed_us, int64_t account_cpu_limit, bool check_minimum )const;
+//         void validate_account_cpu_usage( int64_t billed_us, int64_t account_cpu_limit )const;
+//         void validate_account_cpu_usage_estimate( int64_t billed_us, int64_t account_cpu_limit )const;
 
          void disallow_transaction_extensions( const char* error_msg )const;
 
@@ -163,8 +163,8 @@ namespace eosio { namespace chain {
 
          deque<digest_type>            executed_action_receipt_digests;
          flat_set<account_name>        bill_to_accounts;
-         flat_set<account_name>        validate_ram_usage;
-         flat_set<account_name>        validate_disk_usage;
+         //flat_set<account_name>        validate_ram_usage;
+         //flat_set<account_name>        validate_disk_usage;
 
          /// the maximum number of virtual CPU instructions of the transaction that can be safely billed to the billable accounts
          uint64_t                      initial_max_billable_cpu = 0;
@@ -189,17 +189,17 @@ namespace eosio { namespace chain {
          bool                          is_initialized = false;
 
 
-         uint64_t                      net_limit = 0;
-         bool                          net_limit_due_to_block = true;
-         bool                          net_limit_due_to_greylist = false;
-         uint64_t                      eager_net_limit = 0;
+//         uint64_t                      net_limit = 0;
+//         bool                          net_limit_due_to_block = true;
+//         bool                          net_limit_due_to_greylist = false;
+         //uint64_t                      eager_net_limit = 0;
          uint64_t&                     net_usage; /// reference to trace->net_usage
          bool                          explicit_net_usage = false;
 
-         bool                          cpu_limit_due_to_greylist = false;
+         //bool                          cpu_limit_due_to_greylist = false;
 
-         fc::microseconds              initial_objective_duration_limit;
-         fc::microseconds              objective_duration_limit;
+         //fc::microseconds              initial_objective_duration_limit;
+         //fc::microseconds              objective_duration_limit;
          fc::time_point                _deadline = fc::time_point::maximum();
          int64_t                       deadline_exception_code = block_cpu_usage_exceeded::code_value;
          int64_t                       billing_timer_exception_code = block_cpu_usage_exceeded::code_value;

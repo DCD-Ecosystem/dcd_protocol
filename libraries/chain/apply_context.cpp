@@ -6,7 +6,7 @@
 #include <eosio/chain/wasm_interface.hpp>
 #include <eosio/chain/generated_transaction_object.hpp>
 #include <eosio/chain/authorization_manager.hpp>
-#include <eosio/chain/resource_limits.hpp>
+//#include <eosio/chain/resource_limits.hpp>
 #include <eosio/chain/account_object.hpp>
 #include <eosio/chain/code_object.hpp>
 #include <eosio/chain/global_property_object.hpp>
@@ -54,31 +54,31 @@ apply_context::apply_context(controller& con, transaction_context& trx_ctx, uint
    _db_context = control.kv_db().create_db_context(*this, receiver);
 }
 
-template <typename Exception>
-void apply_context::check_unprivileged_resource_usage(const char* resource, const flat_set<account_delta>& deltas) {
-   const size_t checktime_interval    = 10;
-   const bool   not_in_notify_context = (receiver == act->account);
-   size_t counter = 0;
-   for (const auto& entry : deltas) {
-      if (counter == checktime_interval) {
-         trx_context.checktime();
-         counter = 0;
-      }
-      if (entry.delta > 0 && entry.account != receiver) {
-         EOS_ASSERT(not_in_notify_context, Exception,
-                     "unprivileged contract cannot increase ${resource} usage of another account within a notify context: "
-                     "${account}",
-                     ("resource", resource)
-                     ("account", entry.account));
-         EOS_ASSERT(has_authorization(entry.account), Exception,
-                     "unprivileged contract cannot increase ${resource} usage of another account that has not authorized the "
-                     "action: ${account}",
-                     ("resource", resource)
-                     ("account", entry.account));
-      }
-      ++counter;
-   }
-}
+//template <typename Exception>
+//void apply_context::check_unprivileged_resource_usage(const char* resource, const flat_set<account_delta>& deltas) {
+//   const size_t checktime_interval    = 10;
+//   const bool   not_in_notify_context = (receiver == act->account);
+//   size_t counter = 0;
+//   for (const auto& entry : deltas) {
+//      if (counter == checktime_interval) {
+//         trx_context.checktime();
+//         counter = 0;
+//      }
+//      if (entry.delta > 0 && entry.account != receiver) {
+//         EOS_ASSERT(not_in_notify_context, Exception,
+//                     "unprivileged contract cannot increase ${resource} usage of another account within a notify context: "
+//                     "${account}",
+//                     ("resource", resource)
+//                     ("account", entry.account));
+//         EOS_ASSERT(has_authorization(entry.account), Exception,
+//                     "unprivileged contract cannot increase ${resource} usage of another account that has not authorized the "
+//                     "action: ${account}",
+//                     ("resource", resource)
+//                     ("account", entry.account));
+//      }
+//      ++counter;
+//   }
+//}
 
 void apply_context::exec_one()
 {
@@ -134,11 +134,11 @@ void apply_context::exec_one()
                } catch( const wasm_exit& ) {}
             }
 
-            if (!privileged) {
-               if (control.is_builtin_activated(builtin_protocol_feature_t::ram_restrictions)) {
-                  check_unprivileged_resource_usage<unauthorized_ram_usage_increase>("RAM", _account_ram_deltas);
-               }
-            }
+//            if (!privileged) {
+//               if (control.is_builtin_activated(builtin_protocol_feature_t::ram_restrictions)) {
+//                  check_unprivileged_resource_usage<unauthorized_ram_usage_increase>("RAM", _account_ram_deltas);
+//               }
+//            }
          }
       } FC_RETHROW_EXCEPTIONS( warn, "pending console output: ${console}", ("console", _pending_console_output) )
 
@@ -206,8 +206,8 @@ void apply_context::exec_one()
 
 void apply_context::finalize_trace( action_trace& trace, const fc::time_point& start )
 {
-   trace.account_ram_deltas = std::move( _account_ram_deltas );
-   _account_ram_deltas.clear();
+//   trace.account_ram_deltas = std::move( _account_ram_deltas );
+//   _account_ram_deltas.clear();
 
    trace.console = std::move( _pending_console_output );
    _pending_console_output.clear();
@@ -362,7 +362,7 @@ void apply_context::execute_inline( action&& a ) {
                                       {},
                                       {{receiver, config::eosio_code_name}},
                                       control.pending_block_time() - trx_context.published,
-                                      std::bind(&transaction_context::checktime, &this->trx_context),
+                                      //std::bind(&transaction_context::checktime, &this->trx_context),
                                       false,
                                       inherited_authorizations
                                     );
@@ -528,7 +528,7 @@ void apply_context::schedule_deferred_transaction( const uint128_t& sender_id, a
                                       {},
                                       {{receiver, config::eosio_code_name}},
                                       delay,
-                                      std::bind(&transaction_context::checktime, &this->trx_context),
+                                      //std::bind(&transaction_context::checktime, &this->trx_context),
                                       false
                                     );
       } catch( const fc::exception& e ) {
@@ -567,13 +567,13 @@ void apply_context::schedule_deferred_transaction( const uint128_t& sender_id, a
          event_id = STORAGE_EVENT_ID("${id}", ("id", ptr->id));
       }
 
-      uint64_t orig_trx_ram_bytes = config::billable_size_v<generated_transaction_object> + ptr->packed_trx.size();
-      if( replace_deferred_activated ) {
+      //uint64_t orig_trx_ram_bytes = config::billable_size_v<generated_transaction_object> + ptr->packed_trx.size();
+//      if( replace_deferred_activated ) {
          // avoiding moving event_id to make logic easier to maintain
-         add_ram_usage( ptr->payer, -static_cast<int64_t>( orig_trx_ram_bytes ), storage_usage_trace(get_action_id(), std::string(event_id), "deferred_trx", "cancel", "deferred_trx_cancel") );
-      } else {
-         control.add_to_ram_correction( ptr->payer, orig_trx_ram_bytes, get_action_id(), event_id.c_str() );
-      }
+//         add_ram_usage( ptr->payer, -static_cast<int64_t>( orig_trx_ram_bytes ), storage_usage_trace(get_action_id(), std::string(event_id), "deferred_trx", "cancel", "deferred_trx_cancel") );
+//      }/* else {
+//         control.add_to_ram_correction( ptr->payer, orig_trx_ram_bytes, get_action_id(), event_id.c_str() );
+//      }*/
 
       transaction_id_type trx_id_for_new_obj;
       if( replace_deferred_activated ) {
@@ -664,7 +664,7 @@ void apply_context::schedule_deferred_transaction( const uint128_t& sender_id, a
                subjective_block_production_exception,
                "Cannot charge RAM to other accounts during notify."
    );
-   add_ram_usage( payer, (config::billable_size_v<generated_transaction_object> + trx_size), storage_usage_trace(get_action_id(), std::move(event_id), "deferred_trx", operation, "deferred_trx_add") );
+//   add_ram_usage( payer, (config::billable_size_v<generated_transaction_object> + trx_size), storage_usage_trace(get_action_id(), std::move(event_id), "deferred_trx", operation, "deferred_trx_add") );
 }
 
 bool apply_context::cancel_deferred_transaction( const uint128_t& sender_id, account_name sender ) {
@@ -690,7 +690,7 @@ bool apply_context::cancel_deferred_transaction( const uint128_t& sender_id, acc
          );
       }
 
-      add_ram_usage( gto->payer, -(config::billable_size_v<generated_transaction_object> + gto->packed_trx.size()), storage_usage_trace(get_action_id(), std::move(event_id), "deferred_trx", "cancel", "deferred_trx_cancel") );
+//      add_ram_usage( gto->payer, -(config::billable_size_v<generated_transaction_object> + gto->packed_trx.size()), storage_usage_trace(get_action_id(), std::move(event_id), "deferred_trx", "cancel", "deferred_trx_cancel") );
       generated_transaction_idx.remove(*gto);
    }
    return gto;
@@ -780,7 +780,7 @@ void apply_context::update_db_usage( const account_name& payer, int64_t delta, c
          require_authorization( payer );
       }
    }
-   add_ram_usage(payer, delta, trace);
+//   add_ram_usage(payer, delta, trace);
 }
 
 
@@ -1176,14 +1176,14 @@ uint64_t apply_context::next_auth_sequence( account_name actor ) {
    return amo.auth_sequence;
 }
 
-void apply_context::add_ram_usage( account_name account, int64_t ram_delta, const storage_usage_trace& trace ) {
-   trx_context.add_ram_usage( account, ram_delta, trace );
+//void apply_context::add_ram_usage( account_name account, int64_t ram_delta, const storage_usage_trace& trace ) {
+////   trx_context.add_ram_usage( account, ram_delta, trace );
 
-   auto p = _account_ram_deltas.emplace( account, ram_delta );
-   if( !p.second ) {
-      p.first->delta += ram_delta;
-   }
-}
+//   auto p = _account_ram_deltas.emplace( account, ram_delta );
+//   if( !p.second ) {
+//      p.first->delta += ram_delta;
+//   }
+//}
 
 action_name apply_context::get_sender() const {
    const action_trace& trace = trx_context.get_action_trace( action_ordinal );

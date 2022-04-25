@@ -150,10 +150,10 @@ namespace eosio { namespace chain {
             if(!codeobject)
                codeobject = &db.get<code_object,by_code_hash>(boost::make_tuple(code_hash, vm_type, vm_version));
 
-            auto timer_pause = fc::make_scoped_exit([&](){
-               trx_context.resume_billing_timer();
-            });
-            trx_context.pause_billing_timer();
+            //auto timer_pause = fc::make_scoped_exit([&](){
+            //   trx_context.resume_billing_timer();
+            //});
+            //trx_context.pause_billing_timer();
             IR::Module module;
             std::vector<U8> bytes = {
                 (const U8*)codeobject->code.data(),

@@ -36,7 +36,7 @@ namespace eosio { namespace chain { namespace webassembly {
                                       provided_keys,
                                       provided_permissions,
                                       fc::seconds(trx.delay_sec),
-                                      std::bind(&transaction_context::checktime, &context.trx_context),
+                                      //std::bind(&transaction_context::checktime, &context.trx_context),
                                       false
                                     );
          return true;
@@ -66,7 +66,7 @@ namespace eosio { namespace chain { namespace webassembly {
                                       provided_keys,
                                       provided_permissions,
                                       fc::microseconds(delay_us),
-                                      std::bind(&transaction_context::checktime, &context.trx_context),
+                                      //std::bind(&transaction_context::checktime, &context.trx_context),
                                       false
                                     );
          return true;

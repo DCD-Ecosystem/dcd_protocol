@@ -4,7 +4,7 @@
 #include <eosio/testing/tester.hpp>
 #include <eosio/chain/abi_serializer.hpp>
 #include <eosio/chain/wasm_eosio_constraints.hpp>
-#include <eosio/chain/resource_limits.hpp>
+//#include <eosio/chain/resource_limits.hpp>
 #include <eosio/chain/exceptions.hpp>
 #include <eosio/chain/wast_to_wasm.hpp>
 #include <eosio/chain_plugin/chain_plugin.hpp>
@@ -148,10 +148,10 @@ BOOST_FIXTURE_TEST_CASE( get_info, TESTER ) try {
    BOOST_TEST(info.head_block_id == control->head_block_id());
    BOOST_TEST(info.head_block_time == control->head_block_time());
    BOOST_TEST(info.head_block_producer == control->head_block_producer());
-   BOOST_TEST(info.virtual_block_cpu_limit == control->get_resource_limits_manager().get_virtual_block_cpu_limit());
-   BOOST_TEST(info.virtual_block_net_limit == control->get_resource_limits_manager().get_virtual_block_net_limit());
-   BOOST_TEST(info.block_cpu_limit == control->get_resource_limits_manager().get_block_cpu_limit());
-   BOOST_TEST(info.block_net_limit == control->get_resource_limits_manager().get_block_net_limit());
+//   BOOST_TEST(info.virtual_block_cpu_limit == control->get_resource_limits_manager().get_virtual_block_cpu_limit());
+//   BOOST_TEST(info.virtual_block_net_limit == control->get_resource_limits_manager().get_virtual_block_net_limit());
+//   BOOST_TEST(info.block_cpu_limit == control->get_resource_limits_manager().get_block_cpu_limit());
+//   BOOST_TEST(info.block_net_limit == control->get_resource_limits_manager().get_block_net_limit());
    BOOST_TEST(*info.server_version_string == app().version_string());
    BOOST_TEST(*info.fork_db_head_block_num == control->fork_db_pending_head_block_num());
    BOOST_TEST(*info.fork_db_head_block_id == control->fork_db_pending_head_block_id());
@@ -170,10 +170,10 @@ BOOST_FIXTURE_TEST_CASE( get_info, TESTER ) try {
    BOOST_TEST(info.head_block_id == control->head_block_id());
    BOOST_TEST(info.head_block_time == control->head_block_time());
    BOOST_TEST(info.head_block_producer == control->head_block_producer());
-   BOOST_TEST(info.virtual_block_cpu_limit == control->get_resource_limits_manager().get_virtual_block_cpu_limit());
-   BOOST_TEST(info.virtual_block_net_limit == control->get_resource_limits_manager().get_virtual_block_net_limit());
-   BOOST_TEST(info.block_cpu_limit == control->get_resource_limits_manager().get_block_cpu_limit());
-   BOOST_TEST(info.block_net_limit == control->get_resource_limits_manager().get_block_net_limit());
+//   BOOST_TEST(info.virtual_block_cpu_limit == control->get_resource_limits_manager().get_virtual_block_cpu_limit());
+//   BOOST_TEST(info.virtual_block_net_limit == control->get_resource_limits_manager().get_virtual_block_net_limit());
+//   BOOST_TEST(info.block_cpu_limit == control->get_resource_limits_manager().get_block_cpu_limit());
+//   BOOST_TEST(info.block_net_limit == control->get_resource_limits_manager().get_block_net_limit());
    BOOST_TEST(*info.server_version_string == app().version_string());
    BOOST_TEST(*info.fork_db_head_block_num == control->fork_db_pending_head_block_num());
    BOOST_TEST(*info.fork_db_head_block_id == control->fork_db_pending_head_block_id());

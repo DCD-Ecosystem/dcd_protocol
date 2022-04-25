@@ -2,6 +2,12 @@
 
 namespace eosiobios {
 
+// move this to CDT after this release
+extern "C" {
+   __attribute__((eosio_wasm_import))
+   void set_parameters_packed(const char*, std::size_t);
+}
+
 void bios::setabi( name account, const std::vector<char>& abi ) {
    abi_hash_table table(get_self(), get_self().value);
    auto itr = table.find( account.value );
@@ -26,10 +32,10 @@ void bios::setpriv( name account, uint8_t is_priv ) {
    set_privileged( account, is_priv );
 }
 
-void bios::setalimits( name account, int64_t ram_bytes, int64_t net_weight, int64_t cpu_weight ) {
-   require_auth( get_self() );
-   set_resource_limits( account, ram_bytes, net_weight, cpu_weight );
-}
+//void bios::setalimits( name account, int64_t ram_bytes, int64_t net_weight, int64_t cpu_weight ) {
+//   require_auth( get_self() );
+//   set_resource_limits( account, ram_bytes, net_weight, cpu_weight );
+//}
 
 void bios::setprods( const std::vector<eosio::producer_authority>& schedule ) {
    require_auth( get_self() );
@@ -39,6 +45,16 @@ void bios::setprods( const std::vector<eosio::producer_authority>& schedule ) {
 void bios::setparams( const eosio::blockchain_parameters& params ) {
    require_auth( get_self() );
    set_blockchain_parameters( params );
+}
+
+void bios::setpparams( const std::vector<char>& params ) {
+   require_auth( get_self() );
+   set_parameters_packed( params.data(), params.size() );
+}
+
+void bios::setkvparams( const eosio::kv_parameters& params ) {
+   require_auth( get_self() );
+   set_kv_parameters( params );
 }
 
 void bios::reqauth( name from ) {

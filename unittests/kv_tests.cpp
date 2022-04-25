@@ -1,6 +1,6 @@
 #include <eosio/chain/abi_serializer.hpp>
 #include <eosio/chain/kv_chainbase_objects.hpp>
-#include <eosio/chain/resource_limits.hpp>
+//#include <eosio/chain/resource_limits.hpp>
 #include <eosio/testing/tester.hpp>
 #include <eosio/chain/kv_chainbase_objects.hpp>
 
@@ -182,9 +182,9 @@ class kv_tester : public tester {
                                                                     "k", k)("v", v)("test_id", test_id)("insert", insert)("reinsert", reinsert)));
    }
 
-   uint64_t get_usage(name account="kvtest"_n) {
-      return control->get_resource_limits_manager().get_account_ram_usage(account);
-   }
+//   uint64_t get_usage(name account="kvtest"_n) {
+//      return control->get_resource_limits_manager().get_account_ram_usage(account);
+//   }
 
    void test_basic() {
       get("", "kvtest"_n, "", nullptr);
@@ -463,61 +463,61 @@ class kv_tester : public tester {
       }
    }
 
-   void test_ram_usage() {
-      uint64_t base_usage = get_usage();
-      get("", "kvtest"_n, "11", nullptr);
-      BOOST_TEST(get_usage("kvtest"_n) == base_usage);
+//   void test_ram_usage() {
+//      uint64_t base_usage = get_usage();
+//      get("", "kvtest"_n, "11", nullptr);
+//      BOOST_TEST(get_usage("kvtest"_n) == base_usage);
 
-      BOOST_TEST("" == set("kvtest"_n, "11", "", "kvtest"_n, "kvtest"_n));
+//      BOOST_TEST("" == set("kvtest"_n, "11", "", "kvtest"_n, "kvtest"_n));
 
-      const int base_billable = config::billable_size_v<kv_object>;
-      BOOST_TEST(get_usage("kvtest"_n) == base_usage + base_billable + 1);
-      BOOST_TEST("" == set("kvtest"_n, "11", "1234", "kvtest"_n, "kvtest"_n));
-      BOOST_TEST(get_usage("kvtest"_n) == base_usage + base_billable + 1 + 2);
-      BOOST_TEST("" == set("kvtest"_n, "11", "12", "kvtest"_n, "kvtest"_n));
-      BOOST_TEST(get_usage("kvtest"_n) == base_usage + base_billable + 1 + 1);
-      erase("", "kvtest"_n, "11");
-      BOOST_TEST(get_usage("kvtest"_n) == base_usage);
+//      const int base_billable = config::billable_size_v<kv_object>;
+//      BOOST_TEST(get_usage("kvtest"_n) == base_usage + base_billable + 1);
+//      BOOST_TEST("" == set("kvtest"_n, "11", "1234", "kvtest"_n, "kvtest"_n));
+//      BOOST_TEST(get_usage("kvtest"_n) == base_usage + base_billable + 1 + 2);
+//      BOOST_TEST("" == set("kvtest"_n, "11", "12", "kvtest"_n, "kvtest"_n));
+//      BOOST_TEST(get_usage("kvtest"_n) == base_usage + base_billable + 1 + 1);
+//      erase("", "kvtest"_n, "11");
+//      BOOST_TEST(get_usage("kvtest"_n) == base_usage);
 
-      // test payer changes
-      BOOST_TEST("" == set("kvtest"_n, "11", "", "kvtest"_n, "kvtest"_n));
-      BOOST_TEST(get_usage("kvtest"_n) == base_usage + base_billable + 1);
+//      // test payer changes
+//      BOOST_TEST("" == set("kvtest"_n, "11", "", "kvtest"_n, "kvtest"_n));
+//      BOOST_TEST(get_usage("kvtest"_n) == base_usage + base_billable + 1);
 
-      uint64_t base_usage1 = get_usage("kvtest1"_n);
-      BOOST_TEST("" == set("kvtest"_n, "11", "", "kvtest1"_n, "kvtest1"_n));
+//      uint64_t base_usage1 = get_usage("kvtest1"_n);
+//      BOOST_TEST("" == set("kvtest"_n, "11", "", "kvtest1"_n, "kvtest1"_n));
 
-      BOOST_TEST(get_usage("kvtest"_n) == base_usage);
-      BOOST_TEST(get_usage("kvtest1"_n) == base_usage1 + base_billable + 1);
+//      BOOST_TEST(get_usage("kvtest"_n) == base_usage);
+//      BOOST_TEST(get_usage("kvtest1"_n) == base_usage1 + base_billable + 1);
 
-      // test unauthorized payer
-      BOOST_TEST("unprivileged contract cannot increase RAM usage of another account that has not authorized the action: kvtest1" == 
-                  set("kvtest"_n, "11", "12", "kvtest1"_n, "kvtest2"_n));
+//      // test unauthorized payer
+//      BOOST_TEST("unprivileged contract cannot increase RAM usage of another account that has not authorized the action: kvtest1" ==
+//                  set("kvtest"_n, "11", "12", "kvtest1"_n, "kvtest2"_n));
 
-      BOOST_TEST("unprivileged contract cannot increase RAM usage of another account that has not authorized the action: kvtest2" == 
-                  set("kvtest"_n, "11", "12", "kvtest2"_n, "kvtest1"_n));
-   }
+//      BOOST_TEST("unprivileged contract cannot increase RAM usage of another account that has not authorized the action: kvtest2" ==
+//                  set("kvtest"_n, "11", "12", "kvtest2"_n, "kvtest1"_n));
+//   }
 
-   void test_resource_limit() {
-      uint64_t base_usage = get_usage();
-      // insert a new element
-      const int base_billable = config::billable_size_v<kv_object>;
-      BOOST_TEST_REQUIRE(set_limit(base_usage + base_billable) == "");
-      BOOST_TEST(set("kvtest"_n, "11", "").find("account kvtest has insufficient") == 0);
-      BOOST_TEST_REQUIRE(set_limit(base_usage + base_billable + 1) == "");
-      BOOST_TEST("" == set("kvtest"_n, "11", ""));
-      // increase the size of a value
-      BOOST_TEST_REQUIRE(set_limit(base_usage + base_billable + 1 + 2 - 1) == "");
-      BOOST_TEST(set("kvtest"_n, "11", "1234").find("account kvtest has insufficient") == 0);
-      BOOST_TEST_REQUIRE(set_limit(base_usage + base_billable + 1 + 2) == "");
-      BOOST_TEST("" == set("kvtest"_n, "11", "1234"));
-      // decrease the size of a value
-      BOOST_TEST("" == set("kvtest"_n, "11", ""));
-      // decrease limits
-      BOOST_TEST(set_limit(base_usage + base_billable).find("account kvtest has insufficient") == 0);
-      BOOST_TEST(set_limit(base_usage + base_billable + 1) == "");
-      // erase an element
-      erase("", "kvtest"_n, "11");
-   }
+//   void test_resource_limit() {
+//      uint64_t base_usage = get_usage();
+//      // insert a new element
+//      const int base_billable = config::billable_size_v<kv_object>;
+//      BOOST_TEST_REQUIRE(set_limit(base_usage + base_billable) == "");
+//      BOOST_TEST(set("kvtest"_n, "11", "").find("account kvtest has insufficient") == 0);
+//      BOOST_TEST_REQUIRE(set_limit(base_usage + base_billable + 1) == "");
+//      BOOST_TEST("" == set("kvtest"_n, "11", ""));
+//      // increase the size of a value
+//      BOOST_TEST_REQUIRE(set_limit(base_usage + base_billable + 1 + 2 - 1) == "");
+//      BOOST_TEST(set("kvtest"_n, "11", "1234").find("account kvtest has insufficient") == 0);
+//      BOOST_TEST_REQUIRE(set_limit(base_usage + base_billable + 1 + 2) == "");
+//      BOOST_TEST("" == set("kvtest"_n, "11", "1234"));
+//      // decrease the size of a value
+//      BOOST_TEST("" == set("kvtest"_n, "11", ""));
+//      // decrease limits
+//      BOOST_TEST(set_limit(base_usage + base_billable).find("account kvtest has insufficient") == 0);
+//      BOOST_TEST(set_limit(base_usage + base_billable + 1) == "");
+//      // erase an element
+//      erase("", "kvtest"_n, "11");
+//   }
 
    void test_key_value_limit() {
       BOOST_TEST_REQUIRE(set_kv_limits(4, 4) == "");
@@ -557,7 +557,7 @@ class kv_tester : public tester {
 
    // Go over the limit and back in one transaction, with two separate actions
    void test_kv_inc_dec_usage() {
-      BOOST_TEST_REQUIRE(set_limit(get_usage() + 256) == "");
+//      BOOST_TEST_REQUIRE(set_limit(get_usage() + 256) == "");
       produce_block();
       signed_transaction trx;
       trx.actions.push_back(make_set_action(512));
@@ -569,37 +569,37 @@ class kv_tester : public tester {
    }
 
    // Increase usage and then the limit in two actions in the same transaction.
-   void test_kv_inc_usage_and_limit() {
-      auto base_usage = get_usage();
-      BOOST_TEST_REQUIRE(set_limit(base_usage + 256) == "");
-      produce_block();
-      signed_transaction trx;
-      {
-         trx.actions.push_back(make_set_action(512));
-         trx.actions.push_back(make_set_limit_action(base_usage + 640));
-      }
-      set_transaction_headers(trx);
-      trx.sign(get_private_key("kvtest"_n, "active"), control->get_chain_id());
-      push_transaction(trx);
-      produce_block();
-   }
+//   void test_kv_inc_usage_and_limit() {
+//      auto base_usage = get_usage();
+//      BOOST_TEST_REQUIRE(set_limit(base_usage + 256) == "");
+//      produce_block();
+//      signed_transaction trx;
+//      {
+//         trx.actions.push_back(make_set_action(512));
+//         trx.actions.push_back(make_set_limit_action(base_usage + 640));
+//      }
+//      set_transaction_headers(trx);
+//      trx.sign(get_private_key("kvtest"_n, "active"), control->get_chain_id());
+//      push_transaction(trx);
+//      produce_block();
+//   }
 
    // Decrease limit and then usage in two separate actions in the same transaction
-   void test_kv_dec_limit_and_usage() {
-      auto base_usage = get_usage();
-      BOOST_TEST_REQUIRE(set_limit(base_usage + 1024) == "");
-      BOOST_TEST_REQUIRE(set("kvtest"_n, "", std::vector<char>(512, 'a')) == "");
-      produce_block();
-      signed_transaction trx;
-      {
-         trx.actions.push_back(make_set_limit_action(base_usage + 256));
-         trx.actions.push_back(make_set_action(0));
-      }
-      set_transaction_headers(trx);
-      trx.sign(get_private_key("kvtest"_n, "active"), control->get_chain_id());
-      push_transaction(trx);
-      produce_block();
-   }
+//   void test_kv_dec_limit_and_usage() {
+//      auto base_usage = get_usage();
+//      BOOST_TEST_REQUIRE(set_limit(base_usage + 1024) == "");
+//      BOOST_TEST_REQUIRE(set("kvtest"_n, "", std::vector<char>(512, 'a')) == "");
+//      produce_block();
+//      signed_transaction trx;
+//      {
+//         trx.actions.push_back(make_set_limit_action(base_usage + 256));
+//         trx.actions.push_back(make_set_action(0));
+//      }
+//      set_transaction_headers(trx);
+//      trx.sign(get_private_key("kvtest"_n, "active"), control->get_chain_id());
+//      push_transaction(trx);
+//      produce_block();
+//   }
 
    void test_max_iterators() {
       BOOST_TEST_REQUIRE(set_kv_limits(1024, 1024, 7) == "");
@@ -674,13 +674,13 @@ class kv_tester : public tester {
       test_iterase();
    }
    
-   void test_kv_ram_usage_common() {
-      test_ram_usage();
-   }
+//   void test_kv_ram_usage_common() {
+//      test_ram_usage();
+//   }
    
-   void test_kv_resource_limit_common() { //
-      test_resource_limit();
-   }
+//   void test_kv_resource_limit_common() { //
+//      test_resource_limit();
+//   }
    
    void test_kv_key_value_limit_common() { //
       test_key_value_limit();
@@ -727,15 +727,15 @@ BOOST_FIXTURE_TEST_CASE(kv_iterase, kv_chainbase_tester) try { //
 }
 FC_LOG_AND_RETHROW()
 
-BOOST_FIXTURE_TEST_CASE(kv_ram_usage, kv_chainbase_tester) try { //
-   test_kv_ram_usage_common();
-}
-FC_LOG_AND_RETHROW()
+//BOOST_FIXTURE_TEST_CASE(kv_ram_usage, kv_chainbase_tester) try { //
+//   test_kv_ram_usage_common();
+//}
+//FC_LOG_AND_RETHROW()
 
-BOOST_FIXTURE_TEST_CASE(kv_resource_limit, kv_chainbase_tester) try { //
-   test_kv_resource_limit_common();
-}
-FC_LOG_AND_RETHROW()
+//BOOST_FIXTURE_TEST_CASE(kv_resource_limit, kv_chainbase_tester) try { //
+//   test_kv_resource_limit_common();
+//}
+//FC_LOG_AND_RETHROW()
 
 BOOST_FIXTURE_TEST_CASE(kv_key_value_limit, kv_chainbase_tester) try { //
    test_kv_key_value_limit_common();
@@ -749,15 +749,15 @@ BOOST_DATA_TEST_CASE_F(kv_chainbase_tester, kv_inc_dec_usage, bdata::make(databa
 }
 FC_LOG_AND_RETHROW()
 
-BOOST_DATA_TEST_CASE_F(kv_chainbase_tester, kv_inc_usage_and_limit, bdata::make(databases), db) try { //
-   test_kv_inc_usage_and_limit();
-}
-FC_LOG_AND_RETHROW()
+//BOOST_DATA_TEST_CASE_F(kv_chainbase_tester, kv_inc_usage_and_limit, bdata::make(databases), db) try { //
+//   test_kv_inc_usage_and_limit();
+//}
+//FC_LOG_AND_RETHROW()
 
-BOOST_DATA_TEST_CASE_F(kv_chainbase_tester, kv_dec_limit_and_usage, bdata::make(databases), db) try { //
-   test_kv_dec_limit_and_usage();
-}
-FC_LOG_AND_RETHROW()
+//BOOST_DATA_TEST_CASE_F(kv_chainbase_tester, kv_dec_limit_and_usage, bdata::make(databases), db) try { //
+//   test_kv_dec_limit_and_usage();
+//}
+//FC_LOG_AND_RETHROW()
 
 BOOST_DATA_TEST_CASE_F(kv_chainbase_tester, get_data, bdata::make(databases), db) try { //
    test_get_data();
@@ -801,15 +801,15 @@ BOOST_FIXTURE_TEST_CASE(kv_iterase_rocksdb, kv_rocksdb_tester) try { //
 }
 FC_LOG_AND_RETHROW()
 
-BOOST_FIXTURE_TEST_CASE(kv_ram_usage_rocksdb, kv_rocksdb_tester) try { //
-   test_kv_ram_usage_common();
-}
-FC_LOG_AND_RETHROW()
+//BOOST_FIXTURE_TEST_CASE(kv_ram_usage_rocksdb, kv_rocksdb_tester) try { //
+//   test_kv_ram_usage_common();
+//}
+//FC_LOG_AND_RETHROW()
 
-BOOST_FIXTURE_TEST_CASE(kv_resource_limit_rocksdb, kv_rocksdb_tester) try { //
-   test_kv_resource_limit_common();
-}
-FC_LOG_AND_RETHROW()
+//BOOST_FIXTURE_TEST_CASE(kv_resource_limit_rocksdb, kv_rocksdb_tester) try { //
+//   test_kv_resource_limit_common();
+//}
+//FC_LOG_AND_RETHROW()
 
 BOOST_FIXTURE_TEST_CASE(kv_key_value_limit_rocksdb, kv_rocksdb_tester) try { //
    test_kv_key_value_limit_common();
@@ -821,15 +821,15 @@ BOOST_DATA_TEST_CASE_F(kv_rocksdb_tester, kv_inc_dec_usage_rocksdb, bdata::make(
 }
 FC_LOG_AND_RETHROW()
 
-BOOST_DATA_TEST_CASE_F(kv_rocksdb_tester, kv_inc_usage_and_limit_rocksdb, bdata::make(databases), db) try { //
-   test_kv_inc_usage_and_limit();
-}
-FC_LOG_AND_RETHROW()
+//BOOST_DATA_TEST_CASE_F(kv_rocksdb_tester, kv_inc_usage_and_limit_rocksdb, bdata::make(databases), db) try { //
+//   test_kv_inc_usage_and_limit();
+//}
+//FC_LOG_AND_RETHROW()
 
-BOOST_DATA_TEST_CASE_F(kv_rocksdb_tester, kv_dec_limit_and_usage_rocksdb, bdata::make(databases), db) try { //
-   test_kv_dec_limit_and_usage();
-}
-FC_LOG_AND_RETHROW()
+//BOOST_DATA_TEST_CASE_F(kv_rocksdb_tester, kv_dec_limit_and_usage_rocksdb, bdata::make(databases), db) try { //
+//   test_kv_dec_limit_and_usage();
+//}
+//FC_LOG_AND_RETHROW()
 
 BOOST_DATA_TEST_CASE_F(kv_rocksdb_tester, get_data_rocksdb, bdata::make(databases), db) try { //
    test_get_data();

@@ -344,8 +344,8 @@ class apply_context {
       uint32_t schedule_action( action&& act_to_schedule, account_name receiver, bool context_free );
 
    private:
-      template <typename Exception>
-      void check_unprivileged_resource_usage(const char* resource, const flat_set<account_delta>& deltas);
+      //template <typename Exception>
+      //void check_unprivileged_resource_usage(const char* resource, const flat_set<account_delta>& deltas);
 
    /// Authorization methods:
    public:
@@ -448,7 +448,7 @@ class apply_context {
       uint64_t next_recv_sequence( const account_metadata_object& receiver_account );
       uint64_t next_auth_sequence( account_name actor );
 
-      void add_ram_usage( account_name account, int64_t ram_delta, const storage_usage_trace& trace );
+//      void add_ram_usage( account_name account, int64_t ram_delta, const storage_usage_trace& trace );
 
       void finalize_trace( action_trace& trace, const fc::time_point& start );
 
@@ -498,7 +498,7 @@ class apply_context {
       vector<uint32_t>                                         _inline_actions; ///< action_ordinals of queued inline actions
       vector<uint32_t>                                         _cfa_inline_actions; ///< action_ordinals of queued inline context-free actions
       std::string                                              _pending_console_output;
-      flat_set<account_delta>                                  _account_ram_deltas; ///< flat_set of account_delta so json is an array of objects
+      //flat_set<account_delta>                                  _account_ram_deltas; ///< flat_set of account_delta so json is an array of objects
 
       std::unique_ptr<backing_store::db_context>               _db_context;
 };

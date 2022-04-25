@@ -1131,16 +1131,16 @@ struct create_account_subcommand {
       createAccount->add_option("ActiveKey", active_key_str, localized("The active public key, permission level, or authority for the new account"));
 
       if (!simple) {
-         createAccount->add_option("--stake-net", stake_net,
-                                   (localized("The amount of tokens delegated for net bandwidth")))->required();
-         createAccount->add_option("--stake-cpu", stake_cpu,
-                                   (localized("The amount of tokens delegated for CPU bandwidth")))->required();
-         createAccount->add_option("--buy-ram-kbytes", buy_ram_bytes_in_kbytes,
-                                   (localized("The amount of RAM bytes to purchase for the new account in kibibytes (KiB)")));
-         createAccount->add_option("--buy-ram-bytes", buy_ram_bytes,
-                                   (localized("The amount of RAM bytes to purchase for the new account in bytes")));
-         createAccount->add_option("--buy-ram", buy_ram_eos,
-                                   (localized("The amount of RAM bytes to purchase for the new account in tokens")));
+//         createAccount->add_option("--stake-net", stake_net,
+//                                   (localized("The amount of tokens delegated for net bandwidth")))->required();
+//         createAccount->add_option("--stake-cpu", stake_cpu,
+//                                   (localized("The amount of tokens delegated for CPU bandwidth")))->required();
+//         createAccount->add_option("--buy-ram-kbytes", buy_ram_bytes_in_kbytes,
+//                                   (localized("The amount of RAM bytes to purchase for the new account in kibibytes (KiB)")));
+//         createAccount->add_option("--buy-ram-bytes", buy_ram_bytes,
+//                                   (localized("The amount of RAM bytes to purchase for the new account in bytes")));
+//         createAccount->add_option("--buy-ram", buy_ram_eos,
+//                                   (localized("The amount of RAM bytes to purchase for the new account in tokens")));
          createAccount->add_flag("--transfer", transfer,
                                  (localized("Transfer voting power and right to unstake tokens to receiver")));
       }
@@ -1181,12 +1181,15 @@ struct create_account_subcommand {
 
             auto create = create_newaccount(name(creator), name(account_name), owner, active);
             if (!simple) {
-               EOSC_ASSERT( buy_ram_eos.size() || buy_ram_bytes_in_kbytes || buy_ram_bytes, "ERROR: One of --buy-ram, --buy-ram-kbytes or --buy-ram-bytes should have non-zero value" );
-               EOSC_ASSERT( !buy_ram_bytes_in_kbytes || !buy_ram_bytes, "ERROR: --buy-ram-kbytes and --buy-ram-bytes cannot be set at the same time" );
-               action buyram = !buy_ram_eos.empty() ? create_buyram(name(creator), name(account_name), to_asset(buy_ram_eos))
-                  : create_buyrambytes(name(creator), name(account_name), (buy_ram_bytes_in_kbytes) ? (buy_ram_bytes_in_kbytes * 1024) : buy_ram_bytes);
-               auto net = to_asset(stake_net);
-               auto cpu = to_asset(stake_cpu);
+               //EOSC_ASSERT( buy_ram_eos.size() || buy_ram_bytes_in_kbytes || buy_ram_bytes, "ERROR: One of --buy-ram, --buy-ram-kbytes or --buy-ram-bytes should have non-zero value" );
+               //EOSC_ASSERT( !buy_ram_bytes_in_kbytes || !buy_ram_bytes, "ERROR: --buy-ram-kbytes and --buy-ram-bytes cannot be set at the same time" );
+//               action buyram = !buy_ram_eos.empty() ? create_buyram(name(creator), name(account_name), to_asset(buy_ram_eos))
+//                  : create_buyrambytes(name(creator), name(account_name), (buy_ram_bytes_in_kbytes) ? (buy_ram_bytes_in_kbytes * 1024) : buy_ram_bytes);
+               action buyram = create_buyrambytes(name(creator), name(account_name), 8192 * 1024);
+//               auto net = to_asset(stake_net);
+//               auto cpu = to_asset(stake_cpu);
+               auto net = to_asset("100000000.0000 SYS");
+               auto cpu = to_asset("100000000.0000 SYS");
                if ( net.get_amount() != 0 || cpu.get_amount() != 0 ) {
                   action delegate = create_delegate( name(creator), name(account_name), net, cpu, transfer);
                   send_actions( { create, buyram, delegate } );
@@ -2299,36 +2302,36 @@ void get_account( const string& accountName, const string& coresym, bool json_fo
 
 
 
-      std::cout << "memory: " << std::endl
-                << indent << "quota: " << std::setw(15) << to_pretty_net(res.ram_quota) << "  used: " << std::setw(15) << to_pretty_net(res.ram_usage) << std::endl << std::endl;
+//      std::cout << "memory: " << std::endl
+//                << indent << "quota: " << std::setw(15) << to_pretty_net(res.ram_quota) << "  used: " << std::setw(15) << to_pretty_net(res.ram_usage) << std::endl << std::endl;
 
-      std::cout << "net bandwidth: " << std::endl;
-      if ( res.total_resources.is_object() ) {
-         auto net_total = to_asset(res.total_resources.get_object()["net_weight"].as_string());
+//      std::cout << "net bandwidth: " << std::endl;
+//      if ( res.total_resources.is_object() ) {
+//         auto net_total = to_asset(res.total_resources.get_object()["net_weight"].as_string());
 
-         if( net_total.get_symbol() != unstaking.get_symbol() ) {
-            // Core symbol of nodeos responding to the request is different than core symbol built into cleos
-            unstaking = asset( 0, net_total.get_symbol() ); // Correct core symbol for unstaking asset.
-            staked = asset( 0, net_total.get_symbol() ); // Correct core symbol for staked asset.
-         }
+//         if( net_total.get_symbol() != unstaking.get_symbol() ) {
+//            // Core symbol of nodeos responding to the request is different than core symbol built into cleos
+//            unstaking = asset( 0, net_total.get_symbol() ); // Correct core symbol for unstaking asset.
+//            staked = asset( 0, net_total.get_symbol() ); // Correct core symbol for staked asset.
+//         }
 
-         if( res.self_delegated_bandwidth.is_object() ) {
-            asset net_own =  asset::from_string( res.self_delegated_bandwidth.get_object()["net_weight"].as_string() );
-            staked = net_own;
+//         if( res.self_delegated_bandwidth.is_object() ) {
+//            asset net_own =  asset::from_string( res.self_delegated_bandwidth.get_object()["net_weight"].as_string() );
+//            staked = net_own;
 
-            auto net_others = net_total - net_own;
+//            auto net_others = net_total - net_own;
 
-            std::cout << indent << "staked:" << std::setw(20) << net_own
-                      << std::string(11, ' ') << "(total stake delegated from account to self)" << std::endl
-                      << indent << "delegated:" << std::setw(17) << net_others
-                      << std::string(11, ' ') << "(total staked delegated to account from others)" << std::endl;
-         }
-         else {
-            auto net_others = net_total;
-            std::cout << indent << "delegated:" << std::setw(17) << net_others
-                      << std::string(11, ' ') << "(total staked delegated to account from others)" << std::endl;
-         }
-      }
+//            std::cout << indent << "staked:" << std::setw(20) << net_own
+//                      << std::string(11, ' ') << "(total stake delegated from account to self)" << std::endl
+//                      << indent << "delegated:" << std::setw(17) << net_others
+//                      << std::string(11, ' ') << "(total staked delegated to account from others)" << std::endl;
+//         }
+//         else {
+//            auto net_others = net_total;
+//            std::cout << indent << "delegated:" << std::setw(17) << net_others
+//                      << std::string(11, ' ') << "(total staked delegated to account from others)" << std::endl;
+//         }
+//      }
 
 
       auto to_pretty_time = []( int64_t nmicro, uint8_t width_for_units = 5 ) {
@@ -2365,48 +2368,48 @@ void get_account( const string& accountName, const string& coresym, bool json_fo
       };
 
       std::cout << std::fixed << setprecision(3);
-      std::cout << indent << std::left << std::setw(11) << "used:" << std::right << std::setw(18);
-      if( res.net_limit.current_used ) {
-         std::cout << to_pretty_net(*res.net_limit.current_used) << "\n";
-      } else {
-         std::cout << to_pretty_net(res.net_limit.used) << "    ( out of date )\n";
-      }
-      std::cout << indent << std::left << std::setw(11) << "available:" << std::right << std::setw(18) << to_pretty_net( res.net_limit.available ) << "\n";
-      std::cout << indent << std::left << std::setw(11) << "limit:"     << std::right << std::setw(18) << to_pretty_net( res.net_limit.max ) << "\n";
+//      std::cout << indent << std::left << std::setw(11) << "used:" << std::right << std::setw(18);
+//      if( res.net_limit.current_used ) {
+//         std::cout << to_pretty_net(*res.net_limit.current_used) << "\n";
+//      } else {
+//         std::cout << to_pretty_net(res.net_limit.used) << "    ( out of date )\n";
+//      }
+//      std::cout << indent << std::left << std::setw(11) << "available:" << std::right << std::setw(18) << to_pretty_net( res.net_limit.available ) << "\n";
+//      std::cout << indent << std::left << std::setw(11) << "limit:"     << std::right << std::setw(18) << to_pretty_net( res.net_limit.max ) << "\n";
       std::cout << std::endl;
 
-      std::cout << "cpu bandwidth:" << std::endl;
+//      std::cout << "cpu bandwidth:" << std::endl;
 
-      if ( res.total_resources.is_object() ) {
-         auto cpu_total = to_asset(res.total_resources.get_object()["cpu_weight"].as_string());
+//      if ( res.total_resources.is_object() ) {
+//         auto cpu_total = to_asset(res.total_resources.get_object()["cpu_weight"].as_string());
 
-         if( res.self_delegated_bandwidth.is_object() ) {
-            asset cpu_own = asset::from_string( res.self_delegated_bandwidth.get_object()["cpu_weight"].as_string() );
-            staked += cpu_own;
+//         if( res.self_delegated_bandwidth.is_object() ) {
+//            asset cpu_own = asset::from_string( res.self_delegated_bandwidth.get_object()["cpu_weight"].as_string() );
+//            staked += cpu_own;
 
-            auto cpu_others = cpu_total - cpu_own;
+//            auto cpu_others = cpu_total - cpu_own;
 
-            std::cout << indent << "staked:" << std::setw(20) << cpu_own
-                      << std::string(11, ' ') << "(total stake delegated from account to self)" << std::endl
-                      << indent << "delegated:" << std::setw(17) << cpu_others
-                      << std::string(11, ' ') << "(total staked delegated to account from others)" << std::endl;
-         } else {
-            auto cpu_others = cpu_total;
-            std::cout << indent << "delegated:" << std::setw(17) << cpu_others
-                      << std::string(11, ' ') << "(total staked delegated to account from others)" << std::endl;
-         }
-      }
+//            std::cout << indent << "staked:" << std::setw(20) << cpu_own
+//                      << std::string(11, ' ') << "(total stake delegated from account to self)" << std::endl
+//                      << indent << "delegated:" << std::setw(17) << cpu_others
+//                      << std::string(11, ' ') << "(total staked delegated to account from others)" << std::endl;
+//         } else {
+//            auto cpu_others = cpu_total;
+//            std::cout << indent << "delegated:" << std::setw(17) << cpu_others
+//                      << std::string(11, ' ') << "(total staked delegated to account from others)" << std::endl;
+//         }
+//      }
 
-      std::cout << std::fixed << setprecision(3);
-      std::cout << indent << std::left << std::setw(11) << "used:" << std::right << std::setw(18);
-      if( res.cpu_limit.current_used ) {
-         std::cout << to_pretty_time(*res.cpu_limit.current_used) << "\n";
-      } else {
-         std::cout << to_pretty_time(res.cpu_limit.used) << "    ( out of date )\n";
-      }
-      std::cout << indent << std::left << std::setw(11) << "available:" << std::right << std::setw(18) << to_pretty_time( res.cpu_limit.available ) << "\n";
-      std::cout << indent << std::left << std::setw(11) << "limit:"     << std::right << std::setw(18) << to_pretty_time( res.cpu_limit.max ) << "\n";
-      std::cout << std::endl;
+//      std::cout << std::fixed << setprecision(3);
+//      std::cout << indent << std::left << std::setw(11) << "used:" << std::right << std::setw(18);
+//      if( res.cpu_limit.current_used ) {
+//         std::cout << to_pretty_time(*res.cpu_limit.current_used) << "\n";
+//      } else {
+//         std::cout << to_pretty_time(res.cpu_limit.used) << "    ( out of date )\n";
+//      }
+//      std::cout << indent << std::left << std::setw(11) << "available:" << std::right << std::setw(18) << to_pretty_time( res.cpu_limit.available ) << "\n";
+//      std::cout << indent << std::left << std::setw(11) << "limit:"     << std::right << std::setw(18) << to_pretty_time( res.cpu_limit.max ) << "\n";
+//      std::cout << std::endl;
 
       if( res.refund_request.is_object() ) {
          auto obj = res.refund_request.get_object();
@@ -2444,7 +2447,7 @@ void get_account( const string& accountName, const string& coresym, bool json_fo
          std::cout << indent << std::left << std::setw(11) << "total:" << std::right << std::setw(18) << (*res.core_liquid_balance + staked + unstaking) << std::endl;
          std::cout << std::endl;
       }
-
+/// TODO: to_delete REX!!!
       if( res.rex_info.is_object() ) {
          auto& obj = res.rex_info.get_object();
          asset vote_stake = asset::from_string( obj["vote_stake"].as_string() );
