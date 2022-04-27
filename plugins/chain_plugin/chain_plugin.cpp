@@ -254,21 +254,21 @@ void chain_plugin::set_program_options(options_description& cli, options_descrip
    std::string wasm_runtime_opt = "Override default WASM runtime (";
    std::string wasm_runtime_desc;
    std::string delim;
-#ifdef DCD_EOS_VM_JIT_RUNTIME_ENABLED
-   wasm_runtime_opt += " \"eos-vm-jit\"";
-   wasm_runtime_desc += "\"eos-vm-jit\" : A WebAssembly runtime that compiles WebAssembly code to native x86 code prior to execution.\n";
+#ifdef DCD_DCD_VM_JIT_RUNTIME_ENABLED
+   wasm_runtime_opt += " \"dcd-vm-jit\"";
+   wasm_runtime_desc += "\"dcd-vm-jit\" : A WebAssembly runtime that compiles WebAssembly code to native x86 code prior to execution.\n";
    delim = ", ";
 #endif
 
-#ifdef DCD_EOS_VM_RUNTIME_ENABLED
-   wasm_runtime_opt += delim + "\"eos-vm\"";
-   wasm_runtime_desc += "\"eos-vm\" : A WebAssembly interpreter.\n";
+#ifdef DCD_DCD_VM_RUNTIME_ENABLED
+   wasm_runtime_opt += delim + "\"dcd-vm\"";
+   wasm_runtime_desc += "\"dcd-vm\" : A WebAssembly interpreter.\n";
    delim = ", ";
 #endif
 
-#ifdef DCD_EOS_VM_OC_DEVELOPER
-   wasm_runtime_opt += delim + "\"eos-vm-oc\"";
-   wasm_runtime_desc += "\"eos-vm-oc\" : Unsupported. Instead, use one of the other runtimes along with the option enable-eos-vm-oc.\n";
+#ifdef DCD_DCD_VM_OC_DEVELOPER
+   wasm_runtime_opt += delim + "\"dcd-vm-oc\"";
+   wasm_runtime_desc += "\"dcd-vm-oc\" : Unsupported. Instead, use one of the other runtimes along with the option enable-dcd-vm-oc.\n";
 #endif
    wasm_runtime_opt += ")\n" + wasm_runtime_desc;
 
@@ -300,11 +300,11 @@ void chain_plugin::set_program_options(options_description& cli, options_descrip
           "the location of the protocol_features directory (absolute path or relative to application config dir)")
          ("checkpoint", bpo::value<vector<string>>()->composing(), "Pairs of [BLOCK_NUM,BLOCK_ID] that should be enforced as checkpoints.")
          ("wasm-runtime", bpo::value<dcd::chain::wasm_interface::vm_type>()->value_name("runtime")->notifier([](const auto& vm){
-#ifndef DCD_EOS_VM_OC_DEVELOPER
-            //throwing an exception here (like EOS_ASSERT) is just gobbled up with a "Failed to initialize" error :(
-            if(vm == wasm_interface::vm_type::eos_vm_oc) {
-               elog("EOS VM OC is a tier-up compiler and works in conjunction with the configured base WASM runtime. Enable EOS VM OC via 'eos-vm-oc-enable' option");
-               EOS_ASSERT(false, plugin_exception, "");
+#ifndef DCD_DCD_VM_OC_DEVELOPER
+            //throwing an exception here (like DCD_ASSERT) is just gobbled up with a "Failed to initialize" error :(
+            if(vm == wasm_interface::vm_type::dcd_vm_oc) {
+               elog("DCD VM OC is a tier-up compiler and works in conjunction with the configured base WASM runtime. Enable DCD VM OC via 'dcd-vm-oc-enable' option");
+               DCD_ASSERT(false, plugin_exception, "");
             }
 #endif
          })->default_value(dcd::chain::config::default_wasm_runtime, default_wasm_runtime_str), wasm_runtime_opt.c_str()
@@ -386,15 +386,15 @@ void chain_plugin::set_program_options(options_description& cli, options_descrip
 #endif
          )
 
-#ifdef DCD_EOS_VM_OC_RUNTIME_ENABLED
-         ("eos-vm-oc-cache-size-mb", bpo::value<uint64_t>()->default_value(eosvmoc::config().cache_size / (1024u*1024u)), "Maximum size (in MiB) of the EOS VM OC code cache")
-         ("eos-vm-oc-compile-threads", bpo::value<uint64_t>()->default_value(1u)->notifier([](const auto t) {
+#ifdef DCD_DCD_VM_OC_RUNTIME_ENABLED
+         ("dcd-vm-oc-cache-size-mb", bpo::value<uint64_t>()->default_value(dcdvmoc::config().cache_size / (1024u*1024u)), "Maximum size (in MiB) of the DCD VM OC code cache")
+         ("dcd-vm-oc-compile-threads", bpo::value<uint64_t>()->default_value(1u)->notifier([](const auto t) {
                if(t == 0) {
-                  elog("eos-vm-oc-compile-threads must be set to a non-zero value");
-                  EOS_ASSERT(false, plugin_exception, "");
+                  elog("dcd-vm-oc-compile-threads must be set to a non-zero value");
+                  DCD_ASSERT(false, plugin_exception, "");
                }
-         }), "Number of threads to use for EOS VM OC tier-up")
-         ("eos-vm-oc-enable", bpo::bool_switch(), "Enable EOS VM OC tier-up runtime")
+         }), "Number of threads to use for DCD VM OC tier-up")
+         ("dcd-vm-oc-enable", bpo::bool_switch(), "Enable DCD VM OC tier-up runtime")
 #endif
          ("enable-account-queries", bpo::value<bool>()->default_value(false), "enable queries to find accounts by various metadata.")
          ("max-nonprivileged-inline-action-size", bpo::value<uint32_t>()->default_value(config::default_max_nonprivileged_inline_action_size), "maximum allowed size (in bytes) of an inline action for a nonprivileged account")
@@ -506,7 +506,7 @@ protocol_feature_set initialize_protocol_features( const fc::path& p, bool popul
    bool directory_exists = true;
 
    if( fc::exists( p ) ) {
-      EOS_ASSERT( fc::is_directory( p ), plugin_exception,
+      DCD_ASSERT( fc::is_directory( p ), plugin_exception,
                   "Path to protocol-features is not a directory: ${path}",
                   ("path", p.generic_string())
       );
@@ -572,7 +572,7 @@ protocol_feature_set initialize_protocol_features( const fc::path& p, bool popul
 
          auto res = found_builtin_protocol_features.emplace( f->get_codename(), file_path );
 
-         EOS_ASSERT( res.second, plugin_exception,
+         DCD_ASSERT( res.second, plugin_exception,
                      "Builtin protocol feature '${codename}' was already included from a previous_file",
                      ("codename", builtin_protocol_feature_codename(f->get_codename()))
                      ("current_file", file_path.generic_string())
@@ -623,7 +623,7 @@ protocol_feature_set initialize_protocol_features( const fc::path& p, bool popul
 
       auto file_path = p / filename;
 
-      EOS_ASSERT( !fc::exists( file_path ), plugin_exception,
+      DCD_ASSERT( !fc::exists( file_path ), plugin_exception,
                   "Could not save builtin protocol feature with codename '${codename}' because a file at the following path already exists: ${path}",
                   ("codename", builtin_protocol_feature_codename( f.get_codename() ))
                   ("path", file_path.generic_string())
@@ -649,7 +649,7 @@ protocol_feature_set initialize_protocol_features( const fc::path& p, bool popul
    ( builtin_protocol_feature_t codename ) -> digest_type {
       auto res = visited_builtins.emplace( codename, std::optional<digest_type>() );
       if( !res.second ) {
-         EOS_ASSERT( res.first->second, protocol_feature_exception,
+         DCD_ASSERT( res.first->second, protocol_feature_exception,
                      "invariant failure: cycle found in builtin protocol feature dependencies"
          );
          return *res.first->second;
@@ -730,7 +730,7 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
                p = bfs::current_path() / p;
             }
 
-            EOS_ASSERT( fc::json::save_to_file( chainbase::environment(), p, true ), misc_exception,
+            DCD_ASSERT( fc::json::save_to_file( chainbase::environment(), p, true ), misc_exception,
                         "Error occurred while writing build info JSON to '${path}'",
                         ("path", p.generic_string())
             );
@@ -738,7 +738,7 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
             ilog( "Saved build info JSON to '${path}'", ("path", p.generic_string()) );
          }
 
-         EOS_THROW( node_management_success, "reported build environment information" );
+         DCD_THROW( node_management_success, "reported build environment information" );
       }
 
       LOAD_VALUE_SET( options, "sender-bypass-whiteblacklist", my->chain_config->sender_bypass_whiteblacklist );
@@ -754,7 +754,7 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
          auto& list = my->chain_config->action_blacklist;
          for( const auto& a : acts ) {
             auto pos = a.find( "::" );
-            EOS_ASSERT( pos != std::string::npos, plugin_config_exception, "Invalid entry in action-blacklist: '${a}'", ("a", a));
+            DCD_ASSERT( pos != std::string::npos, plugin_config_exception, "Invalid entry in action-blacklist: '${a}'", ("a", a));
             account_name code( a.substr( 0, pos ));
             action_name act( a.substr( pos + 2 ));
             list.emplace( code, act );
@@ -796,7 +796,7 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
             auto item = fc::json::from_string(cp).as<std::pair<uint32_t,block_id_type>>();
             auto itr = my->loaded_checkpoints.find(item.first);
             if( itr != my->loaded_checkpoints.end() ) {
-               EOS_ASSERT( itr->second == item.second,
+               DCD_ASSERT( itr->second == item.second,
                            plugin_config_exception,
                           "redefining existing checkpoint at block number ${num}: original: ${orig} new: ${new}",
                           ("num", item.first)("orig", itr->second)("new", item.second)
@@ -839,30 +839,30 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
 
       if( options.count( "persistent-storage-num-threads" )) {
          my->chain_config->persistent_storage_num_threads = options.at( "persistent-storage-num-threads" ).as<uint16_t>();
-         EOS_ASSERT( my->chain_config->persistent_storage_num_threads > 0, plugin_config_exception,
+         DCD_ASSERT( my->chain_config->persistent_storage_num_threads > 0, plugin_config_exception,
                      "persistent-storage-num-threads ${num} must be greater than 0", ("num", my->chain_config->persistent_storage_num_threads) );
       }
 
       if( options.count( "persistent-storage-max-num-files" )) {
          my->chain_config->persistent_storage_max_num_files = options.at( "persistent-storage-max-num-files" ).as<int>();
-         EOS_ASSERT( my->chain_config->persistent_storage_max_num_files == -1 || my->chain_config->persistent_storage_max_num_files > 0, plugin_config_exception,
+         DCD_ASSERT( my->chain_config->persistent_storage_max_num_files == -1 || my->chain_config->persistent_storage_max_num_files > 0, plugin_config_exception,
                      "persistent-storage-max-num-files ${num} must be equal to -1 or be greater than 0", ("num", my->chain_config->persistent_storage_max_num_files) );
       }
 
       if( options.count( "persistent-storage-write-buffer-size-mb" )) {
          my->chain_config->persistent_storage_write_buffer_size = options.at( "persistent-storage-write-buffer-size-mb" ).as<uint64_t>() * 1024 * 1024;
-         EOS_ASSERT( my->chain_config->persistent_storage_write_buffer_size > 0, plugin_config_exception,
+         DCD_ASSERT( my->chain_config->persistent_storage_write_buffer_size > 0, plugin_config_exception,
                      "persistent-storage-write-buffer-size-mb ${num} must be greater than 0", ("num", my->chain_config->persistent_storage_write_buffer_size) );
       }
 
       if( options.count( "persistent-storage-bytes-per-sync" )) {
          my->chain_config->persistent_storage_bytes_per_sync = options.at( "persistent-storage-bytes-per-sync" ).as<uint64_t>();
-         EOS_ASSERT( my->chain_config->persistent_storage_bytes_per_sync > 0, plugin_config_exception,
+         DCD_ASSERT( my->chain_config->persistent_storage_bytes_per_sync > 0, plugin_config_exception,
                      "persistent-storage-bytes-per-sync ${num} must be greater than 0", ("num", my->chain_config->persistent_storage_bytes_per_sync) );
       }
 
       my->chain_config->persistent_storage_mbytes_batch = options.at( "persistent-storage-mbytes-snapshot-batch" ).as<uint32_t>();
-      EOS_ASSERT( my->chain_config->persistent_storage_mbytes_batch > 0, plugin_config_exception,
+      DCD_ASSERT( my->chain_config->persistent_storage_mbytes_batch > 0, plugin_config_exception,
                   "persistent-storage-mbytes-snapshot-batch ${num} must be greater than 0", ("num", my->chain_config->persistent_storage_mbytes_batch) );
 
       if( options.count( "reversible-blocks-db-size-mb" ))
@@ -877,12 +877,12 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
 
       if( options.count( "chain-threads" )) {
          my->chain_config->thread_pool_size = options.at( "chain-threads" ).as<uint16_t>();
-         EOS_ASSERT( my->chain_config->thread_pool_size > 0, plugin_config_exception,
+         DCD_ASSERT( my->chain_config->thread_pool_size > 0, plugin_config_exception,
                      "chain-threads ${num} must be greater than 0", ("num", my->chain_config->thread_pool_size) );
       }
 
       my->chain_config->sig_cpu_bill_pct = options.at("signature-cpu-billable-pct").as<uint32_t>();
-      EOS_ASSERT( my->chain_config->sig_cpu_bill_pct >= 0 && my->chain_config->sig_cpu_bill_pct <= 100, plugin_config_exception,
+      DCD_ASSERT( my->chain_config->sig_cpu_bill_pct >= 0 && my->chain_config->sig_cpu_bill_pct <= 100, plugin_config_exception,
                   "signature-cpu-billable-pct must be 0 - 100, ${pct}", ("pct", my->chain_config->sig_cpu_bill_pct) );
       my->chain_config->sig_cpu_bill_pct *= config::percent_1;
 
@@ -908,7 +908,7 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
 
          if( fc::exists( my->blocks_dir / "blocks.log" )) {
             gs = block_log::extract_genesis_state( my->blocks_dir );
-            EOS_ASSERT( gs,
+            DCD_ASSERT( gs,
                         plugin_config_exception,
                         "Block log at '${path}' does not contain a genesis state, it only has the chain-id.",
                         ("path", (my->blocks_dir / "blocks.log").generic_string())
@@ -930,7 +930,7 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
                p = bfs::current_path() / p;
             }
 
-            EOS_ASSERT( fc::json::save_to_file( *gs, p, true ),
+            DCD_ASSERT( fc::json::save_to_file( *gs, p, true ),
                         misc_exception,
                         "Error occurred while writing genesis JSON to '${path}'",
                         ("path", p.generic_string())
@@ -939,7 +939,7 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
             ilog( "Saved genesis JSON to '${path}'", ("path", p.generic_string()) );
          }
 
-         EOS_THROW( extract_genesis_state_exception, "extracted genesis state from blocks.log" );
+         DCD_THROW( extract_genesis_state_exception, "extracted genesis state from blocks.log" );
       }
 
       if( options.count("export-reversible-blocks") ) {
@@ -954,7 +954,7 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
          else
             ilog( "Saved recovered blocks from reversible block database into '${path}'", ("path", p.generic_string()) );
 
-         EOS_THROW( node_management_success, "exported reversible blocks" );
+         DCD_THROW( node_management_success, "exported reversible blocks" );
       }
 
       if( options.at( "delete-all-blocks" ).as<bool>()) {
@@ -985,7 +985,7 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
          } else {
             ilog( "Exiting after fixing reversible blocks database..." );
          }
-         EOS_THROW( fixed_reversible_db_exception, "fixed corrupted reversible blocks database" );
+         DCD_THROW( fixed_reversible_db_exception, "fixed corrupted reversible blocks database" );
       } else if( options.at( "truncate-at-block" ).as<uint32_t>() > 0 ) {
          wlog( "The --truncate-at-block option can only be used with --fix-reversible-blocks without a replay or with --hard-replay-blockchain." );
       } else if( options.count("import-reversible-blocks") ) {
@@ -996,7 +996,7 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
          import_reversible_blocks( my->chain_config->blog.log_dir/config::reversible_blocks_dir_name,
                                    my->chain_config->reversible_cache_size, reversible_blocks_file );
 
-         EOS_THROW( node_management_success, "imported reversible blocks" );
+         DCD_THROW( node_management_success, "imported reversible blocks" );
       }
 
       if( options.count("import-reversible-blocks") ) {
@@ -1006,7 +1006,7 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
       std::optional<chain_id_type> chain_id;
       if (options.count( "snapshot" )) {
          my->snapshot_path = options.at( "snapshot" ).as<bfs::path>();
-         EOS_ASSERT( fc::exists(*my->snapshot_path), plugin_config_exception,
+         DCD_ASSERT( fc::exists(*my->snapshot_path), plugin_config_exception,
                      "Cannot load snapshot, ${name} does not exist", ("name", my->snapshot_path->generic_string()) );
 
          // recover genesis information from the snapshot
@@ -1017,15 +1017,15 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
          chain_id = controller::extract_chain_id(reader);
          infile.close();
 
-         EOS_ASSERT( options.count( "genesis-timestamp" ) == 0,
+         DCD_ASSERT( options.count( "genesis-timestamp" ) == 0,
                  plugin_config_exception,
                  "--snapshot is incompatible with --genesis-timestamp as the snapshot contains genesis information");
-         EOS_ASSERT( options.count( "genesis-json" ) == 0,
+         DCD_ASSERT( options.count( "genesis-json" ) == 0,
                      plugin_config_exception,
                      "--snapshot is incompatible with --genesis-json as the snapshot contains genesis information");
 
          auto shared_mem_path = my->chain_config->state_dir / "shared_memory.bin";
-         EOS_ASSERT( !fc::is_regular_file(shared_mem_path),
+         DCD_ASSERT( !fc::is_regular_file(shared_mem_path),
                  plugin_config_exception,
                  "Snapshot can only be used to initialize an empty database." );
 
@@ -1033,7 +1033,7 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
             auto block_log_genesis = block_log::extract_genesis_state(my->blocks_dir);
             if( block_log_genesis ) {
                const auto& block_log_chain_id = block_log_genesis->compute_chain_id();
-               EOS_ASSERT( *chain_id == block_log_chain_id,
+               DCD_ASSERT( *chain_id == block_log_chain_id,
                            plugin_config_exception,
                            "snapshot chain ID (${snapshot_chain_id}) does not match the chain ID from the genesis state in the block log (${block_log_chain_id})",
                            ("snapshot_chain_id",  *chain_id)
@@ -1041,7 +1041,7 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
                );
             } else {
                const auto& block_log_chain_id = block_log::extract_chain_id(my->blocks_dir);
-               EOS_ASSERT( *chain_id == block_log_chain_id,
+               DCD_ASSERT( *chain_id == block_log_chain_id,
                            plugin_config_exception,
                            "snapshot chain ID (${snapshot_chain_id}) does not match the chain ID (${block_log_chain_id}) in the block log",
                            ("snapshot_chain_id",  *chain_id)
@@ -1066,7 +1066,7 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
             }
 
             if( chain_id ) {
-               EOS_ASSERT( *block_log_chain_id == *chain_id, block_log_exception,
+               DCD_ASSERT( *block_log_chain_id == *chain_id, block_log_exception,
                            "Chain ID in blocks.log (${block_log_chain_id}) does not match the existing "
                            " chain ID in state (${state_chain_id}).",
                            ("block_log_chain_id", *block_log_chain_id)
@@ -1086,7 +1086,7 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
                genesis_file = bfs::current_path() / genesis_file;
             }
 
-            EOS_ASSERT( fc::is_regular_file( genesis_file ),
+            DCD_ASSERT( fc::is_regular_file( genesis_file ),
                         plugin_config_exception,
                        "Specified genesis file '${genesis}' does not exist.",
                        ("genesis", genesis_file.generic_string()));
@@ -1103,7 +1103,7 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
             }
 
             if( block_log_genesis ) {
-               EOS_ASSERT( *block_log_genesis == provided_genesis, plugin_config_exception,
+               DCD_ASSERT( *block_log_genesis == provided_genesis, plugin_config_exception,
                            "Genesis state, provided via command line arguments, does not match the existing genesis state"
                            " in blocks.log. It is not necessary to provide genesis state arguments when a full blocks.log "
                            "file already exists."
@@ -1111,7 +1111,7 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
             } else {
                const auto& provided_genesis_chain_id = provided_genesis.compute_chain_id();
                if( chain_id ) {
-                  EOS_ASSERT( provided_genesis_chain_id == *chain_id, plugin_config_exception,
+                  DCD_ASSERT( provided_genesis_chain_id == *chain_id, plugin_config_exception,
                               "Genesis state, provided via command line arguments, has a chain ID (${provided_genesis_chain_id}) "
                               "that does not match the existing chain ID in the database state (${state_chain_id}). "
                               "It is not necessary to provide genesis state arguments when an initialized database state already exists.",
@@ -1120,7 +1120,7 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
                   );
                } else {
                   if( block_log_chain_id ) {
-                     EOS_ASSERT( provided_genesis_chain_id == *block_log_chain_id, plugin_config_exception,
+                     DCD_ASSERT( provided_genesis_chain_id == *block_log_chain_id, plugin_config_exception,
                                  "Genesis state, provided via command line arguments, has a chain ID (${provided_genesis_chain_id}) "
                                  "that does not match the existing chain ID in blocks.log (${block_log_chain_id}).",
                                  ("provided_genesis_chain_id", provided_genesis_chain_id)
@@ -1135,7 +1135,7 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
                }
             }
          } else {
-            EOS_ASSERT( options.count( "genesis-timestamp" ) == 0,
+            DCD_ASSERT( options.count( "genesis-timestamp" ) == 0,
                         plugin_config_exception,
                         "--genesis-timestamp is only valid if also passed in with --genesis-json");
          }
@@ -1147,7 +1147,7 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
             } else {
                // Uninitialized state database and no genesis state provided
 
-               EOS_ASSERT( !block_log_chain_id, plugin_config_exception,
+               DCD_ASSERT( !block_log_chain_id, plugin_config_exception,
                            "Genesis state is necessary to initialize fresh blockchain state but genesis state could not be "
                            "found in the blocks log. Please either load from snapshot or find a blocks log that starts "
                            "from genesis."
@@ -1185,13 +1185,13 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
 
       my->chain_config->db_map_mode = options.at("database-map-mode").as<pinnable_mapped_file::map_mode>();
 
-#ifdef DCD_EOS_VM_OC_RUNTIME_ENABLED
-      if( options.count("eos-vm-oc-cache-size-mb") )
-         my->chain_config->eosvmoc_config.cache_size = options.at( "eos-vm-oc-cache-size-mb" ).as<uint64_t>() * 1024u * 1024u;
-      if( options.count("eos-vm-oc-compile-threads") )
-         my->chain_config->eosvmoc_config.threads = options.at("eos-vm-oc-compile-threads").as<uint64_t>();
-      if( options["eos-vm-oc-enable"].as<bool>() )
-         my->chain_config->eosvmoc_tierup = true;
+#ifdef DCD_DCD_VM_OC_RUNTIME_ENABLED
+      if( options.count("dcd-vm-oc-cache-size-mb") )
+         my->chain_config->dcdvmoc_config.cache_size = options.at( "dcd-vm-oc-cache-size-mb" ).as<uint64_t>() * 1024u * 1024u;
+      if( options.count("dcd-vm-oc-compile-threads") )
+         my->chain_config->dcdvmoc_config.threads = options.at("dcd-vm-oc-compile-threads").as<uint64_t>();
+      if( options["dcd-vm-oc-enable"].as<bool>() )
+         my->chain_config->dcdvmoc_tierup = true;
 #endif
 
       my->account_queries_enabled = options.at("enable-account-queries").as<bool>();
@@ -1259,7 +1259,7 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
          auto itr = my->loaded_checkpoints.find( blk->block_num() );
          if( itr != my->loaded_checkpoints.end() ) {
             auto id = blk->calculate_id();
-            EOS_ASSERT( itr->second == id, checkpoint_exception,
+            DCD_ASSERT( itr->second == id, checkpoint_exception,
                         "Checkpoint does not match for block number ${num}: expected: ${expected} actual: ${actual}",
                         ("num", blk->block_num())("expected", itr->second)("actual", id)
             );
@@ -1326,7 +1326,7 @@ void chain_plugin::plugin_startup()
 { try {
    handle_sighup(); // Sets loggers
 
-   EOS_ASSERT( my->chain_config->read_mode != db_read_mode::IRREVERSIBLE || !accept_transactions(), plugin_config_exception,
+   DCD_ASSERT( my->chain_config->read_mode != db_read_mode::IRREVERSIBLE || !accept_transactions(), plugin_config_exception,
                "read-mode = irreversible. transactions should not be enabled by enable_accept_transactions" );
    try {
       auto shutdown = [](){ return app().quit(); };
@@ -1402,7 +1402,7 @@ chain_apis::read_write::read_write(controller& db, const fc::microseconds& abi_s
 }
 
 void chain_apis::read_write::validate() const {
-   EOS_ASSERT( api_accept_transactions, missing_chain_api_plugin_exception,
+   DCD_ASSERT( api_accept_transactions, missing_chain_api_plugin_exception,
                "Not allowed, node has api-accept-transactions = false" );
 }
 
@@ -1453,10 +1453,10 @@ bool chain_plugin::recover_reversible_blocks( const fc::path& db_dir, uint32_t c
       reversible_dir = *new_db_dir;
    } else {
       auto reversible_dir_name = reversible_dir.filename().generic_string();
-      EOS_ASSERT( reversible_dir_name != ".", invalid_reversible_blocks_dir, "Invalid path to reversible directory" );
+      DCD_ASSERT( reversible_dir_name != ".", invalid_reversible_blocks_dir, "Invalid path to reversible directory" );
       backup_dir = reversible_dir.parent_path() / reversible_dir_name.append("-").append( now );
 
-      EOS_ASSERT( !fc::exists(backup_dir),
+      DCD_ASSERT( !fc::exists(backup_dir),
                   reversible_blocks_backup_dir_exist,
                  "Cannot move existing reversible directory to already existing directory '${backup_dir}'",
                  ("backup_dir", backup_dir) );
@@ -1501,7 +1501,7 @@ bool chain_plugin::recover_reversible_blocks( const fc::path& db_dir, uint32_t c
    }
    try {
       for( ; itr != ubi.end(); ++itr ) {
-         EOS_ASSERT( itr->blocknum == end + 1, gap_in_reversible_blocks_db,
+         DCD_ASSERT( itr->blocknum == end + 1, gap_in_reversible_blocks_db,
                      "gap in reversible block database between ${end} and ${blocknum}",
                      ("end", end)("blocknum", itr->blocknum)
                    );
@@ -1557,7 +1557,7 @@ bool chain_plugin::import_reversible_blocks( const fc::path& reversible_dir,
          if( start == 0 ) {
             start = num;
          } else {
-            EOS_ASSERT( num == end + 1, gap_in_reversible_blocks_db,
+            DCD_ASSERT( num == end + 1, gap_in_reversible_blocks_db,
                         "gap in reversible block database between ${end} and ${num}",
                         ("end", end)("num", num)
                       );
@@ -1600,7 +1600,7 @@ bool chain_plugin::export_reversible_blocks( const fc::path& reversible_dir,
    }
    try {
       for( ; itr != ubi.end(); ++itr ) {
-         EOS_ASSERT( itr->blocknum == end + 1, gap_in_reversible_blocks_db,
+         DCD_ASSERT( itr->blocknum == end + 1, gap_in_reversible_blocks_db,
                      "gap in reversible block database between ${end} and ${blocknum}",
                      ("end", end)("blocknum", itr->blocknum)
                    );
@@ -1802,7 +1802,7 @@ uint64_t read_only::get_table_index_name(const read_only::get_table_rows_params&
    // see multi_index packing of index name
    const uint64_t table = p.table.to_uint64_t();
    uint64_t index = table & 0xFFFFFFFFFFFFFFF0ULL;
-   EOS_ASSERT( index == table, chain::contract_table_query_exception, "Unsupported table name: ${n}", ("n", p.table) );
+   DCD_ASSERT( index == table, chain::contract_table_query_exception, "Unsupported table name: ${n}", ("n", p.table) );
 
    primary = false;
    uint64_t pos = 0;
@@ -1829,7 +1829,7 @@ uint64_t read_only::get_table_index_name(const read_only::get_table_rows_params&
       try {
          pos = fc::to_uint64( p.index_position );
       } catch(...) {
-         EOS_ASSERT( false, chain::contract_table_query_exception, "Invalid index_position: ${p}", ("p", p.index_position));
+         DCD_ASSERT( false, chain::contract_table_query_exception, "Invalid index_position: ${p}", ("p", p.index_position));
       }
       if (pos < 2) {
          primary = true;
@@ -1860,7 +1860,7 @@ uint64_t convert_to_type(const string& str, const string& desc) {
       return s.to_uint64_t();
    } catch( ... ) { }
 
-   if (str.find(',') != string::npos) { // fix #6274 only match formats like 4,EOS
+   if (str.find(',') != string::npos) { // fix #6274 only match formats like 4,DCD
       try {
          auto symb = dcd::chain::symbol::from_string(str);
          return symb.value();
@@ -1870,7 +1870,7 @@ uint64_t convert_to_type(const string& str, const string& desc) {
    try {
       return ( dcd::chain::string_to_symbol( 0, str.c_str() ) >> 8 );
    } catch( ... ) {
-      EOS_ASSERT( false, chain_type_exception, "Could not convert ${desc} string '${str}' to any of the following: "
+      DCD_ASSERT( false, chain_type_exception, "Could not convert ${desc} string '${str}' to any of the following: "
                         "uint64_t, valid name, or valid symbol (with or without the precision)",
                   ("desc", desc)("str", str));
    }
@@ -1883,7 +1883,7 @@ double convert_to_type(const string& str, const string& desc) {
       val = fc::variant(str).as<double>();
    } FC_RETHROW_EXCEPTIONS(warn, "Could not convert ${desc} string '${str}' to key type.", ("desc", desc)("str",str) )
 
-   EOS_ASSERT( !std::isnan(val), chain::contract_table_query_exception,
+   DCD_ASSERT( !std::isnan(val), chain::contract_table_query_exception,
                "Converted ${desc} string '${str}' to NaN which is not a permitted value for the key type", ("desc", desc)("str",str) );
 
    return val;
@@ -1913,7 +1913,7 @@ string convert_to_string(const chain::key256_t& source, const string& key_type, 
          memcpy(val._hash, byte_array.data(), byte_array.size() );
          return std::string(val);
       }
-      EOS_ASSERT( false, chain_type_exception, "Incompatible key_type and encode_type for key256_t next_key" );
+      DCD_ASSERT( false, chain_type_exception, "Incompatible key_type and encode_type for key256_t next_key" );
 
    } FC_RETHROW_EXCEPTIONS(warn, "Could not convert ${desc} source '${source}' to string.", ("desc", desc)("source",source) )
 }
@@ -1929,7 +1929,7 @@ string convert_to_string(const float128_t& source, const string& key_type, const
 abi_def get_abi( const controller& db, const name& account ) {
    const auto &d = db.db();
    const account_object *code_accnt = d.find<account_object, by_name>(account);
-   EOS_ASSERT(code_accnt != nullptr, chain::account_query_exception, "Fail to retrieve account for ${account}", ("account", account) );
+   DCD_ASSERT(code_accnt != nullptr, chain::account_query_exception, "Fail to retrieve account for ${account}", ("account", account) );
    abi_def abi;
    abi_serializer::to_abi(code_accnt->abi, abi);
    return abi;
@@ -1941,7 +1941,7 @@ string get_table_type( const abi_def& abi, const name& table_name ) {
          return t.index_type;
       }
    }
-   EOS_ASSERT( false, chain::contract_table_query_exception, "Table ${table} is not specified in the ABI", ("table",table_name) );
+   DCD_ASSERT( false, chain::contract_table_query_exception, "Table ${table} is not specified in the ABI", ("table",table_name) );
 }
 
 read_only::get_table_rows_result read_only::get_table_rows( const read_only::get_table_rows_params& p )const {
@@ -1951,14 +1951,14 @@ read_only::get_table_rows_result read_only::get_table_rows( const read_only::get
    bool primary = false;
    auto table_with_index = get_table_index_name( p, primary );
    if( primary ) {
-      EOS_ASSERT( p.table == table_with_index, chain::contract_table_query_exception, "Invalid table name ${t}", ( "t", p.table ));
+      DCD_ASSERT( p.table == table_with_index, chain::contract_table_query_exception, "Invalid table name ${t}", ( "t", p.table ));
       auto table_type = get_table_type( abi, p.table );
       if( table_type == KEYi64 || p.key_type == "i64" || p.key_type == "name" ) {
          return get_table_rows_ex<key_value_index>(p,abi);
       }
-      EOS_ASSERT( false, chain::contract_table_query_exception,  "Invalid table type ${type}", ("type",table_type)("abi",abi));
+      DCD_ASSERT( false, chain::contract_table_query_exception,  "Invalid table type ${type}", ("type",table_type)("abi",abi));
    } else {
-      EOS_ASSERT( !p.key_type.empty(), chain::contract_table_query_exception, "key type required for non-primary index" );
+      DCD_ASSERT( !p.key_type.empty(), chain::contract_table_query_exception, "key type required for non-primary index" );
 
       if (p.key_type == chain_apis::i64 || p.key_type == "name") {
          return get_table_rows_by_seckey<index64_index, uint64_t>(p, abi, [](uint64_t v)->uint64_t {
@@ -2005,7 +2005,7 @@ read_only::get_table_rows_result read_only::get_table_rows( const read_only::get
          using  conv = keytype_converter<chain_apis::ripemd160,chain_apis::hex>;
          return get_table_rows_by_seckey<conv::index_type, conv::input_type>(p, abi, conv::function());
       }
-      EOS_ASSERT(false, chain::contract_table_query_exception,  "Unsupported secondary index type: ${t}", ("t", p.key_type));
+      DCD_ASSERT(false, chain::contract_table_query_exception,  "Unsupported secondary index type: ${t}", ("t", p.key_type));
    }
 #pragma GCC diagnostic pop
 }
@@ -2033,7 +2033,7 @@ template <typename Type, typename Enable = void>
 struct key_converter;
 
 inline void key_convert_assert(bool condition) {
-   // EOS_ASSERT is avoided intentionally here because EOS_ASSERT would create the fc::log_message object which is
+   // DCD_ASSERT is avoided intentionally here because DCD_ASSERT would create the fc::log_message object which is
    // relatively expensive. The throw statement here is only used for flow control purpose, not for error reporting
    // purpose. 
    if (!condition)
@@ -2158,7 +2158,7 @@ struct key_converter<std::string, void> {
 
    static std::string from_hex(const std::string& bytes_in_hex, short_string encode_type) {
       std::string result = boost::algorithm::unhex(bytes_in_hex);
-      /// restore the string following the encoding rule from `template <typename S> to_key(std::string, S&)` in abieos
+      /// restore the string following the encoding rule from `template <typename S> to_key(std::string, S&)` in abidcd
       /// to_key.hpp
       boost::replace_all(result, "\0\1", "\0");
       // remove trailing '\0\0'
@@ -2256,19 +2256,19 @@ struct kv_table_rows_context {
        , abi(dcd::chain_apis::get_abi(db, param.code))
        , shorten_abi_errors(shorten_error) {
 
-      EOS_ASSERT(p.limit > 0, chain::contract_table_query_exception, "invalid limit : ${n}", ("n", p.limit));
+      DCD_ASSERT(p.limit > 0, chain::contract_table_query_exception, "invalid limit : ${n}", ("n", p.limit));
       string tbl_name = p.table.to_string();
 
       // Check valid table name
       const auto table_it = abi.kv_tables.value.find(p.table);
       if (table_it == abi.kv_tables.value.end()) {
-         EOS_ASSERT(false, chain::contract_table_query_exception, "Unknown kv_table: ${t}", ("t", tbl_name));
+         DCD_ASSERT(false, chain::contract_table_query_exception, "Unknown kv_table: ${t}", ("t", tbl_name));
       }
       const auto& kv_tbl_def = table_it->second;
       // Check valid index_name
       is_primary_idx  = (p.index_name == kv_tbl_def.primary_index.name);
       bool is_sec_idx = (kv_tbl_def.secondary_indices.find(p.index_name) != kv_tbl_def.secondary_indices.end());
-      EOS_ASSERT(is_primary_idx || is_sec_idx, chain::contract_table_query_exception, "Unknown kv index: ${t} ${i}",
+      DCD_ASSERT(is_primary_idx || is_sec_idx, chain::contract_table_query_exception, "Unknown kv index: ${t} ${i}",
                  ("t", p.table)("i", p.index_name));
 
       index_type = kv_tbl_def.get_index_type(p.index_name.to_string());
@@ -2308,7 +2308,7 @@ struct kv_iterator_ex {
        : context(ctx) {
       base   = context.kv_context->kv_it_create(context.p.code.to_uint64_t(), full_key.data(), prefix_size);
       status = base->kv_it_lower_bound(full_key.data(), full_key.size(), &key_size, &value_size);
-      EOS_ASSERT(status != chain::kv_it_stat::iterator_erased, chain::contract_table_query_exception,
+      DCD_ASSERT(status != chain::kv_it_stat::iterator_erased, chain::contract_table_query_exception,
                  "Invalid iterator in ${t} ${i}", ("t", context.p.table)("i", context.p.index_name));
    }
 
@@ -2330,7 +2330,7 @@ struct kv_iterator_ex {
       if (!context.is_primary_idx) {
          auto success =
              context.kv_context->kv_get(context.p.code.to_uint64_t(), result.data(), result.size(), actual_size);
-         EOS_ASSERT(success, chain::contract_table_query_exception, "invalid secondary index in ${t} ${i}",
+         DCD_ASSERT(success, chain::contract_table_query_exception, "invalid secondary index in ${t} ${i}",
                     ("t", context.p.table)("i", context.p.index_name));
          result.resize(actual_size);
          context.kv_context->kv_get_data(0, result.data(), actual_size);
@@ -2454,7 +2454,7 @@ read_only::get_table_rows_result read_only::get_kv_table_rows(const read_only::g
    kv_table_rows_context context{db, p, abi_serializer_max_time, shorten_abi_errors};
 
    if (context.point_query()) {
-      EOS_ASSERT(p.lower_bound.empty() && p.upper_bound.empty(), chain::contract_table_query_exception,
+      DCD_ASSERT(p.lower_bound.empty() && p.upper_bound.empty(), chain::contract_table_query_exception,
                  "specify both index_value and ranges (i.e. lower_bound/upper_bound) is not allowed");
       read_only::get_table_rows_result result;
       auto full_key = context.get_full_key(p.index_value);
@@ -2554,7 +2554,7 @@ read_only::get_table_by_scope_result read_only::get_table_by_scope( const read_o
    }
    else {
       using namespace dcd::chain;
-      EOS_ASSERT(db_backing_store == backing_store_type::ROCKSDB,
+      DCD_ASSERT(db_backing_store == backing_store_type::ROCKSDB,
                  chain::contract_table_query_exception,
                  "Support for configured backing_store has not been added to get_table_by_scope");
       const auto& kv_database = db.kv_db();
@@ -2591,13 +2591,13 @@ vector<asset> read_only::get_currency_balance( const read_only::get_currency_bal
 
    vector<asset> results;
    walk_key_value_table(p.code, p.account, "accounts"_n, [&](const auto& obj){
-      EOS_ASSERT( obj.value.size() >= sizeof(asset), chain::asset_type_exception, "Invalid data on table");
+      DCD_ASSERT( obj.value.size() >= sizeof(asset), chain::asset_type_exception, "Invalid data on table");
 
       asset cursor;
       fc::datastream<const char *> ds(obj.value.data(), obj.value.size());
       fc::raw::unpack(ds, cursor);
 
-      EOS_ASSERT( cursor.get_symbol().valid(), chain::asset_type_exception, "Invalid asset");
+      DCD_ASSERT( cursor.get_symbol().valid(), chain::asset_type_exception, "Invalid asset");
 
       if( !p.symbol || boost::iequals(cursor.symbol_name(), *p.symbol) ) {
         results.emplace_back(cursor);
@@ -2619,7 +2619,7 @@ fc::variant read_only::get_currency_stats( const read_only::get_currency_stats_p
    uint64_t scope = ( dcd::chain::string_to_symbol( 0, boost::algorithm::to_upper_copy(p.symbol).c_str() ) >> 8 );
 
    walk_key_value_table(p.code, name(scope), "stat"_n, [&](const auto& obj){
-      EOS_ASSERT( obj.value.size() >= sizeof(read_only::get_currency_stats_result), chain::asset_type_exception, "Invalid data on table");
+      DCD_ASSERT( obj.value.size() >= sizeof(read_only::get_currency_stats_result), chain::asset_type_exception, "Invalid data on table");
 
       fc::datastream<const char *> ds(obj.value.data(), obj.value.size());
       read_only::get_currency_stats_result result;
@@ -2640,7 +2640,7 @@ read_only::get_producers_result read_only::get_producers( const read_only::get_p
    const abi_def abi = dcd::chain_apis::get_abi(db, config::system_account_name);
    const auto table_type = get_table_type(abi, producers_table);
    const abi_serializer abis{ abi, abi_serializer::create_yield_function( abi_serializer_max_time ) };
-   EOS_ASSERT(table_type == KEYi64, chain::contract_table_query_exception, "Invalid table type ${type} for table producers", ("type",table_type));
+   DCD_ASSERT(table_type == KEYi64, chain::contract_table_query_exception, "Invalid table type ${type} for table producers", ("type",table_type));
 
    const auto& d = db.db();
    const auto lower = name{p.lower_bound};
@@ -2673,7 +2673,7 @@ read_only::get_producers_result read_only::get_producers( const read_only::get_p
             boost::make_tuple(code, scope, producers_table));
       const auto* const secondary_table_id = d.find<chain::table_id_object, chain::by_code_scope_table>(
             boost::make_tuple(code, scope, sec_producers_table));
-      EOS_ASSERT(table_id && secondary_table_id, chain::contract_table_query_exception, "Missing producers table");
+      DCD_ASSERT(table_id && secondary_table_id, chain::contract_table_query_exception, "Missing producers table");
 
       const auto& kv_index = d.get_index<key_value_index, by_scope_primary>();
       const auto& secondary_index = d.get_index<index_double_index>().indices();
@@ -2698,7 +2698,7 @@ read_only::get_producers_result read_only::get_producers( const read_only::get_p
    }
    else {
       using namespace dcd::chain;
-      EOS_ASSERT(db_backing_store == backing_store_type::ROCKSDB,
+      DCD_ASSERT(db_backing_store == backing_store_type::ROCKSDB,
                  contract_table_query_exception,
                  "Support for configured backing_store has not been added to get_table_by_scope");
       const auto& kv_database = db.kv_db();
@@ -2766,7 +2766,7 @@ read_only::get_producers_result read_only::get_producers( const read_only::get_p
 
    constexpr name global = "global"_n;
    const auto global_table_type = get_table_type(abi, global);
-   EOS_ASSERT(global_table_type == read_only::KEYi64, chain::contract_table_query_exception, "Invalid table type ${type} for table global", ("type",global_table_type));
+   DCD_ASSERT(global_table_type == read_only::KEYi64, chain::contract_table_query_exception, "Invalid table type ${type} for table global", ("type",global_table_type));
    auto var = get_primary_key(config::system_account_name, config::system_account_name, global, global.to_uint64_t(), row_requirements::required, row_requirements::required, abis.get_table_type(global));
    result.total_producer_vote_weight = var["total_producer_vote_weight"].as_double();
    return result;
@@ -2853,12 +2853,31 @@ read_only::get_fee_rate_result read_only::get_fee_rate(const get_fee_rate_params
    return result;
 }
 
-read_only::get_fee_proposals_result read_only::get_fee_proposals(const get_fee_proposals_params& params)const {
+read_only::get_fee_proposals_result read_only::get_fee_proposals(const read_only::get_fee_proposals_params& p)const {
+
+   read_only::get_fee_proposals_result result; 
    auto res = db.get_transaction_fee_manager().get_fee_proposals(db);
-   get_fee_proposals_result result;
-   result.owner = res.owner;
+
+   for (auto r : res)
+   {
+      fee_proposal tmp_res; 
+      tmp_res.owner = r.owner;
+      
+      for ( auto pr : r.fee_prop_list)
+      {
+         action_fee_prop tmp;
+         tmp.action = pr.action;
+         tmp.account = pr.account;
+         tmp.fee = pr.fee;
+         tmp_res.fee_prop_list.push_back(tmp);
+      }
+      tmp_res.proposed_at = r.proposed_at;
+      tmp_res.expires_at = r.expires_at;
+      result.proposals.push_back(tmp_res);
+   }
+
    return result;
-}
+} 
 
 template<typename Api>
 struct resolver_factory {
@@ -2899,7 +2918,7 @@ read_only::get_scheduled_transactions( const read_only::get_scheduled_transactio
                const auto& by_txid = d.get_index<generated_transaction_multi_index,by_trx_id>();
                auto itr = by_txid.find( txid );
                if (itr == by_txid.end()) {
-                  EOS_THROW(transaction_exception, "Unknown Transaction ID: ${txid}", ("txid", txid));
+                  DCD_THROW(transaction_exception, "Unknown Transaction ID: ${txid}", ("txid", txid));
                }
 
                return d.get_index<generated_transaction_multi_index>().indices().project<by_delay>(itr);
@@ -2960,7 +2979,7 @@ fc::variant read_only::get_block(const read_only::get_block_params& params) cons
    signed_block_ptr block;
    std::optional<uint64_t> block_num;
 
-   EOS_ASSERT( !params.block_num_or_id.empty() && params.block_num_or_id.size() <= 64,
+   DCD_ASSERT( !params.block_num_or_id.empty() && params.block_num_or_id.size() <= 64,
                chain::block_id_type_exception,
                "Invalid Block number or ID, must be greater than 0 and less than 64 characters"
    );
@@ -2974,10 +2993,10 @@ fc::variant read_only::get_block(const read_only::get_block_params& params) cons
    } else {
       try {
          block = db.fetch_block_by_id( fc::variant(params.block_num_or_id).as<block_id_type>() );
-      } EOS_RETHROW_EXCEPTIONS(chain::block_id_type_exception, "Invalid block ID: ${block_num_or_id}", ("block_num_or_id", params.block_num_or_id))
+      } DCD_RETHROW_EXCEPTIONS(chain::block_id_type_exception, "Invalid block ID: ${block_num_or_id}", ("block_num_or_id", params.block_num_or_id))
    }
 
-   EOS_ASSERT( block, unknown_block_exception, "Could not find block: ${block}", ("block", params.block_num_or_id));
+   DCD_ASSERT( block, unknown_block_exception, "Could not find block: ${block}", ("block", params.block_num_or_id));
 
    // serializes signed_block to variant in signed_block_v0 format
    fc::variant pretty_output;
@@ -3002,7 +3021,7 @@ fc::variant read_only::get_block_info(const read_only::get_block_info_params& pa
       // assert below will handle the invalid block num
    }
 
-   EOS_ASSERT( block, unknown_block_exception, "Could not find block: ${block}", ("block", params.block_num));
+   DCD_ASSERT( block, unknown_block_exception, "Could not find block: ${block}", ("block", params.block_num));
 
    const auto id = block->calculate_id();
    const uint32_t ref_block_prefix = id._hash[1];
@@ -3035,10 +3054,10 @@ fc::variant read_only::get_block_header_state(const get_block_header_state_param
    } else {
       try {
          b = db.fetch_block_state_by_id(fc::variant(params.block_num_or_id).as<block_id_type>());
-      } EOS_RETHROW_EXCEPTIONS(chain::block_id_type_exception, "Invalid block ID: ${block_num_or_id}", ("block_num_or_id", params.block_num_or_id))
+      } DCD_RETHROW_EXCEPTIONS(chain::block_id_type_exception, "Invalid block ID: ${block_num_or_id}", ("block_num_or_id", params.block_num_or_id))
    }
 
-   EOS_ASSERT( b, unknown_block_exception, "Could not find reversible block: ${block}", ("block", params.block_num_or_id));
+   DCD_ASSERT( b, unknown_block_exception, "Could not find reversible block: ${block}", ("block", params.block_num_or_id));
 
    fc::variant vo;
    fc::to_variant( static_cast<const block_header_state&>(*b), vo );
@@ -3064,7 +3083,7 @@ void read_write::push_transaction(const read_write::push_transaction_params& par
       try {
          abi_serializer::from_variant(params, input_trx_v0, std::move( resolver ), abi_serializer::create_yield_function( abi_serializer_max_time ));
          input_trx = std::make_shared<packed_transaction>( std::move( input_trx_v0 ), true );
-      } EOS_RETHROW_EXCEPTIONS(chain::packed_transaction_type_exception, "Invalid packed transaction")
+      } DCD_RETHROW_EXCEPTIONS(chain::packed_transaction_type_exception, "Invalid packed transaction")
 
       auto trx_trace = fc_create_trace_with_id("Transaction", input_trx->id());
       auto trx_span = fc_create_span(trx_trace, "HTTP Received");
@@ -3185,7 +3204,7 @@ static void push_recurse(read_write* rw, int index, const std::shared_ptr<read_w
 
 void read_write::push_transactions(const read_write::push_transactions_params& params, next_function<read_write::push_transactions_results> next) {
    try {
-      EOS_ASSERT( params.size() <= 1000, too_many_tx_at_once, "Attempt to push too many transactions at once" );
+      DCD_ASSERT( params.size() <= 1000, too_many_tx_at_once, "Attempt to push too many transactions at once" );
       auto params_copy = std::make_shared<read_write::push_transactions_params>(params.begin(), params.end());
       auto result = std::make_shared<read_write::push_transactions_results>();
       result->reserve(params.size());
@@ -3207,7 +3226,7 @@ void read_write::send_transaction(const read_write::send_transaction_params& par
       try {
          abi_serializer::from_variant(params, input_trx_v0, std::move( resolver ), abi_serializer::create_yield_function( abi_serializer_max_time ));
          input_trx = std::make_shared<packed_transaction>( std::move( input_trx_v0 ), true );
-      } EOS_RETHROW_EXCEPTIONS(chain::packed_transaction_type_exception, "Invalid packed transaction")
+      } DCD_RETHROW_EXCEPTIONS(chain::packed_transaction_type_exception, "Invalid packed transaction")
 
       auto trx_trace = fc_create_trace_with_id("Transaction", input_trx->id());
       auto trx_span = fc_create_span(trx_trace, "HTTP Received");
@@ -3278,7 +3297,7 @@ read_only::get_code_results read_only::get_code( const get_code_params& params )
    const auto& accnt_obj          = d.get<account_object,by_name>( params.account_name );
    const auto& accnt_metadata_obj = d.get<account_metadata_object,by_name>( params.account_name );
 
-   EOS_ASSERT( params.code_as_wasm, unsupported_feature, "Returning WAST from get_code is no longer supported" );
+   DCD_ASSERT( params.code_as_wasm, unsupported_feature, "Returning WAST from get_code is no longer supported" );
 
    if( accnt_metadata_obj.code_hash != digest_type() ) {
       const auto& code_obj = d.get<code_object, by_code_hash>(accnt_metadata_obj.code_hash);
@@ -3379,7 +3398,7 @@ read_only::get_account_results read_only::get_account( const get_account_params&
       if( perm->parent._id ) {
          const auto* p = d.find<permission_object,by_id>( perm->parent );
          if( p ) {
-            EOS_ASSERT(perm->owner == p->owner, invalid_parent_permission, "Invalid parent permission");
+            DCD_ASSERT(perm->owner == p->owner, invalid_parent_permission, "Invalid parent permission");
             parent = p->name;
          }
       }
@@ -3437,20 +3456,20 @@ static fc::variant action_abi_to_variant( const abi_def& abi, type_name action_t
 read_only::abi_json_to_bin_result read_only::abi_json_to_bin( const read_only::abi_json_to_bin_params& params )const try {
    abi_json_to_bin_result result;
    const auto code_account = db.db().find<account_object,by_name>( params.code );
-   EOS_ASSERT(code_account != nullptr, contract_query_exception, "Contract can't be found ${contract}", ("contract", params.code));
+   DCD_ASSERT(code_account != nullptr, contract_query_exception, "Contract can't be found ${contract}", ("contract", params.code));
 
    abi_def abi;
    if( abi_serializer::to_abi(code_account->abi, abi) ) {
       abi_serializer abis( abi, abi_serializer::create_yield_function( abi_serializer_max_time ) );
       auto action_type = abis.get_action_type(params.action);
-      EOS_ASSERT(!action_type.empty(), action_validate_exception, "Unknown action ${action} in contract ${contract}", ("action", params.action)("contract", params.code));
+      DCD_ASSERT(!action_type.empty(), action_validate_exception, "Unknown action ${action} in contract ${contract}", ("action", params.action)("contract", params.code));
       try {
          result.binargs = abis.variant_to_binary( action_type, params.args, abi_serializer::create_yield_function( abi_serializer_max_time ), shorten_abi_errors );
-      } EOS_RETHROW_EXCEPTIONS(chain::invalid_action_args_exception,
+      } DCD_RETHROW_EXCEPTIONS(chain::invalid_action_args_exception,
                                 "'${args}' is invalid args for action '${action}' code '${code}'. expected '${proto}'",
                                 ("args", params.args)("action", params.action)("code", params.code)("proto", action_abi_to_variant(abi, action_type)))
    } else {
-      EOS_ASSERT(false, abi_not_found_exception, "No ABI found for ${contract}", ("contract", params.code));
+      DCD_ASSERT(false, abi_not_found_exception, "No ABI found for ${contract}", ("contract", params.code));
    }
    return result;
 } FC_RETHROW_EXCEPTIONS( warn, "code: ${code}, action: ${action}, args: ${args}",
@@ -3464,7 +3483,7 @@ read_only::abi_bin_to_json_result read_only::abi_bin_to_json( const read_only::a
       abi_serializer abis( abi, abi_serializer::create_yield_function( abi_serializer_max_time ) );
       result.args = abis.binary_to_variant( abis.get_action_type( params.action ), params.binargs, abi_serializer::create_yield_function( abi_serializer_max_time ), shorten_abi_errors );
    } else {
-      EOS_ASSERT(false, abi_not_found_exception, "No ABI found for ${contract}", ("contract", params.code));
+      DCD_ASSERT(false, abi_not_found_exception, "No ABI found for ${contract}", ("contract", params.code));
    }
    return result;
 }
@@ -3474,7 +3493,7 @@ read_only::get_required_keys_result read_only::get_required_keys( const get_requ
    auto resolver = make_resolver(this, abi_serializer::create_yield_function( abi_serializer_max_time ));
    try {
       abi_serializer::from_variant(params.transaction, pretty_input, resolver, abi_serializer::create_yield_function( abi_serializer_max_time ));
-   } EOS_RETHROW_EXCEPTIONS(chain::transaction_type_exception, "Invalid transaction")
+   } DCD_RETHROW_EXCEPTIONS(chain::transaction_type_exception, "Invalid transaction")
 
    auto required_keys_set = db.get_authorization_manager().get_required_keys( pretty_input, params.available_keys, fc::seconds( pretty_input.delay_sec ));
    get_required_keys_result result;
@@ -3488,7 +3507,7 @@ read_only::get_transaction_id_result read_only::get_transaction_id( const read_o
 
 account_query_db::get_accounts_by_authorizers_result read_only::get_accounts_by_authorizers( const account_query_db::get_accounts_by_authorizers_params& args) const
 {
-   EOS_ASSERT(aqdb.has_value(), plugin_config_exception, "Account Queries being accessed when not enabled");
+   DCD_ASSERT(aqdb.has_value(), plugin_config_exception, "Account Queries being accessed when not enabled");
    return aqdb->get_accounts_by_authorizers(args);
 }  
   

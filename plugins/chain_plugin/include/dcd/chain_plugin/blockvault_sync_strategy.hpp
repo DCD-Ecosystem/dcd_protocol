@@ -15,7 +15,7 @@ struct blockvault_sync_strategy : public sync_callback {
        , _check_shutdown(check_shutdown)
        , _startup_run(false)
        , _received_snapshot(false) {
-      EOS_ASSERT(nullptr != blockvault, plugin_exception, "block_vault_interface cannot be null");
+      DCD_ASSERT(nullptr != blockvault, plugin_exception, "block_vault_interface cannot be null");
    }
 
    ~blockvault_sync_strategy() {
@@ -53,7 +53,7 @@ struct blockvault_sync_strategy : public sync_callback {
 
    void on_snapshot(const char* snapshot_filename) override final {
       ilog("Received snapshot from blockvault ${fn}", ("fn", snapshot_filename));
-      EOS_ASSERT(!_received_snapshot, plugin_exception, "Received multiple snapshots from blockvault." );
+      DCD_ASSERT(!_received_snapshot, plugin_exception, "Received multiple snapshots from blockvault." );
       _received_snapshot = true;
 
       if (_check_shutdown()) {
@@ -90,7 +90,7 @@ struct blockvault_sync_strategy : public sync_callback {
          auto rc = _blockchain_provider.incoming_blockvault_sync_method(block,
             !(_received_snapshot && block->block_num() == _snapshot_height +1));
 
-         EOS_ASSERT(rc, plugin_exception,
+         DCD_ASSERT(rc, plugin_exception,
                     "Unable to sync block from blockvault, block num=${bnum}, block id=${bid}",
                     ("bnum", block->block_num())("bid", block->calculate_id()));
       } catch (unlinkable_block_exception& e) {

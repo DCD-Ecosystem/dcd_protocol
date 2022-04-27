@@ -347,14 +347,18 @@ public:
 
 
    struct get_fee_proposals_params {
+      bool        json = false;
+   };
+
+   struct fee_proposal {
+      name                                            owner;
+      std::vector<action_fee_prop>                    fee_prop_list;
+      time_point                                      proposed_at;
+      time_point                                      expires_at;
    };
 
    struct get_fee_proposals_result {
-      name                                                     owner;
-      //std::vector <action_fee_prop>                            fee_prop_list;
-      //time_point                                               propose_rate_time;
-      //bool                                                     is_active;
-
+      std::vector<fee_proposal>                    proposals;
    };
 
    get_required_fee_result get_required_fee( const get_required_fee_params& params)const;
@@ -533,7 +537,7 @@ public:
          if (require_table == row_requirements::optional && !table_id) {
             return false;
          }
-         EOS_ASSERT(table_id, chain::contract_table_query_exception,
+         DCD_ASSERT(table_id, chain::contract_table_query_exception,
                     "Missing code: ${code}, scope: ${scope}, table: ${table}",
                     ("code",code.to_string())("scope",scope.to_string())("table",table.to_string()));
          const auto& kv_index = db.db().get_index<chain::key_value_index, chain::by_scope_primary>();
@@ -541,7 +545,7 @@ public:
          if (require_primary == row_requirements::optional && it == kv_index.end()) {
             return false;
          }
-         EOS_ASSERT(it != kv_index.end(), chain::contract_table_query_exception,
+         DCD_ASSERT(it != kv_index.end(), chain::contract_table_query_exception,
                     "Missing row for primary_key: ${primary} in code: ${code}, scope: ${scope}, table: ${table}",
                     ("primary", primary_key)("code",code.to_string())("scope",scope.to_string())
                     ("table",table.to_string()));
@@ -550,7 +554,7 @@ public:
       }
       else {
          using namespace dcd::chain;
-         EOS_ASSERT(db_backing_store == backing_store_type::ROCKSDB,
+         DCD_ASSERT(db_backing_store == backing_store_type::ROCKSDB,
                     chain::contract_table_query_exception,
                     "Support for configured backing_store has not been added to get_primary_key");
          const auto& kv_database = db.kv_db();
@@ -563,11 +567,11 @@ public:
             if (require_table == row_requirements::required) {
                const auto whole_table_prefix(backing_store::db_key_value_format::create_full_key_prefix(full_key, backing_store::db_key_value_format::end_of_prefix::pre_type));
                const auto value = current_session.read(whole_table_prefix);
-               EOS_ASSERT(value, chain::contract_table_query_exception,
+               DCD_ASSERT(value, chain::contract_table_query_exception,
                           "Missing code: ${code}, scope: ${scope}, table: ${table}",
                           ("code",code.to_string())("scope",scope.to_string())("table",table.to_string()));
             }
-            EOS_ASSERT(require_primary == row_requirements::optional, chain::contract_table_query_exception,
+            DCD_ASSERT(require_primary == row_requirements::optional, chain::contract_table_query_exception,
                        "Missing row for primary_key: ${primary} in code: ${code}, scope: ${scope}, table: ${table}",
                        ("primary", primary_key)("code",code.to_string())("scope",scope.to_string())
                        ("table",table.to_string()));
@@ -685,7 +689,7 @@ public:
       }
       else {
          using namespace dcd::chain;
-         EOS_ASSERT(db_backing_store == backing_store_type::ROCKSDB,
+         DCD_ASSERT(db_backing_store == backing_store_type::ROCKSDB,
                     chain::contract_table_query_exception,
                     "Support for configured backing_store has not been added to get_primary_key");
             primary_key_receiver<Function> receiver(f);
@@ -763,7 +767,7 @@ public:
                SecKeyType lv = convert_to_type(name{p.lower_bound}, "lower_bound name");
                secondary_key_lower = conv( lv );
             } else {
-               EOS_ASSERT(false, chain::contract_table_query_exception, "Invalid key type of dcd::name ${nm} for lower bound", ("nm", p.lower_bound));
+               DCD_ASSERT(false, chain::contract_table_query_exception, "Invalid key type of dcd::name ${nm} for lower bound", ("nm", p.lower_bound));
             }
          } else {
             SecKeyType lv = convert_to_type<SecKeyType>( p.lower_bound, "lower_bound" );
@@ -777,7 +781,7 @@ public:
                SecKeyType uv = convert_to_type(name{p.upper_bound}, "upper_bound name");
                secondary_key_upper = conv( uv );
             } else {
-               EOS_ASSERT(false, chain::contract_table_query_exception, "Invalid key type of dcd::name ${nm} for upper bound", ("nm", p.upper_bound));
+               DCD_ASSERT(false, chain::contract_table_query_exception, "Invalid key type of dcd::name ${nm} for upper bound", ("nm", p.upper_bound));
             }
          } else {
             SecKeyType uv = convert_to_type<SecKeyType>( p.upper_bound, "upper_bound" );
@@ -831,7 +835,7 @@ public:
       }
       else {
          using namespace dcd::chain;
-         EOS_ASSERT(db_backing_store == backing_store_type::ROCKSDB,
+         DCD_ASSERT(db_backing_store == backing_store_type::ROCKSDB,
                     chain::contract_table_query_exception,
                     "Support for configured backing_store has not been added to get_primary_key");
          const auto context = (reverse) ? backing_store::key_context::standalone_reverse : backing_store::key_context::standalone;
@@ -935,7 +939,7 @@ public:
       }
       else {
          using namespace dcd::chain;
-         EOS_ASSERT(db_backing_store == backing_store_type::ROCKSDB,
+         DCD_ASSERT(db_backing_store == backing_store_type::ROCKSDB,
                     chain::contract_table_query_exception,
                     "Support for configured backing_store has not been added to get_primary_key");
          const auto context = (reverse) ? backing_store::key_context::standalone_reverse : backing_store::key_context::standalone;
@@ -1208,13 +1212,15 @@ FC_REFLECT( dcd::chain_apis::read_only::abi_bin_to_json_params, (code)(action)(b
 FC_REFLECT( dcd::chain_apis::read_only::abi_bin_to_json_result, (args) )
 FC_REFLECT( dcd::chain_apis::read_only::get_required_keys_params, (transaction)(available_keys) )
 FC_REFLECT( dcd::chain_apis::read_only::get_required_keys_result, (required_keys) )
+FC_REFLECT( dcd::chain_apis::read_only::action_fee_prop, (account)(action)(fee) )
 
 //Fee rate reflects 
 FC_REFLECT( dcd::chain_apis::read_only::get_action_fee_params, (account)(action) )
 FC_REFLECT( dcd::chain_apis::read_only::get_action_fee_result, (core_fee)(usd_fee)(rate) )
 FC_REFLECT( dcd::chain_apis::read_only::get_required_fee_params, (transaction) )
 FC_REFLECT( dcd::chain_apis::read_only::get_required_fee_result, (required_fee) )
-FC_REFLECT( dcd::chain_apis::read_only::get_fee_proposals_result, (owner) )
+FC_REFLECT( dcd::chain_apis::read_only::fee_proposal, (owner)(fee_prop_list)(proposed_at)(expires_at) )
+FC_REFLECT( dcd::chain_apis::read_only::get_fee_proposals_result, (proposals) )
 FC_REFLECT_EMPTY( dcd::chain_apis::read_only::get_fee_rate_params )
 FC_REFLECT_EMPTY( dcd::chain_apis::read_only::get_fee_proposals_params )
 FC_REFLECT( dcd::chain_apis::read_only::get_fee_rate_result, (base_rate_asset)(new_rate_period)(out_of_date_time)(prev_rate)(cur_rate)(cur_rate_time)(cur_rate_producers) )
