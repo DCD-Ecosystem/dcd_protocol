@@ -8,11 +8,11 @@ Retrieves the ABI for an account
 - `-f,--file` _TEXT_ - The name of the file to save the contract .abi to instead of writing to console
 
 ## Examples
-Retrieve and save abi for eosio.token contract
+Retrieve and save abi for dcd.token contract
 
 ```sh
-dcdcli get abi eosio.token -f eosio.token.abi
+dcdcli get abi dcd.token -f dcd.token.abi
 ```
 ```console
-saving abi to eosio.token.abi
+saving abi to dcd.token.abi
 ```

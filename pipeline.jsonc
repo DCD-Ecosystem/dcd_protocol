@@ -1,5 +1,5 @@
 {
-    "eosio-code-coverage":
+    "dcd-code-coverage":
     {
         "exclude": [ // ignore coverage reports from source filenames matching these PCREs
             "^/build/",
@@ -15,7 +15,7 @@
             "[.]h(pp)?([.]in)?$"
         ]
     },
-    "eosio-docker-builds":
+    "dcd-docker-builds":
     {
         "environment":
         {
@@ -33,8 +33,8 @@
             "170=v1.7.0"
         ]
     },
-    // eosio-resume-from-state documentation: https://github.com/EOSIO/auto-eks-sync-nodes/blob/master/pipelines/eosio-resume-from-state/README.md
-    "eosio-resume-from-state":
+    // dcd-resume-from-state documentation: https://github.com/DCD/auto-eks-sync-nodes/blob/master/pipelines/dcd-resume-from-state/README.md
+    "dcd-resume-from-state":
     {
         "test":
         [

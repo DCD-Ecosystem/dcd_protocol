@@ -11,7 +11,7 @@
 
 #include <b1/session/shared_bytes.hpp>
 
-namespace eosio::session {
+namespace dcd::session {
 
 template <class... Ts>
 struct overloaded : Ts... {
@@ -844,7 +844,7 @@ void session<Parent>::session_iterator<Iterator_traits>::move_next_() {
    auto update_cache = [&](auto& it) mutable {
       auto value = std::optional<shared_bytes>{};
 
-      auto pending_key = eosio::session::shared_bytes{};
+      auto pending_key = dcd::session::shared_bytes{};
       auto end         = std::end(m_active_session->m_cache);
       if (it != end) {
          ++it;
@@ -905,7 +905,7 @@ void session<Parent>::session_iterator<Iterator_traits>::move_previous_() {
    auto update_cache = [&](auto& it) mutable {
       auto value = std::optional<shared_bytes>{};
 
-      auto pending_key = eosio::session::shared_bytes{};
+      auto pending_key = dcd::session::shared_bytes{};
       if (it != std::begin(m_active_session->m_cache)) {
          --it;
          pending_key = it->first;
@@ -918,7 +918,7 @@ void session<Parent>::session_iterator<Iterator_traits>::move_previous_() {
                if (pit != std::begin(*p)) {
                   --pit;
                } else {
-                  return eosio::session::shared_bytes{};
+                  return dcd::session::shared_bytes{};
                }
 
                value = (*pit).second;
@@ -1028,4 +1028,4 @@ bool session<Parent>::session_iterator<Iterator_traits>::operator!=(const sessio
    return !(*this == other);
 }
 
-} // namespace eosio::session
+} // namespace dcd::session

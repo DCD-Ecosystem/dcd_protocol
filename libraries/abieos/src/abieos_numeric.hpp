@@ -7,7 +7,7 @@
 #include <stdint.h>
 #include <string>
 #include <string_view>
-#include <eosio/from_json.hpp>
+#include <dcd/from_json.hpp>
 
 #include "abieos_ripemd160.hpp"
 
@@ -59,16 +59,16 @@ inline void decimal_to_binary(std::array<uint8_t, size>& result,
                                                               std::string_view s) {
     memset(result.begin(), 0, result.size());
     for (auto& src_digit : s) {
-       eosio::check(!(src_digit < '0' || src_digit > '9'),
-            eosio::convert_json_error(eosio::from_json_error::expected_int));
+       dcd::check(!(src_digit < '0' || src_digit > '9'),
+            dcd::convert_json_error(dcd::from_json_error::expected_int));
         uint8_t carry = src_digit - '0';
         for (auto& result_byte : result) {
             int x = result_byte * 10 + carry;
             result_byte = x;
             carry = x >> 8;
         }
-        eosio::check(!carry,
-              eosio::convert_json_error(eosio::from_json_error::number_out_of_range));
+        dcd::check(!carry,
+              dcd::convert_json_error(dcd::from_json_error::number_out_of_range));
     }
 }
 

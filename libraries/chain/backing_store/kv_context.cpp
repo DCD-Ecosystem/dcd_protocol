@@ -1,9 +1,9 @@
-#include <eosio/chain/backing_store/kv_context.hpp>
-#include <eosio/chain/kv_chainbase_objects.hpp>
-#include <eosio/chain/apply_context.hpp>
-#include <eosio/chain/trace.hpp>
+#include <dcd/chain/backing_store/kv_context.hpp>
+#include <dcd/chain/kv_chainbase_objects.hpp>
+#include <dcd/chain/apply_context.hpp>
+#include <dcd/chain/trace.hpp>
 
-namespace eosio { namespace chain {
+namespace dcd { namespace chain {
 
    namespace {
       void kv_resource_manager_update_ram(apply_context& context, int64_t delta, const kv_resource_trace& trace, account_name payer) {

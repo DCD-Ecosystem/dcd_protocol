@@ -11,7 +11,7 @@ Make sure you meet the following requirements:
 * Install the currently supported version of `dcdcli`.
 
 [[info | Note]]
-| `dcdcli` is bundled with the EOSIO software. [Installing EOSIO](../../00_install/index.md) will also install `dcdcli`.
+| `dcdcli` is bundled with the DCD software. [Installing DCD](../../00_install/index.md) will also install `dcdcli`.
 
 * Understand what an [account](https://developers.eos.io/welcome/v2.1/glossary/index/#account) is and its role in the blockchain.
 * Understand [Accounts and Permissions](https://developers.eos.io/welcome/v2.1/protocol-guides/accounts_and_permissions) in the protocol documents.

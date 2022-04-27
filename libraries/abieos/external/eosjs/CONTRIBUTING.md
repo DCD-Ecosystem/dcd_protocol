@@ -35,12 +35,12 @@ Guidelines for bug reports:
    reported.
 
 1. **Check if the issue has been fixed** &mdash; look for [closed issues in the
-   current milestone](https://github.com/EOSIO/eosjs/issues?q=is%3Aissue+is%3Aclosed) or try to reproduce it
+   current milestone](https://github.com/DCD/eosjs/issues?q=is%3Aissue+is%3Aclosed) or try to reproduce it
    using the latest `develop` branch.
 
 A good bug report shouldn't leave others needing to chase you up for more information. Be sure to include the details of your environment and relevant tests that demonstrate the failure.
 
-[Report a bug](https://github.com/EOSIO/eosjs/issues/new?template=bug_report.md)
+[Report a bug](https://github.com/DCD/eosjs/issues/new?template=bug_report.md)
 
 ### Feature Requests
 
@@ -60,7 +60,7 @@ Change requests cover both architectural and functional changes to how EOSJS wor
 
 ## Working on EOSJS
 
-Code contributions are welcome and encouraged! If you are looking for a good place to start, check out the [good first issue](https://github.com/EOSIO/eosjs/labels/good%20first%20issue) label in GitHub issues.
+Code contributions are welcome and encouraged! If you are looking for a good place to start, check out the [good first issue](https://github.com/DCD/eosjs/labels/good%20first%20issue) label in GitHub issues.
 
 Also, please follow these guidelines when submitting code:
 
@@ -68,8 +68,8 @@ Also, please follow these guidelines when submitting code:
 
 To get it out of the way:
 
-- **[develop](https://github.com/EOSIO/eosjs/tree/develop)** is the development branch. All work on the next release happens here so you should generally branch off `develop`. Do **NOT** use this branch for a production site.
-- **[master](https://github.com/EOSIO/eosjs/tree/master)** contains the latest release of EOSJS. This branch may be used in production. Do **NOT** use this branch to work on EOSJS's source.
+- **[develop](https://github.com/DCD/eosjs/tree/develop)** is the development branch. All work on the next release happens here so you should generally branch off `develop`. Do **NOT** use this branch for a production site.
+- **[master](https://github.com/DCD/eosjs/tree/master)** contains the latest release of EOSJS. This branch may be used in production. Do **NOT** use this branch to work on EOSJS's source.
 
 ### Submitting Pull Requests
 
@@ -77,7 +77,7 @@ Pull requests are awesome. If you're looking to raise a PR for something which d
 
 ### Testing
 
-EOSJS is used by many libraries across the EOSIO ecosystem, so proper testing is absolutely essential prior to opening a pull request. This can be done in EOSJS by running `yarn build-production`.  This command will build the distrubution bundles (`yarn build-all`) and test each environment accordingly (`yarn test-all`).
+EOSJS is used by many libraries across the DCD ecosystem, so proper testing is absolutely essential prior to opening a pull request. This can be done in EOSJS by running `yarn build-production`.  This command will build the distrubution bundles (`yarn build-all`) and test each environment accordingly (`yarn test-all`).
 
 #### Automated Unit Test Suite
 
@@ -85,7 +85,7 @@ EOSJS is used by many libraries across the EOSIO ecosystem, so proper testing is
 
 #### Integration Test Suite
 
-Integration tests will only work with a local node running on port 8888 and with test accounts "bob" and "alice".  This can be accomplished by following the [EOSIO Developer Getting Started Guide](https://developers.eos.io/eosio-home/docs/getting-the-software#section-step-1-1-start-dcdksd).
+Integration tests will only work with a local node running on port 8888 and with test accounts "bob" and "alice".  This can be accomplished by following the [DCD Developer Getting Started Guide](https://developers.eos.io/dcd-home/docs/getting-the-software#section-step-1-1-start-dcdksd).
 
 ##### Web Environment
 

@@ -1,7 +1,7 @@
-#include <eosio/abi.hpp>
+#include <dcd/abi.hpp>
 #include "abieos.hpp"
 
-using namespace eosio;
+using namespace dcd;
 
 namespace {
 
@@ -45,30 +45,30 @@ constexpr void for_each_abi_type(F f) {
 
 abi_type* get_type(std::map<std::string, abi_type>& abi_types,
                            const std::string& name, int depth) {
-   eosio::check(depth < 32,
-        eosio::convert_abi_error(abi_error::recursion_limit_reached));
+   dcd::check(depth < 32,
+        dcd::convert_abi_error(abi_error::recursion_limit_reached));
     auto it = abi_types.find(name);
     if (it == abi_types.end()) {
         if (ends_with(name, "?")) {
             auto base = get_type(abi_types, name.substr(0, name.size() - 1), depth + 1);
-            eosio::check(!holds_any_alternative<abi_type::optional, abi_type::array, abi_type::extension>(base->_data),
-                  eosio::convert_abi_error(abi_error::invalid_nesting));
+            dcd::check(!holds_any_alternative<abi_type::optional, abi_type::array, abi_type::extension>(base->_data),
+                  dcd::convert_abi_error(abi_error::invalid_nesting));
             auto [iter, success] = abi_types.try_emplace(name, name, abi_type::optional{base}, &abi_serializer_for< ::abieos::pseudo_optional>);
             return &iter->second;
         } else if (ends_with(name, "[]")) {
             auto element = get_type(abi_types, name.substr(0, name.size() - 2), depth + 1);
-            eosio::check(!holds_any_alternative<abi_type::optional, abi_type::array, abi_type::extension>(element->_data),
-                  eosio::convert_abi_error(abi_error::invalid_nesting));
+            dcd::check(!holds_any_alternative<abi_type::optional, abi_type::array, abi_type::extension>(element->_data),
+                  dcd::convert_abi_error(abi_error::invalid_nesting));
             auto [iter, success] = abi_types.try_emplace(name, name, abi_type::array{element}, &abi_serializer_for< ::abieos::pseudo_array>);
             return &iter->second;
         } else if (ends_with(name, "$")) {
             auto base = get_type(abi_types, name.substr(0, name.size() - 1), depth + 1);
-            eosio::check(!std::holds_alternative<abi_type::extension>(base->_data),
-                  eosio::convert_abi_error(abi_error::invalid_nesting));
+            dcd::check(!std::holds_alternative<abi_type::extension>(base->_data),
+                  dcd::convert_abi_error(abi_error::invalid_nesting));
             auto [iter, success] = abi_types.try_emplace(name, name, abi_type::extension{base}, &abi_serializer_for< ::abieos::pseudo_extension>);
             return &iter->second;
         } else
-           eosio::check(false, eosio::convert_abi_error(abi_error::unknown_type));
+           dcd::check(false, dcd::convert_abi_error(abi_error::unknown_type));
     }
 
     // resolve aliases
@@ -84,8 +84,8 @@ abi_type* get_type(std::map<std::string, abi_type>& abi_types,
 }
 
 abi_type::struct_ resolve(std::map<std::string, abi_type>& abi_types, const struct_def* type, int depth) {
-   eosio::check(depth < 32,
-        eosio::convert_abi_error(abi_error::recursion_limit_reached));
+   dcd::check(depth < 32,
+        dcd::convert_abi_error(abi_error::recursion_limit_reached));
     abi_type::struct_ result;
     if (!type->base.empty()) {
         auto base = get_type(abi_types, type->base, depth + 1);
@@ -97,7 +97,7 @@ abi_type::struct_ resolve(std::map<std::string, abi_type>& abi_types, const stru
         if(auto* b = std::get_if<abi_type::struct_>(&base->_data)) {
             result.fields = b->fields;
         } else {
-           eosio::check(false, eosio::convert_abi_error(abi_error::base_not_a_struct));
+           dcd::check(false, dcd::convert_abi_error(abi_error::base_not_a_struct));
         }
     }
     for (auto& field : type->fields) {
@@ -109,8 +109,8 @@ abi_type::struct_ resolve(std::map<std::string, abi_type>& abi_types, const stru
 
 
 abi_type::variant resolve(std::map<std::string, abi_type>& abi_types, const variant_def* type, int depth) {
-   eosio::check(depth < 32,
-        eosio::convert_abi_error(abi_error::recursion_limit_reached));
+   dcd::check(depth < 32,
+        dcd::convert_abi_error(abi_error::recursion_limit_reached));
     abi_type::variant result;
     for (const std::string& field : type->types) {
         auto t = get_type(abi_types, field, depth + 1);
@@ -121,8 +121,8 @@ abi_type::variant resolve(std::map<std::string, abi_type>& abi_types, const vari
 
 abi_type::alias resolve(std::map<std::string, abi_type>& abi_types, const abi_type::alias_def* type, int depth) {
     auto t = get_type(abi_types, *type, depth + 1);
-    eosio::check(!std::holds_alternative<abi_type::extension>(t->_data),
-        eosio::convert_abi_error(abi_error::extension_typedef));
+    dcd::check(!std::holds_alternative<abi_type::extension>(t->_data),
+        dcd::convert_abi_error(abi_error::extension_typedef));
     return abi_type::alias{t};
 }
 
@@ -147,11 +147,11 @@ void fill(std::map<std::string, abi_type>& abi_types, abi_type& type, int depth)
 }
 
 
-const abi_type* eosio::abi::get_type(const std::string& name) {
+const abi_type* dcd::abi::get_type(const std::string& name) {
    return ::get_type(abi_types, name, 0);
 }
 
-void eosio::convert(const abi_def& abi, eosio::abi& c) {
+void dcd::convert(const abi_def& abi, dcd::abi& c) {
     for (auto& a : abi.actions)
         c.action_types[a.name] = a.type;
     for (auto& t : abi.tables)
@@ -170,25 +170,25 @@ void eosio::convert(const abi_def& abi, eosio::abi& c) {
     }
 
     for (auto& t : abi.types) {
-       eosio::check(!t.new_type_name.empty(),
-            eosio::convert_abi_error(abi_error::missing_name));
+       dcd::check(!t.new_type_name.empty(),
+            dcd::convert_abi_error(abi_error::missing_name));
         auto [_, inserted] = c.abi_types.try_emplace(t.new_type_name, t.new_type_name, &t.type, nullptr);
-        eosio::check(inserted,
-            eosio::convert_abi_error(abi_error::redefined_type));
+        dcd::check(inserted,
+            dcd::convert_abi_error(abi_error::redefined_type));
     }
     for (auto& s : abi.structs) {
-       eosio::check(!s.name.empty(),
-            eosio::convert_abi_error(abi_error::missing_name));
+       dcd::check(!s.name.empty(),
+            dcd::convert_abi_error(abi_error::missing_name));
         auto [it, inserted] = c.abi_types.try_emplace(s.name, s.name, &s, &abi_serializer_for<::abieos::pseudo_object>);
-        eosio::check(inserted,
-            eosio::convert_abi_error(abi_error::redefined_type));
+        dcd::check(inserted,
+            dcd::convert_abi_error(abi_error::redefined_type));
     }
     for (auto& v : abi.variants.value) {
-       eosio::check(!v.name.empty(),
-            eosio::convert_abi_error(abi_error::missing_name));
+       dcd::check(!v.name.empty(),
+            dcd::convert_abi_error(abi_error::missing_name));
         auto [it, inserted] = c.abi_types.try_emplace(v.name, v.name, &v, &abi_serializer_for<::abieos::pseudo_variant>);
-        eosio::check(inserted,
-            eosio::convert_abi_error(abi_error::redefined_type));
+        dcd::check(inserted,
+            dcd::convert_abi_error(abi_error::redefined_type));
     }
     for (auto& [_, t] : c.abi_types) {
         fill(c.abi_types, t, 0);
@@ -196,7 +196,7 @@ void eosio::convert(const abi_def& abi, eosio::abi& c) {
 
     for (const auto& [key, val] : abi.kv_tables.value) {
         std::vector<char> bytes;
-        eosio::vector_stream strm(bytes);
+        dcd::vector_stream strm(bytes);
         to_json(val, strm);
         c.kv_tables.try_emplace(key, bytes.begin(), bytes.end());
     }
@@ -209,7 +209,7 @@ void to_abi_def(abi_def& def, const std::string& name, const abi_type::extension
 
 template<typename T>
 void to_abi_def(abi_def& def, const std::string& name, const T*) {
-   eosio::check(false, eosio::convert_abi_error(eosio::abi_error::bad_abi));
+   dcd::check(false, dcd::convert_abi_error(dcd::abi_error::bad_abi));
 }
 
 void to_abi_def(abi_def& def, const std::string& name, const abi_type::alias& alias) {
@@ -240,20 +240,20 @@ void to_abi_def(abi_def& def, const std::string& name, const abi_type::variant& 
    def.variants.value.push_back({name, std::move(types)});
 }
 
-void eosio::convert(const eosio::abi& abi, eosio::abi_def& def) {
+void dcd::convert(const dcd::abi& abi, dcd::abi_def& def) {
    def.version = "eosio::abi/1.0";
    for(auto& [name, type] : abi.abi_types) {
       std::visit([&name = type.name, &def](const auto& t){ return to_abi_def(def, name, t); }, type._data);
    }
 }
 
-const abi_serializer* const eosio::object_abi_serializer = &abi_serializer_for< ::abieos::pseudo_object>;
-const abi_serializer* const eosio::variant_abi_serializer = &abi_serializer_for< ::abieos::pseudo_variant>;
-const abi_serializer* const eosio::array_abi_serializer = &abi_serializer_for< ::abieos::pseudo_array>;
-const abi_serializer* const eosio::extension_abi_serializer = &abi_serializer_for< ::abieos::pseudo_extension>;
-const abi_serializer* const eosio::optional_abi_serializer = &abi_serializer_for< ::abieos::pseudo_optional>;
+const abi_serializer* const dcd::object_abi_serializer = &abi_serializer_for< ::abieos::pseudo_object>;
+const abi_serializer* const dcd::variant_abi_serializer = &abi_serializer_for< ::abieos::pseudo_variant>;
+const abi_serializer* const dcd::array_abi_serializer = &abi_serializer_for< ::abieos::pseudo_array>;
+const abi_serializer* const dcd::extension_abi_serializer = &abi_serializer_for< ::abieos::pseudo_extension>;
+const abi_serializer* const dcd::optional_abi_serializer = &abi_serializer_for< ::abieos::pseudo_optional>;
 
-std::vector<char> eosio::abi_type::json_to_bin_reorderable(std::string_view json, std::function<void()> f) const {
+std::vector<char> dcd::abi_type::json_to_bin_reorderable(std::string_view json, std::function<void()> f) const {
    abieos::jvalue tmp;
    abieos::json_to_jvalue(tmp, json, f);
    std::vector<char> result;
@@ -261,13 +261,13 @@ std::vector<char> eosio::abi_type::json_to_bin_reorderable(std::string_view json
    return result;
 }
 
-std::vector<char> eosio::abi_type::json_to_bin(std::string_view json, std::function<void()> f) const {
+std::vector<char> dcd::abi_type::json_to_bin(std::string_view json, std::function<void()> f) const {
    std::vector<char> result;
    abieos::json_to_bin(result, this, json, f);
    return result;
 }
 
-std::string eosio::abi_type::bin_to_json(input_stream& bin, std::function<void()> f) const {
+std::string dcd::abi_type::bin_to_json(input_stream& bin, std::function<void()> f) const {
    std::string result;
    abieos::bin_to_json(bin, this, result, f);
    return result;

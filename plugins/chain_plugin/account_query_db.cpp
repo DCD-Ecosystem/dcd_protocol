@@ -1,8 +1,8 @@
-#include <eosio/chain_plugin/account_query_db.hpp>
+#include <dcd/chain_plugin/account_query_db.hpp>
 
-#include <eosio/chain/contract_types.hpp>
-#include <eosio/chain/controller.hpp>
-#include <eosio/chain/permission_object.hpp>
+#include <dcd/chain/contract_types.hpp>
+#include <dcd/chain/controller.hpp>
+#include <dcd/chain/permission_object.hpp>
 
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/ordered_index.hpp>
@@ -15,8 +15,8 @@
 
 #include <shared_mutex>
 
-using namespace eosio;
-using namespace eosio::chain::literals;
+using namespace dcd;
+using namespace dcd::chain::literals;
 using namespace boost::multi_index;
 using namespace boost::bimaps;
 
@@ -69,12 +69,12 @@ namespace {
       if (p->action_traces.empty())
          return false;
       const auto& act = p->action_traces[0].act;
-      if (act.account != eosio::chain::config::system_account_name || act.name != "onblock"_n ||
+      if (act.account != dcd::chain::config::system_account_name || act.name != "onblock"_n ||
           act.authorization.size() != 1)
          return false;
       const auto& auth = act.authorization[0];
-      return auth.actor == eosio::chain::config::system_account_name &&
-             auth.permission == eosio::chain::config::active_name;
+      return auth.actor == dcd::chain::config::system_account_name &&
+             auth.permission == dcd::chain::config::active_name;
    }
 
    template<typename T>
@@ -124,7 +124,7 @@ namespace std {
 
 }
 
-namespace eosio::chain_apis {
+namespace dcd::chain_apis {
    /**
     * Implementation details of the account query DB
     */

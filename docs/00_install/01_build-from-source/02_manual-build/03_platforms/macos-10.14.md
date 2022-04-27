@@ -2,73 +2,73 @@
 content_title: MacOS 10.14
 ---
 
-This section contains shell commands to manually download, build, install, test, and uninstall EOSIO and dependencies on MacOS 10.14.
+This section contains shell commands to manually download, build, install, test, and uninstall DCD and dependencies on MacOS 10.14.
 
-[[info | Building EOSIO is for Advanced Developers]]
-| If you are new to EOSIO, it is recommended that you install the [EOSIO Prebuilt Binaries](../../../00_install-prebuilt-binaries.md) instead of building from source.
+[[info | Building DCD is for Advanced Developers]]
+| If you are new to DCD, it is recommended that you install the [DCD Prebuilt Binaries](../../../00_install-prebuilt-binaries.md) instead of building from source.
 
 Select a task below, then copy/paste the shell commands to a Unix terminal to execute:
 
-* [Download EOSIO Repository](#download-eosio-repository)
-* [Install EOSIO Dependencies](#install-eosio-dependencies)
-* [Build EOSIO](#build-eosio)
-* [Install EOSIO](#install-eosio)
-* [Test EOSIO](#test-eosio)
-* [Uninstall EOSIO](#uninstall-eosio)
+* [Download DCD Repository](#download-dcd-repository)
+* [Install DCD Dependencies](#install-dcd-dependencies)
+* [Build DCD](#build-dcd)
+* [Install DCD](#install-dcd)
+* [Test DCD](#test-dcd)
+* [Uninstall DCD](#uninstall-dcd)
 
-[[info | Building EOSIO on another OS?]]
-| Visit the [Build EOSIO from Source](../../index.md) section.
+[[info | Building DCD on another OS?]]
+| Visit the [Build DCD from Source](../../index.md) section.
 
-## Download EOSIO Repository
-These commands set the EOSIO directories, install git, and clone the EOSIO repository.
+## Download DCD Repository
+These commands set the DCD directories, install git, and clone the DCD repository.
 ```sh
-# set EOSIO directories
-export EOSIO_LOCATION=~/eosio/eos
-export EOSIO_INSTALL_LOCATION=$EOSIO_LOCATION/../install
-mkdir -p $EOSIO_INSTALL_LOCATION
+# set DCD directories
+export DCD_LOCATION=~/dcd/eos
+export DCD_INSTALL_LOCATION=$DCD_LOCATION/../install
+mkdir -p $DCD_INSTALL_LOCATION
 # install git
 brew update && brew install git
-# clone EOSIO repository
-git clone https://github.com/EOSIO/eos.git $EOSIO_LOCATION
-cd $EOSIO_LOCATION && git submodule update --init --recursive
+# clone DCD repository
+git clone https://github.com/DCD/eos.git $DCD_LOCATION
+cd $DCD_LOCATION && git submodule update --init --recursive
 ```
 
-## Install EOSIO Dependencies
-These commands install the EOSIO software dependencies. Make sure to [Download the EOSIO Repository](#download-eosio-repository) first and set the EOSIO directories.
+## Install DCD Dependencies
+These commands install the DCD software dependencies. Make sure to [Download the DCD Repository](#download-dcd-repository) first and set the DCD directories.
 ```sh
 # install dependencies
 brew install cmake python libtool libusb graphviz automake wget gmp pkgconfig doxygen openssl@1.1 jq boost || :
-export PATH=$EOSIO_INSTALL_LOCATION/bin:$PATH
+export PATH=$DCD_INSTALL_LOCATION/bin:$PATH
 ```
 
-## Build EOSIO
-These commands build the EOSIO software on the specified OS. Make sure to [Install EOSIO Dependencies](#install-eosio-dependencies) first.
+## Build DCD
+These commands build the DCD software on the specified OS. Make sure to [Install DCD Dependencies](#install-dcd-dependencies) first.
 
-[[caution | `EOSIO_BUILD_LOCATION` environment variable]]
+[[caution | `DCD_BUILD_LOCATION` environment variable]]
 | Do NOT change this variable. It is set for convenience only. It should always be set to the `build` folder within the cloned repository.
 
 ```sh
-export EOSIO_BUILD_LOCATION=$EOSIO_LOCATION/build
-mkdir -p $EOSIO_BUILD_LOCATION
-cd $EOSIO_BUILD_LOCATION && cmake -DCMAKE_BUILD_TYPE='Release' -DCMAKE_INSTALL_PREFIX=$EOSIO_INSTALL_LOCATION $EOSIO_LOCATION
-cd $EOSIO_BUILD_LOCATION && make -j$(getconf _NPROCESSORS_ONLN)
+export DCD_BUILD_LOCATION=$DCD_LOCATION/build
+mkdir -p $DCD_BUILD_LOCATION
+cd $DCD_BUILD_LOCATION && cmake -DCMAKE_BUILD_TYPE='Release' -DCMAKE_INSTALL_PREFIX=$DCD_INSTALL_LOCATION $DCD_LOCATION
+cd $DCD_BUILD_LOCATION && make -j$(getconf _NPROCESSORS_ONLN)
 ```
 
-## Install EOSIO
-This command installs the EOSIO software on the specified OS. Make sure to [Build EOSIO](#build-eosio) first.
+## Install DCD
+This command installs the DCD software on the specified OS. Make sure to [Build DCD](#build-dcd) first.
 ```sh
-cd $EOSIO_BUILD_LOCATION && make install
+cd $DCD_BUILD_LOCATION && make install
 ```
 
-## Test EOSIO
-These commands validate the EOSIO software installation on the specified OS. This task is optional but recommended. Make sure to [Install EOSIO](#install-eosio) first.
+## Test DCD
+These commands validate the DCD software installation on the specified OS. This task is optional but recommended. Make sure to [Install DCD](#install-dcd) first.
 ```sh
-cd $EOSIO_BUILD_LOCATION && make test
+cd $DCD_BUILD_LOCATION && make test
 ```
 
-## Uninstall EOSIO
-These commands uninstall the EOSIO software from the specified OS.
+## Uninstall DCD
+These commands uninstall the DCD software from the specified OS.
 ```sh
-xargs rm < $EOSIO_BUILD_LOCATION/install_manifest.txt
-rm -rf $EOSIO_BUILD_LOCATION
+xargs rm < $DCD_BUILD_LOCATION/install_manifest.txt
+rm -rf $DCD_BUILD_LOCATION
 ```

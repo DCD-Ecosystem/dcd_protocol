@@ -2,11 +2,11 @@
 #include <iterator>
 #include <vector>
 
-#include <eosio/chain/controller.hpp>
-#include <eosio/chain/exceptions.hpp>
-#include <eosio/chain/permission_object.hpp>
-#include <eosio/chain/global_property_object.hpp>
-#include <eosio/testing/tester.hpp>
+#include <dcd/chain/controller.hpp>
+#include <dcd/chain/exceptions.hpp>
+#include <dcd/chain/permission_object.hpp>
+#include <dcd/chain/global_property_object.hpp>
+#include <dcd/testing/tester.hpp>
 
 #include <fc/crypto/digest.hpp>
 
@@ -15,9 +15,9 @@
 #include <boost/range/algorithm/permutation.hpp>
 #include <boost/test/unit_test.hpp>
 
-using namespace eosio;
+using namespace dcd;
 using namespace chain;
-using tester = eosio::testing::tester;
+using tester = dcd::testing::tester;
 
 BOOST_AUTO_TEST_SUITE(special_account_tests)
 
@@ -31,12 +31,12 @@ BOOST_FIXTURE_TEST_CASE(accounts_exists, tester)
 
       auto nobody = chain1_db.find<account_object, by_name>(config::null_account_name);
       BOOST_CHECK(nobody != nullptr);
-      const auto& nobody_active_authority = chain1_db.get<permission_object, eosio::chain::by_owner>(boost::make_tuple(config::null_account_name, config::active_name));
+      const auto& nobody_active_authority = chain1_db.get<permission_object, dcd::chain::by_owner>(boost::make_tuple(config::null_account_name, config::active_name));
       BOOST_CHECK_EQUAL(nobody_active_authority.auth.threshold, 1u);
       BOOST_CHECK_EQUAL(nobody_active_authority.auth.accounts.size(), 0u);
       BOOST_CHECK_EQUAL(nobody_active_authority.auth.keys.size(), 0u);
 
-      const auto& nobody_owner_authority = chain1_db.get<permission_object, eosio::chain::by_owner>(boost::make_tuple(config::null_account_name, config::owner_name));
+      const auto& nobody_owner_authority = chain1_db.get<permission_object, dcd::chain::by_owner>(boost::make_tuple(config::null_account_name, config::owner_name));
       BOOST_CHECK_EQUAL(nobody_owner_authority.auth.threshold, 1u);
       BOOST_CHECK_EQUAL(nobody_owner_authority.auth.accounts.size(), 0u);
       BOOST_CHECK_EQUAL(nobody_owner_authority.auth.keys.size(), 0u);

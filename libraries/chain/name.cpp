@@ -1,8 +1,8 @@
-#include <eosio/chain/name.hpp>
+#include <dcd/chain/name.hpp>
 #include <fc/variant.hpp>
 #include <boost/algorithm/string.hpp>
 
-namespace eosio::chain {
+namespace dcd::chain {
 
    void name::set( std::string_view str ) {
       value = string_to_uint64_t(str);
@@ -51,9 +51,9 @@ namespace eosio::chain {
       return true;
    }
 
-} // eosio::chain
+} // dcd::chain
 
 namespace fc {
-  void to_variant(const eosio::chain::name& c, fc::variant& v) { v = c.to_string(); }
-  void from_variant(const fc::variant& v, eosio::chain::name& check) { check.set( v.get_string() ); }
+  void to_variant(const dcd::chain::name& c, fc::variant& v) { v = c.to_string(); }
+  void from_variant(const fc::variant& v, dcd::chain::name& check) { check.set( v.get_string() ); }
 } // fc

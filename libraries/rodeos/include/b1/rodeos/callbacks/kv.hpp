@@ -2,16 +2,16 @@
 
 #include <b1/chain_kv/chain_kv.hpp>
 #include <b1/rodeos/callbacks/vm_types.hpp>
-#include <eosio/check.hpp>
-#include <eosio/name.hpp>
+#include <dcd/check.hpp>
+#include <dcd/name.hpp>
 #include <rocksdb/db.h>
 #include <rocksdb/table.h>
 
 namespace b1::rodeos {
 
-inline constexpr eosio::name kvram_db_id{ "eosio.kvram" };
-inline constexpr eosio::name kvdisk_db_id{ "eosio.kvdisk" };
-inline constexpr eosio::name state_db_id{ "eosio.state" };
+inline constexpr dcd::name kvram_db_id{ "dcd.kvram" };
+inline constexpr dcd::name kvdisk_db_id{ "dcd.kvdisk" };
+inline constexpr dcd::name state_db_id{ "dcd.state" };
 
 enum class kv_it_stat {
    iterator_ok     = 0,  // Iterator is positioned at a key-value pair
@@ -61,16 +61,16 @@ struct kv_iterator_rocksdb {
    }
 
    int32_t kv_it_compare(const kv_iterator_rocksdb& rhs) {
-      eosio::check(rhs.is_kv_rocksdb_context_iterator(), "Incompatible key-value iterators");
+      dcd::check(rhs.is_kv_rocksdb_context_iterator(), "Incompatible key-value iterators");
       auto& r = static_cast<const kv_iterator_rocksdb&>(rhs);
-      eosio::check(&view == &r.view && contract == r.contract, "Incompatible key-value iterators");
-      eosio::check(!kv_it.is_erased(), "Iterator to erased element");
-      eosio::check(!r.kv_it.is_erased(), "Iterator to erased element");
+      dcd::check(&view == &r.view && contract == r.contract, "Incompatible key-value iterators");
+      dcd::check(!kv_it.is_erased(), "Iterator to erased element");
+      dcd::check(!r.kv_it.is_erased(), "Iterator to erased element");
       return compare(kv_it, r.kv_it);
    }
 
    int32_t kv_it_key_compare(const char* key, uint32_t size) {
-      eosio::check(!kv_it.is_erased(), "Iterator to erased element");
+      dcd::check(!kv_it.is_erased(), "Iterator to erased element");
       return chain_kv::compare_key(kv_it.get_kv(), chain_kv::key_value{ { key, size }, {} });
    }
 
@@ -80,14 +80,14 @@ struct kv_iterator_rocksdb {
    }
 
    kv_it_stat kv_it_next(uint32_t* found_key_size = nullptr, uint32_t* found_value_size = nullptr) {
-      eosio::check(!kv_it.is_erased(), "Iterator to erased element");
+      dcd::check(!kv_it.is_erased(), "Iterator to erased element");
       ++kv_it;
       fill_found(found_key_size, found_value_size);
       return kv_it_status();
    }
 
    kv_it_stat kv_it_prev(uint32_t* found_key_size = nullptr, uint32_t* found_value_size = nullptr) {
-      eosio::check(!kv_it.is_erased(), "Iterator to erased element");
+      dcd::check(!kv_it.is_erased(), "Iterator to erased element");
       --kv_it;
       fill_found(found_key_size, found_value_size);
       return kv_it_status();
@@ -101,7 +101,7 @@ struct kv_iterator_rocksdb {
    }
 
    kv_it_stat kv_it_key(uint32_t offset, char* dest, uint32_t size, uint32_t& actual_size) {
-      eosio::check(!kv_it.is_erased(), "Iterator to erased element");
+      dcd::check(!kv_it.is_erased(), "Iterator to erased element");
 
       std::optional<chain_kv::key_value> kv;
       kv = kv_it.get_kv();
@@ -118,7 +118,7 @@ struct kv_iterator_rocksdb {
    }
 
    kv_it_stat kv_it_value(uint32_t offset, char* dest, uint32_t size, uint32_t& actual_size) {
-      eosio::check(!kv_it.is_erased(), "Iterator to erased element");
+      dcd::check(!kv_it.is_erased(), "Iterator to erased element");
 
       std::optional<chain_kv::key_value> kv;
       kv = kv_it.get_kv();
@@ -145,17 +145,17 @@ struct kv_context_rocksdb {
    chain_kv::database&                      database;
    chain_kv::write_session&                 write_session;
    std::vector<char>                        contract_kv_prefix;
-   eosio::name                              database_id;
+   dcd::name                              database_id;
    chain_kv::view                           view;
    bool                                     enable_write          = false;
    bool                                     bypass_receiver_check = false;
-   eosio::name                              receiver;
+   dcd::name                              receiver;
    const kv_database_config&                limits;
    uint32_t                                 num_iterators = 0;
    std::shared_ptr<const std::vector<char>> temp_data_buffer;
 
    kv_context_rocksdb(chain_kv::database& database, chain_kv::write_session& write_session,
-                      std::vector<char> contract_kv_prefix, eosio::name database_id, eosio::name receiver,
+                      std::vector<char> contract_kv_prefix, dcd::name database_id, dcd::name receiver,
                       const kv_database_config& limits)
        : database{ database }, write_session{ write_session }, contract_kv_prefix{ std::move(contract_kv_prefix) },
          database_id{ database_id }, view{ write_session, make_prefix() }, receiver{ receiver }, limits{ limits } {}
@@ -167,7 +167,7 @@ struct kv_context_rocksdb {
    }
 
    int64_t kv_erase(uint64_t contract, const char* key, uint32_t key_size) {
-      eosio::check(enable_write && (bypass_receiver_check || eosio::name{ contract } == receiver),
+      dcd::check(enable_write && (bypass_receiver_check || dcd::name{ contract } == receiver),
                    "Can not write to this key");
       temp_data_buffer = nullptr;
       view.erase(contract, { key, key_size });
@@ -175,10 +175,10 @@ struct kv_context_rocksdb {
    }
 
    int64_t kv_set(uint64_t contract, const char* key, uint32_t key_size, const char* value, uint32_t value_size) {
-      eosio::check(enable_write && (bypass_receiver_check || eosio::name{ contract } == receiver),
+      dcd::check(enable_write && (bypass_receiver_check || dcd::name{ contract } == receiver),
                    "Can not write to this key");
-      eosio::check(key_size <= limits.max_key_size, "Key too large");
-      eosio::check(value_size <= limits.max_value_size, "Value too large");
+      dcd::check(key_size <= limits.max_key_size, "Key too large");
+      dcd::check(value_size <= limits.max_value_size, "Value too large");
       temp_data_buffer = nullptr;
       view.set(contract, { key, key_size }, { value, value_size });
       return 0;
@@ -208,13 +208,13 @@ struct kv_context_rocksdb {
    }
 
    std::unique_ptr<kv_iterator_rocksdb> kv_it_create(uint64_t contract, const char* prefix, uint32_t size) {
-      eosio::check(num_iterators < limits.max_iterators, "Too many iterators");
+      dcd::check(num_iterators < limits.max_iterators, "Too many iterators");
       return std::make_unique<kv_iterator_rocksdb>(num_iterators, view, contract, prefix, size);
    }
 }; // kv_context_rocksdb
 
 struct db_view_state {
-   eosio::name                                       receiver;
+   dcd::name                                       receiver;
    chain_kv::database&                               database;
    const kv_database_config                          limits;
    const kv_database_config                          kv_state_limits{ 1024, std::numeric_limits<uint32_t>::max() };
@@ -224,7 +224,7 @@ struct db_view_state {
    std::vector<std::unique_ptr<kv_iterator_rocksdb>> kv_iterators;
    std::vector<size_t>                               kv_destroyed_iterators;
 
-   db_view_state(eosio::name receiver, chain_kv::database& database, chain_kv::write_session& write_session,
+   db_view_state(dcd::name receiver, chain_kv::database& database, chain_kv::write_session& write_session,
                  const std::vector<char>& contract_kv_prefix)
        : receiver{ receiver }, database{ database }, //
          kv_ram{ database, write_session, contract_kv_prefix, kvram_db_id, receiver, limits },
@@ -233,7 +233,7 @@ struct db_view_state {
          kv_iterators(1) {}
 
    void reset() {
-      eosio::check(kv_iterators.size() == kv_destroyed_iterators.size() + 1, "iterators are still alive");
+      dcd::check(kv_iterators.size() == kv_destroyed_iterators.size() + 1, "iterators are still alive");
       kv_iterators.resize(1);
       kv_destroyed_iterators.clear();
    }
@@ -243,23 +243,23 @@ template <typename Derived>
 struct db_callbacks {
    Derived& derived() { return static_cast<Derived&>(*this); }
 
-   int64_t kv_erase(uint64_t db, uint64_t contract, eosio::vm::span<const char> key) {
+   int64_t kv_erase(uint64_t db, uint64_t contract, dcd::vm::span<const char> key) {
       return kv_get_db(db).kv_erase(contract, key.data(), key.size());
    }
 
-   int64_t kv_set(uint64_t db, uint64_t contract, eosio::vm::span<const char> key, eosio::vm::span<const char> value) {
+   int64_t kv_set(uint64_t db, uint64_t contract, dcd::vm::span<const char> key, dcd::vm::span<const char> value) {
       return kv_get_db(db).kv_set(contract, key.data(), key.size(), value.data(), value.size());
    }
 
-   bool kv_get(uint64_t db, uint64_t contract, eosio::vm::span<const char> key, uint32_t* value_size) {
+   bool kv_get(uint64_t db, uint64_t contract, dcd::vm::span<const char> key, uint32_t* value_size) {
       return kv_get_db(db).kv_get(contract, key.data(), key.size(), *value_size);
    }
 
-   uint32_t kv_get_data(uint64_t db, uint32_t offset, eosio::vm::span<char> data) {
+   uint32_t kv_get_data(uint64_t db, uint32_t offset, dcd::vm::span<char> data) {
       return kv_get_db(db).kv_get_data(offset, data.data(), data.size());
    }
 
-   uint32_t kv_it_create(uint64_t db, uint64_t contract, eosio::vm::span<const char> prefix) {
+   uint32_t kv_it_create(uint64_t db, uint64_t contract, dcd::vm::span<const char> prefix) {
       auto&    kdb = kv_get_db(db);
       uint32_t itr;
       if (!derived().get_db_view_state().kv_destroyed_iterators.empty()) {
@@ -267,7 +267,7 @@ struct db_callbacks {
          derived().get_db_view_state().kv_destroyed_iterators.pop_back();
       } else {
          // Sanity check in case the per-database limits are set poorly
-         eosio::check(derived().get_db_view_state().kv_iterators.size() <= 0xFFFFFFFFu, "Too many iterators");
+         dcd::check(derived().get_db_view_state().kv_iterators.size() <= 0xFFFFFFFFu, "Too many iterators");
          itr = derived().get_db_view_state().kv_iterators.size();
          derived().get_db_view_state().kv_iterators.emplace_back();
       }
@@ -293,7 +293,7 @@ struct db_callbacks {
             *derived().get_db_view_state().kv_iterators[itr_b]);
    }
 
-   int32_t kv_it_key_compare(uint32_t itr, eosio::vm::span<const char> key) {
+   int32_t kv_it_key_compare(uint32_t itr, dcd::vm::span<const char> key) {
       kv_check_iterator(itr);
       return derived().get_db_view_state().kv_iterators[itr]->kv_it_key_compare(key.data(), key.size());
    }
@@ -315,20 +315,20 @@ struct db_callbacks {
             derived().get_db_view_state().kv_iterators[itr]->kv_it_prev(found_key_size, found_value_size));
    }
 
-   int32_t kv_it_lower_bound(uint32_t itr, eosio::vm::span<const char> key, uint32_t* found_key_size,
+   int32_t kv_it_lower_bound(uint32_t itr, dcd::vm::span<const char> key, uint32_t* found_key_size,
                              uint32_t* found_value_size) {
       kv_check_iterator(itr);
       return static_cast<int32_t>(derived().get_db_view_state().kv_iterators[itr]->kv_it_lower_bound(
             key.data(), key.size(), found_key_size, found_value_size));
    }
 
-   int32_t kv_it_key(uint32_t itr, uint32_t offset, eosio::vm::span<char> dest, uint32_t* actual_size) {
+   int32_t kv_it_key(uint32_t itr, uint32_t offset, dcd::vm::span<char> dest, uint32_t* actual_size) {
       kv_check_iterator(itr);
       return static_cast<int32_t>(
             derived().get_db_view_state().kv_iterators[itr]->kv_it_key(offset, dest.data(), dest.size(), *actual_size));
    }
 
-   int32_t kv_it_value(uint32_t itr, uint32_t offset, eosio::vm::span<char> dest, uint32_t* actual_size) {
+   int32_t kv_it_value(uint32_t itr, uint32_t offset, dcd::vm::span<char> dest, uint32_t* actual_size) {
       kv_check_iterator(itr);
       return static_cast<int32_t>(derived().get_db_view_state().kv_iterators[itr]->kv_it_value(
             offset, dest.data(), dest.size(), *actual_size));
@@ -345,7 +345,7 @@ struct db_callbacks {
    }
 
    void kv_check_iterator(uint32_t itr) {
-      eosio::check(itr < derived().get_db_view_state().kv_iterators.size() &&
+      dcd::check(itr < derived().get_db_view_state().kv_iterators.size() &&
                          derived().get_db_view_state().kv_iterators[itr],
                    "Bad key-value iterator");
    }

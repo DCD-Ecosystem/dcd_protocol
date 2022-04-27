@@ -1,12 +1,12 @@
 # Overview
 
-Block Vault is a component in an EOSIO network architecture which provides a replicated durable storage with strong consistency guarantees for all the input required by a redundant cluster of nodeos nodes to achieve the guarantees outlined in BlockVault: Failover for Nodeos  reproduced here:
+Block Vault is a component in an DCD network architecture which provides a replicated durable storage with strong consistency guarantees for all the input required by a redundant cluster of dcdnode nodes to achieve the guarantees outlined in BlockVault: Failover for dcdnode  reproduced here:
 
 * Guarantee against double-production of blocks
 * Guarantee against finality violation
 * Guarantee of liveness (ability to make progress as a blockchain)
 
-By facilitating these guarantees, Block Vault allows nodeos to run in a redundant and/or highly available mode without an additional requirement of coordination between the nodes. Block Vault itself does not implement any coordination of nodeos nodes in a cluster. Thus, it merely guarantees that any such coordination, including faulty coordination leading to multiple active block constructing nodeos nodes will be safe as defined by the above guarantees.
+By facilitating these guarantees, Block Vault allows dcdnode to run in a redundant and/or highly available mode without an additional requirement of coordination between the nodes. Block Vault itself does not implement any coordination of dcdnode nodes in a cluster. Thus, it merely guarantees that any such coordination, including faulty coordination leading to multiple active block constructing dcdnode nodes will be safe as defined by the above guarantees.
 
 Currently we use PostgreSQL as our durable storage for block vault, other distributed database may be supported in the future. 
 
@@ -45,15 +45,15 @@ CREATE TABLE IF NOT EXISTS SnapshotData (watermark_bn bigint, watermark_ts bigin
 
 ## Plugin configuration
 
-To use this plugin, `nodeos` has to be configured as a producer with `--block-vault-backend` option.  For example
+To use this plugin, `dcdnode` has to be configured as a producer with `--block-vault-backend` option.  For example
 
 ```
-nodeos --plugin eosio::producer_plugin --producer-name myproducera --plugin eosio::blockvault_client_plugin --block-vault-backend postgresql://user:password@mycompany.com
+dcdnode --plugin dcd::producer_plugin --producer-name myproducera --plugin dcd::blockvault_client_plugin --block-vault-backend postgresql://user:password@mycompany.com
 ```
 
 For production environment, we recommend to use `PGPASSWORD` environment variable to configure the password instead of embedding the password in the URI.
 
 ```
 export PGPASSWORD=password
-nodeos --plugin eosio::producer_plugin --producer-name myproducera --plugin eosio::blockvault_client_plugin --block-vault-backend postgresql://user@mycompany.com
+dcdnode --plugin dcd::producer_plugin --producer-name myproducera --plugin dcd::blockvault_client_plugin --block-vault-backend postgresql://user@mycompany.com
 ```

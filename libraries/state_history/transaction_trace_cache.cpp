@@ -1,23 +1,23 @@
-#include "eosio/state_history/transaction_trace_cache.hpp"
+#include "dcd/state_history/transaction_trace_cache.hpp"
 
-namespace eosio {
+namespace dcd {
 namespace state_history {
 
-using eosio::chain::packed_transaction;
-using eosio::chain::state_history_exception;
+using dcd::chain::packed_transaction;
+using dcd::chain::state_history_exception;
 
 
 bool is_onblock(const transaction_trace_ptr& p) {
    if (p->action_traces.size() != 1)
       return false;
    auto& act = p->action_traces[0].act;
-   using namespace eosio::chain::literals;
-   if (act.account != eosio::chain::config::system_account_name || act.name != "onblock"_n ||
+   using namespace dcd::chain::literals;
+   if (act.account != dcd::chain::config::system_account_name || act.name != "onblock"_n ||
        act.authorization.size() != 1)
       return false;
    auto& auth = act.authorization[0];
-   return auth.actor == eosio::chain::config::system_account_name &&
-          auth.permission == eosio::chain::config::active_name;
+   return auth.actor == dcd::chain::config::system_account_name &&
+          auth.permission == dcd::chain::config::active_name;
 }
 
 void transaction_trace_cache::add_transaction(const transaction_trace_ptr& trace, const packed_transaction_ptr& transaction) {
@@ -56,4 +56,4 @@ void transaction_trace_cache::clear() {
    this->onblock_trace.reset();
 }
 
-}} // namespace eosio::state_history
+}} // namespace dcd::state_history

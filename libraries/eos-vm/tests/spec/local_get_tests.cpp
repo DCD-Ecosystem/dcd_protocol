@@ -9,10 +9,10 @@
 #include <catch2/catch.hpp>
 #include <utils.hpp>
 #include <wasm_config.hpp>
-#include <eosio/vm/backend.hpp>
+#include <dcd/vm/backend.hpp>
 
-using namespace eosio;
-using namespace eosio::vm;
+using namespace dcd;
+using namespace dcd::vm;
 extern wasm_allocator wa;
 
 BACKEND_TEST_CASE( "Testing wasm <local_get_0_wasm>", "[local_get_0_wasm_tests]" ) {

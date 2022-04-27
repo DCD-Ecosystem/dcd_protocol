@@ -5,11 +5,11 @@
 
 #include <catch2/catch.hpp>
 
-#include <eosio/vm/leb128.hpp>
-#include <eosio/vm/types.hpp>
+#include <dcd/vm/leb128.hpp>
+#include <dcd/vm/types.hpp>
 
-using namespace eosio;
-using namespace eosio::vm;
+using namespace dcd;
+using namespace dcd::vm;
 
 TEST_CASE("Testing varuint", "[varuint_tests]") { 
    {

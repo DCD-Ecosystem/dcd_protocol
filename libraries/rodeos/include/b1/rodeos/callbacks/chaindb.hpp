@@ -2,8 +2,8 @@
 
 #include <b1/rodeos/callbacks/kv.hpp>
 #include <b1/rodeos/constants.hpp>
-#include <eosio/ship_protocol.hpp>
-#include <eosio/to_key.hpp>
+#include <dcd/ship_protocol.hpp>
+#include <dcd/to_key.hpp>
 
 namespace b1::rodeos {
 
@@ -46,9 +46,9 @@ class iterator_cache {
       if (map_it != table_to_index.end())
          return map_it->second;
       if (!view.get(state_account.value,
-                    chain_kv::to_slice(eosio::convert_to_key(std::make_tuple(
-                                                          (uint8_t)0x01, eosio::name{ "contract.tab" },
-                                                          eosio::name{ "primary" }, key.code, key.table, key.scope)))))
+                    chain_kv::to_slice(dcd::convert_to_key(std::make_tuple(
+                                                          (uint8_t)0x01, dcd::name{ "contract.tab" },
+                                                          dcd::name{ "primary" }, key.code, key.table, key.scope)))))
          return -1;
       if (tables.size() != table_to_index.size() || tables.size() != end_iterators.size())
          throw std::runtime_error("internal error: tables.size() mismatch");
@@ -83,8 +83,8 @@ class iterator_cache {
             result = iterators.size();
             iterators.emplace_back();
             it = &iterators.back();
-            eosio::input_stream stream{ view_it.get_kv()->value.data(), view_it.get_kv()->value.size() };
-            auto row = std::get<0>(eosio::from_bin<eosio::ship_protocol::contract_row>(stream));
+            dcd::input_stream stream{ view_it.get_kv()->value.data(), view_it.get_kv()->value.size() };
+            auto row = std::get<0>(dcd::from_bin<dcd::ship_protocol::contract_row>(stream));
             it->table_index = rk.table_index;
             it->primary     = row.primary_key;
             it->value.insert(it->value.end(), row.value.pos, row.value.end);
@@ -136,12 +136,12 @@ class iterator_cache {
          const auto& table_key = tables[it.table_index];
          view_it               = chain_kv::view::iterator{
             view, state_account.value,
-            chain_kv::to_slice(eosio::convert_to_key(std::make_tuple( //
-                                     (uint8_t)0x01, eosio::name{ "contract.row" }, eosio::name{ "primary" },
+            chain_kv::to_slice(dcd::convert_to_key(std::make_tuple( //
+                                     (uint8_t)0x01, dcd::name{ "contract.row" }, dcd::name{ "primary" },
                                      table_key.code, table_key.table, table_key.scope)))
          };
-         view_it->lower_bound(eosio::convert_to_key(std::make_tuple(
-                                                 (uint8_t)0x01, eosio::name{ "contract.row" }, eosio::name{ "primary" },
+         view_it->lower_bound(dcd::convert_to_key(std::make_tuple(
+                                                 (uint8_t)0x01, dcd::name{ "contract.row" }, dcd::name{ "primary" },
                                                  table_key.code, table_key.table, table_key.scope, it.primary)));
       }
       ++*view_it;
@@ -149,8 +149,8 @@ class iterator_cache {
          it.next = index_to_end_iterator(itr);
          return it.next;
       } else {
-         eosio::input_stream stream{ view_it->get_kv()->value.data(), view_it->get_kv()->value.size() };
-         auto row = std::get<0>(eosio::from_bin<eosio::ship_protocol::contract_row>(stream));
+         dcd::input_stream stream{ view_it->get_kv()->value.data(), view_it->get_kv()->value.size() };
+         auto row = std::get<0>(dcd::from_bin<dcd::ship_protocol::contract_row>(stream));
          primary  = row.primary_key;
          it.next  = get_iterator({ it.table_index, primary }, std::move(*view_it));
          return it.next;
@@ -171,11 +171,11 @@ class iterator_cache {
       }
       // std::cout << "lower_bound: db_view::iterator\n";
       chain_kv::view::iterator it{ view, state_account.value,
-                                   chain_kv::to_slice(eosio::convert_to_key(std::make_tuple(
-                                                                         (uint8_t)0x01, eosio::name{ "contract.row" },
-                                                                         eosio::name{ "primary" }, code, table, scope))) };
-      it.lower_bound(eosio::convert_to_key(std::make_tuple((uint8_t)0x01, eosio::name{ "contract.row" },
-                                                               eosio::name{ "primary" }, code, table, scope, key)));
+                                   chain_kv::to_slice(dcd::convert_to_key(std::make_tuple(
+                                                                         (uint8_t)0x01, dcd::name{ "contract.row" },
+                                                                         dcd::name{ "primary" }, code, table, scope))) };
+      it.lower_bound(dcd::convert_to_key(std::make_tuple((uint8_t)0x01, dcd::name{ "contract.row" },
+                                                               dcd::name{ "primary" }, code, table, scope, key)));
       return get_iterator(rk, std::move(it));
    }
 }; // iterator_cache

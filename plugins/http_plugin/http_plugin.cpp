@@ -1,9 +1,9 @@
-#include <eosio/http_plugin/http_plugin.hpp>
+#include <dcd/http_plugin/http_plugin.hpp>
 #ifdef BOOST_ASIO_HAS_LOCAL_SOCKETS
-#include <eosio/http_plugin/local_endpoint.hpp>
+#include <dcd/http_plugin/local_endpoint.hpp>
 #endif
-#include <eosio/chain/exceptions.hpp>
-#include <eosio/chain/thread_utils.hpp>
+#include <dcd/chain/exceptions.hpp>
+#include <dcd/chain/thread_utils.hpp>
 
 #include <fc/network/ip.hpp>
 #include <fc/log/logger_config.hpp>
@@ -29,7 +29,7 @@
 const fc::string logger_name("http_plugin");
 fc::logger logger;
 
-namespace eosio {
+namespace dcd {
 
    static appbase::abstract_plugin& _http_plugin = app().register_plugin<http_plugin>();
 
@@ -220,7 +220,7 @@ class http_plugin_impl : public std::enable_shared_from_this<http_plugin_impl> {
          websocket_server_type    server;
 
          uint16_t                                       thread_pool_size = 2;
-         std::optional<eosio::chain::named_thread_pool> thread_pool;
+         std::optional<dcd::chain::named_thread_pool> thread_pool;
          std::atomic<size_t>                            bytes_in_flight{0};
          std::atomic<int32_t>                           requests_in_flight{0};
          size_t                                         max_bytes_in_flight = 0;

@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include <eosio/ship_protocol.hpp>
+#include <dcd/ship_protocol.hpp>
 
 #include <abieos.hpp>
 #include <boost/asio/connect.hpp>
@@ -13,7 +13,7 @@
 
 namespace b1::ship_client {
 
-namespace ship = eosio::ship_protocol;
+namespace ship = dcd::ship_protocol;
 
 enum request_flags {
    request_irreversible_only = 1,
@@ -25,9 +25,9 @@ enum request_flags {
 struct connection_callbacks {
    virtual ~connection_callbacks() = default;
    virtual void received_abi() {}
-   virtual bool received(ship::get_status_result_v0& status, eosio::input_stream bin) { return true; }
-   virtual bool received(ship::get_blocks_result_v0& result, eosio::input_stream bin) { return true; }
-   virtual bool received(ship::get_blocks_result_v1& result, eosio::input_stream bin) { return true; }
+   virtual bool received(ship::get_status_result_v0& status, dcd::input_stream bin) { return true; }
+   virtual bool received(ship::get_blocks_result_v0& result, dcd::input_stream bin) { return true; }
+   virtual bool received(ship::get_blocks_result_v1& result, dcd::input_stream bin) { return true; }
    virtual void closed(bool retry) = 0;
 };
 
@@ -36,16 +36,16 @@ struct connection_config {
    std::string port;
 };
 
-struct abi_def_skip_table : eosio::abi_def {};
+struct abi_def_skip_table : dcd::abi_def {};
 
-EOSIO_REFLECT(abi_def_skip_table, version, types, structs, actions, ricardian_clauses, error_messages, abi_extensions,
+DCD_REFLECT(abi_def_skip_table, version, types, structs, actions, ricardian_clauses, error_messages, abi_extensions,
               variants);
 
 struct connection : std::enable_shared_from_this<connection> {
    using error_code  = boost::system::error_code;
    using flat_buffer = boost::beast::flat_buffer;
    using tcp         = boost::asio::ip::tcp;
-   using abi_type    = eosio::abi_type;
+   using abi_type    = dcd::abi_type;
 
    connection_config                            config;
    std::shared_ptr<connection_callbacks>        callbacks;
@@ -105,12 +105,12 @@ struct connection : std::enable_shared_from_this<connection> {
    void receive_abi(const std::shared_ptr<flat_buffer>& p) {
       auto                     data = p->data();
       std::string              json{ (const char*)data.data(), data.size() };
-      eosio::json_token_stream stream{ json.data() };
+      dcd::json_token_stream stream{ json.data() };
       from_json(abi, stream);
       std::string error;
       if (!abieos::check_abi_version(abi.version, error))
          throw std::runtime_error(error);
-      eosio::abi a;
+      dcd::abi a;
       convert(abi, a);
       abi_types = std::move(a.abi_types);
       have_abi  = true;
@@ -120,7 +120,7 @@ struct connection : std::enable_shared_from_this<connection> {
 
    bool receive_result(const std::shared_ptr<flat_buffer>& p) {
       auto                data = p->data();
-      eosio::input_stream bin{ (const char*)data.data(), (const char*)data.data() + data.size() };
+      dcd::input_stream bin{ (const char*)data.data(), (const char*)data.data() + data.size() };
       auto                orig = bin;
       ship::result        result;
       from_bin(result, bin);
@@ -142,14 +142,14 @@ struct connection : std::enable_shared_from_this<connection> {
 
    void request_blocks(const ship::get_status_result_v0& status, uint32_t start_block_num,
                        const std::vector<ship::block_position>& positions, int flags) {
-      uint32_t nodeos_start = 0xffff'ffff;
+      uint32_t dcdnode_start = 0xffff'ffff;
       if (status.trace_begin_block < status.trace_end_block)
-         nodeos_start = std::min(nodeos_start, status.trace_begin_block);
+         dcdnode_start = std::min(dcdnode_start, status.trace_begin_block);
       if (status.chain_state_begin_block < status.chain_state_end_block)
-         nodeos_start = std::min(nodeos_start, status.chain_state_begin_block);
-      if (nodeos_start == 0xffff'ffff)
-         nodeos_start = 0;
-      request_blocks(std::max(start_block_num, nodeos_start), positions, flags);
+         dcdnode_start = std::min(dcdnode_start, status.chain_state_begin_block);
+      if (dcdnode_start == 0xffff'ffff)
+         dcdnode_start = 0;
+      request_blocks(std::max(start_block_num, dcdnode_start), positions, flags);
    }
 
    const abi_type& get_type(const std::string& name) {
@@ -161,7 +161,7 @@ struct connection : std::enable_shared_from_this<connection> {
 
    void send(const ship::request& req) {
       auto bin = std::make_shared<std::vector<char>>();
-      eosio::convert_to_bin(req, *bin);
+      dcd::convert_to_bin(req, *bin);
       stream.async_write(boost::asio::buffer(*bin), [self = shared_from_this(), bin, this](error_code ec, size_t) {
          enter_callback(ec, "async_write", [&] {});
       });

@@ -549,7 +549,7 @@ export class SerialBuffer { // tslint:disable-line max-classes-per-file
 
 /** Is this a supported ABI version? */
 export function supportedAbiVersion(version: string) {
-    return version.startsWith('eosio::abi/1.');
+    return version.startsWith('dcd::abi/1.');
 }
 
 function checkDateParse(date: string) {

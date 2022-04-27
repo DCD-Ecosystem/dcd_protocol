@@ -7,30 +7,30 @@
 
 #include <catch2/catch.hpp>
 
-#include <eosio/vm/backend.hpp>
+#include <dcd/vm/backend.hpp>
 #include "wasm_config.hpp"
 #include "utils.hpp"
 
-using namespace eosio;
-using namespace eosio::vm;
+using namespace dcd;
+using namespace dcd::vm;
 
 // host functions that are C-style functions
 // wasm hex
-/* Code used to generate test, compile with eosio-cpp v1.6.2 with minor manual edits to remove unneeded imports
+/* Code used to generate test, compile with dcd-cpp v1.6.2 with minor manual edits to remove unneeded imports
  * extern "C" {
       struct state_t { float f; int i; };
-      [[eosio::wasm_import]]
+      [[dcd::wasm_import]]
       void c_style_host_function_0();
-      [[eosio::wasm_import]]
+      [[dcd::wasm_import]]
       void c_style_host_function_1(int);
-      [[eosio::wasm_import]]
+      [[dcd::wasm_import]]
       void c_style_host_function_2(int, int);
-      [[eosio::wasm_import]]
+      [[dcd::wasm_import]]
       void c_style_host_function_3(int, float);
-      [[eosio::wasm_import]]
+      [[dcd::wasm_import]]
       void c_style_host_function_4(const state_t&);
 
-      [[eosio::wasm_entry]]
+      [[dcd::wasm_entry]]
       void apply(unsigned long long a, unsigned long long b, unsigned long long c) {
          if (a == 0)
             c_style_host_function_0();
@@ -195,8 +195,8 @@ struct init_backend {
    }
    decltype(auto) get_context() { return bkend.get_context(); }
 
-   using rhf_t     = eosio::vm::registered_host_functions<Host, execution_interface, cnv<Host>>;
-   using backend_t = eosio::vm::backend<rhf_t, Impl>;
+   using rhf_t     = dcd::vm::registered_host_functions<Host, execution_interface, cnv<Host>>;
+   using backend_t = dcd::vm::backend<rhf_t, Impl>;
    wasm_allocator wa;
    backend_t bkend{host_functions_tests_1_code, &wa};
    Host * _host;
@@ -349,8 +349,8 @@ BACKEND_TEST_CASE( "Test host function results", "[host_functions_results]" ) {
 
 BACKEND_TEST_CASE( "Test C-style host function system", "[C-style_host_functions_tests]") {
    wasm_allocator wa;
-   using rhf_t     = eosio::vm::registered_host_functions<standalone_function_t, execution_interface, cnv<standalone_function_t>>;
-   using backend_t = eosio::vm::backend<rhf_t, TestType>;
+   using rhf_t     = dcd::vm::registered_host_functions<standalone_function_t, execution_interface, cnv<standalone_function_t>>;
+   using backend_t = dcd::vm::backend<rhf_t, TestType>;
    rhf_t::add<&c_style_host_function_0>("env", "c_style_host_function_0");
    rhf_t::add<&c_style_host_function_1>("env", "c_style_host_function_1");
    rhf_t::add<&c_style_host_function_2>("env", "c_style_host_function_2");

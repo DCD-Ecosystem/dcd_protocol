@@ -42,45 +42,45 @@ struct tmp {
     std::vector<uint8_t> list{ 1, 2 };
 };
 
-[[eosio::action]]
+[[dcd::action]]
 std::string rstring(const std::string & str) { return str;   }
 
-[[eosio::action]]
+[[dcd::action]]
 uint16_t    ruint(uint16_t i)                { return i;     }
 
-[[eosio::action]]
+[[dcd::action]]
 tmp         rtmp()                           { return tmp{}; }
 ```
 
 The `dcdcli` commands and their respective outputs are.
 
 ```shell
-> dcdcli push action eosio rstring '{"str":null}'  -p eosio@active
+> dcdcli push action dcd rstring '{"str":null}'  -p dcd@active
 
 executed transaction: 1e72a3ef1fa01a9c90b870fe86bf31413c6a2f40a2722ca72d9dd707f58851af  96 bytes  116 us
-#         eosio <= eosio::rstring               {"str":""}
+#         dcd <= dcd::rstring               {"str":""}
 =>                                return value: ""
 
-> dcdcli push action eosio rstring '{"str":"test"}'  -p eosio@active
+> dcdcli push action dcd rstring '{"str":"test"}'  -p dcd@active
 
 executed transaction: 2484ba021683bb3c6daaabe291ba291e2689d1be899a293d0a09cc68cf0967fb  96 bytes  116 us
-#         eosio <= eosio::rstring               {"str":"test"}
+#         dcd <= dcd::rstring               {"str":"test"}
 =>                                return value: "test"
 
-> dcdcli push action eosio ruint '{"i":42}'  -p eosio@active
+> dcdcli push action dcd ruint '{"i":42}'  -p dcd@active
 
 executed transaction: 12c51fd27fad9bb0fa959037a72093ad0b168f5846e916a0e9a295c8416bdf9f  96 bytes  138 us
-#         eosio <= eosio::ruint                 {"i":42}
+#         dcd <= dcd::ruint                 {"i":42}
 =>                                return value: 42
 ```
 
 The `rtmp` action output, returning a default `tmp` object, looks like this:
 
 ```shell
-> dcdcli push action eosio rtmp '{}'  -p eosio@active
+> dcdcli push action dcd rtmp '{}'  -p dcd@active
 
 executed transaction: 42386687d94695d77d67cf901cf8d1a4f83ac9f89382f0b01f3fb51267cc21cd  96 bytes  110 us
-#         eosio <= eosio::rtmp                  ""
+#         dcd <= dcd::rtmp                  ""
 =>                                return value: {"id":1,"list":[1,2]}
 ```
 
@@ -93,8 +93,8 @@ When it is not possible to decode the return value, for example when ABI doesnâ€
 If the length of the return value string is more than 100 chars the string will be truncated to the first 100 chars and three dots `...` will be added at the end. It's similar to what dcdcli does to action parameters output.
 
 ```shell
-> dcdcli push action eosio rstring '{"str":"qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq"}'  -p eosio@active
+> dcdcli push action dcd rstring '{"str":"qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq"}'  -p dcd@active
 executed transaction: 9fb35c72dbccadb4ff7b72a3a046543fbe2ae36eea70265f2b8356e8192c3f0e  248 bytes  176 us
-#         eosio <= eosio::rstring               {"str":"qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq...
+#         dcd <= dcd::rstring               {"str":"qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq...
 =>                                return value: "qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq...
 ```

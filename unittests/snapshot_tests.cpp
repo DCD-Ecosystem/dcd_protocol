@@ -1,11 +1,11 @@
 #include <sstream>
 
-#include <eosio/chain/block_log.hpp>
-#include <eosio/chain/global_property_object.hpp>
-#include <eosio/chain/kv_chainbase_objects.hpp>
-#include <eosio/chain/snapshot.hpp>
-#include <eosio/testing/tester.hpp>
-#include <eosio/testing/snapshot_suites.hpp>
+#include <dcd/chain/block_log.hpp>
+#include <dcd/chain/global_property_object.hpp>
+#include <dcd/chain/kv_chainbase_objects.hpp>
+#include <dcd/chain/snapshot.hpp>
+#include <dcd/testing/tester.hpp>
+#include <dcd/testing/snapshot_suites.hpp>
 
 #include <boost/mpl/list.hpp>
 #include <boost/test/unit_test.hpp>
@@ -13,8 +13,8 @@
 #include <contracts.hpp>
 #include <snapshots.hpp>
 
-using namespace eosio::testing;
-using namespace eosio::chain;
+using namespace dcd::testing;
+using namespace dcd::chain;
 
 chainbase::bfs::path get_parent_path(chainbase::bfs::path blocks_dir, int ordinal) {
    chainbase::bfs::path leaf_dir = blocks_dir.filename();
@@ -178,8 +178,8 @@ namespace {
 }
 
 template<typename SnapshotSuite>
-void exhaustive_snapshot(const eosio::chain::backing_store_type main_store,
-                         const eosio::chain::backing_store_type sub_store) {
+void exhaustive_snapshot(const dcd::chain::backing_store_type main_store,
+                         const dcd::chain::backing_store_type sub_store) {
    fc::temp_directory temp_dir;
    tester chain(temp_dir, [main_store] (auto& config) { config.backing_store = main_store; }, true);
 
@@ -250,26 +250,26 @@ void exhaustive_snapshot(const eosio::chain::backing_store_type main_store,
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_exhaustive_snapshot_cb_to_cb, SNAPSHOT_SUITE, snapshot_suites)
 {
-   exhaustive_snapshot<SNAPSHOT_SUITE>(eosio::chain::backing_store_type::CHAINBASE,
-                                       eosio::chain::backing_store_type::CHAINBASE);
+   exhaustive_snapshot<SNAPSHOT_SUITE>(dcd::chain::backing_store_type::CHAINBASE,
+                                       dcd::chain::backing_store_type::CHAINBASE);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_exhaustive_snapshot_cb_to_rdb, SNAPSHOT_SUITE, snapshot_suites)
 {
-   exhaustive_snapshot<SNAPSHOT_SUITE>(eosio::chain::backing_store_type::CHAINBASE,
-                                       eosio::chain::backing_store_type::ROCKSDB);
+   exhaustive_snapshot<SNAPSHOT_SUITE>(dcd::chain::backing_store_type::CHAINBASE,
+                                       dcd::chain::backing_store_type::ROCKSDB);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_exhaustive_snapshot_rdb_to_cb, SNAPSHOT_SUITE, snapshot_suites)
 {
-   exhaustive_snapshot<SNAPSHOT_SUITE>(eosio::chain::backing_store_type::ROCKSDB,
-                                       eosio::chain::backing_store_type::CHAINBASE);
+   exhaustive_snapshot<SNAPSHOT_SUITE>(dcd::chain::backing_store_type::ROCKSDB,
+                                       dcd::chain::backing_store_type::CHAINBASE);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_exhaustive_snapshot_rdb_to_rdb, SNAPSHOT_SUITE, snapshot_suites)
 {
-   exhaustive_snapshot<SNAPSHOT_SUITE>(eosio::chain::backing_store_type::ROCKSDB,
-                                       eosio::chain::backing_store_type::ROCKSDB);
+   exhaustive_snapshot<SNAPSHOT_SUITE>(dcd::chain::backing_store_type::ROCKSDB,
+                                       dcd::chain::backing_store_type::ROCKSDB);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_replay_over_snapshot, SNAPSHOT_SUITE, snapshot_suites)
@@ -355,7 +355,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_replay_over_snapshot, SNAPSHOT_SUITE, snapsho
 
    // verifies that chain's block_log has a genesis_state (and blocks starting at 1)
    controller::config copied_config = copy_config_and_files(chain.get_config(), ordinal++);
-   auto genesis = eosio::chain::block_log::extract_genesis_state(chain.get_config().blog.log_dir);
+   auto genesis = dcd::chain::block_log::extract_genesis_state(chain.get_config().blog.log_dir);
    BOOST_REQUIRE(genesis);
    tester from_block_log_chain(copied_config, *genesis);
    const auto from_block_log_head = from_block_log_chain.control->head_block_num();
@@ -438,7 +438,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_compatible_versions, SNAPSHOT_SUITE, snapshot
    }
 
    auto config = tester::default_config(fc::temp_directory(), legacy_default_max_inline_action_size).first;
-   auto genesis = eosio::chain::block_log::extract_genesis_state(source_log_dir);
+   auto genesis = dcd::chain::block_log::extract_genesis_state(source_log_dir);
    bfs::create_directories(config.blog.log_dir);
    bfs::copy(source_log_dir / "blocks.log", config.blog.log_dir / "blocks.log");
    tester base_chain(config, *genesis);
@@ -501,7 +501,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_pending_schedule_snapshot, SNAPSHOT_SUITE, sn
    const auto source_log_dir = bfs::path(source_log_dir_str.c_str());
    const uint32_t legacy_default_max_inline_action_size = 4 * 1024;
    auto config = tester::default_config(fc::temp_directory(), legacy_default_max_inline_action_size).first;
-   auto genesis = eosio::chain::block_log::extract_genesis_state(source_log_dir);
+   auto genesis = dcd::chain::block_log::extract_genesis_state(source_log_dir);
    bfs::create_directories(config.blog.log_dir);
    bfs::copy(source_log_dir / "blocks.log", config.blog.log_dir / "blocks.log");
    tester blockslog_chain(config, *genesis);
@@ -640,7 +640,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_kv_snapshot, SNAPSHOT_SUITE, snapshot_suites)
          chain.create_accounts(contracts);
 
          chain.set_code("manager"_n, kv_snapshot_bios);
-         chain.push_action("eosio"_n, "setpriv"_n, "eosio"_n, mutable_variant_object()("account", "manager")("is_priv", 1));
+         chain.push_action("dcd"_n, "setpriv"_n, "dcd"_n, mutable_variant_object()("account", "manager")("is_priv", 1));
 
          chain.produce_blocks(1);
          {
@@ -682,7 +682,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_kv_snapshot, SNAPSHOT_SUITE, snapshot_suites)
                // Calling apply method which will increment the
                // current value stored
                signed_transaction trx;
-               trx.actions.push_back({{{contract, "active"_n}}, contract, "eosio.kvram"_n, {}});
+               trx.actions.push_back({{{contract, "active"_n}}, contract, "dcd.kvram"_n, {}});
                chain.set_transaction_headers(trx);
                trx.sign(chain.get_private_key(contract, "active"), chain.control->get_chain_id());
                chain.push_transaction(trx);

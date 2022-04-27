@@ -34,7 +34,7 @@ The following information shows the different positionals and options you can us
 ## Requirements
 * Install the currently supported version of `dcdcli` and `dcdksd`.
 [[info | Note]]
-| `dcdcli` and `dcdksd` are bundled with the EOSIO software. [Installing EOSIO](../../00_install/index.md) will also install the `dcdcli` and `dcdksd`  command line tools. 
+| `dcdcli` and `dcdksd` are bundled with the DCD software. [Installing DCD](../../00_install/index.md) will also install the `dcdcli` and `dcdksd`  command line tools. 
 
 ## Examples
 1. Create a new wallet called `default` and output the wallet password to the screen

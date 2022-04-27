@@ -1,17 +1,17 @@
-#include <eosio/chain/controller.hpp>
-#include <eosio/chain/transaction_context.hpp>
+#include <dcd/chain/controller.hpp>
+#include <dcd/chain/transaction_context.hpp>
 
-#include <eosio/chain/block_log.hpp>
-#include <eosio/chain/fork_database.hpp>
-#include <eosio/chain/exceptions.hpp>
+#include <dcd/chain/block_log.hpp>
+#include <dcd/chain/fork_database.hpp>
+#include <dcd/chain/exceptions.hpp>
 
-#include <eosio/chain/eosio_contract.hpp>
+#include <dcd/chain/dcd_contract.hpp>
 
-#include <eosio/chain/protocol_feature_manager.hpp>
-#include <eosio/chain/authorization_manager.hpp>
-//#include <eosio/chain/resource_limits.hpp>
-#include <eosio/chain/thread_utils.hpp>
-#include <eosio/chain/platform_timer.hpp>
+#include <dcd/chain/protocol_feature_manager.hpp>
+#include <dcd/chain/authorization_manager.hpp>
+//#include <dcd/chain/resource_limits.hpp>
+#include <dcd/chain/thread_utils.hpp>
+#include <dcd/chain/platform_timer.hpp>
 
 #include <chainbase/chainbase.hpp>
 #include <fc/io/json.hpp>
@@ -22,11 +22,11 @@
 
 #include <new>
 
-#if defined(EOSIO_EOS_VM_RUNTIME_ENABLED) || defined(EOSIO_EOS_VM_JIT_RUNTIME_ENABLED)
-#include <eosio/vm/allocator.hpp>
+#if defined(DCD_EOS_VM_RUNTIME_ENABLED) || defined(DCD_EOS_VM_JIT_RUNTIME_ENABLED)
+#include <dcd/vm/allocator.hpp>
 #endif
 
-namespace eosio { namespace chain {
+namespace dcd { namespace chain {
 
 //using resource_limits::resource_limits_manager;
 
@@ -175,7 +175,7 @@ struct controller_impl {
    named_thread_pool                   thread_pool;
    platform_timer                      timer;
    fc::logger*                         deep_mind_logger = nullptr;
-#if defined(EOSIO_EOS_VM_RUNTIME_ENABLED) || defined(EOSIO_EOS_VM_JIT_RUNTIME_ENABLED)
+#if defined(DCD_EOS_VM_RUNTIME_ENABLED) || defined(DCD_EOS_VM_JIT_RUNTIME_ENABLED)
    vm::wasm_allocator               wasm_alloc;
 #endif
 
@@ -273,23 +273,23 @@ struct controller_impl {
    set_apply_handler( account_name(#receiver), account_name(#contract), action_name(#action), \
                       &BOOST_PP_CAT(apply_, BOOST_PP_CAT(contract, BOOST_PP_CAT(_,action) ) ) )
 
-   SET_APP_HANDLER( eosio, eosio, newaccount );
-   SET_APP_HANDLER( eosio, eosio, setcode );
-   SET_APP_HANDLER( eosio, eosio, setabi );
-   SET_APP_HANDLER( eosio, eosio, updateauth );
-   SET_APP_HANDLER( eosio, eosio, deleteauth );
-   SET_APP_HANDLER( eosio, eosio, linkauth );
-   SET_APP_HANDLER( eosio, eosio, unlinkauth );
-   SET_APP_HANDLER( eosio, eosio, setfee );
-   SET_APP_HANDLER( eosio, eosio, setfeeforce );
+   SET_APP_HANDLER( dcd, dcd, newaccount );
+   SET_APP_HANDLER( dcd, dcd, setcode );
+   SET_APP_HANDLER( dcd, dcd, setabi );
+   SET_APP_HANDLER( dcd, dcd, updateauth );
+   SET_APP_HANDLER( dcd, dcd, deleteauth );
+   SET_APP_HANDLER( dcd, dcd, linkauth );
+   SET_APP_HANDLER( dcd, dcd, unlinkauth );
+   SET_APP_HANDLER( dcd, dcd, setfee );
+   SET_APP_HANDLER( dcd, dcd, setfeeforce );
 
 /*
-   SET_APP_HANDLER( eosio, eosio, postrecovery );
-   SET_APP_HANDLER( eosio, eosio, passrecovery );
-   SET_APP_HANDLER( eosio, eosio, vetorecovery );
+   SET_APP_HANDLER( dcd, dcd, postrecovery );
+   SET_APP_HANDLER( dcd, dcd, passrecovery );
+   SET_APP_HANDLER( dcd, dcd, vetorecovery );
 */
 
-   SET_APP_HANDLER( eosio, eosio, canceldelay );
+   SET_APP_HANDLER( dcd, dcd, canceldelay );
    }
 
    /**
@@ -788,9 +788,9 @@ struct controller_impl {
          a.creation_date = initial_timestamp;
 
          if( name == config::system_account_name ) {
-            // The initial eosio ABI value affects consensus; see  https://github.com/EOSIO/eos/issues/7794
+            // The initial dcd ABI value affects consensus; see  https://github.com/DCD/eos/issues/7794
             // TODO: This doesn't charge RAM; a fix requires a consensus upgrade.
-            a.abi.assign(eosio_abi_bin, sizeof(eosio_abi_bin));
+            a.abi.assign(dcd_abi_bin, sizeof(dcd_abi_bin));
          }
       });
       db.create<account_metadata_object>([&](auto & a) {
@@ -2441,7 +2441,7 @@ const chainbase::database& controller::db()const { return my->db; }
 chainbase::database& controller::mutable_db()const { return my->db; }
 
 const fork_database& controller::fork_db()const { return my->fork_db; }
-eosio::chain::combined_database& controller::kv_db() const { return my->kv_db; }
+dcd::chain::combined_database& controller::kv_db() const { return my->kv_db; }
 
 const chainbase::database& controller::reversible_db()const { return my->reversible_blocks; }
 
@@ -2498,7 +2498,7 @@ void controller::preactivate_feature( uint32_t action_id, const digest_type& fea
    // But it is still possible for a producer to retire a deferred transaction that deals with this subjective
    // information. If they recognized the feature, they would retire it successfully, but a validator that
    // does not recognize the feature should reject the entire block (not just fail the deferred transaction).
-   // Even if they don't recognize the feature, the producer could change their nodeos code to treat it like an
+   // Even if they don't recognize the feature, the producer could change their dcdnode code to treat it like an
    // objective failure thus leading the deferred transaction to retire with soft_fail or hard_fail.
    // In this case, validators that don't recognize the feature would reject the whole block immediately, and
    // validators that do recognize the feature would likely lead to a different retire status which would
@@ -3367,7 +3367,7 @@ void controller::enable_deep_mind(fc::logger* logger) {
    my->deep_mind_logger = logger;
 }
 
-#if defined(EOSIO_EOS_VM_RUNTIME_ENABLED) || defined(EOSIO_EOS_VM_JIT_RUNTIME_ENABLED)
+#if defined(DCD_EOS_VM_RUNTIME_ENABLED) || defined(DCD_EOS_VM_JIT_RUNTIME_ENABLED)
 vm::wasm_allocator& controller::get_wasm_allocator() {
    return my->wasm_alloc;
 }
@@ -3574,4 +3574,4 @@ void controller_impl::on_activation<builtin_protocol_feature_t::blockchain_param
 
 /// End of protocol feature activation handlers
 
-} } /// eosio::chain
+} } /// dcd::chain

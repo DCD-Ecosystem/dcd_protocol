@@ -7,12 +7,12 @@
 
 #include <catch2/catch.hpp>
 
-#include <eosio/vm/backend.hpp>
+#include <dcd/vm/backend.hpp>
 #include "wasm_config.hpp"
 #include "utils.hpp"
 
-using namespace eosio;
-using namespace eosio::vm;
+using namespace dcd;
+using namespace dcd::vm;
 
 void host_call() {}
 
@@ -32,8 +32,8 @@ struct dynamic_options {
 
 BACKEND_TEST_CASE( "Test call depth", "[call_depth]") {
    wasm_allocator wa;
-   using rhf_t     = eosio::vm::registered_host_functions<standalone_function_t>;
-   using backend_t = eosio::vm::backend<rhf_t, TestType>;
+   using rhf_t     = dcd::vm::registered_host_functions<standalone_function_t>;
+   using backend_t = dcd::vm::backend<rhf_t, TestType>;
 
    rhf_t::add<&host_call>("env", "host.call");
 
@@ -54,8 +54,8 @@ BACKEND_TEST_CASE( "Test call depth", "[call_depth]") {
 
 BACKEND_TEST_CASE( "Test call depth dynamic", "[call_depth]") {
    wasm_allocator wa;
-   using rhf_t     = eosio::vm::registered_host_functions<standalone_function_t>;
-   using backend_t = eosio::vm::backend<rhf_t, TestType, dynamic_options>;
+   using rhf_t     = dcd::vm::registered_host_functions<standalone_function_t>;
+   using backend_t = dcd::vm::backend<rhf_t, TestType, dynamic_options>;
    rhf_t::add<&host_call>("env", "host.call");
 
    backend_t bkend(implementation_limits_wasm_code, nullptr, dynamic_options{151});

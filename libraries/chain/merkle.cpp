@@ -1,7 +1,7 @@
-#include <eosio/chain/merkle.hpp>
+#include <dcd/chain/merkle.hpp>
 #include <fc/io/raw.hpp>
 
-namespace eosio { namespace chain {
+namespace dcd { namespace chain {
 
 /**
  * in order to keep proofs concise, before hashing we set the first bit
@@ -49,4 +49,4 @@ digest_type merkle(deque<digest_type> ids) {
    return ids.front();
 }
 
-} } // eosio::chain
+} } // dcd::chain

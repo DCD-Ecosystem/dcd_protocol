@@ -1,18 +1,18 @@
-#include <eosio/trace_api/trace_api_plugin.hpp>
+#include <dcd/trace_api/trace_api_plugin.hpp>
 
-#include <eosio/trace_api/abi_data_handler.hpp>
-#include <eosio/trace_api/request_handler.hpp>
-#include <eosio/trace_api/chain_extraction.hpp>
-#include <eosio/trace_api/store_provider.hpp>
+#include <dcd/trace_api/abi_data_handler.hpp>
+#include <dcd/trace_api/request_handler.hpp>
+#include <dcd/trace_api/chain_extraction.hpp>
+#include <dcd/trace_api/store_provider.hpp>
 
-#include <eosio/trace_api/configuration_utils.hpp>
+#include <dcd/trace_api/configuration_utils.hpp>
 
-#include <eosio/resource_monitor_plugin/resource_monitor_plugin.hpp>
+#include <dcd/resource_monitor_plugin/resource_monitor_plugin.hpp>
 
 #include <boost/signals2/connection.hpp>
 
-using namespace eosio::trace_api;
-using namespace eosio::trace_api::configuration_utils;
+using namespace dcd::trace_api;
+using namespace dcd::trace_api::configuration_utils;
 using boost::signals2::scoped_connection;
 
 namespace {
@@ -91,7 +91,7 @@ namespace {
    };
 }
 
-namespace eosio {
+namespace dcd {
 
 /**
  * A common source for information shared between the extraction process and the RPC process

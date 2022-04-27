@@ -1,5 +1,5 @@
 {
-  "name": "eosio",
+  "name": "dcd",
   "version": "1.0.0",
   "dependencies": {
     "eosjs": "^20.0.0",

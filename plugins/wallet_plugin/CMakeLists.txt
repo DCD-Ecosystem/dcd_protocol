@@ -1,4 +1,4 @@
-file(GLOB HEADERS "include/eosio/wallet_plugin/*.hpp")
+file(GLOB HEADERS "include/dcd/wallet_plugin/*.hpp")
 
 if(APPLE)
   set(SE_WALLET_SOURCES se_wallet.cpp macos_user_auth.m)
@@ -18,7 +18,7 @@ add_library( wallet_plugin
              yubihsm_wallet.cpp
              ${HEADERS} )
 
-target_link_libraries( wallet_plugin yubihsm_static eosio_chain appbase ${security_framework} ${corefoundation_framework} ${localauthentication_framework} ${cocoa_framework})
+target_link_libraries( wallet_plugin yubihsm_static dcd_chain appbase ${security_framework} ${corefoundation_framework} ${localauthentication_framework} ${cocoa_framework})
 target_include_directories( wallet_plugin PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include" )
 
 if(APPLE)

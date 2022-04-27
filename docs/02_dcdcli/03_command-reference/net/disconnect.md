@@ -26,8 +26,8 @@ Make sure you meet the following requirements:
 
 * Install the currently supported version of `dcdcli`.
 [[info | Note]]
-| `dcdcli` is bundled with the EOSIO software. [Installing EOSIO](../../../00_install/index.md) will also install the `dcdcli` and `dcdksd` command line tools.
-* You have access to a producing node instance with the [`net_api_plugin`](../../../01_nodeos/03_plugins/net_api_plugin/index.md) loaded.
+| `dcdcli` is bundled with the DCD software. [Installing DCD](../../../00_install/index.md) will also install the `dcdcli` and `dcdksd` command line tools.
+* You have access to a producing node instance with the [`net_api_plugin`](../../../01_dcdnode/03_plugins/net_api_plugin/index.md) loaded.
 
 ## Examples
 The following examples demonstrate how to use the `dcdcli net disconnect` command:

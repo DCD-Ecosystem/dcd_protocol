@@ -11,7 +11,7 @@ dcdcli system buyram [OPTIONS] payer receiver amount
 **Note**: The arguments and options enclosed in square brackets are optional.
 
 ## Description
-Use this command to buy RAM for a blockchain account on EOSIO.
+Use this command to buy RAM for a blockchain account on DCD.
 
 ## Command Usage
 The following information shows the different positionals and options you can use with the `dcdcli system buyram` command:

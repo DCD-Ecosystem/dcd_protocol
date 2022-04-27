@@ -43,15 +43,15 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #include "llvm/Transforms/InstCombine/InstCombine.h"
 #include "llvm/Transforms/Utils.h"
 
-#include <eosio/chain/webassembly/eos-vm-oc/intrinsic.hpp>
-#include <eosio/chain/webassembly/eos-vm-oc/memory.hpp>
+#include <dcd/chain/webassembly/eos-vm-oc/intrinsic.hpp>
+#include <dcd/chain/webassembly/eos-vm-oc/memory.hpp>
 
 #define ENABLE_LOGGING 0
 #define ENABLE_FUNCTION_ENTER_EXIT_HOOKS 0
 
 using namespace IR;
 
-namespace eosio { namespace chain { namespace eosvmoc {
+namespace dcd { namespace chain { namespace eosvmoc {
 namespace LLVMJIT
 {
 	static std::string getExternalFunctionName(Uptr functionDefIndex)
@@ -364,7 +364,7 @@ namespace LLVMJIT
 		// Emits a call to a WAVM intrinsic function.
 		llvm::Value* emitRuntimeIntrinsic(const char* intrinsicName,const FunctionType* intrinsicType,const std::initializer_list<llvm::Value*>& args)
 		{
-			const eosio::chain::eosvmoc::intrinsic_entry& ie = eosio::chain::eosvmoc::get_intrinsic_map().at(intrinsicName);
+			const dcd::chain::eosvmoc::intrinsic_entry& ie = dcd::chain::eosvmoc::get_intrinsic_map().at(intrinsicName);
 			llvm::Value* ic = irBuilder.CreateLoad( emitLiteralPointer((void*)(OFFSET_OF_FIRST_INTRINSIC-ie.ordinal*8), llvmI64Type->getPointerTo(256)) );
 			llvm::Value* itp = irBuilder.CreateIntToPtr(ic, asLLVMType(ie.type)->getPointerTo());
 			return createCall(itp,llvm::ArrayRef<llvm::Value*>(args.begin(),args.end()));
@@ -704,7 +704,7 @@ namespace LLVMJIT
 				calleeType = module.types[module.functions.imports[imm.functionIndex].type.index];
 				llvm::Value* ic = irBuilder.CreateLoad( emitLiteralPointer((void*)(OFFSET_OF_FIRST_INTRINSIC-moduleContext.importedFunctionOffsets[imm.functionIndex]*8), llvmI64Type->getPointerTo(256)) );
 				callee = irBuilder.CreateIntToPtr(ic, asLLVMType(calleeType)->getPointerTo());
-				isExit = module.functions.imports[imm.functionIndex].moduleName == "env" && module.functions.imports[imm.functionIndex].exportName == "eosio_exit";
+				isExit = module.functions.imports[imm.functionIndex].moduleName == "env" && module.functions.imports[imm.functionIndex].exportName == "dcd_exit";
 			}
 			else
 			{

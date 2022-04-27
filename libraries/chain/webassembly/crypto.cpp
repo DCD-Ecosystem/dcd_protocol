@@ -1,9 +1,9 @@
-#include <eosio/chain/webassembly/interface.hpp>
-#include <eosio/chain/protocol_state_object.hpp>
-#include <eosio/chain/transaction_context.hpp>
-#include <eosio/chain/apply_context.hpp>
+#include <dcd/chain/webassembly/interface.hpp>
+#include <dcd/chain/protocol_state_object.hpp>
+#include <dcd/chain/transaction_context.hpp>
+#include <dcd/chain/apply_context.hpp>
 
-namespace eosio { namespace chain { namespace webassembly {
+namespace dcd { namespace chain { namespace webassembly {
 
    void interface::assert_recover_key( legacy_ptr<const fc::sha256> digest,
                                        legacy_span<const char> sig,
@@ -100,4 +100,4 @@ namespace eosio { namespace chain { namespace webassembly {
    void interface::ripemd160(legacy_span<const char> data, legacy_ptr<fc::ripemd160> hash_val) const {
       *hash_val = context.trx_context.hash_with_checktime<fc::ripemd160>( data.data(), data.size() );
    }
-}}} // ns eosio::chain::webassembly
+}}} // ns dcd::chain::webassembly

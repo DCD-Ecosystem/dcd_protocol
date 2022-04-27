@@ -66,12 +66,12 @@ verifyErrorCode()
 
 killAll()
 {
-  programs/eosio-launcher/eosio-launcher -k 15
+  programs/dcd-launcher/dcd-launcher -k 15
 }
 
 cleanup()
 {
-    rm -rf etc/eosio/node_*
+    rm -rf etc/dcd/node_*
     rm -rf var/lib/node_*
 }
 
@@ -111,10 +111,10 @@ INITA_PRV_KEY="5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3"
 # cleanup from last run
 cleanup
 
-# stand up nodeos cluster
+# stand up dcdnode cluster
 launcherOpts="-p $pnodes -n $total_nodes -s $topo -d $delay"
-echo Launcher options: --nodeos \"--plugin eosio::wallet_api_plugin\" $launcherOpts
-programs/eosio-launcher/eosio-launcher --nodeos "--plugin eosio::wallet_api_plugin" $launcherOpts
+echo Launcher options: --dcdnode \"--plugin dcd::wallet_api_plugin\" $launcherOpts
+programs/dcd-launcher/dcd-launcher --dcdnode "--plugin dcd::wallet_api_plugin" $launcherOpts
 sleep 7
 
 startPort=8888

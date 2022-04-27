@@ -1,12 +1,12 @@
 #include <boost/test/unit_test.hpp>       /* BOOST_AUTO_TEST_SUITE, etc. */
 
-#include <eosio/testing/tester.hpp>       /* tester */
-#include <eosio/chain/exceptions.hpp>     /* config_parse_error */
+#include <dcd/testing/tester.hpp>       /* tester */
+#include <dcd/chain/exceptions.hpp>     /* config_parse_error */
 
 #include <contracts.hpp>                  /* params_test_wasm, params_test_abi */
 
-using namespace eosio;
-using namespace eosio::testing;
+using namespace dcd;
+using namespace dcd::testing;
 using mvo = mutable_variant_object;
 
 /**
@@ -19,8 +19,8 @@ public:
 
    void setup(){
       //set parameters intrinsics are priviledged so we need system account here
-      set_code(config::system_account_name, eosio::testing::contracts::params_test_wasm());
-      set_abi(config::system_account_name, eosio::testing::contracts::params_test_abi().data());
+      set_code(config::system_account_name, dcd::testing::contracts::params_test_wasm());
+      set_abi(config::system_account_name, dcd::testing::contracts::params_test_abi().data());
       produce_block();
    }
 

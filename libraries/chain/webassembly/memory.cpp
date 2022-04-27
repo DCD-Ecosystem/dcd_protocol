@@ -1,6 +1,6 @@
-#include <eosio/chain/webassembly/interface.hpp>
+#include <dcd/chain/webassembly/interface.hpp>
 
-namespace eosio { namespace chain { namespace webassembly {
+namespace dcd { namespace chain { namespace webassembly {
    void* interface::memcpy( memcpy_params args ) const {
       auto [dest, src, length] = args;
       EOS_ASSERT((size_t)(std::abs((ptrdiff_t)(char*)dest - (ptrdiff_t)(const char*)src)) >= length,
@@ -24,4 +24,4 @@ namespace eosio { namespace chain { namespace webassembly {
       return (char *)std::memset( (char*)dest, value, length );
    }
 
-}}} // ns eosio::chain::webassembly
+}}} // ns dcd::chain::webassembly

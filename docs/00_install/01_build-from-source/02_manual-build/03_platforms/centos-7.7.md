@@ -2,39 +2,39 @@
 content_title: Centos 7.7
 ---
 
-This section contains shell commands to manually download, build, install, test, and uninstall EOSIO and dependencies on Centos 7.7.
+This section contains shell commands to manually download, build, install, test, and uninstall DCD and dependencies on Centos 7.7.
 
-[[info | Building EOSIO is for Advanced Developers]]
-| If you are new to EOSIO, it is recommended that you install the [EOSIO Prebuilt Binaries](../../../00_install-prebuilt-binaries.md) instead of building from source.
+[[info | Building DCD is for Advanced Developers]]
+| If you are new to DCD, it is recommended that you install the [DCD Prebuilt Binaries](../../../00_install-prebuilt-binaries.md) instead of building from source.
 
 Select a task below, then copy/paste the shell commands to a Unix terminal to execute:
 
-* [Download EOSIO Repository](#download-eosio-repository)
-* [Install EOSIO Dependencies](#install-eosio-dependencies)
-* [Build EOSIO](#build-eosio)
-* [Install EOSIO](#install-eosio)
-* [Test EOSIO](#test-eosio)
-* [Uninstall EOSIO](#uninstall-eosio)
+* [Download DCD Repository](#download-dcd-repository)
+* [Install DCD Dependencies](#install-dcd-dependencies)
+* [Build DCD](#build-dcd)
+* [Install DCD](#install-dcd)
+* [Test DCD](#test-dcd)
+* [Uninstall DCD](#uninstall-dcd)
 
-[[info | Building EOSIO on another OS?]]
-| Visit the [Build EOSIO from Source](../../index.md) section.
+[[info | Building DCD on another OS?]]
+| Visit the [Build DCD from Source](../../index.md) section.
 
-## Download EOSIO Repository
-These commands set the EOSIO directories, install git, and clone the EOSIO repository.
+## Download DCD Repository
+These commands set the DCD directories, install git, and clone the DCD repository.
 ```sh
-# set EOSIO directories
-export EOSIO_LOCATION=~/eosio/eos
-export EOSIO_INSTALL_LOCATION=$EOSIO_LOCATION/../install
-mkdir -p $EOSIO_INSTALL_LOCATION
+# set DCD directories
+export DCD_LOCATION=~/dcd/eos
+export DCD_INSTALL_LOCATION=$DCD_LOCATION/../install
+mkdir -p $DCD_INSTALL_LOCATION
 # install git
 yum update -y && yum install -y git
-# clone EOSIO repository
-git clone https://github.com/EOSIO/eos.git $EOSIO_LOCATION
-cd $EOSIO_LOCATION && git submodule update --init --recursive
+# clone DCD repository
+git clone https://github.com/DCD/eos.git $DCD_LOCATION
+cd $DCD_LOCATION && git submodule update --init --recursive
 ```
 
-## Install EOSIO Dependencies
-These commands install the EOSIO software dependencies. Make sure to [Download the EOSIO Repository](#download-eosio-repository) first and set the EOSIO directories.
+## Install DCD Dependencies
+These commands install the DCD software dependencies. Make sure to [Download the DCD Repository](#download-dcd-repository) first and set the DCD directories.
 ```sh
 # install dependencies
 yum update -y && \
@@ -46,55 +46,55 @@ yum update -y && \
     python python-devel rh-python36 file libusbx-devel \
     libcurl-devel patch vim-common jq llvm-toolset-7.0-llvm-devel llvm-toolset-7.0-llvm-static
 # build cmake
-export PATH=$EOSIO_INSTALL_LOCATION/bin:$PATH
-cd $EOSIO_INSTALL_LOCATION && curl -LO https://cmake.org/files/v3.13/cmake-3.13.2.tar.gz && \
+export PATH=$DCD_INSTALL_LOCATION/bin:$PATH
+cd $DCD_INSTALL_LOCATION && curl -LO https://cmake.org/files/v3.13/cmake-3.13.2.tar.gz && \
     source /opt/rh/devtoolset-8/enable && \
     tar -xzf cmake-3.13.2.tar.gz && \
     cd cmake-3.13.2 && \
-    ./bootstrap --prefix=$EOSIO_INSTALL_LOCATION && \
+    ./bootstrap --prefix=$DCD_INSTALL_LOCATION && \
     make -j$(nproc) && \
     make install && \
-    rm -rf $EOSIO_INSTALL_LOCATION/cmake-3.13.2.tar.gz $EOSIO_INSTALL_LOCATION/cmake-3.13.2
+    rm -rf $DCD_INSTALL_LOCATION/cmake-3.13.2.tar.gz $DCD_INSTALL_LOCATION/cmake-3.13.2
 # apply clang patch
-cp -f $EOSIO_LOCATION/scripts/clang-devtoolset8-support.patch /tmp/clang-devtoolset8-support.patch
+cp -f $DCD_LOCATION/scripts/clang-devtoolset8-support.patch /tmp/clang-devtoolset8-support.patch
 # build boost
-cd $EOSIO_INSTALL_LOCATION && curl -LO https://boostorg.jfrog.io/artifactory/main/release/1.71.0/source/boost_1_71_0.tar.bz2 && \
+cd $DCD_INSTALL_LOCATION && curl -LO https://boostorg.jfrog.io/artifactory/main/release/1.71.0/source/boost_1_71_0.tar.bz2 && \
     source /opt/rh/devtoolset-8/enable && \
     tar -xjf boost_1_71_0.tar.bz2 && \
     cd boost_1_71_0 && \
-    ./bootstrap.sh --prefix=$EOSIO_INSTALL_LOCATION && \
+    ./bootstrap.sh --prefix=$DCD_INSTALL_LOCATION && \
     ./b2 --with-iostreams --with-date_time --with-filesystem --with-system --with-program_options --with-chrono --with-test -q -j$(nproc) install && \
-    rm -rf $EOSIO_INSTALL_LOCATION/boost_1_71_0.tar.bz2 $EOSIO_INSTALL_LOCATION/boost_1_71_0
+    rm -rf $DCD_INSTALL_LOCATION/boost_1_71_0.tar.bz2 $DCD_INSTALL_LOCATION/boost_1_71_0
 ```
 
-## Build EOSIO
-These commands build the EOSIO software on the specified OS. Make sure to [Install EOSIO Dependencies](#install-eosio-dependencies) first.
+## Build DCD
+These commands build the DCD software on the specified OS. Make sure to [Install DCD Dependencies](#install-dcd-dependencies) first.
 
-[[caution | `EOSIO_BUILD_LOCATION` environment variable]]
+[[caution | `DCD_BUILD_LOCATION` environment variable]]
 | Do NOT change this variable. It is set for convenience only. It should always be set to the `build` folder within the cloned repository.
 
 ```sh
-export EOSIO_BUILD_LOCATION=$EOSIO_LOCATION/build
-mkdir -p $EOSIO_BUILD_LOCATION
-cd $EOSIO_BUILD_LOCATION && source /opt/rh/devtoolset-8/enable && cmake -DCMAKE_BUILD_TYPE='Release' -DLLVM_DIR='/opt/rh/llvm-toolset-7.0/root/usr/lib64/cmake/llvm' -DCMAKE_INSTALL_PREFIX=$EOSIO_INSTALL_LOCATION $EOSIO_LOCATION
-cd $EOSIO_BUILD_LOCATION && make -j$(nproc)
+export DCD_BUILD_LOCATION=$DCD_LOCATION/build
+mkdir -p $DCD_BUILD_LOCATION
+cd $DCD_BUILD_LOCATION && source /opt/rh/devtoolset-8/enable && cmake -DCMAKE_BUILD_TYPE='Release' -DLLVM_DIR='/opt/rh/llvm-toolset-7.0/root/usr/lib64/cmake/llvm' -DCMAKE_INSTALL_PREFIX=$DCD_INSTALL_LOCATION $DCD_LOCATION
+cd $DCD_BUILD_LOCATION && make -j$(nproc)
 ```
 
-## Install EOSIO
-This command installs the EOSIO software on the specified OS. Make sure to [Build EOSIO](#build-eosio) first.
+## Install DCD
+This command installs the DCD software on the specified OS. Make sure to [Build DCD](#build-dcd) first.
 ```sh
-cd $EOSIO_BUILD_LOCATION && make install
+cd $DCD_BUILD_LOCATION && make install
 ```
 
-## Test EOSIO
-These commands validate the EOSIO software installation on the specified OS. This task is optional but recommended. Make sure to [Install EOSIO](#install-eosio) first.
+## Test DCD
+These commands validate the DCD software installation on the specified OS. This task is optional but recommended. Make sure to [Install DCD](#install-dcd) first.
 ```sh
-cd $EOSIO_BUILD_LOCATION && source /opt/rh/rh-python36/enable && make test
+cd $DCD_BUILD_LOCATION && source /opt/rh/rh-python36/enable && make test
 ```
 
-## Uninstall EOSIO
-These commands uninstall the EOSIO software from the specified OS.
+## Uninstall DCD
+These commands uninstall the DCD software from the specified OS.
 ```sh
-xargs rm < $EOSIO_BUILD_LOCATION/install_manifest.txt
-rm -rf $EOSIO_BUILD_LOCATION
+xargs rm < $DCD_BUILD_LOCATION/install_manifest.txt
+rm -rf $DCD_BUILD_LOCATION
 ```

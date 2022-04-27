@@ -8,11 +8,11 @@ content_title: dcdksd
 
 ## Installation
 
-`dcdksd` is distributed as part of the [EOSIO software suite](https://github.com/EOSIO/eos/blob/master/README.md). To install `dcdksd` just visit the [EOSIO Software Installation](../00_install/index.md) section.
+`dcdksd` is distributed as part of the [DCD software suite](https://github.com/DCD/eos/blob/master/README.md). To install `dcdksd` just visit the [DCD Software Installation](../00_install/index.md) section.
 
 ## Operation
 
 When a wallet is unlocked with the corresponding password, `dcdcli` can request `dcdksd` to sign a transaction with the appropriate private keys. Also, `dcdksd` provides support for hardware-based wallets such as Secure Encalve and YubiHSM.
 
 [[info | Audience]]
-| `dcdksd` is intended to be used by EOSIO developers only.
+| `dcdksd` is intended to be used by DCD developers only.

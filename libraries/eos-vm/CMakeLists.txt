@@ -104,7 +104,7 @@ if(ENABLE_TESTS)
       include(ExternalProject)
       ExternalProject_Add(
          eos_vm_test_wasms
-         GIT_REPOSITORY "https://github.com/EOSIO/eos-vm-test-wasms.git"
+         GIT_REPOSITORY "https://github.com/DCD/eos-vm-test-wasms.git"
          SOURCE_DIR ${CMAKE_BINARY_DIR}/wasms
          BINARY_DIR ${CMAKE_BINARY_DIR}/wasms
          BUILD_ALWAYS 0
@@ -132,7 +132,7 @@ if(ENABLE_INSTALL)
                DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
                COMPONENT Headers)
 
-   install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/eosio
+   install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/dcd
       DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 endif()
 

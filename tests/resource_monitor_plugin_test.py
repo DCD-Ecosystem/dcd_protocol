@@ -26,7 +26,7 @@ stderrFile=dataDir + "/stderr.txt"
 
 testNum=0
 
-# We need debug level to get more information about nodeos process
+# We need debug level to get more information about dcdnode process
 logging="""{
   "includes": [],
   "appenders": [{
@@ -75,12 +75,12 @@ def prepareDirectories():
     with open(loggingFile, "w") as textFile:
         print(logging,file=textFile)
 
-def runNodeos(extraNodeosArgs, myTimeout):
-    """Startup nodeos, wait for timeout (before forced shutdown) and collect output."""
-    if debug: Print("Launching nodeos process.")
-    cmd="programs/nodeos/nodeos --config-dir rsmStaging/etc -e -p eosio --plugin eosio::chain_api_plugin --plugin eosio::history_api_plugin --data-dir " + dataDir + " "
+def rundcdnode(extradcdnodeArgs, myTimeout):
+    """Startup dcdnode, wait for timeout (before forced shutdown) and collect output."""
+    if debug: Print("Launching dcdnode process.")
+    cmd="programs/dcdnode/dcdnode --config-dir rsmStaging/etc -e -p dcd --plugin dcd::chain_api_plugin --plugin dcd::history_api_plugin --data-dir " + dataDir + " "
 
-    cmd=cmd + extraNodeosArgs;
+    cmd=cmd + extradcdnodeArgs;
     if debug: Print("cmd: %s" % (cmd))
     with open(stderrFile, 'w') as serr:
         proc=subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=serr)
@@ -100,15 +100,15 @@ def isMsgInStderrFile(msg):
                 break
     return msgFound
 
-def testCommon(title, extraNodeosArgs, expectedMsgs):
+def testCommon(title, extradcdnodeArgs, expectedMsgs):
     global testNum
     testNum+=1
     Print("Test %d: %s" % (testNum, title))
 
     prepareDirectories()
 
-    timeout=120  # Leave sufficient time such nodeos can start up fully in any platforms
-    runNodeos(extraNodeosArgs, timeout)
+    timeout=120  # Leave sufficient time such dcdnode can start up fully in any platforms
+    rundcdnode(extradcdnodeArgs, timeout)
 
     for msg in expectedMsgs:
         if not isMsgInStderrFile(msg):
@@ -148,9 +148,9 @@ def fillFS(dir, threshold):
         filesize = (available - warningAvailable) * 1.1 // (1024 * 1024) # add 0.1 redundancy to ensure warning be triggered
         os.system('dd if=/dev/zero of=' + fillerFile + ' count=' + str(filesize) + ' bs=1M')
 
-testIntervalMaxTimeout = 300 # Assume nodeos at most runs 300 sec for this test
+testIntervalMaxTimeout = 300 # Assume dcdnode at most runs 300 sec for this test
 
-def testInterval(title, extraNodeosArgs, interval, expectedMsgs, warningThreshold):
+def testInterval(title, extradcdnodeArgs, interval, expectedMsgs, warningThreshold):
     global testNum
     testNum += 1
     Print("Test %d: %s" % (testNum, title))
@@ -158,10 +158,10 @@ def testInterval(title, extraNodeosArgs, interval, expectedMsgs, warningThreshol
     prepareDirectories()
     fillFS(dataDir, warningThreshold)
 
-    timeout = 120 + interval * 2 # Leave sufficient time so nodeos can start up fully in any platforms, and at least two warnings can be output
+    timeout = 120 + interval * 2 # Leave sufficient time so dcdnode can start up fully in any platforms, and at least two warnings can be output
     if timeout > testIntervalMaxTimeout: 
         errorExit ("Max timeout for testInterval is %d sec" % (testIntervalMaxTimeout))
-    runNodeos(extraNodeosArgs, timeout)
+    rundcdnode(extradcdnodeArgs, timeout)
 
     for msg in expectedMsgs:
         hasMsg, validInterval = isMsgIntervalValid(msg, interval)
@@ -171,25 +171,25 @@ def testInterval(title, extraNodeosArgs, interval, expectedMsgs, warningThreshol
             errorExit ("Log containing \"%s\" should be output every %d seconds" % (msg, interval))
 
 def testAll():
-    testCommon("Resmon enabled: all arguments", "--plugin  eosio::resource_monitor_plugin --resource-monitor-space-threshold=85 --resource-monitor-interval-seconds=5 --resource-monitor-not-shutdown-on-threshold-exceeded", ["threshold set to 85", "interval set to 5", "Shutdown flag when threshold exceeded set to false", "Creating and starting monitor thread"])
+    testCommon("Resmon enabled: all arguments", "--plugin  dcd::resource_monitor_plugin --resource-monitor-space-threshold=85 --resource-monitor-interval-seconds=5 --resource-monitor-not-shutdown-on-threshold-exceeded", ["threshold set to 85", "interval set to 5", "Shutdown flag when threshold exceeded set to false", "Creating and starting monitor thread"])
 
     # default arguments and default directories to be monitored
     testCommon("Resmon not enabled: no arguments", "", ["interval set to 2", "threshold set to 90", "Shutdown flag when threshold exceeded set to true", "Creating and starting monitor thread", "snapshots's file system to be monitored", "blocks's file system to be monitored", "state's file system to be monitored"])
     
     # default arguments with registered directories
-    testCommon("Resmon not enabled: Producer, Chain, State History and Trace Api", "--plugin eosio::state_history_plugin --state-history-dir=/tmp/state-history --disable-replay-opts --plugin eosio::trace_api_plugin --trace-dir=/tmp/trace --trace-no-abis", ["interval set to 2", "threshold set to 90", "Shutdown flag when threshold exceeded set to true", "snapshots's file system to be monitored", "blocks's file system to be monitored", "state's file system to be monitored", "state-history's file system to be monitored", "trace's file system to be monitored", "Creating and starting monitor thread"])
+    testCommon("Resmon not enabled: Producer, Chain, State History and Trace Api", "--plugin dcd::state_history_plugin --state-history-dir=/tmp/state-history --disable-replay-opts --plugin dcd::trace_api_plugin --trace-dir=/tmp/trace --trace-no-abis", ["interval set to 2", "threshold set to 90", "Shutdown flag when threshold exceeded set to true", "snapshots's file system to be monitored", "blocks's file system to be monitored", "state's file system to be monitored", "state-history's file system to be monitored", "trace's file system to be monitored", "Creating and starting monitor thread"])
 
-    testCommon("Resmon enabled: Producer, Chain, State History and Trace Api", "--plugin  eosio::resource_monitor_plugin --plugin eosio::state_history_plugin --state-history-dir=/tmp/state-history --disable-replay-opts --plugin eosio::trace_api_plugin --trace-dir=/tmp/trace --trace-no-abis --resource-monitor-space-threshold=80 --resource-monitor-interval-seconds=3", ["snapshots's file system to be monitored", "blocks's file system to be monitored", "state's file system to be monitored", "state-history's file system to be monitored", "trace's file system to be monitored", "Creating and starting monitor thread", "threshold set to 80", "interval set to 3", "Shutdown flag when threshold exceeded set to true"])
+    testCommon("Resmon enabled: Producer, Chain, State History and Trace Api", "--plugin  dcd::resource_monitor_plugin --plugin dcd::state_history_plugin --state-history-dir=/tmp/state-history --disable-replay-opts --plugin dcd::trace_api_plugin --trace-dir=/tmp/trace --trace-no-abis --resource-monitor-space-threshold=80 --resource-monitor-interval-seconds=3", ["snapshots's file system to be monitored", "blocks's file system to be monitored", "state's file system to be monitored", "state-history's file system to be monitored", "trace's file system to be monitored", "Creating and starting monitor thread", "threshold set to 80", "interval set to 3", "Shutdown flag when threshold exceeded set to true"])
 
     # Only test minimum warning threshold (i.e. 6) to trigger warning as much as possible
     testInterval("Resmon enabled: set warning interval", 
-        "--plugin eosio::resource_monitor_plugin --resource-monitor-space-threshold=6 --resource-monitor-warning-interval=5 --resource-monitor-not-shutdown-on-threshold-exceeded", 
+        "--plugin dcd::resource_monitor_plugin --resource-monitor-space-threshold=6 --resource-monitor-warning-interval=5 --resource-monitor-not-shutdown-on-threshold-exceeded", 
         2 * 5, # Default monitor interval is 2 sec
         ["Space usage warning"],
         6)
 
     testInterval("Resmon enabled: default warning interval", 
-        "--plugin eosio::resource_monitor_plugin --resource-monitor-space-threshold=6 --resource-monitor-interval-seconds=1 --resource-monitor-not-shutdown-on-threshold-exceeded", 
+        "--plugin dcd::resource_monitor_plugin --resource-monitor-space-threshold=6 --resource-monitor-interval-seconds=1 --resource-monitor-not-shutdown-on-threshold-exceeded", 
         1 * 30, # Default warning interval is 30
         ["Space usage warning"],
         6)

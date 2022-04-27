@@ -1,78 +1,78 @@
 #include <boost/test/unit_test.hpp>
 #include <contracts.hpp>
-#include <eosio/chain/authorization_manager.hpp>
-#include <eosio/state_history/create_deltas.hpp>
-#include <eosio/state_history/log.hpp>
-#include <eosio/state_history/trace_converter.hpp>
+#include <dcd/chain/authorization_manager.hpp>
+#include <dcd/state_history/create_deltas.hpp>
+#include <dcd/state_history/log.hpp>
+#include <dcd/state_history/trace_converter.hpp>
 #include <utilities.hpp>
-#include <eosio/testing/tester.hpp>
+#include <dcd/testing/tester.hpp>
 #include <fc/io/json.hpp>
 
 #include "test_cfd_transaction.hpp"
 #include <boost/filesystem.hpp>
 
-#include <eosio/ship_protocol.hpp>
-#include <eosio/stream.hpp>
+#include <dcd/ship_protocol.hpp>
+#include <dcd/stream.hpp>
 
-using namespace eosio::chain;
-using namespace eosio::testing;
+using namespace dcd::chain;
+using namespace dcd::testing;
 using namespace std::literals;
-using prunable_data_type = eosio::chain::packed_transaction::prunable_data_type;
+using prunable_data_type = dcd::chain::packed_transaction::prunable_data_type;
 
 namespace bio = boost::iostreams;
 extern const char* const state_history_plugin_abi;
 
 prunable_data_type::prunable_data_t
-get_prunable_data_from_traces(std::vector<eosio::state_history::transaction_trace>& traces,
+get_prunable_data_from_traces(std::vector<dcd::state_history::transaction_trace>& traces,
                               const transaction_id_type&                            id) {
    auto cfd_trace_itr =
-       std::find_if(traces.begin(), traces.end(), [id](const eosio::state_history::transaction_trace& v) {
-          return std::get<eosio::state_history::transaction_trace_v0>(v).id == id;
+       std::find_if(traces.begin(), traces.end(), [id](const dcd::state_history::transaction_trace& v) {
+          return std::get<dcd::state_history::transaction_trace_v0>(v).id == id;
        });
 
    // make sure the trace with cfd can be found
    BOOST_REQUIRE(cfd_trace_itr != traces.end());
-   BOOST_REQUIRE(std::holds_alternative<eosio::state_history::transaction_trace_v0>(*cfd_trace_itr));
-   auto trace_v0 = std::get<eosio::state_history::transaction_trace_v0>(*cfd_trace_itr);
+   BOOST_REQUIRE(std::holds_alternative<dcd::state_history::transaction_trace_v0>(*cfd_trace_itr));
+   auto trace_v0 = std::get<dcd::state_history::transaction_trace_v0>(*cfd_trace_itr);
    BOOST_REQUIRE(trace_v0.partial);
-   BOOST_REQUIRE(std::holds_alternative<eosio::state_history::partial_transaction_v1>(*trace_v0.partial));
-   return std::get<eosio::state_history::partial_transaction_v1>(*trace_v0.partial).prunable_data->prunable_data;
+   BOOST_REQUIRE(std::holds_alternative<dcd::state_history::partial_transaction_v1>(*trace_v0.partial));
+   return std::get<dcd::state_history::partial_transaction_v1>(*trace_v0.partial).prunable_data->prunable_data;
 }
 
-bool operator==(const eosio::checksum256& lhs, const transaction_id_type& rhs) {
+bool operator==(const dcd::checksum256& lhs, const transaction_id_type& rhs) {
    return memcmp(lhs.extract_as_byte_array().data(), rhs.data(), rhs.data_size()) == 0;
 }
 
-auto get_prunable_data_from_traces(std::vector<eosio::ship_protocol::transaction_trace>& traces,
+auto get_prunable_data_from_traces(std::vector<dcd::ship_protocol::transaction_trace>& traces,
                                    const transaction_id_type&                            id) {
    auto cfd_trace_itr =
-       std::find_if(traces.begin(), traces.end(), [id](const eosio::ship_protocol::transaction_trace& v) {
-          return std::get<eosio::ship_protocol::transaction_trace_v0>(v).id == id;
+       std::find_if(traces.begin(), traces.end(), [id](const dcd::ship_protocol::transaction_trace& v) {
+          return std::get<dcd::ship_protocol::transaction_trace_v0>(v).id == id;
        });
 
    // make sure the trace with cfd can be found
    BOOST_REQUIRE(cfd_trace_itr != traces.end());
-   BOOST_REQUIRE(std::holds_alternative<eosio::ship_protocol::transaction_trace_v0>(*cfd_trace_itr));
-   auto trace_v0 = std::get<eosio::ship_protocol::transaction_trace_v0>(*cfd_trace_itr);
+   BOOST_REQUIRE(std::holds_alternative<dcd::ship_protocol::transaction_trace_v0>(*cfd_trace_itr));
+   auto trace_v0 = std::get<dcd::ship_protocol::transaction_trace_v0>(*cfd_trace_itr);
    BOOST_REQUIRE(trace_v0.partial);
-   BOOST_REQUIRE(std::holds_alternative<eosio::ship_protocol::partial_transaction_v1>(*trace_v0.partial));
-   return std::get<eosio::ship_protocol::partial_transaction_v1>(*trace_v0.partial).prunable_data->prunable_data;
+   BOOST_REQUIRE(std::holds_alternative<dcd::ship_protocol::partial_transaction_v1>(*trace_v0.partial));
+   return std::get<dcd::ship_protocol::partial_transaction_v1>(*trace_v0.partial).prunable_data->prunable_data;
 }
 
 prunable_data_type::prunable_data_t get_prunable_data_from_traces_bin(const std::vector<char>&   entry,
                                                                       const transaction_id_type& id) {
    fc::datastream<const char*>                          strm(entry.data(), entry.size());
-   std::vector<eosio::state_history::transaction_trace> traces;
-   eosio::state_history::trace_converter::unpack(strm, traces);
+   std::vector<dcd::state_history::transaction_trace> traces;
+   dcd::state_history::trace_converter::unpack(strm, traces);
    return get_prunable_data_from_traces(traces, id);
 }
 
-std::vector<eosio::ship_protocol::transaction_trace> get_traces(eosio::state_history_traces_log& log,
+std::vector<dcd::ship_protocol::transaction_trace> get_traces(dcd::state_history_traces_log& log,
                                                                 block_num_type                   block_num) {
    auto                                                 entry = log.get_log_entry(block_num);
-   std::vector<eosio::ship_protocol::transaction_trace> traces;
+   std::vector<dcd::ship_protocol::transaction_trace> traces;
    if (entry.size()) {
-      eosio::input_stream traces_bin{entry.data(), entry.data() + entry.size()};
+      dcd::input_stream traces_bin{entry.data(), entry.data() + entry.size()};
       BOOST_REQUIRE_NO_THROW(from_bin(traces, traces_bin));
    }
    return traces;
@@ -87,7 +87,7 @@ struct state_history_abi_serializer {
        , sr(fc::json::from_string(state_history_plugin_abi).as<abi_def>(),
             abi_serializer::create_yield_function(chain.abi_serializer_max_time)) {}
 
-   fc::variant deserialize(const eosio::chain::bytes& data, const char* type) {
+   fc::variant deserialize(const dcd::chain::bytes& data, const char* type) {
       fc::datastream<const char*> strm(data.data(), data.size());
       auto                        result =
           sr.binary_to_variant(type, strm, abi_serializer::create_yield_function(chain.abi_serializer_max_time));
@@ -101,10 +101,10 @@ BOOST_AUTO_TEST_SUITE(test_state_history)
 BOOST_AUTO_TEST_CASE(test_trace_converter) {
 
    tester chain;
-   using namespace eosio::state_history;
+   using namespace dcd::state_history;
 
    transaction_trace_cache cache;
-   std::map<uint32_t, eosio::chain::bytes>       on_disk_log_entries;
+   std::map<uint32_t, dcd::chain::bytes>       on_disk_log_entries;
 
    chain.control->applied_transaction.connect(
        [&](std::tuple<const transaction_trace_ptr&, const packed_transaction_ptr&> t) {
@@ -149,7 +149,7 @@ BOOST_AUTO_TEST_CASE(test_trace_log) {
 
    scoped_temp_path state_history_dir;
    fc::create_directories(state_history_dir.path);
-   eosio::state_history_traces_log log({ .log_dir = state_history_dir.path });
+   dcd::state_history_traces_log log({ .log_dir = state_history_dir.path });
 
    chain.control->applied_transaction.connect(
        [&](std::tuple<const transaction_trace_ptr&, const packed_transaction_ptr&> t) {
@@ -166,20 +166,20 @@ BOOST_AUTO_TEST_CASE(test_trace_log) {
    auto traces = get_traces(log, cfd_trace->block_num);
    BOOST_REQUIRE(traces.size());
 
-   BOOST_REQUIRE(!std::holds_alternative<eosio::ship_protocol::prunable_data_type::none>(
+   BOOST_REQUIRE(!std::holds_alternative<dcd::ship_protocol::prunable_data_type::none>(
        get_prunable_data_from_traces(traces, cfd_trace->id)));
 
    std::vector<transaction_id_type> ids{cfd_trace->id};
    log.prune_transactions(cfd_trace->block_num, ids);
    BOOST_REQUIRE(ids.empty());
 
-   // we assume the nodeos has to be stopped while running, it can only be read
+   // we assume the dcdnode has to be stopped while running, it can only be read
    // correctly with restart
-   eosio::state_history_traces_log new_log({ .log_dir = state_history_dir.path });
+   dcd::state_history_traces_log new_log({ .log_dir = state_history_dir.path });
    auto                            pruned_traces = get_traces(new_log, cfd_trace->block_num);
    BOOST_REQUIRE(pruned_traces.size());
 
-   BOOST_CHECK(std::holds_alternative<eosio::ship_protocol::prunable_data_type::none>(
+   BOOST_CHECK(std::holds_alternative<dcd::ship_protocol::prunable_data_type::none>(
        get_prunable_data_from_traces(pruned_traces, cfd_trace->id)));
 }
 
@@ -188,7 +188,7 @@ BOOST_AUTO_TEST_CASE(test_trace_log_with_transaction_extensions) {
 
    scoped_temp_path state_history_dir;
    fc::create_directories(state_history_dir.path);
-   eosio::state_history_traces_log log({.log_dir = state_history_dir.path});
+   dcd::state_history_traces_log log({.log_dir = state_history_dir.path});
 
    c.control->applied_transaction.connect(
        [&](std::tuple<const transaction_trace_ptr&, const packed_transaction_ptr&> t) {
@@ -215,10 +215,10 @@ BOOST_AUTO_TEST_CASE(test_trace_log_with_transaction_extensions) {
    auto block  = c.produce_block();
    auto traces = get_traces(log, block->block_num());
 
-   auto contains_transaction_extensions = [](const eosio::ship_protocol::transaction_trace& trace) {
-      const auto& trace_v0 = std::get<eosio::ship_protocol::transaction_trace_v0>(trace);
+   auto contains_transaction_extensions = [](const dcd::ship_protocol::transaction_trace& trace) {
+      const auto& trace_v0 = std::get<dcd::ship_protocol::transaction_trace_v0>(trace);
       BOOST_REQUIRE(trace_v0.partial.has_value());
-      return std::get<eosio::ship_protocol::partial_transaction_v1>(*trace_v0.partial).transaction_extensions.size() >
+      return std::get<dcd::ship_protocol::partial_transaction_v1>(*trace_v0.partial).transaction_extensions.size() >
              0;
    };
 
@@ -230,7 +230,7 @@ BOOST_AUTO_TEST_CASE(test_trace_log_versions) {
 
    for(std::string version : {"v0", "v1"}) {
       tester chain;
-      eosio::state_history_traces_log log({ .log_dir = state_history_data_base_path() + "/trace-log-"+ version });
+      dcd::state_history_traces_log log({ .log_dir = state_history_data_base_path() + "/trace-log-"+ version });
 
       for(int i = 2; i <= 11; i++) {
          auto traces = get_traces(log, i);
@@ -245,7 +245,7 @@ BOOST_AUTO_TEST_CASE(test_chain_state_log) {
 
    scoped_temp_path state_history_dir;
    fc::create_directories(state_history_dir.path);
-   eosio::state_history_chain_state_log log({ .log_dir = state_history_dir.path });
+   dcd::state_history_chain_state_log log({ .log_dir = state_history_dir.path });
 
    uint32_t last_accepted_block_num = 0;
 
@@ -256,24 +256,24 @@ BOOST_AUTO_TEST_CASE(test_chain_state_log) {
 
    chain.produce_blocks(10);
 
-   eosio::chain::bytes                                   entry = log.get_log_entry(last_accepted_block_num);
-   std::vector<eosio::ship_protocol::table_delta>        deltas;
-   eosio::input_stream                                   deltas_bin{entry.data(), entry.data() + entry.size()};
+   dcd::chain::bytes                                   entry = log.get_log_entry(last_accepted_block_num);
+   std::vector<dcd::ship_protocol::table_delta>        deltas;
+   dcd::input_stream                                   deltas_bin{entry.data(), entry.data() + entry.size()};
    BOOST_CHECK_NO_THROW(from_bin(deltas, deltas_bin));
 }
 
 
 struct state_history_tester_logs  {
-   state_history_tester_logs(const eosio::state_history_config& config) 
+   state_history_tester_logs(const dcd::state_history_config& config) 
       : traces_log(config) , chain_state_log(config) {}
 
-   eosio::state_history_traces_log traces_log;
-   eosio::state_history_chain_state_log   chain_state_log;
+   dcd::state_history_traces_log traces_log;
+   dcd::state_history_chain_state_log   chain_state_log;
 };
 
 struct state_history_tester : state_history_tester_logs, tester {
-   state_history_tester(const eosio::state_history_config& config) 
-   : state_history_tester_logs(config), tester ([&](eosio::chain::controller& control) {
+   state_history_tester(const dcd::state_history_config& config) 
+   : state_history_tester_logs(config), tester ([&](dcd::chain::controller& control) {
       control.applied_transaction.connect(
        [&](std::tuple<const transaction_trace_ptr&, const packed_transaction_ptr&> t) {
           traces_log.add_transaction(std::get<0>(t), std::get<1>(t));
@@ -293,7 +293,7 @@ BOOST_AUTO_TEST_CASE(test_splitted_log) {
    scoped_temp_path state_history_dir;
    fc::create_directories(state_history_dir.path);
 
-   eosio::state_history_config config{
+   dcd::state_history_config config{
       .log_dir = state_history_dir.path,
       .retained_dir = "retained",
       .archive_dir = "archive",
@@ -365,20 +365,20 @@ BOOST_AUTO_TEST_CASE(test_splitted_log) {
    auto traces = get_traces(chain.traces_log, cfd_trace->block_num);
    BOOST_REQUIRE(traces.size());
 
-   BOOST_REQUIRE(!std::holds_alternative<eosio::ship_protocol::prunable_data_type::none>(
+   BOOST_REQUIRE(!std::holds_alternative<dcd::ship_protocol::prunable_data_type::none>(
        get_prunable_data_from_traces(traces, cfd_trace->id)));
 
    std::vector<transaction_id_type> ids{cfd_trace->id};
    chain.traces_log.prune_transactions(cfd_trace->block_num, ids);
    BOOST_REQUIRE(ids.empty());
 
-   // we assume the nodeos has to be stopped while running, it can only be read
+   // we assume the dcdnode has to be stopped while running, it can only be read
    // correctly with restart
-   eosio::state_history_traces_log new_log(config);
+   dcd::state_history_traces_log new_log(config);
    auto                            pruned_traces = get_traces(new_log, cfd_trace->block_num);
    BOOST_REQUIRE(pruned_traces.size());
 
-   BOOST_CHECK(std::holds_alternative<eosio::ship_protocol::prunable_data_type::none>(
+   BOOST_CHECK(std::holds_alternative<dcd::ship_protocol::prunable_data_type::none>(
        get_prunable_data_from_traces(pruned_traces, cfd_trace->id)));
 }
 
@@ -397,7 +397,7 @@ bool test_fork(uint32_t stride, uint32_t max_retained_files) {
    scoped_temp_path state_history_dir;
    fc::create_directories(state_history_dir.path);
 
-   eosio::state_history_config config{
+   dcd::state_history_config config{
       .log_dir = state_history_dir.path,
       .retained_dir = "retained",
       .archive_dir = "archive",
@@ -432,7 +432,7 @@ bool test_fork(uint32_t stride, uint32_t max_retained_files) {
    auto traces = get_traces(chain1.traces_log, b->block_num());
 
    bool trace_found = std::find_if(traces.begin(), traces.end(), [create_account_trace_id](const auto& v) {
-                         return std::get<eosio::ship_protocol::transaction_trace_v0>(v).id == create_account_trace_id;
+                         return std::get<dcd::ship_protocol::transaction_trace_v0>(v).id == create_account_trace_id;
                       }) != traces.end();
 
    return trace_found;
@@ -461,7 +461,7 @@ BOOST_AUTO_TEST_CASE(test_corrupted_log_recovery) {
    scoped_temp_path state_history_dir;
    fc::create_directories(state_history_dir.path);
 
-   eosio::state_history_config config{
+   dcd::state_history_config config{
       .log_dir = state_history_dir.path,
       .archive_dir = "archive",
       .stride  = 100,
@@ -490,12 +490,12 @@ BOOST_AUTO_TEST_CASE(test_corrupted_log_recovery) {
 
 
 BOOST_AUTO_TEST_CASE(test_state_result_abi) {
-   using namespace eosio::state_history;
+   using namespace dcd::state_history;
 
    tester chain;
 
    transaction_trace_cache          trace_cache;
-   std::map<uint32_t, eosio::chain::bytes> history;
+   std::map<uint32_t, dcd::chain::bytes> history;
    std::optional<block_position>    prev_block;
 
    chain.control->applied_transaction.connect(
@@ -518,7 +518,7 @@ BOOST_AUTO_TEST_CASE(test_state_result_abi) {
       message.this_block = block_position{block_state->block->block_num(), block_state->id};
       message.prev_block = prev_block;
       message.block      = block_state->block;
-      std::vector<eosio::state_history::transaction_trace> traces;
+      std::vector<dcd::state_history::transaction_trace> traces;
       trace_converter::unpack(strm, traces);
       message.traces = traces;
       message.deltas = fc::raw::pack(create_deltas(control->kv_db(), !prev_block));
@@ -542,27 +542,27 @@ BOOST_AUTO_TEST_CASE(test_state_result_abi) {
          BOOST_CHECK(result_variant[0].as_string() == "get_blocks_result_v1");
          auto& get_blocks_result_v1 = result_variant[1].get_object();
 
-         eosio::chain::bytes traces_bin;
+         dcd::chain::bytes traces_bin;
          fc::from_variant(get_blocks_result_v1["traces"], traces_bin);
          BOOST_CHECK_NO_THROW( serializer.deserialize(traces_bin, "transaction_trace[]") );
       
-         eosio::chain::bytes deltas_bin;
+         dcd::chain::bytes deltas_bin;
          fc::from_variant(get_blocks_result_v1["deltas"], deltas_bin);
          BOOST_CHECK_NO_THROW( serializer.deserialize(deltas_bin, "table_delta[]"));
       }
       {
          // check the validity of abieos ship_protocol type definitions
-         eosio::input_stream          bin{value.data(), value.data() + value.size()};
-         eosio::ship_protocol::result result;
+         dcd::input_stream          bin{value.data(), value.data() + value.size()};
+         dcd::ship_protocol::result result;
          BOOST_CHECK_NO_THROW(from_bin(result, bin));
          BOOST_CHECK(bin.remaining() == 0);
 
-         auto& blocks_result_v1 = std::get<eosio::ship_protocol::get_blocks_result_v1>(result);
+         auto& blocks_result_v1 = std::get<dcd::ship_protocol::get_blocks_result_v1>(result);
 
-         std::vector<eosio::ship_protocol::transaction_trace> traces;
+         std::vector<dcd::ship_protocol::transaction_trace> traces;
          BOOST_CHECK_NO_THROW(unpack(blocks_result_v1.traces, traces));
 
-         std::vector<eosio::ship_protocol::table_delta> deltas;
+         std::vector<dcd::ship_protocol::table_delta> deltas;
          BOOST_CHECK_NO_THROW(unpack(blocks_result_v1.deltas, deltas));
       }
    }
@@ -576,23 +576,23 @@ BOOST_AUTO_TEST_CASE(test_traces_present)
 
    scoped_temp_path state_history_dir;
    fc::create_directories(state_history_dir.path);
-   eosio::state_history_config config;
+   dcd::state_history_config config;
    config.log_dir = state_history_dir.path;
-   eosio::state_history_traces_log log(config);
+   dcd::state_history_traces_log log(config);
 
    bool onblock_test_executed = false;
 
    chain.control->applied_transaction.connect(
       [&](std::tuple<const transaction_trace_ptr&, const packed_transaction_ptr&> t) {
          const transaction_trace_ptr &trace_ptr = std::get<0>(t);
-         const eosio::chain::packed_transaction_ptr &transaction = std::get<1>(t);
+         const dcd::chain::packed_transaction_ptr &transaction = std::get<1>(t);
          log.add_transaction(trace_ptr, transaction);
 
          // see issue #9159
          if (!trace_ptr->action_traces.empty() && trace_ptr->action_traces[0].act.name == "onblock"_n) {
-            BOOST_CHECK(eosio::chain::is_onblock(*trace_ptr));
+            BOOST_CHECK(dcd::chain::is_onblock(*trace_ptr));
             trace_ptr->action_traces.clear();
-            BOOST_CHECK(!eosio::chain::is_onblock(*trace_ptr));
+            BOOST_CHECK(!dcd::chain::is_onblock(*trace_ptr));
             onblock_test_executed = true;
          }
    });
@@ -608,17 +608,17 @@ BOOST_AUTO_TEST_CASE(test_traces_present)
    BOOST_REQUIRE_EQUAL(traces.size(), 1);
 
    auto trace_itr =
-       std::find_if(traces.begin(), traces.end(), [tr_ptr](const eosio::ship_protocol::transaction_trace& v) {
-          return std::get<eosio::ship_protocol::transaction_trace_v0>(v).id == tr_ptr->id;
+       std::find_if(traces.begin(), traces.end(), [tr_ptr](const dcd::ship_protocol::transaction_trace& v) {
+          return std::get<dcd::ship_protocol::transaction_trace_v0>(v).id == tr_ptr->id;
        });
 
    BOOST_REQUIRE(trace_itr != traces.end());
 
-   auto& action_traces = std::get<eosio::ship_protocol::transaction_trace_v0>(*trace_itr).action_traces;
+   auto& action_traces = std::get<dcd::ship_protocol::transaction_trace_v0>(*trace_itr).action_traces;
 
    auto new_account_action_itr =
-       std::find_if(action_traces.begin(), action_traces.end(), [](const eosio::ship_protocol::action_trace& v) {
-          return std::get<eosio::ship_protocol::action_trace_v1>(v).act.name.value == "newaccount"_n.to_uint64_t();
+       std::find_if(action_traces.begin(), action_traces.end(), [](const dcd::ship_protocol::action_trace& v) {
+          return std::get<dcd::ship_protocol::action_trace_v1>(v).act.name.value == "newaccount"_n.to_uint64_t();
        });
 
    BOOST_REQUIRE(new_account_action_itr != action_traces.end());
@@ -627,12 +627,12 @@ BOOST_AUTO_TEST_CASE(test_traces_present)
 class table_deltas_tester : public tester {
 public:
    using tester::tester;
-   using deltas_vector = vector<eosio::state_history::table_delta>;
+   using deltas_vector = vector<dcd::state_history::table_delta>;
 
    table_deltas_tester(backing_store_type backing_store, setup_policy policy=setup_policy::full) : tester(policy, db_read_mode::SPECULATIVE, std::optional<uint32_t>{}, std::optional<uint32_t>{}, backing_store) { };
 
    pair<bool, deltas_vector::iterator> find_table_delta(const std::string &name, bool full_snapshot = false) {
-      v = eosio::state_history::create_deltas(control->kv_db(), full_snapshot);
+      v = dcd::state_history::create_deltas(control->kv_db(), full_snapshot);
 
       auto find_by_name = [&name](const auto& x) {
          return x.name == name;
@@ -647,8 +647,8 @@ public:
    vector<A> deserialize_data(deltas_vector::iterator &it) {
       vector<A> result;
       for(std::size_t i=0; i < it->rows.obj.size(); i++) {
-         eosio::input_stream stream{it->rows.obj[i].second.data(), it->rows.obj[i].second.size()};
-         result.push_back(std::get<A>(eosio::from_bin<B>(stream)));
+         dcd::input_stream stream{it->rows.obj[i].second.data(), it->rows.obj[i].second.size()};
+         result.push_back(std::get<A>(dcd::from_bin<B>(stream)));
       }
       return result;
    }
@@ -661,7 +661,7 @@ BOOST_AUTO_TEST_CASE(test_deltas_not_empty) {
    for (backing_store_type backing_store : { backing_store_type::CHAINBASE/* TODO: uncomment this , backing_store_type::ROCKSDB*/ } ) {
       table_deltas_tester chain { backing_store };
 
-      auto deltas = eosio::state_history::create_deltas(chain.control->kv_db(), false);
+      auto deltas = dcd::state_history::create_deltas(chain.control->kv_db(), false);
 
       for(const auto &delta: deltas) {
          BOOST_REQUIRE(!delta.rows.obj.empty());
@@ -685,7 +685,7 @@ BOOST_AUTO_TEST_CASE(test_deltas_account_creation) {
       BOOST_REQUIRE(result.first);
       auto &it_account = result.second;
       BOOST_REQUIRE_EQUAL(it_account->rows.obj.size(), 1);
-      auto accounts = chain.deserialize_data<eosio::ship_protocol::account_v0, eosio::ship_protocol::account>(it_account);
+      auto accounts = chain.deserialize_data<dcd::ship_protocol::account_v0, dcd::ship_protocol::account>(it_account);
       BOOST_REQUIRE_EQUAL(accounts[0].name.to_string(), "newacc");
    }
 }
@@ -702,7 +702,7 @@ BOOST_AUTO_TEST_CASE(test_deltas_account_metadata) {
       BOOST_REQUIRE(result.first);
       auto &it_account_metadata = result.second;
       BOOST_REQUIRE_EQUAL(it_account_metadata->rows.obj.size(), 1);
-      auto accounts_metadata = chain.deserialize_data<eosio::ship_protocol::account_metadata_v0, eosio::ship_protocol::account_metadata>(it_account_metadata);
+      auto accounts_metadata = chain.deserialize_data<dcd::ship_protocol::account_metadata_v0, dcd::ship_protocol::account_metadata>(it_account_metadata);
       BOOST_REQUIRE_EQUAL(accounts_metadata[0].name.to_string(), "newacc");
       BOOST_REQUIRE_EQUAL(accounts_metadata[0].privileged, false);
    }
@@ -722,7 +722,7 @@ BOOST_AUTO_TEST_CASE(test_deltas_account_permission) {
       BOOST_REQUIRE(result.first);
       auto &it_permission = result.second;
       BOOST_REQUIRE_EQUAL(it_permission->rows.obj.size(), 2);
-      auto accounts_permissions = chain.deserialize_data<eosio::ship_protocol::permission_v0, eosio::ship_protocol::permission>(it_permission);
+      auto accounts_permissions = chain.deserialize_data<dcd::ship_protocol::permission_v0, dcd::ship_protocol::permission>(it_permission);
       for (std::size_t i = 0; i < accounts_permissions.size(); i++) {
          BOOST_REQUIRE_EQUAL(it_permission->rows.obj[i].first, 2);
          BOOST_REQUIRE_EQUAL(accounts_permissions[i].owner.to_string(), "newacc");
@@ -755,7 +755,7 @@ BOOST_AUTO_TEST_CASE(test_deltas_account_permission_creation_and_deletion) {
       auto &it_permission = result.second;
       BOOST_REQUIRE_EQUAL(it_permission->rows.obj.size(), 3);
       BOOST_REQUIRE_EQUAL(it_permission->rows.obj[2].first, 2);
-      auto accounts_permissions = chain.deserialize_data<eosio::ship_protocol::permission_v0, eosio::ship_protocol::permission>(it_permission);
+      auto accounts_permissions = chain.deserialize_data<dcd::ship_protocol::permission_v0, dcd::ship_protocol::permission>(it_permission);
       BOOST_REQUIRE_EQUAL(accounts_permissions[2].owner.to_string(), "newacc");
       BOOST_REQUIRE_EQUAL(accounts_permissions[2].name.to_string(), "mypermission");
       BOOST_REQUIRE_EQUAL(accounts_permissions[2].parent.to_string(), "active");
@@ -770,7 +770,7 @@ BOOST_AUTO_TEST_CASE(test_deltas_account_permission_creation_and_deletion) {
       auto &it_permission_del = result.second;
       BOOST_REQUIRE_EQUAL(it_permission_del->rows.obj.size(), 1);
       BOOST_REQUIRE_EQUAL(it_permission_del->rows.obj[0].first, 0);
-      accounts_permissions = chain.deserialize_data<eosio::ship_protocol::permission_v0, eosio::ship_protocol::permission>(it_permission_del);
+      accounts_permissions = chain.deserialize_data<dcd::ship_protocol::permission_v0, dcd::ship_protocol::permission>(it_permission_del);
       BOOST_REQUIRE_EQUAL(accounts_permissions[0].owner.to_string(), "newacc");
       BOOST_REQUIRE_EQUAL(accounts_permissions[0].name.to_string(), "mypermission");
       BOOST_REQUIRE_EQUAL(accounts_permissions[0].parent.to_string(), "active");
@@ -801,7 +801,7 @@ BOOST_AUTO_TEST_CASE(test_deltas_account_permission_modification) {
          auto &it_permission = result.second;
          BOOST_REQUIRE_EQUAL(it_permission->rows.obj.size(), 1);
 
-         auto accounts_permissions = chain.deserialize_data<eosio::ship_protocol::permission_v0, eosio::ship_protocol::permission>(it_permission);
+         auto accounts_permissions = chain.deserialize_data<dcd::ship_protocol::permission_v0, dcd::ship_protocol::permission>(it_permission);
          BOOST_REQUIRE_EQUAL(accounts_permissions[0].owner.to_string(), "newacc");
          BOOST_REQUIRE_EQUAL(accounts_permissions[0].name.to_string(), "active");
          BOOST_REQUIRE_EQUAL(accounts_permissions[0].auth.keys.size(), 1);
@@ -829,14 +829,14 @@ BOOST_AUTO_TEST_CASE(test_deltas_permission_link) {
       const auto spending_pub_key = spending_priv_key.get_public_key();
 
       chain.set_authority("newacc"_n, "spending"_n, spending_pub_key, "active"_n);
-      chain.link_authority("newacc"_n, "eosio"_n, "spending"_n, "reqauth"_n);
+      chain.link_authority("newacc"_n, "dcd"_n, "spending"_n, "reqauth"_n);
       chain.push_reqauth("newacc"_n, {permission_level{"newacc"_n, "spending"_n}}, {spending_priv_key});
 
       auto result = chain.find_table_delta("permission_link");
       BOOST_REQUIRE(result.first);
       auto &it_permission_link = result.second;
       BOOST_REQUIRE_EQUAL(it_permission_link->rows.obj.size(), 1);
-      auto permission_links = chain.deserialize_data<eosio::ship_protocol::permission_link_v0, eosio::ship_protocol::permission_link>(it_permission_link);
+      auto permission_links = chain.deserialize_data<dcd::ship_protocol::permission_link_v0, dcd::ship_protocol::permission_link>(it_permission_link);
       BOOST_REQUIRE_EQUAL(permission_links[0].account.to_string(), "newacc");
       BOOST_REQUIRE_EQUAL(permission_links[0].message_type.to_string(), "reqauth");
       BOOST_REQUIRE_EQUAL(permission_links[0].required_permission.to_string(), "spending");
@@ -858,8 +858,8 @@ BOOST_AUTO_TEST_CASE(test_deltas_global_property_history) {
       BOOST_REQUIRE(result.first);
       auto &it_global_property = result.second;
       BOOST_REQUIRE_EQUAL(it_global_property->rows.obj.size(), 1);
-      auto global_properties = chain.deserialize_data<eosio::ship_protocol::global_property_v1, eosio::ship_protocol::global_property>(it_global_property);
-      auto configuration = std::get<eosio::ship_protocol::chain_config_v1>(global_properties[0].configuration);
+      auto global_properties = chain.deserialize_data<dcd::ship_protocol::global_property_v1, dcd::ship_protocol::global_property>(it_global_property);
+      auto configuration = std::get<dcd::ship_protocol::chain_config_v1>(global_properties[0].configuration);
       BOOST_REQUIRE_EQUAL(configuration.max_transaction_delay, 60);
    }
 }
@@ -887,13 +887,13 @@ BOOST_AUTO_TEST_CASE(test_deltas_protocol_feature_history) {
       BOOST_REQUIRE(result.first);
       auto &it_protocol_state = result.second;
       BOOST_REQUIRE_EQUAL(it_protocol_state->rows.obj.size(), 1);
-      auto protocol_states = chain.deserialize_data<eosio::ship_protocol::protocol_state_v0, eosio::ship_protocol::protocol_state>(it_protocol_state);
-      auto protocol_feature = std::get<eosio::ship_protocol::activated_protocol_feature_v0>(protocol_states[0].activated_protocol_features[0]);
+      auto protocol_states = chain.deserialize_data<dcd::ship_protocol::protocol_state_v0, dcd::ship_protocol::protocol_state>(it_protocol_state);
+      auto protocol_feature = std::get<dcd::ship_protocol::activated_protocol_feature_v0>(protocol_states[0].activated_protocol_features[0]);
 
       auto digest_byte_array = protocol_feature.feature_digest.extract_as_byte_array();
       char digest_array[digest_byte_array.size()];
       for (std::size_t i = 0; i < digest_byte_array.size(); i++) digest_array[i] = digest_byte_array[i];
-      eosio::chain::digest_type digest_in_delta(digest_array, digest_byte_array.size());
+      dcd::chain::digest_type digest_in_delta(digest_array, digest_byte_array.size());
 
       BOOST_REQUIRE_EQUAL(digest_in_delta, *d);
    }
@@ -911,7 +911,7 @@ BOOST_AUTO_TEST_CASE(test_deltas_kv) {
 
       chain.set_code(config::system_account_name, contracts::kv_bios_wasm());
       chain.set_abi(config::system_account_name, contracts::kv_bios_abi().data());
-      chain.push_action("eosio"_n, "ramkvlimits"_n, "eosio"_n, mutable_variant_object()("k", 1024)("v", 1024)("i", 1024));
+      chain.push_action("dcd"_n, "ramkvlimits"_n, "dcd"_n, mutable_variant_object()("k", 1024)("v", 1024)("i", 1024));
       chain.produce_block();
 
       chain.set_code("kvtable"_n, contracts::contracts::kv_test_wasm());
@@ -924,7 +924,7 @@ BOOST_AUTO_TEST_CASE(test_deltas_kv) {
       auto result = chain.find_table_delta("key_value");
       BOOST_REQUIRE(result.first);
 
-      auto key_values = chain.deserialize_data<eosio::ship_protocol::key_value_v0, eosio::ship_protocol::key_value>(result.second);
+      auto key_values = chain.deserialize_data<dcd::ship_protocol::key_value_v0, dcd::ship_protocol::key_value>(result.second);
       BOOST_REQUIRE_EQUAL(key_values.size(), 1);
       BOOST_REQUIRE_EQUAL(result.second->rows.obj[0].first, 2);
 
@@ -951,7 +951,7 @@ BOOST_AUTO_TEST_CASE(test_deltas_kv) {
       result = chain.find_table_delta("key_value");
       BOOST_REQUIRE(result.first);
 
-      key_values = chain.deserialize_data<eosio::ship_protocol::key_value_v0, eosio::ship_protocol::key_value>(result.second);
+      key_values = chain.deserialize_data<dcd::ship_protocol::key_value_v0, dcd::ship_protocol::key_value>(result.second);
       BOOST_REQUIRE_EQUAL(key_values.size(), 1);
       BOOST_REQUIRE_EQUAL(result.second->rows.obj[0].first, 0);
 
@@ -989,7 +989,7 @@ BOOST_AUTO_TEST_CASE(test_deltas_contract) {
          BOOST_REQUIRE_EQUAL(row.first, 2);
       }
 
-      auto contract_tables = chain.deserialize_data<eosio::ship_protocol::contract_table_v0, eosio::ship_protocol::contract_table>(it_contract_table_full);
+      auto contract_tables = chain.deserialize_data<dcd::ship_protocol::contract_table_v0, dcd::ship_protocol::contract_table>(it_contract_table_full);
       BOOST_REQUIRE_EQUAL(contract_tables[0].table.to_string(), "hashobjs");
       BOOST_REQUIRE_EQUAL(contract_tables[1].table.to_string(), "hashobjs....1");
       BOOST_REQUIRE_EQUAL(contract_tables[2].table.to_string(), "numobjs");
@@ -1007,7 +1007,7 @@ BOOST_AUTO_TEST_CASE(test_deltas_contract) {
          BOOST_REQUIRE_EQUAL(row.first, 2);
       }
 
-      auto contract_rows_full = chain.deserialize_data<eosio::ship_protocol::contract_row_v0, eosio::ship_protocol::contract_row>(it_contract_row_full);
+      auto contract_rows_full = chain.deserialize_data<dcd::ship_protocol::contract_row_v0, dcd::ship_protocol::contract_row>(it_contract_row_full);
       BOOST_REQUIRE_EQUAL(contract_rows_full[0].table.to_string(), "hashobjs");
       BOOST_REQUIRE_EQUAL(contract_rows_full[1].table.to_string(), "numobjs");
 
@@ -1016,7 +1016,7 @@ BOOST_AUTO_TEST_CASE(test_deltas_contract) {
       BOOST_REQUIRE(result.first);
       auto &it_contract_table = result.second;
       BOOST_REQUIRE_EQUAL(it_contract_table->rows.obj.size(), 6);
-      contract_tables = chain.deserialize_data<eosio::ship_protocol::contract_table_v0, eosio::ship_protocol::contract_table>(it_contract_table);
+      contract_tables = chain.deserialize_data<dcd::ship_protocol::contract_table_v0, dcd::ship_protocol::contract_table>(it_contract_table);
 
       std::set<std::string> expected_contract_table_names {"hashobjs", "hashobjs....1", "numobjs", "numobjs.....1", "numobjs.....2", "numobjs.....3"};
       std::set<std::string> result_contract_table_names;
@@ -1035,7 +1035,7 @@ BOOST_AUTO_TEST_CASE(test_deltas_contract) {
          BOOST_REQUIRE_EQUAL(row.first, 2);
       }
 
-      auto contract_rows = chain.deserialize_data<eosio::ship_protocol::contract_row_v0, eosio::ship_protocol::contract_row>(it_contract_row);
+      auto contract_rows = chain.deserialize_data<dcd::ship_protocol::contract_row_v0, dcd::ship_protocol::contract_row>(it_contract_row);
       std::set<std::string> expected_contract_row_table_names {"hashobjs", "numobjs"};
       std::set<std::string> result_contract_row_table_names;
       for(auto &contract_row : contract_rows) {
@@ -1049,7 +1049,7 @@ BOOST_AUTO_TEST_CASE(test_deltas_contract) {
       auto &it_contract_index256 = result.second;
       BOOST_REQUIRE_EQUAL(it_contract_index256->rows.obj.size(), 2);
 
-      auto contract_indices = chain.deserialize_data<eosio::ship_protocol::contract_index256_v0, eosio::ship_protocol::contract_index256>(it_contract_index256);
+      auto contract_indices = chain.deserialize_data<dcd::ship_protocol::contract_index256_v0, dcd::ship_protocol::contract_index256>(it_contract_index256);
       std::set<std::string> expected_contract_index256_table_names {"hashobjs", "hashobjs....1"};
       std::set<std::string> result_contract_index256_table_names;
       for(auto &contract_index : contract_indices) {
@@ -1066,7 +1066,7 @@ BOOST_AUTO_TEST_CASE(test_deltas_contract) {
       result = chain.find_table_delta("contract_row");
       BOOST_REQUIRE(result.first);
       auto &it_contract_table_modified = result.second;
-      auto modified_contract_tables = chain.deserialize_data<eosio::ship_protocol::contract_table_v0, eosio::ship_protocol::contract_table>(it_contract_table_modified);
+      auto modified_contract_tables = chain.deserialize_data<dcd::ship_protocol::contract_table_v0, dcd::ship_protocol::contract_table>(it_contract_table_modified);
       BOOST_REQUIRE_EQUAL(modified_contract_tables.size(), 1);
 
       for(auto &row : it_contract_table_modified->rows.obj) {
@@ -1082,7 +1082,7 @@ BOOST_AUTO_TEST_CASE(test_deltas_contract) {
       result = chain.find_table_delta("contract_table");
       BOOST_REQUIRE(result.first);
       auto &it_contract_table_deleted = result.second;
-      auto deleted_contract_tables = chain.deserialize_data<eosio::ship_protocol::contract_table_v0, eosio::ship_protocol::contract_table>(it_contract_table_deleted);
+      auto deleted_contract_tables = chain.deserialize_data<dcd::ship_protocol::contract_table_v0, dcd::ship_protocol::contract_table>(it_contract_table_deleted);
       BOOST_REQUIRE_EQUAL(deleted_contract_tables.size(), 4);
 
       for(auto &row : it_contract_table_deleted->rows.obj) {
@@ -1100,7 +1100,7 @@ BOOST_AUTO_TEST_CASE(test_deltas_contract) {
       BOOST_REQUIRE(result.first);
       auto &it_contract_index128 = result.second;
       BOOST_REQUIRE_EQUAL(it_contract_index128->rows.obj.size(), 1);
-      auto contract_indices128 = chain.deserialize_data<eosio::ship_protocol::contract_index128_v0, eosio::ship_protocol::contract_index128>(it_contract_index128);
+      auto contract_indices128 = chain.deserialize_data<dcd::ship_protocol::contract_index128_v0, dcd::ship_protocol::contract_index128>(it_contract_index128);
       BOOST_REQUIRE_EQUAL(contract_indices128[0].table.to_string(), "numobjs.....1");
    }
 }
@@ -1141,7 +1141,7 @@ BOOST_AUTO_TEST_CASE(test_deltas_contract_several_rows){
       BOOST_REQUIRE(result.first);
       auto &it_contract_row = result.second;
       BOOST_REQUIRE_EQUAL(it_contract_row->rows.obj.size(), 6);
-      auto contract_rows = chain.deserialize_data<eosio::ship_protocol::contract_row_v0, eosio::ship_protocol::contract_row>(it_contract_row);
+      auto contract_rows = chain.deserialize_data<dcd::ship_protocol::contract_row_v0, dcd::ship_protocol::contract_row>(it_contract_row);
 
       std::multiset<std::string> expected_contract_row_table_names {"hashobjs", "hashobjs", "hashobjs", "numobjs", "numobjs", "numobjs"};
       std::multiset<uint64_t> expected_contract_row_table_primary_keys {0, 1 ,2, 0, 1, 2};
@@ -1166,7 +1166,7 @@ BOOST_AUTO_TEST_CASE(test_deltas_contract_several_rows){
       BOOST_REQUIRE(result.first);
       auto &it_contract_row_after_delete = result.second;
       BOOST_REQUIRE_EQUAL(it_contract_row->rows.obj.size(), 2);
-      contract_rows = chain.deserialize_data<eosio::ship_protocol::contract_row_v0, eosio::ship_protocol::contract_row>(it_contract_row);
+      contract_rows = chain.deserialize_data<dcd::ship_protocol::contract_row_v0, dcd::ship_protocol::contract_row>(it_contract_row);
 
       for(size_t i=0; i < contract_rows.size(); i++) {
          BOOST_REQUIRE_EQUAL(it_contract_row->rows.obj[i].first, 0);
@@ -1177,7 +1177,7 @@ BOOST_AUTO_TEST_CASE(test_deltas_contract_several_rows){
       BOOST_REQUIRE(result.first);
       auto &it_contract_index_double = result.second;
       BOOST_REQUIRE_EQUAL(it_contract_index_double->rows.obj.size(), 2);
-      auto contract_index_double_elems = chain.deserialize_data<eosio::ship_protocol::contract_index_double_v0, eosio::ship_protocol::contract_index_double>(it_contract_index_double);
+      auto contract_index_double_elems = chain.deserialize_data<dcd::ship_protocol::contract_index_double_v0, dcd::ship_protocol::contract_index_double>(it_contract_index_double);
 
       for(size_t i=0; i < contract_index_double_elems.size(); i++) {
          BOOST_REQUIRE_EQUAL(it_contract_index_double->rows.obj[i].first, 0);
@@ -1201,7 +1201,7 @@ BOOST_AUTO_TEST_CASE(test_deltas_table_and_kv) {
       chain.set_code(config::system_account_name, contracts::kv_bios_wasm());
       chain.set_abi(config::system_account_name, contracts::kv_bios_abi().data());
 
-      auto trace = chain.push_action("eosio"_n, "ramkvlimits"_n, "eosio"_n, mutable_variant_object()("k", 1024)("v", 1024)("i", 1024));
+      auto trace = chain.push_action("dcd"_n, "ramkvlimits"_n, "dcd"_n, mutable_variant_object()("k", 1024)("v", 1024)("i", 1024));
       BOOST_REQUIRE_EQUAL(transaction_receipt::executed, trace->receipt->status);
 
       chain.set_code("kvtable"_n, contracts::contracts::kv_test_wasm());
@@ -1237,7 +1237,7 @@ BOOST_AUTO_TEST_CASE(test_deltas_table_and_kv) {
       BOOST_REQUIRE(result.first);
       auto &it_contract_table = result.second;
       BOOST_REQUIRE_EQUAL(it_contract_table->rows.obj.size(), 2);
-      auto contract_tables = chain.deserialize_data<eosio::ship_protocol::contract_table_v0, eosio::ship_protocol::contract_table>(it_contract_table);
+      auto contract_tables = chain.deserialize_data<dcd::ship_protocol::contract_table_v0, dcd::ship_protocol::contract_table>(it_contract_table);
 
       std::set<std::string> expected_contract_table_names {"hashobjs", "hashobjs....1"};
       std::set<std::string> result_contract_table_names;
@@ -1249,7 +1249,7 @@ BOOST_AUTO_TEST_CASE(test_deltas_table_and_kv) {
       result = chain.find_table_delta("key_value");
       BOOST_REQUIRE(result.first);
 
-      auto key_values = chain.deserialize_data<eosio::ship_protocol::key_value_v0, eosio::ship_protocol::key_value>(result.second);
+      auto key_values = chain.deserialize_data<dcd::ship_protocol::key_value_v0, dcd::ship_protocol::key_value>(result.second);
       BOOST_REQUIRE_EQUAL(key_values.size(), 1);
 
       chain.produce_block();
@@ -1265,7 +1265,7 @@ BOOST_AUTO_TEST_CASE(test_deltas_table_and_kv) {
 
       auto &it_contract_table_full = result.second;
       BOOST_REQUIRE_EQUAL(it_contract_table_full->rows.obj.size(), 3);
-      contract_tables = chain.deserialize_data<eosio::ship_protocol::contract_table_v0, eosio::ship_protocol::contract_table>(it_contract_table);
+      contract_tables = chain.deserialize_data<dcd::ship_protocol::contract_table_v0, dcd::ship_protocol::contract_table>(it_contract_table);
 
       std::set<std::string> expected_contract_table_names_full {"abihash", "hashobjs", "hashobjs....1"};
       std::set<std::string> result_contract_table_names_full;
@@ -1277,7 +1277,7 @@ BOOST_AUTO_TEST_CASE(test_deltas_table_and_kv) {
       result = chain.find_table_delta("key_value", true);
       BOOST_REQUIRE(result.first);
 
-      key_values = chain.deserialize_data<eosio::ship_protocol::key_value_v0, eosio::ship_protocol::key_value>(result.second);
+      key_values = chain.deserialize_data<dcd::ship_protocol::key_value_v0, dcd::ship_protocol::key_value>(result.second);
       BOOST_REQUIRE_EQUAL(key_values.size(), 1);
    }
 }
@@ -1287,30 +1287,30 @@ BOOST_AUTO_TEST_CASE(test_deltas_resources_history) {
       table_deltas_tester chain { backing_store };
       chain.produce_block();
 
-      chain.create_accounts({ "eosio.token"_n, "eosio.ram"_n, "eosio.ramfee"_n, "eosio.stake"_n});
+      chain.create_accounts({ "dcd.token"_n, "dcd.ram"_n, "dcd.ramfee"_n, "dcd.stake"_n});
 
       chain.produce_blocks( 100 );
 
-      chain.set_code( "eosio.token"_n, contracts::eosio_token_wasm() );
-      chain.set_abi( "eosio.token"_n, contracts::eosio_token_abi().data() );
+      chain.set_code( "dcd.token"_n, contracts::dcd_token_wasm() );
+      chain.set_abi( "dcd.token"_n, contracts::dcd_token_abi().data() );
 
       chain.produce_block();
 
-      chain.push_action("eosio.token"_n, "create"_n, "eosio.token"_n, mutable_variant_object()
-         ("issuer", "eosio.token" )
+      chain.push_action("dcd.token"_n, "create"_n, "dcd.token"_n, mutable_variant_object()
+         ("issuer", "dcd.token" )
          ("maximum_supply", core_from_string("1000000000.0000") )
       );
 
-      chain.push_action("eosio.token"_n, "issue"_n, "eosio.token"_n, fc::mutable_variant_object()
-         ("to",       "eosio")
+      chain.push_action("dcd.token"_n, "issue"_n, "dcd.token"_n, fc::mutable_variant_object()
+         ("to",       "dcd")
          ("quantity", core_from_string("90.0000"))
          ("memo", "for stuff")
       );
 
       chain.produce_blocks(10);
 
-      chain.set_code( config::system_account_name, contracts::eosio_system_wasm() );
-      chain.set_abi( config::system_account_name, contracts::eosio_system_abi().data() );
+      chain.set_code( config::system_account_name, contracts::dcd_system_wasm() );
+      chain.set_abi( config::system_account_name, contracts::dcd_system_abi().data() );
 
       chain.push_action(config::system_account_name, "init"_n, config::system_account_name,
                            mutable_variant_object()
@@ -1353,7 +1353,7 @@ BOOST_AUTO_TEST_CASE(test_deltas_resources_history) {
       BOOST_REQUIRE(result.first);
       auto &it_resource_limits = result.second;
       BOOST_REQUIRE_EQUAL(it_resource_limits->rows.obj.size(), 2);
-      auto resource_limits = chain.deserialize_data<eosio::ship_protocol::resource_limits_v0, eosio::ship_protocol::resource_limits>(it_resource_limits);
+      auto resource_limits = chain.deserialize_data<dcd::ship_protocol::resource_limits_v0, dcd::ship_protocol::resource_limits>(it_resource_limits);
       BOOST_REQUIRE(resource_limits[0].owner.to_string() == "alice");
       BOOST_REQUIRE(resource_limits[0].ram_bytes != -1);
 
@@ -1361,7 +1361,7 @@ BOOST_AUTO_TEST_CASE(test_deltas_resources_history) {
       BOOST_REQUIRE(result.first);
       auto &it_resource_usage = result.second;
       BOOST_REQUIRE_EQUAL(it_resource_usage->rows.obj.size(), 4);
-      auto resource_usages = chain.deserialize_data<eosio::ship_protocol::resource_usage_v0, eosio::ship_protocol::resource_usage>(it_resource_usage);
+      auto resource_usages = chain.deserialize_data<dcd::ship_protocol::resource_usage_v0, dcd::ship_protocol::resource_usage>(it_resource_usage);
       BOOST_REQUIRE(resource_usages[0].owner.to_string() == "alice");
       BOOST_REQUIRE(resource_usages[0].ram_usage > 0);
    */

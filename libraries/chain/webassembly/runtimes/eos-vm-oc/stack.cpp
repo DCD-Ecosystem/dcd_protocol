@@ -1,8 +1,8 @@
-#include <eosio/chain/webassembly/eos-vm-oc/stack.hpp>
+#include <dcd/chain/webassembly/eos-vm-oc/stack.hpp>
 #include <fc/exception/exception.hpp>
 #include <sys/mman.h>
 
-using namespace eosio::chain::eosvmoc;
+using namespace dcd::chain::eosvmoc;
 
 void execution_stack::reset(std::size_t max_call_depth) {
    if(max_call_depth > call_depth_limit) {

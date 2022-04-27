@@ -1,8 +1,8 @@
-#include <eosio/chain/abi_serializer.hpp>
-#include <eosio/chain/abi_serializer.hpp>
-#include <eosio/testing/tester.hpp>
+#include <dcd/chain/abi_serializer.hpp>
+#include <dcd/chain/abi_serializer.hpp>
+#include <dcd/testing/tester.hpp>
 
-#include <eosio/chain/fork_database.hpp>
+#include <dcd/chain/fork_database.hpp>
 
 #include <Runtime/Runtime.h>
 
@@ -14,8 +14,8 @@
 
 #include "fork_test_utilities.hpp"
 
-using namespace eosio::chain;
-using namespace eosio::testing;
+using namespace dcd::chain;
+using namespace dcd::testing;
 
 BOOST_AUTO_TEST_SUITE(forked_tests)
 
@@ -140,26 +140,26 @@ BOOST_AUTO_TEST_CASE( forking ) try {
    wlog("set producer schedule to [dan,sam,pam]");
    c.produce_blocks(30);
 
-   auto r2 = c.create_accounts( {"eosio.token"_n} );
+   auto r2 = c.create_accounts( {"dcd.token"_n} );
    wdump((fc::json::to_pretty_string(r2)));
-   c.set_code( "eosio.token"_n, contracts::eosio_token_wasm() );
-   c.set_abi( "eosio.token"_n, contracts::eosio_token_abi().data() );
+   c.set_code( "dcd.token"_n, contracts::dcd_token_wasm() );
+   c.set_abi( "dcd.token"_n, contracts::dcd_token_abi().data() );
    c.produce_blocks(10);
 
 
-   auto cr = c.push_action( "eosio.token"_n, "create"_n, "eosio.token"_n, mutable_variant_object()
-              ("issuer",       "eosio" )
+   auto cr = c.push_action( "dcd.token"_n, "create"_n, "dcd.token"_n, mutable_variant_object()
+              ("issuer",       "dcd" )
               ("maximum_supply", core_from_string("10000000.0000"))
       );
 
-   cr = c.push_action( "eosio.token"_n, "issue"_n, config::system_account_name, mutable_variant_object()
-              ("to",       "eosio" )
+   cr = c.push_action( "dcd.token"_n, "issue"_n, config::system_account_name, mutable_variant_object()
+              ("to",       "dcd" )
               ("quantity", core_from_string("100.0000"))
               ("memo", "")
       );
 
-   cr = c.push_action( "eosio.token"_n, "transfer"_n, config::system_account_name, mutable_variant_object()
-              ("from",     "eosio")
+   cr = c.push_action( "dcd.token"_n, "transfer"_n, config::system_account_name, mutable_variant_object()
+              ("from",     "dcd")
               ("to",       "dan" )
               ("quantity", core_from_string("100.0000"))
               ("memo", "")

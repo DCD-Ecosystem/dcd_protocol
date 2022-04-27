@@ -7,7 +7,7 @@
 
 #include "wasm_ql_http.hpp"
 
-#include <eosio/from_json.hpp>
+#include <dcd/from_json.hpp>
 
 #include <boost/asio/bind_executor.hpp>
 #include <boost/asio/io_service.hpp>
@@ -22,7 +22,7 @@
 #include <fc/exception/exception.hpp>
 #include <fc/log/logger.hpp>
 
-#include <eosio/to_json.hpp>
+#include <dcd/to_json.hpp>
 
 #include <algorithm>
 #include <cstdlib>
@@ -49,7 +49,7 @@ struct error_info {
    std::vector<int> details = {};
 };
 
-EOSIO_REFLECT(error_info, code, name, what, details)
+DCD_REFLECT(error_info, code, name, what, details)
 
 struct error_results {
    uint16_t    code    = {};
@@ -57,7 +57,7 @@ struct error_results {
    error_info  error   = {};
 };
 
-EOSIO_REFLECT(error_results, code, message, error)
+DCD_REFLECT(error_results, code, message, error)
 
 namespace b1::rodeos::wasm_ql {
 
@@ -243,7 +243,7 @@ void handle_request(const wasm_ql::http_config& http_config, const wasm_ql::shar
          return;
       } else if (req.target() == "/v1/chain/send_transaction") {
          // todo: replace with /v1/chain/send_transaction2?
-         // or:   change nodeos to not do abi deserialization if transaction extension present?
+         // or:   change dcdnode to not do abi deserialization if transaction extension present?
          if (req.method() != http::verb::post)
             return send(
                   error(http::status::bad_request, "Unsupported HTTP-method for " + req.target().to_string() + "\n"));
@@ -320,7 +320,7 @@ void handle_request(const wasm_ql::http_config& http_config, const wasm_ql::shar
          err.message    = "Internal Service Error";
          err.error.name = "exception";
          err.error.what = e.what();
-         return send(error(http::status::internal_server_error, eosio::convert_to_json(err),
+         return send(error(http::status::internal_server_error, dcd::convert_to_json(err),
                            "application/json"));
       } catch (...) { //
          return send(error(http::status::internal_server_error, "failure reporting failure\n"));

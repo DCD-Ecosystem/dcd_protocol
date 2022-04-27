@@ -225,7 +225,7 @@ function check_type(contract: number, types: any, type: string, data: string, ex
 }
 
 function check_types() {
-    let token = name('eosio.token');
+    let token = name('dcd.token');
     let test = name('test.abi');
     check(l.abieos_set_abi_hex(context, token, cstr(tokenHexApi)));
     check(l.abieos_set_abi(context, test, cstr(testAbi)));
@@ -234,9 +234,9 @@ function check_types() {
 
     check_throw('Error: missing abi_def.version (type=string)', () => eosjs_hex_abi_to_json(eosjs_json_abi_to_hex({})));
     check_throw('Error: Unsupported abi version', () => eosjs_hex_abi_to_json(eosjs_json_abi_to_hex({ version: '' })));
-    check_throw('Error: Unsupported abi version', () => eosjs_hex_abi_to_json(eosjs_json_abi_to_hex({ version: 'eosio::abi/9.0' })));
-    eosjs_hex_abi_to_json(eosjs_json_abi_to_hex({ version: 'eosio::abi/1.0' }));
-    eosjs_hex_abi_to_json(eosjs_json_abi_to_hex({ version: 'eosio::abi/1.1' }));
+    check_throw('Error: Unsupported abi version', () => eosjs_hex_abi_to_json(eosjs_json_abi_to_hex({ version: 'dcd::abi/9.0' })));
+    eosjs_hex_abi_to_json(eosjs_json_abi_to_hex({ version: 'dcd::abi/1.0' }));
+    eosjs_hex_abi_to_json(eosjs_json_abi_to_hex({ version: 'dcd::abi/1.1' }));
 
     check_type(0, js2Types, 'bool', 'true');
     check_type(0, js2Types, 'bool', 'false');
@@ -468,7 +468,7 @@ function check_types() {
     check_type(0, js2Types, 'extended_asset', '{"quantity":"0.123456 SIX","contract":"seven"}');
 
     check_type(token, tokenTypes, "transfer", '{"from":"useraaaaaaaa","to":"useraaaaaaab","quantity":"0.0001 SYS","memo":"test memo"}');
-    check_type(0, js2Types, "transaction", '{"expiration":"2009-02-13T23:31:31.000","ref_block_num":1234,"ref_block_prefix":5678,"max_net_usage_words":0,"max_cpu_usage_ms":0,"delay_sec":0,"context_free_actions":[],"actions":[{"account":"eosio.token","name":"transfer","authorization":[{"actor":"useraaaaaaaa","permission":"active"}],"data":"608C31C6187315D6708C31C6187315D60100000000000000045359530000000000"}],"transaction_extensions":[]}');
+    check_type(0, js2Types, "transaction", '{"expiration":"2009-02-13T23:31:31.000","ref_block_num":1234,"ref_block_prefix":5678,"max_net_usage_words":0,"max_cpu_usage_ms":0,"delay_sec":0,"context_free_actions":[],"actions":[{"account":"dcd.token","name":"transfer","authorization":[{"actor":"useraaaaaaaa","permission":"active"}],"data":"608C31C6187315D6708C31C6187315D60100000000000000045359530000000000"}],"transaction_extensions":[]}');
 
     check_type(test, testTypes, "v1", '["int8",7]');
     check_type(test, testTypes, "v1", '["s1",{"x1":6}]');
@@ -490,11 +490,11 @@ function check_types() {
 
 async function push_transfer() {
     if (useTokenHexApi)
-        check(l.abieos_set_abi_hex(context, name('eosio.token'), cstr(tokenHexApi)));
+        check(l.abieos_set_abi_hex(context, name('dcd.token'), cstr(tokenHexApi)));
     else
-        check(l.abieos_set_abi(context, name('eosio.token'), jsonStr((await rpc.get_abi('eosio.token')).abi)));
-    let type = checkPtr(l.abieos_get_type_for_action(context, name('eosio.token'), name('transfer')));
-    check(l.abieos_json_to_bin(context, name('eosio.token'), type, jsonStr({
+        check(l.abieos_set_abi(context, name('dcd.token'), jsonStr((await rpc.get_abi('dcd.token')).abi)));
+    let type = checkPtr(l.abieos_get_type_for_action(context, name('dcd.token'), name('transfer')));
+    check(l.abieos_json_to_bin(context, name('dcd.token'), type, jsonStr({
         from: 'useraaaaaaaa',
         to: 'useraaaaaaab',
         quantity: '0.0001 SYS',
@@ -502,7 +502,7 @@ async function push_transfer() {
     })));
     const actionDataHex = l.abieos_get_bin_hex(context).readCString();
     console.log('action json->bin: ', actionDataHex);
-    console.log('action bin->json: ', abieos_hex_to_json(name('eosio.token'), 'transfer', actionDataHex));
+    console.log('action bin->json: ', abieos_hex_to_json(name('dcd.token'), 'transfer', actionDataHex));
 
     let info = await rpc.get_info();
     let refBlock = await rpc.get_block(info.head_block_num - 3);
@@ -515,7 +515,7 @@ async function push_transfer() {
         delay_sec: 0,
         context_free_actions: [] as any,
         actions: [{
-            account: 'eosio.token',
+            account: 'dcd.token',
             name: 'transfer',
             authorization: [{
                 actor: 'useraaaaaaaa',

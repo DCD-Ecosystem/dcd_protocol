@@ -1,7 +1,7 @@
-#include <eosio/chain/block.hpp>
-#include <eosio/chain/types.hpp>
+#include <dcd/chain/block.hpp>
+#include <dcd/chain/types.hpp>
 
-namespace eosio { namespace chain {
+namespace dcd { namespace chain {
    void additional_block_signatures_extension::reflector_init() {
       static_assert( fc::raw::has_feature_reflector_init_on_unpacked_reflected_types,
                      "additional_block_signatures_extension expects FC to support reflector_init" );
@@ -152,4 +152,4 @@ namespace eosio { namespace chain {
       }
       return result;
    }
-} } /// namespace eosio::chain
+} } /// namespace dcd::chain

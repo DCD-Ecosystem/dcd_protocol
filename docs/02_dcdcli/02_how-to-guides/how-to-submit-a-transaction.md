@@ -10,7 +10,7 @@ This how-to guide provides instructions on how to submit, or push, a transaction
   * What a [transaction](https://developers.eos.io/welcome/latest/glossary/index/#transaction) is.
   * How to generate a valid transaction JSON.
     * Consult [dcdcli push transaction](https://developers.eos.io/manuals/eos/v2.1/dcdcli/command-reference/push/push-transaction) reference, and pay attention to option `-d` and `-j`.
-    * Consult [push transaction](https://developers.eos.io/manuals/eos/v2.1/nodeos/plugins/chain_api_plugin/api-reference/index#operation/push_transaction) endpoint for chain api plug-in, and pay attention to the payload definition.
+    * Consult [push transaction](https://developers.eos.io/manuals/eos/v2.1/dcdnode/plugins/chain_api_plugin/api-reference/index#operation/push_transaction) endpoint for chain api plug-in, and pay attention to the payload definition.
 
 ## Command Reference
 
@@ -41,7 +41,7 @@ You can create the JSON snippet defining the transaction in two ways:
   "delay_sec": 0,
   "context_free_actions": [],
   "actions": [{
-      "account": "eosio.token",
+      "account": "dcd.token",
       "name": "transfer",
       "authorization": [{
           "actor": "han",
@@ -59,7 +59,7 @@ You can create the JSON snippet defining the transaction in two ways:
 * Alternatively, you can also create a JSON snippet that uses clear text JSON for `data` field.
 
 [[info]]
-| Be aware that if a clear text `data` field is used, `dcdcli` needs to fetch the smart contract's ABI using `nodeos` API. This operation has an overall performance overhead for both `dcdcli` and `nodeos`. On the other hand if hex data is used in the `data` field then the ABI fetching is not executed and thus the total time to send and execute the transaction is faster.
+| Be aware that if a clear text `data` field is used, `dcdcli` needs to fetch the smart contract's ABI using `dcdnode` API. This operation has an overall performance overhead for both `dcdcli` and `dcdnode`. On the other hand if hex data is used in the `data` field then the ABI fetching is not executed and thus the total time to send and execute the transaction is faster.
 
 ```json
 {
@@ -71,7 +71,7 @@ You can create the JSON snippet defining the transaction in two ways:
   "delay_sec": 0,
   "context_free_actions": [],
   "actions": [{
-      "account": "eosio.token",
+      "account": "dcd.token",
       "name": "transfer",
       "authorization": [{
           "actor": "han",
@@ -80,7 +80,7 @@ You can create the JSON snippet defining the transaction in two ways:
       ],
       "data": {
         "from": "han",
-        "to": "eosio",
+        "to": "dcd",
         "quantity": "0.0001 SYS",
         "memo": "m"
       }
@@ -104,7 +104,7 @@ dcdcli push transaction TRX_FILE.json
 * Alternatively, you can send the transaction using the JSON content directly:
 
 ```sh
-dcdcli push transaction '{"expiration": "2019-08-01T07:15:49", "ref_block_num": 34881,"ref_block_prefix": 2972818865,"max_net_usage_words": 0,"max_cpu_usage_ms": 0,"delay_sec": 0,"context_free_actions": [],"actions": [{"account": "eosio.token","name": "transfer","authorization": [{"actor": "han","permission": "active"}],"data": {"from": "han","to": "eosio","quantity": "0.0001 SYS","memo": "m"}}],"transaction_extensions": [],"context_free_data": []}'
+dcdcli push transaction '{"expiration": "2019-08-01T07:15:49", "ref_block_num": 34881,"ref_block_prefix": 2972818865,"max_net_usage_words": 0,"max_cpu_usage_ms": 0,"delay_sec": 0,"context_free_actions": [],"actions": [{"account": "dcd.token","name": "transfer","authorization": [{"actor": "han","permission": "active"}],"data": {"from": "han","to": "dcd","quantity": "0.0001 SYS","memo": "m"}}],"transaction_extensions": [],"context_free_data": []}'
 ```
 
 ## Summary

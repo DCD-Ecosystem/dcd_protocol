@@ -1,13 +1,13 @@
 #include <fc/log/logger_config.hpp> //set_thread_name
 
-#include <eosio/chain/webassembly/eos-vm-oc/code_cache.hpp>
-#include <eosio/chain/webassembly/eos-vm-oc/config.hpp>
-#include <eosio/chain/webassembly/common.hpp>
-#include <eosio/chain/webassembly/eos-vm-oc/memory.hpp>
-#include <eosio/chain/webassembly/eos-vm-oc/eos-vm-oc.hpp>
-#include <eosio/chain/webassembly/eos-vm-oc/intrinsic.hpp>
-#include <eosio/chain/webassembly/eos-vm-oc/compile_monitor.hpp>
-#include <eosio/chain/exceptions.hpp>
+#include <dcd/chain/webassembly/eos-vm-oc/code_cache.hpp>
+#include <dcd/chain/webassembly/eos-vm-oc/config.hpp>
+#include <dcd/chain/webassembly/common.hpp>
+#include <dcd/chain/webassembly/eos-vm-oc/memory.hpp>
+#include <dcd/chain/webassembly/eos-vm-oc/eos-vm-oc.hpp>
+#include <dcd/chain/webassembly/eos-vm-oc/intrinsic.hpp>
+#include <dcd/chain/webassembly/eos-vm-oc/compile_monitor.hpp>
+#include <dcd/chain/exceptions.hpp>
 
 #include <unistd.h>
 #include <sys/syscall.h>
@@ -22,7 +22,7 @@
 using namespace IR;
 using namespace Runtime;
 
-namespace eosio { namespace chain { namespace eosvmoc {
+namespace dcd { namespace chain { namespace eosvmoc {
 
 static constexpr size_t header_offset = 512u;
 static constexpr size_t header_size = 512u;

@@ -9,7 +9,7 @@ From packed to plain signed json form
 ## Options
 
 - `-h,--help` - Print this help message and exit
-- `--unpack-action-data` - Unpack all action data within transaction, needs interaction with `nodeos`
+- `--unpack-action-data` - Unpack all action data within transaction, needs interaction with `dcdnode`
 
 ## Usage
 
@@ -37,10 +37,10 @@ dcdcli convert unpack_transaction '{
   "delay_sec": 0,
   "context_free_actions": [],
   "actions": [{
-      "account": "eosio",
+      "account": "dcd",
       "name": "newaccount",
       "authorization": [{
-          "actor": "eosio",
+          "actor": "dcd",
           "permission": "active"
         }
       ],

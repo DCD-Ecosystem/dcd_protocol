@@ -1,25 +1,25 @@
-#include <eosio/chain_plugin/chain_plugin.hpp>
-#include <eosio/chain_plugin/blockvault_sync_strategy.hpp>
-#include <eosio/chain/fork_database.hpp>
-#include <eosio/chain/block_log.hpp>
-#include <eosio/chain/exceptions.hpp>
-#include <eosio/chain/authorization_manager.hpp>
-#include <eosio/chain/code_object.hpp>
-#include <eosio/chain/config.hpp>
-#include <eosio/chain/wasm_interface.hpp>
-//#include <eosio/chain/resource_limits.hpp>
-#include <eosio/chain/reversible_block_object.hpp>
-#include <eosio/chain/controller.hpp>
-#include <eosio/chain/generated_transaction_object.hpp>
-#include <eosio/chain/global_property_object.hpp>
-#include <eosio/chain/snapshot.hpp>
-#include <eosio/chain/combined_database.hpp>
-#include <eosio/chain/backing_store/kv_context.hpp>
-#include <eosio/to_key.hpp>
+#include <dcd/chain_plugin/chain_plugin.hpp>
+#include <dcd/chain_plugin/blockvault_sync_strategy.hpp>
+#include <dcd/chain/fork_database.hpp>
+#include <dcd/chain/block_log.hpp>
+#include <dcd/chain/exceptions.hpp>
+#include <dcd/chain/authorization_manager.hpp>
+#include <dcd/chain/code_object.hpp>
+#include <dcd/chain/config.hpp>
+#include <dcd/chain/wasm_interface.hpp>
+//#include <dcd/chain/resource_limits.hpp>
+#include <dcd/chain/reversible_block_object.hpp>
+#include <dcd/chain/controller.hpp>
+#include <dcd/chain/generated_transaction_object.hpp>
+#include <dcd/chain/global_property_object.hpp>
+#include <dcd/chain/snapshot.hpp>
+#include <dcd/chain/combined_database.hpp>
+#include <dcd/chain/backing_store/kv_context.hpp>
+#include <dcd/to_key.hpp>
 
-#include <eosio/chain/eosio_contract.hpp>
-#include <eosio/resource_monitor_plugin/resource_monitor_plugin.hpp>
-#include <eosio/blockvault_client_plugin/blockvault_client_plugin.hpp>
+#include <dcd/chain/dcd_contract.hpp>
+#include <dcd/resource_monitor_plugin/resource_monitor_plugin.hpp>
+#include <dcd/blockvault_client_plugin/blockvault_client_plugin.hpp>
 
 #include <chainbase/environment.hpp>
 
@@ -44,19 +44,19 @@ FC_REFLECT(chainbase::environment, (debug)(os)(arch)(boost_version)(compiler) )
 const fc::string deep_mind_logger_name("deep-mind");
 fc::logger _deep_mind_log;
 
-namespace eosio {
+namespace dcd {
 
 //declare operator<< and validate funciton for read_mode in the same namespace as read_mode itself
 namespace chain {
 
-std::ostream& operator<<(std::ostream& osm, eosio::chain::db_read_mode m) {
-   if ( m == eosio::chain::db_read_mode::SPECULATIVE ) {
+std::ostream& operator<<(std::ostream& osm, dcd::chain::db_read_mode m) {
+   if ( m == dcd::chain::db_read_mode::SPECULATIVE ) {
       osm << "speculative";
-   } else if ( m == eosio::chain::db_read_mode::HEAD ) {
+   } else if ( m == dcd::chain::db_read_mode::HEAD ) {
       osm << "head";
-   } else if ( m == eosio::chain::db_read_mode::READ_ONLY ) { // deprecated
+   } else if ( m == dcd::chain::db_read_mode::READ_ONLY ) { // deprecated
       osm << "read-only";
-   } else if ( m == eosio::chain::db_read_mode::IRREVERSIBLE ) {
+   } else if ( m == dcd::chain::db_read_mode::IRREVERSIBLE ) {
       osm << "irreversible";
    }
 
@@ -65,7 +65,7 @@ std::ostream& operator<<(std::ostream& osm, eosio::chain::db_read_mode m) {
 
 void validate(boost::any& v,
               const std::vector<std::string>& values,
-              eosio::chain::db_read_mode* /* target_type */,
+              dcd::chain::db_read_mode* /* target_type */,
               int)
 {
   using namespace boost::program_options;
@@ -78,22 +78,22 @@ void validate(boost::any& v,
   std::string const& s = validators::get_single_string(values);
 
   if ( s == "speculative" ) {
-     v = boost::any(eosio::chain::db_read_mode::SPECULATIVE);
+     v = boost::any(dcd::chain::db_read_mode::SPECULATIVE);
   } else if ( s == "head" ) {
-     v = boost::any(eosio::chain::db_read_mode::HEAD);
+     v = boost::any(dcd::chain::db_read_mode::HEAD);
   } else if ( s == "read-only" ) {
-     v = boost::any(eosio::chain::db_read_mode::READ_ONLY);
+     v = boost::any(dcd::chain::db_read_mode::READ_ONLY);
   } else if ( s == "irreversible" ) {
-     v = boost::any(eosio::chain::db_read_mode::IRREVERSIBLE);
+     v = boost::any(dcd::chain::db_read_mode::IRREVERSIBLE);
   } else {
      throw validation_error(validation_error::invalid_option_value);
   }
 }
 
-std::ostream& operator<<(std::ostream& osm, eosio::chain::validation_mode m) {
-   if ( m == eosio::chain::validation_mode::FULL ) {
+std::ostream& operator<<(std::ostream& osm, dcd::chain::validation_mode m) {
+   if ( m == dcd::chain::validation_mode::FULL ) {
       osm << "full";
-   } else if ( m == eosio::chain::validation_mode::LIGHT ) {
+   } else if ( m == dcd::chain::validation_mode::LIGHT ) {
       osm << "light";
    }
 
@@ -102,7 +102,7 @@ std::ostream& operator<<(std::ostream& osm, eosio::chain::validation_mode m) {
 
 void validate(boost::any& v,
               const std::vector<std::string>& values,
-              eosio::chain::validation_mode* /* target_type */,
+              dcd::chain::validation_mode* /* target_type */,
               int)
 {
   using namespace boost::program_options;
@@ -115,18 +115,18 @@ void validate(boost::any& v,
   std::string const& s = validators::get_single_string(values);
 
   if ( s == "full" ) {
-     v = boost::any(eosio::chain::validation_mode::FULL);
+     v = boost::any(dcd::chain::validation_mode::FULL);
   } else if ( s == "light" ) {
-     v = boost::any(eosio::chain::validation_mode::LIGHT);
+     v = boost::any(dcd::chain::validation_mode::LIGHT);
   } else {
      throw validation_error(validation_error::invalid_option_value);
   }
 }
 
-std::ostream& operator<<(std::ostream& osm, eosio::chain::backing_store_type b) {
-   if ( b == eosio::chain::backing_store_type::CHAINBASE ) {
+std::ostream& operator<<(std::ostream& osm, dcd::chain::backing_store_type b) {
+   if ( b == dcd::chain::backing_store_type::CHAINBASE ) {
       osm << "chainbase";
-   } else if ( b == eosio::chain::backing_store_type::ROCKSDB ) {
+   } else if ( b == dcd::chain::backing_store_type::ROCKSDB ) {
       osm << "rocksdb";
    }
 
@@ -135,7 +135,7 @@ std::ostream& operator<<(std::ostream& osm, eosio::chain::backing_store_type b) 
 
 void validate(boost::any& v,
               const std::vector<std::string>& values,
-              eosio::chain::backing_store_type* /* target_type */,
+              dcd::chain::backing_store_type* /* target_type */,
               int)
 {
   using namespace boost::program_options;
@@ -148,19 +148,19 @@ void validate(boost::any& v,
   std::string const& s = validators::get_single_string(values);
 
   if ( s == "chainbase" ) {
-     v = boost::any(eosio::chain::backing_store_type::CHAINBASE);
+     v = boost::any(dcd::chain::backing_store_type::CHAINBASE);
   } else if ( s == "rocksdb" ) {
-     v = boost::any(eosio::chain::backing_store_type::ROCKSDB);
+     v = boost::any(dcd::chain::backing_store_type::ROCKSDB);
   } else {
      throw validation_error(validation_error::invalid_option_value);
   }
 }
 }
 
-using namespace eosio;
-using namespace eosio::chain;
-using namespace eosio::chain::config;
-using namespace eosio::chain::plugin_interface;
+using namespace dcd;
+using namespace dcd::chain;
+using namespace dcd::chain::config;
+using namespace dcd::chain::plugin_interface;
 using vm_type = wasm_interface::vm_type;
 using fc::flat_map;
 
@@ -239,11 +239,11 @@ public:
 
 chain_plugin::chain_plugin()
    : my(new chain_plugin_impl()) {
-   app().register_config_type<eosio::chain::db_read_mode>();
-   app().register_config_type<eosio::chain::validation_mode>();
-   app().register_config_type<eosio::chain::backing_store_type>();
+   app().register_config_type<dcd::chain::db_read_mode>();
+   app().register_config_type<dcd::chain::validation_mode>();
+   app().register_config_type<dcd::chain::backing_store_type>();
    app().register_config_type<chainbase::pinnable_mapped_file::map_mode>();
-   app().register_config_type<eosio::chain::wasm_interface::vm_type>();
+   app().register_config_type<dcd::chain::wasm_interface::vm_type>();
 }
 
 chain_plugin::~chain_plugin(){}
@@ -254,25 +254,25 @@ void chain_plugin::set_program_options(options_description& cli, options_descrip
    std::string wasm_runtime_opt = "Override default WASM runtime (";
    std::string wasm_runtime_desc;
    std::string delim;
-#ifdef EOSIO_EOS_VM_JIT_RUNTIME_ENABLED
+#ifdef DCD_EOS_VM_JIT_RUNTIME_ENABLED
    wasm_runtime_opt += " \"eos-vm-jit\"";
    wasm_runtime_desc += "\"eos-vm-jit\" : A WebAssembly runtime that compiles WebAssembly code to native x86 code prior to execution.\n";
    delim = ", ";
 #endif
 
-#ifdef EOSIO_EOS_VM_RUNTIME_ENABLED
+#ifdef DCD_EOS_VM_RUNTIME_ENABLED
    wasm_runtime_opt += delim + "\"eos-vm\"";
    wasm_runtime_desc += "\"eos-vm\" : A WebAssembly interpreter.\n";
    delim = ", ";
 #endif
 
-#ifdef EOSIO_EOS_VM_OC_DEVELOPER
+#ifdef DCD_EOS_VM_OC_DEVELOPER
    wasm_runtime_opt += delim + "\"eos-vm-oc\"";
    wasm_runtime_desc += "\"eos-vm-oc\" : Unsupported. Instead, use one of the other runtimes along with the option enable-eos-vm-oc.\n";
 #endif
    wasm_runtime_opt += ")\n" + wasm_runtime_desc;
 
-   std::string default_wasm_runtime_str= eosio::chain::wasm_interface::vm_type_string(eosio::chain::config::default_wasm_runtime);
+   std::string default_wasm_runtime_str= dcd::chain::wasm_interface::vm_type_string(dcd::chain::config::default_wasm_runtime);
 
    cfg.add_options()
          ("blocks-dir", bpo::value<bfs::path>()->default_value("blocks"),
@@ -292,28 +292,28 @@ void chain_plugin::set_program_options(options_description& cli, options_descrip
          ("blocks-archive-dir", bpo::value<bfs::path>()->default_value(config::default_blocks_archive_dir_name),
           "the location of the blocks archive directory (absolute path or relative to blocks dir).\n"
           "If the value is empty, blocks files beyond the retained limit will be deleted.\n"
-          "All files in the archive directory are completely under user's control, i.e. they won't be accessed by nodeos anymore.")
+          "All files in the archive directory are completely under user's control, i.e. they won't be accessed by dcdnode anymore.")
          ("fix-irreversible-blocks", bpo::value<bool>()->default_value("false"),
           "When the existing block log is inconsistent with the index, allows fixing the block log and index files automatically - that is, " 
           "it will take the highest indexed block if it is valid; otherwise it will repair the block log and reconstruct the index.")
          ("protocol-features-dir", bpo::value<bfs::path>()->default_value("protocol_features"),
           "the location of the protocol_features directory (absolute path or relative to application config dir)")
          ("checkpoint", bpo::value<vector<string>>()->composing(), "Pairs of [BLOCK_NUM,BLOCK_ID] that should be enforced as checkpoints.")
-         ("wasm-runtime", bpo::value<eosio::chain::wasm_interface::vm_type>()->value_name("runtime")->notifier([](const auto& vm){
-#ifndef EOSIO_EOS_VM_OC_DEVELOPER
+         ("wasm-runtime", bpo::value<dcd::chain::wasm_interface::vm_type>()->value_name("runtime")->notifier([](const auto& vm){
+#ifndef DCD_EOS_VM_OC_DEVELOPER
             //throwing an exception here (like EOS_ASSERT) is just gobbled up with a "Failed to initialize" error :(
             if(vm == wasm_interface::vm_type::eos_vm_oc) {
                elog("EOS VM OC is a tier-up compiler and works in conjunction with the configured base WASM runtime. Enable EOS VM OC via 'eos-vm-oc-enable' option");
                EOS_ASSERT(false, plugin_exception, "");
             }
 #endif
-         })->default_value(eosio::chain::config::default_wasm_runtime, default_wasm_runtime_str), wasm_runtime_opt.c_str()
+         })->default_value(dcd::chain::config::default_wasm_runtime, default_wasm_runtime_str), wasm_runtime_opt.c_str()
          )
          ("abi-serializer-max-time-ms", bpo::value<uint32_t>()->default_value(config::default_abi_serializer_max_time_us / 1000),
           "Override default maximum ABI serialization time allowed in ms")
          ("chain-state-db-size-mb", bpo::value<uint64_t>()->default_value(config::default_state_size / (1024  * 1024)), "Maximum size (in MiB) of the chain state database")
          ("chain-state-db-guard-size-mb", bpo::value<uint64_t>()->default_value(config::default_state_guard_size / (1024  * 1024)), "Safely shut down node when free space remaining in the chain state database drops below this size (in MiB).")
-         ("backing-store", boost::program_options::value<eosio::chain::backing_store_type>()->default_value(eosio::chain::backing_store_type::CHAINBASE),
+         ("backing-store", boost::program_options::value<dcd::chain::backing_store_type>()->default_value(dcd::chain::backing_store_type::CHAINBASE),
           "The storage for state, chainbase or rocksdb")
          ("persistent-storage-num-threads", bpo::value<uint16_t>()->default_value(default_persistent_storage_num_threads),
           "Number of rocksdb threads for flush and compaction")
@@ -338,7 +338,7 @@ void chain_plugin::set_program_options(options_description& cli, options_descrip
           "print deeper information about chain operations")
          ("telemetry-url", bpo::value<std::string>(),
           "Send Zipkin spans to url. e.g. http://127.0.0.1:9411/api/v2/spans" )
-         ("telemetry-service-name", bpo::value<std::string>()->default_value("nodeos"),
+         ("telemetry-service-name", bpo::value<std::string>()->default_value("dcdnode"),
           "Zipkin localEndpoint.serviceName sent with each span" )
          ("telemetry-timeout-us", bpo::value<uint32_t>()->default_value(200000),
           "Timeout for sending Zipkin span." )
@@ -356,7 +356,7 @@ void chain_plugin::set_program_options(options_description& cli, options_descrip
           "Public key added to blacklist of keys that should not be included in authorities (may specify multiple times)")
          ("sender-bypass-whiteblacklist", boost::program_options::value<vector<string>>()->composing()->multitoken(),
           "Deferred transactions sent by accounts in this list do not have any of the subjective whitelist/blacklist checks applied to them (may specify multiple times)")
-         ("read-mode", boost::program_options::value<eosio::chain::db_read_mode>()->default_value(eosio::chain::db_read_mode::SPECULATIVE),
+         ("read-mode", boost::program_options::value<dcd::chain::db_read_mode>()->default_value(dcd::chain::db_read_mode::SPECULATIVE),
           "Database read mode (\"speculative\", \"head\", \"read-only\", \"irreversible\").\n"
           "In \"speculative\" mode: database contains state changes by transactions in the blockchain up to the head block as well as some transactions not yet included in the blockchain.\n"
           "In \"head\" mode: database contains state changes by only transactions in the blockchain up to the head block; transactions received by the node are relayed if valid.\n"
@@ -364,13 +364,13 @@ void chain_plugin::set_program_options(options_description& cli, options_descrip
           "In \"irreversible\" mode: database contains state changes by only transactions in the blockchain up to the last irreversible block; transactions received via the P2P network are not relayed and transactions cannot be pushed via the chain API.\n"
           )
          ( "api-accept-transactions", bpo::value<bool>()->default_value(true), "Allow API transactions to be evaluated and relayed if valid.")
-         ("validation-mode", boost::program_options::value<eosio::chain::validation_mode>()->default_value(eosio::chain::validation_mode::FULL),
+         ("validation-mode", boost::program_options::value<dcd::chain::validation_mode>()->default_value(dcd::chain::validation_mode::FULL),
           "Chain validation mode (\"full\" or \"light\").\n"
           "In \"full\" mode all incoming blocks will be fully validated.\n"
           "In \"light\" mode all incoming blocks headers will be fully validated; transactions in those validated blocks will be trusted \n")
          ("disable-ram-billing-notify-checks", bpo::bool_switch()->default_value(false),
           "Disable the check which subjectively fails a transaction if a contract bills more RAM to another account within the context of a notification handler (i.e. when the receiver is not the code of the action).")
-#ifdef EOSIO_DEVELOPER
+#ifdef DCD_DEVELOPER
          ("disable-all-subjective-mitigations", bpo::bool_switch()->default_value(false),
           "Disable all subjective mitigations checks in the entire codebase.")
 #endif
@@ -386,7 +386,7 @@ void chain_plugin::set_program_options(options_description& cli, options_descrip
 #endif
          )
 
-#ifdef EOSIO_EOS_VM_OC_RUNTIME_ENABLED
+#ifdef DCD_EOS_VM_OC_RUNTIME_ENABLED
          ("eos-vm-oc-cache-size-mb", bpo::value<uint64_t>()->default_value(eosvmoc::config().cache_size / (1024u*1024u)), "Maximum size (in MiB) of the EOS VM OC code cache")
          ("eos-vm-oc-compile-threads", bpo::value<uint64_t>()->default_value(1u)->notifier([](const auto t) {
                if(t == 0) {
@@ -450,7 +450,7 @@ void chain_plugin::set_program_options(options_description& cli, options_descrip
 if( options.count(op_name) ) { \
    const std::vector<std::string>& ops = options[op_name].as<std::vector<std::string>>(); \
    for( const auto& v : ops ) { \
-      container.emplace( eosio::chain::name( v ) ); \
+      container.emplace( dcd::chain::name( v ) ); \
    } \
 }
 
@@ -710,10 +710,10 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
 
    try {
       try {
-         genesis_state gs; // Check if EOSIO_ROOT_KEY is bad
+         genesis_state gs; // Check if DCD_ROOT_KEY is bad
       } catch ( const std::exception& ) {
-         elog( "EOSIO_ROOT_KEY ('${root_key}') is invalid. Recompile with a valid public key.",
-               ("root_key", genesis_state::eosio_root_key));
+         elog( "DCD_ROOT_KEY ('${root_key}') is invalid. Recompile with a valid public key.",
+               ("root_key", genesis_state::dcd_root_key));
          throw;
       }
 
@@ -894,7 +894,7 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
       my->chain_config->contracts_console = options.at( "contracts-console" ).as<bool>();
       my->chain_config->allow_ram_billing_in_notify = options.at( "disable-ram-billing-notify-checks" ).as<bool>();
 
-#ifdef EOSIO_DEVELOPER
+#ifdef DCD_DEVELOPER
       my->chain_config->disable_all_subjective_mitigations = options.at( "disable-all-subjective-mitigations" ).as<bool>();
 #endif
 
@@ -969,7 +969,7 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
          ilog( "Replay requested: deleting state database" );
          if( options.at( "truncate-at-block" ).as<uint32_t>() > 0 )
             wlog( "The --truncate-at-block option does not work for a regular replay of the blockchain." );
-         eosio::chain::combined_database::destroy( my->chain_config->state_dir );
+         dcd::chain::combined_database::destroy( my->chain_config->state_dir );
          if( options.at( "fix-reversible-blocks" ).as<bool>()) {
             if( !recover_reversible_blocks( my->chain_config->blog.log_dir / config::reversible_blocks_dir_name,
                                             my->chain_config->reversible_cache_size )) {
@@ -1185,7 +1185,7 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
 
       my->chain_config->db_map_mode = options.at("database-map-mode").as<pinnable_mapped_file::map_mode>();
 
-#ifdef EOSIO_EOS_VM_OC_RUNTIME_ENABLED
+#ifdef DCD_EOS_VM_OC_RUNTIME_ENABLED
       if( options.count("eos-vm-oc-cache-size-mb") )
          my->chain_config->eosvmoc_config.cache_size = options.at( "eos-vm-oc-cache-size-mb" ).as<uint64_t>() * 1024u * 1024u;
       if( options.count("eos-vm-oc-compile-threads") )
@@ -1334,7 +1334,7 @@ void chain_plugin::plugin_startup()
       auto bvc_plug = app().find_plugin<blockvault_client_plugin>();
       auto blockvault_instance = bvc_plug ? bvc_plug->get() : nullptr;
       if (nullptr != blockvault_instance) {
-          eosio::blockvault::blockvault_sync_strategy<chain_plugin_impl> bss(blockvault_instance, *my, shutdown, check_shutdown);
+          dcd::blockvault::blockvault_sync_strategy<chain_plugin_impl> bss(blockvault_instance, *my, shutdown, check_shutdown);
           bss.do_sync();
       } else if (my->snapshot_path) {
          auto infile = std::ifstream(my->snapshot_path->generic_string(), (std::ios::in | std::ios::binary));
@@ -1669,20 +1669,20 @@ void chain_plugin::log_guard_exception(const chain::guard_exception&e ) {
 void chain_plugin::handle_guard_exception(const chain::guard_exception& e) {
    log_guard_exception(e);
 
-   elog("database chain::guard_exception, quitting..."); // log string searched for in: tests/nodeos_under_min_avail_ram.py
+   elog("database chain::guard_exception, quitting..."); // log string searched for in: tests/dcdnode_under_min_avail_ram.py
    // quit the app
    app().quit();
 }
 
 void chain_plugin::handle_db_exhaustion() {
    elog("database memory exhausted: increase chain-state-db-size-mb and/or reversible-blocks-db-size-mb");
-   //return 1 -- it's what programs/nodeos/main.cpp considers "BAD_ALLOC"
+   //return 1 -- it's what programs/dcdnode/main.cpp considers "BAD_ALLOC"
    std::_Exit(1);
 }
 
 void chain_plugin::handle_bad_alloc() {
    elog("std::bad_alloc - memory exhausted");
-   //return -2 -- it's what programs/nodeos/main.cpp reports for std::exception
+   //return -2 -- it's what programs/dcdnode/main.cpp reports for std::exception
    std::_Exit(-2);
 }
   
@@ -1842,7 +1842,7 @@ uint64_t read_only::get_table_index_name(const read_only::get_table_rows_params&
    return index;
 }
 
-uint64_t convert_to_type(const eosio::name &n, const string &desc) {
+uint64_t convert_to_type(const dcd::name &n, const string &desc) {
    return n.to_uint64_t();
 }
 
@@ -1862,13 +1862,13 @@ uint64_t convert_to_type(const string& str, const string& desc) {
 
    if (str.find(',') != string::npos) { // fix #6274 only match formats like 4,EOS
       try {
-         auto symb = eosio::chain::symbol::from_string(str);
+         auto symb = dcd::chain::symbol::from_string(str);
          return symb.value();
       } catch( ... ) { }
    }
 
    try {
-      return ( eosio::chain::string_to_symbol( 0, str.c_str() ) >> 8 );
+      return ( dcd::chain::string_to_symbol( 0, str.c_str() ) >> 8 );
    } catch( ... ) {
       EOS_ASSERT( false, chain_type_exception, "Could not convert ${desc} string '${str}' to any of the following: "
                         "uint64_t, valid name, or valid symbol (with or without the precision)",
@@ -1945,7 +1945,7 @@ string get_table_type( const abi_def& abi, const name& table_name ) {
 }
 
 read_only::get_table_rows_result read_only::get_table_rows( const read_only::get_table_rows_params& p )const {
-   const abi_def abi = eosio::chain_apis::get_abi( db, p.code );
+   const abi_def abi = dcd::chain_apis::get_abi( db, p.code );
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
    bool primary = false;
@@ -2237,7 +2237,7 @@ std::string read_key(string index_type, string encode_type, const string& bytes_
 
 constexpr uint32_t prefix_size = 17; // prefix 17bytes: status(1 byte) + table_name(8bytes) + index_name(8 bytes)
 struct kv_table_rows_context {
-   std::unique_ptr<eosio::chain::kv_context>  kv_context;
+   std::unique_ptr<dcd::chain::kv_context>  kv_context;
    const read_only::get_kv_table_rows_params& p;
    abi_serializer::yield_function_t           yield_function;                            
    abi_def                                    abi;
@@ -2253,7 +2253,7 @@ struct kv_table_rows_context {
              db.get_global_properties().kv_configuration)) // To do: provide kv_resource_manmager to create_kv_context
        , p(param)
        , yield_function(abi_serializer::create_yield_function(abi_serializer_max_time))
-       , abi(eosio::chain_apis::get_abi(db, param.code))
+       , abi(dcd::chain_apis::get_abi(db, param.code))
        , shorten_abi_errors(shorten_error) {
 
       EOS_ASSERT(p.limit > 0, chain::contract_table_query_exception, "invalid limit : ${n}", ("n", p.limit));
@@ -2527,7 +2527,7 @@ read_only::get_table_by_scope_result read_only::get_table_by_scope( const read_o
 
    const bool reverse = p.reverse && *p.reverse;
    const auto db_backing_store = get_backing_store();
-   if (db_backing_store == eosio::chain::backing_store_type::CHAINBASE) {
+   if (db_backing_store == dcd::chain::backing_store_type::CHAINBASE) {
       auto walk_table_range = [&result,&p]( auto itr, auto end_itr ) {
          keep_processing kp;
          for( unsigned int count = 0; kp() && count < p.limit && itr != end_itr; ++itr ) {
@@ -2553,7 +2553,7 @@ read_only::get_table_by_scope_result read_only::get_table_by_scope( const read_o
       }
    }
    else {
-      using namespace eosio::chain;
+      using namespace dcd::chain;
       EOS_ASSERT(db_backing_store == backing_store_type::ROCKSDB,
                  chain::contract_table_query_exception,
                  "Support for configured backing_store has not been added to get_table_by_scope");
@@ -2567,14 +2567,14 @@ read_only::get_table_by_scope_result read_only::get_table_by_scope( const read_o
                                                                                      std::get<1>(upper_bound_lookup_tuple),
                                                                                      std::get<2>(upper_bound_lookup_tuple));
       if (reverse) {
-         lower = eosio::session::shared_bytes::truncate_key(lower);
+         lower = dcd::session::shared_bytes::truncate_key(lower);
       }
       // since upper is either the upper_bound of a forward search, or the reverse iterator <= for the beginning of the end of
       // the table, we need to move it to just before the beginning of the next table
       upper = upper.next();
       const auto context = (reverse) ? backing_store::key_context::table_only_reverse : backing_store::key_context::table_only;
       backing_store::rocksdb_contract_db_table_writer<table_receiver, std::decay_t < decltype(kp)>> writer(receiver, context, kp);
-      eosio::chain::backing_store::walk_rocksdb_entries_with_prefix(kv_database.get_kv_undo_stack(), lower, upper, writer);
+      dcd::chain::backing_store::walk_rocksdb_entries_with_prefix(kv_database.get_kv_undo_stack(), lower, upper, writer);
       const auto stopped_at = writer.stopped_at();
       if (stopped_at) {
          result.more = stopped_at->scope.to_string();
@@ -2586,7 +2586,7 @@ read_only::get_table_by_scope_result read_only::get_table_by_scope( const read_o
 
 vector<asset> read_only::get_currency_balance( const read_only::get_currency_balance_params& p )const {
 
-   const abi_def abi = eosio::chain_apis::get_abi( db, p.code );
+   const abi_def abi = dcd::chain_apis::get_abi( db, p.code );
    (void)get_table_type( abi, name("accounts") );
 
    vector<asset> results;
@@ -2613,10 +2613,10 @@ vector<asset> read_only::get_currency_balance( const read_only::get_currency_bal
 fc::variant read_only::get_currency_stats( const read_only::get_currency_stats_params& p )const {
    fc::mutable_variant_object results;
 
-   const abi_def abi = eosio::chain_apis::get_abi( db, p.code );
+   const abi_def abi = dcd::chain_apis::get_abi( db, p.code );
    (void)get_table_type( abi, name("stat") );
 
-   uint64_t scope = ( eosio::chain::string_to_symbol( 0, boost::algorithm::to_upper_copy(p.symbol).c_str() ) >> 8 );
+   uint64_t scope = ( dcd::chain::string_to_symbol( 0, boost::algorithm::to_upper_copy(p.symbol).c_str() ) >> 8 );
 
    walk_key_value_table(p.code, name(scope), "stat"_n, [&](const auto& obj){
       EOS_ASSERT( obj.value.size() >= sizeof(read_only::get_currency_stats_result), chain::asset_type_exception, "Invalid data on table");
@@ -2637,7 +2637,7 @@ fc::variant read_only::get_currency_stats( const read_only::get_currency_stats_p
 
 read_only::get_producers_result read_only::get_producers( const read_only::get_producers_params& p ) const try {
    const auto producers_table = "producers"_n;
-   const abi_def abi = eosio::chain_apis::get_abi(db, config::system_account_name);
+   const abi_def abi = dcd::chain_apis::get_abi(db, config::system_account_name);
    const auto table_type = get_table_type(abi, producers_table);
    const abi_serializer abis{ abi, abi_serializer::create_yield_function( abi_serializer_max_time ) };
    EOS_ASSERT(table_type == KEYi64, chain::contract_table_query_exception, "Invalid table type ${type} for table producers", ("type",table_type));
@@ -2668,7 +2668,7 @@ read_only::get_producers_result read_only::get_producers( const read_only::get_p
    const name sec_producers_table {producers_table.to_uint64_t() | secondary_index_num};
 
    const auto db_backing_store = get_backing_store();
-   if (db_backing_store == eosio::chain::backing_store_type::CHAINBASE) {
+   if (db_backing_store == dcd::chain::backing_store_type::CHAINBASE) {
       const auto* const table_id = d.find<chain::table_id_object, chain::by_code_scope_table>(
             boost::make_tuple(code, scope, producers_table));
       const auto* const secondary_table_id = d.find<chain::table_id_object, chain::by_code_scope_table>(
@@ -2697,7 +2697,7 @@ read_only::get_producers_result read_only::get_producers( const read_only::get_p
       }
    }
    else {
-      using namespace eosio::chain;
+      using namespace dcd::chain;
       EOS_ASSERT(db_backing_store == backing_store_type::ROCKSDB,
                  contract_table_query_exception,
                  "Support for configured backing_store has not been added to get_table_by_scope");
@@ -2761,7 +2761,7 @@ read_only::get_producers_result read_only::get_producers( const read_only::get_p
       auto kpe = receiver.keep_processing_entries();
       backing_store::rocksdb_contract_db_table_writer<f64_secondary_key_receiver, std::decay_t < decltype(kpe)>>
          writer(receiver, backing_store::key_context::standalone, kpe);
-      eosio::chain::backing_store::walk_rocksdb_entries_with_prefix(kv_database.get_kv_undo_stack(), lower_key, upper_key, writer);
+      dcd::chain::backing_store::walk_rocksdb_entries_with_prefix(kv_database.get_kv_undo_stack(), lower_key, upper_key, writer);
    };
 
    constexpr name global = "global"_n;
@@ -3388,7 +3388,7 @@ read_only::get_account_results read_only::get_account( const get_account_params&
    if( abi_serializer::to_abi(code_account.abi, abi) ) {
       abi_serializer abis( abi, abi_serializer::create_yield_function( abi_serializer_max_time ) );
 
-      const auto token_code = "eosio.token"_n;
+      const auto token_code = "dcd.token"_n;
 
       auto core_symbol = extract_core_symbol();
 
@@ -3499,8 +3499,8 @@ namespace detail {
 chain::symbol read_only::extract_core_symbol()const {
    symbol core_symbol(0);
 
-   // The following code makes assumptions about the contract deployed on eosio account (i.e. the system contract) and how it stores its data.
-   get_primary_key<detail::ram_market_exchange_state_t>("eosio"_n, "eosio"_n, "rammarket"_n, eosio::chain::string_to_symbol_c(4,"RAMCORE"),
+   // The following code makes assumptions about the contract deployed on dcd account (i.e. the system contract) and how it stores its data.
+   get_primary_key<detail::ram_market_exchange_state_t>("dcd"_n, "dcd"_n, "rammarket"_n, dcd::chain::string_to_symbol_c(4,"RAMCORE"),
 		      row_requirements::optional, row_requirements::optional, [&core_symbol](const detail::ram_market_exchange_state_t& ram_market_exchange_state) {
          if( ram_market_exchange_state.core_symbol.get_symbol().valid() ) {
             core_symbol = ram_market_exchange_state.core_symbol.get_symbol();
@@ -3512,7 +3512,7 @@ chain::symbol read_only::extract_core_symbol()const {
 
 fc::variant read_only::get_primary_key(name code, name scope, name table, uint64_t primary_key, row_requirements require_table,
                                        row_requirements require_primary, const std::string_view& type, bool as_json) const {
-   const abi_def abi = eosio::chain_apis::get_abi(db, code);
+   const abi_def abi = dcd::chain_apis::get_abi(db, code);
    abi_serializer abis;
    abis.set_abi(abi, abi_serializer::create_yield_function(abi_serializer_max_time));
    return get_primary_key(code, scope, table, primary_key, require_table, require_primary, type, abis, as_json);
@@ -3526,12 +3526,12 @@ fc::variant read_only::get_primary_key(name code, name scope, name table, uint64
    return val;
 }
 
-eosio::chain::backing_store_type read_only::get_backing_store() const {
+dcd::chain::backing_store_type read_only::get_backing_store() const {
    const auto& kv_database = db.kv_db();
    return kv_database.get_backing_store();
 }
 
 } // namespace chain_apis
-} // namespace eosio
+} // namespace dcd
 
-FC_REFLECT( eosio::chain_apis::detail::ram_market_exchange_state_t, (ignore1)(ignore2)(ignore3)(core_symbol)(ignore4) )
+FC_REFLECT( dcd::chain_apis::detail::ram_market_exchange_state_t, (ignore1)(ignore2)(ignore3)(core_symbol)(ignore4) )

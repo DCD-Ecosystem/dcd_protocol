@@ -1,6 +1,6 @@
 
 ## Overview
-This how-to guide provides instructions on how to update an account keys for an EOSIO blockchain account using the dcdcli CLI tool. 
+This how-to guide provides instructions on how to update an account keys for an DCD blockchain account using the dcdcli CLI tool. 
 
 The example uses `dcdcli` to update the keys for the **alice** account.
 
@@ -9,8 +9,8 @@ Make sure you meet the following requirements:
 
 * Install the currently supported version of `dcdcli.`
 [[info | Note]]
-| The `dcdcli` tool is bundled with the EOSIO software. [Installing EOSIO](../../00_install/index.md) will install the `dcdcli` and `dcdksd` command line tools.  
-* You have an EOSIO account and access to the account's private key.
+| The `dcdcli` tool is bundled with the DCD software. [Installing DCD](../../00_install/index.md) will install the `dcdcli` and `dcdksd` command line tools.  
+* You have an DCD account and access to the account's private key.
 
 ## Reference
 See the following reference guides for command line usage and related options:
@@ -60,7 +60,7 @@ dcdcli set account permission alice active EOS5zG7PsdtzQ9achTdRtXwHieL7yyigBFiJD
 **Example Output**
 ```shell
 executed transaction: ab5752ecb017f166d56e7f4203ea02631e58f06f2e0b67103b71874f608793e3  160 bytes  231 us
-#         eosio <= eosio::updateauth            {"account":"alice","permission":"active","parent":"owner","auth":{"threshold":1,"keys":[{"key":"E...
+#         dcd <= dcd::updateauth            {"account":"alice","permission":"active","parent":"owner","auth":{"threshold":1,"keys":[{"key":"E...
 ```
 
 4. Check the account

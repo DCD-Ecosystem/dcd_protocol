@@ -2,7 +2,7 @@
 
 #include <b1/session/session.hpp>
 
-namespace eosio::session {
+namespace dcd::session {
 
 template <typename... T>
 class session_variant {
@@ -289,4 +289,4 @@ const shared_bytes session_variant<T...>::session_variant_iterator<Iterator_trai
    return std::visit([&](auto& it) { return it.key(); }, m_holder);
 }
 
-} // namespace eosio::session
+} // namespace dcd::session

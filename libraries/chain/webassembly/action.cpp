@@ -1,8 +1,8 @@
-#include <eosio/chain/webassembly/interface.hpp>
-#include <eosio/chain/apply_context.hpp>
-#include <eosio/chain/global_property_object.hpp>
+#include <dcd/chain/webassembly/interface.hpp>
+#include <dcd/chain/apply_context.hpp>
+#include <dcd/chain/global_property_object.hpp>
 
-namespace eosio { namespace chain { namespace webassembly {
+namespace dcd { namespace chain { namespace webassembly {
    int32_t interface::read_action_data(legacy_span<char> memory) const {
       auto s = context.get_action().data.size();
       if( memory.size() == 0 ) return s;
@@ -29,4 +29,4 @@ namespace eosio { namespace chain { namespace webassembly {
                  "action return value size must be less or equal to ${s} bytes", ("s", max_action_return_value_size));
       context.action_return_value.assign( packed_blob.data(), packed_blob.data() + packed_blob.size() );
    }
-}}} // ns eosio::chain::webassembly
+}}} // ns dcd::chain::webassembly

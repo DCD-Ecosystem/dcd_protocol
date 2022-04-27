@@ -23,7 +23,7 @@ The following information shows the different positionals and options you can us
 ## Requirements
 * Install the currently supported version of `dcdcli`.
 [[info | Note]]
-| The `dcdcli` tool is bundled with the EOSIO software. [Installing EOSIO](../../00_install/index.md) will install the `dcdcli` and `dcdksd` command line tools.   
+| The `dcdcli` tool is bundled with the DCD software. [Installing DCD](../../00_install/index.md) will install the `dcdcli` and `dcdksd` command line tools.   
 
 ## Examples
 1. Create a new key pair and output to the screen

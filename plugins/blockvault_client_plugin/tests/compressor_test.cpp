@@ -15,7 +15,7 @@ BOOST_AUTO_TEST_CASE(zlib_compressor_test) {
    fbuf.sputn(content.data(), content.size());
    fbuf.close();
 
-   eosio::blockvault::zlib_compressor compressor;
+   dcd::blockvault::zlib_compressor compressor;
    std::string                        compressed_file = compressor.compress(file.path().string().c_str());
    auto x = fc::make_scoped_exit([&compressed_file]() { boost::filesystem::remove(compressed_file); });
 

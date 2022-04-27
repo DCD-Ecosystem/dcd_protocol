@@ -1,8 +1,8 @@
-#include <eosio/chain/chain_config.hpp>
-#include <eosio/chain/exceptions.hpp>
-#include <eosio/chain/controller.hpp>
+#include <dcd/chain/chain_config.hpp>
+#include <dcd/chain/exceptions.hpp>
+#include <dcd/chain/controller.hpp>
 
-namespace eosio { namespace chain {
+namespace dcd { namespace chain {
 
    void chain_config_v0::validate() const {
       EOS_ASSERT( target_block_net_usage_pct <= config::percent_100, action_validate_exception,
@@ -61,4 +61,4 @@ bool config_entry_validator::operator()(uint32_t id) const {
    return allowed;
 }
 
-} } // namespace eosio::chain
+} } // namespace dcd::chain

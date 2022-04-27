@@ -1,7 +1,7 @@
-#include <eosio/chain/webassembly/interface.hpp>
-#include <eosio/chain/apply_context.hpp>
+#include <dcd/chain/webassembly/interface.hpp>
+#include <dcd/chain/apply_context.hpp>
 
-namespace eosio { namespace chain { namespace webassembly {
+namespace dcd { namespace chain { namespace webassembly {
    int32_t interface::get_active_producers( legacy_span<account_name> producers ) const {
       auto active_producers = context.get_active_producers();
 
@@ -23,4 +23,4 @@ namespace eosio { namespace chain { namespace webassembly {
       }
 
    
-}}} // ns eosio::chain::webassembly
+}}} // ns dcd::chain::webassembly

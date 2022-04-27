@@ -6,12 +6,12 @@ This how-to guide provides instructions on how to stake resources, NET and/or CP
 
 * Install the currently supported version of `dcdcli`.
 
-* Ensure the [reference system contracts](https://developers.eos.io/manuals/eosio.contracts/v1.9/build-and-deploy) are deployed and used to manage system resources.
+* Ensure the [reference system contracts](https://developers.eos.io/manuals/dcd.contracts/v1.9/build-and-deploy) are deployed and used to manage system resources.
 
 * Understand the following:
   * What an [account](https://developers.eos.io/welcome/v2.1/glossary/index/#account) is.
-  * What [NET bandwidth](https://developers.eos.io/manuals/eosio.contracts/v1.9/key-concepts/net) is.
-  * What [CPU bandwidth](https://developers.eos.io/manuals/eosio.contracts/v1.9/key-concepts/cpu) is.
+  * What [NET bandwidth](https://developers.eos.io/manuals/dcd.contracts/v1.9/key-concepts/net) is.
+  * What [CPU bandwidth](https://developers.eos.io/manuals/dcd.contracts/v1.9/key-concepts/cpu) is.
   * The [`delegatebw` dcdcli sub-command](https://developers.eos.io/manuals/eos/v2.1/dcdcli/command-reference/system/system-delegatebw).
 
 ## Command Reference
@@ -47,10 +47,10 @@ Example output:
 
 ```console
 executed transaction: 5487afafd67bf459a20fcc2dbc5d0c2f0d1f10e33123eaaa07088046fd18e3ae  192 bytes  503 us
-#         eosio <= eosio::delegatebw            {"from":"bob","receiver":"alice","stake_net_quantity":"0.01 SYS","stake_cpu_quanti...
-#   eosio.token <= eosio.token::transfer        {"from":"bob","to":"eosio.stake","quantity":"0.01 EOS","memo":"stake bandwidth"}
-#  alice <= eosio.token::transfer        {"from":"bob","to":"eosio.stake","quantity":"0.01 SYS","memo":"stake bandwidth"}
-#   eosio.stake <= eosio.token::transfer        {"from":"bob","to":"eosio.stake","quantity":"0.01 SYS","memo":"stake bandwidth"}
+#         dcd <= dcd::delegatebw            {"from":"bob","receiver":"alice","stake_net_quantity":"0.01 SYS","stake_cpu_quanti...
+#   dcd.token <= dcd.token::transfer        {"from":"bob","to":"dcd.stake","quantity":"0.01 EOS","memo":"stake bandwidth"}
+#  alice <= dcd.token::transfer        {"from":"bob","to":"dcd.stake","quantity":"0.01 SYS","memo":"stake bandwidth"}
+#   dcd.stake <= dcd.token::transfer        {"from":"bob","to":"dcd.stake","quantity":"0.01 SYS","memo":"stake bandwidth"}
 ```
 
 ### 2. Stake CPU bandwidth
@@ -72,10 +72,10 @@ Example output:
 
 ```console
 executed transaction: 5487afafd67bf459a20fcc2dbc5d0c2f0d1f10e33123eaaa07088046fd18e3ae  192 bytes  503 us
-#         eosio <= eosio::delegatebw            {"from":"bob","receiver":"alice","stake_net_quantity":"0.0000 SYS","stake_cpu_quanti...
-#   eosio.token <= eosio.token::transfer        {"from":"bob","to":"eosio.stake","quantity":"0.01 EOS","memo":"stake bandwidth"}
-#  alice <= eosio.token::transfer        {"from":"bob","to":"eosio.stake","quantity":"0.01 SYS","memo":"stake bandwidth"}
-#   eosio.stake <= eosio.token::transfer        {"from":"bob","to":"eosio.stake","quantity":"0.01 SYS","memo":"stake bandwidth"}
+#         dcd <= dcd::delegatebw            {"from":"bob","receiver":"alice","stake_net_quantity":"0.0000 SYS","stake_cpu_quanti...
+#   dcd.token <= dcd.token::transfer        {"from":"bob","to":"dcd.stake","quantity":"0.01 EOS","memo":"stake bandwidth"}
+#  alice <= dcd.token::transfer        {"from":"bob","to":"dcd.stake","quantity":"0.01 SYS","memo":"stake bandwidth"}
+#   dcd.stake <= dcd.token::transfer        {"from":"bob","to":"dcd.stake","quantity":"0.01 SYS","memo":"stake bandwidth"}
 ```
 
 ### 3. Stake NET and CPU bandwidth
@@ -97,10 +97,10 @@ Example output:
 
 ```console
 executed transaction: 5487afafd67bf459a20fcc2dbc5d0c2f0d1f10e33123eaaa07088046fd18e3ae  192 bytes  503 us
-#         eosio <= eosio::delegatebw            {"from":"bob","receiver":"alice","stake_net_quantity":"0.01 SYS","stake_cpu_quanti...
-#   eosio.token <= eosio.token::transfer        {"from":"bob","to":"eosio.stake","quantity":"0.01 EOS","memo":"stake bandwidth"}
-#  alice <= eosio.token::transfer        {"from":"bob","to":"eosio.stake","quantity":"0.01 SYS","memo":"stake bandwidth"}
-#   eosio.stake <= eosio.token::transfer        {"from":"bob","to":"eosio.stake","quantity":"0.01 SYS","memo":"stake bandwidth"}
+#         dcd <= dcd::delegatebw            {"from":"bob","receiver":"alice","stake_net_quantity":"0.01 SYS","stake_cpu_quanti...
+#   dcd.token <= dcd.token::transfer        {"from":"bob","to":"dcd.stake","quantity":"0.01 EOS","memo":"stake bandwidth"}
+#  alice <= dcd.token::transfer        {"from":"bob","to":"dcd.stake","quantity":"0.01 SYS","memo":"stake bandwidth"}
+#   dcd.stake <= dcd.token::transfer        {"from":"bob","to":"dcd.stake","quantity":"0.01 SYS","memo":"stake bandwidth"}
 ```
 
 [[info|An account can stake to itself]]

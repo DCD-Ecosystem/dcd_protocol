@@ -1,24 +1,24 @@
-#include <eosio/producer_api_plugin/producer_api_plugin.hpp>
-#include <eosio/chain/exceptions.hpp>
+#include <dcd/producer_api_plugin/producer_api_plugin.hpp>
+#include <dcd/chain/exceptions.hpp>
 
 #include <fc/variant.hpp>
 #include <fc/io/json.hpp>
 
 #include <chrono>
 
-namespace eosio { namespace detail {
+namespace dcd { namespace detail {
   struct producer_api_plugin_response {
      std::string result;
   };
 }}
 
-FC_REFLECT(eosio::detail::producer_api_plugin_response, (result));
+FC_REFLECT(dcd::detail::producer_api_plugin_response, (result));
 
-namespace eosio {
+namespace dcd {
 
 static appbase::abstract_plugin& _producer_api_plugin = app().register_plugin<producer_api_plugin>();
 
-using namespace eosio;
+using namespace dcd;
 
 struct async_result_visitor : public fc::visitor<fc::variant> {
    template<typename T>
@@ -75,12 +75,12 @@ struct async_result_visitor : public fc::visitor<fc::variant> {
 #define INVOKE_V_R(api_handle, call_name, in_param) \
      auto params = parse_params<in_param, http_params_types::params_required>(body);\
      api_handle.call_name(std::move(params)); \
-     eosio::detail::producer_api_plugin_response result{"ok"};
+     dcd::detail::producer_api_plugin_response result{"ok"};
 
 #define INVOKE_V_V(api_handle, call_name) \
      body = parse_params<std::string, http_params_types::no_params_required>(body); \
      api_handle.call_name(); \
-     eosio::detail::producer_api_plugin_response result{"ok"};
+     dcd::detail::producer_api_plugin_response result{"ok"};
 
 
 void producer_api_plugin::plugin_startup() {

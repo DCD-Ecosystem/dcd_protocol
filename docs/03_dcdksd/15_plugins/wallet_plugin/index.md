@@ -9,10 +9,10 @@ The `wallet_plugin` adds access to wallet functionality from a node.
 
 ```sh
 # config.ini
-plugin = eosio::wallet_plugin
+plugin = dcd::wallet_plugin
 
 # command-line
-nodeos ... --plugin eosio::wallet_plugin
+dcdnode ... --plugin dcd::wallet_plugin
 ```
 
 ## Options
@@ -28,12 +28,12 @@ None
 
 ```sh
 # config.ini
-plugin = eosio::wallet_plugin
+plugin = dcd::wallet_plugin
 [options]
-plugin = eosio::http_plugin
+plugin = dcd::http_plugin
 [options]
 
 # command-line
-nodeos ... --plugin eosio::wallet_plugin [options]  \
-           --plugin eosio::http_plugin [options]
+dcdnode ... --plugin dcd::wallet_plugin [options]  \
+           --plugin dcd::http_plugin [options]
 ```

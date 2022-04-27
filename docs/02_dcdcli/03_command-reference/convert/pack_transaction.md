@@ -9,7 +9,7 @@ From plain signed json to packed form
 ## Options
 
 - `-h,--help` - Print this help message and exit
-- `--pack-action-data` - Pack all action data within transaction, needs interaction with `nodeos`
+- `--pack-action-data` - Pack all action data within transaction, needs interaction with `dcdnode`
 
 ## Usage
 
@@ -24,10 +24,10 @@ dcdcli convert pack_transaction '{
   "delay_sec": 0,
   "context_free_actions": [],
   "actions": [{
-      "account": "eosio",
+      "account": "dcd",
       "name": "newaccount",
       "authorization": [{
-          "actor": "eosio",
+          "actor": "dcd",
           "permission": "active"
         }
       ],

@@ -9,15 +9,15 @@
 #include <boost/multi_index/ordered_index.hpp>
 #include <boost/multi_index/sequenced_index.hpp>
 #include <boost/multi_index_container.hpp>
-#include <eosio/abi.hpp>
-#include <eosio/bytes.hpp>
-#include <eosio/vm/watchdog.hpp>
+#include <dcd/abi.hpp>
+#include <dcd/bytes.hpp>
+#include <dcd/vm/watchdog.hpp>
 #include <fc/log/logger.hpp>
 #include <fc/scoped_exit.hpp>
 #include <mutex>
 
 using namespace std::literals;
-namespace ship_protocol = eosio::ship_protocol;
+namespace ship_protocol = dcd::ship_protocol;
 
 using boost::multi_index::indexed_by;
 using boost::multi_index::member;
@@ -26,19 +26,19 @@ using boost::multi_index::ordered_non_unique;
 using boost::multi_index::sequenced;
 using boost::multi_index::tag;
 
-using eosio::ship_protocol::action_receipt_v0;
-using eosio::ship_protocol::action_trace_v1;
-using eosio::ship_protocol::transaction_trace_v0;
+using dcd::ship_protocol::action_receipt_v0;
+using dcd::ship_protocol::action_trace_v1;
+using dcd::ship_protocol::transaction_trace_v0;
 
-namespace eosio {
+namespace dcd {
 
 // todo: abieos support for pair. Used by extensions_type.
 template <typename S>
 void to_json(const std::pair<uint16_t, std::vector<char>>&, S& stream) {
-   eosio::check(false, eosio::convert_stream_error(stream_error::bad_variant_index));
+   dcd::check(false, dcd::convert_stream_error(stream_error::bad_variant_index));
 }
 
-} // namespace eosio
+} // namespace dcd
 
 namespace b1::rodeos::wasm_ql {
 
@@ -50,7 +50,7 @@ template <class... Ts>
 overloaded(Ts...)->overloaded<Ts...>;
 
 // todo: relax some of these limits
-// todo: restore max_function_section_elements to 1023 and use nodeos's hard fork
+// todo: restore max_function_section_elements to 1023 and use dcdnode's hard fork
 struct wasm_ql_backend_options {
    // static constexpr std::uint32_t max_mutable_global_bytes      = 1024;
    // static constexpr std::uint32_t max_table_elements            = 1024;
@@ -62,7 +62,7 @@ struct wasm_ql_backend_options {
    // static constexpr std::uint32_t max_linear_memory_init        = 64 * 1024;
    // static constexpr std::uint32_t max_func_local_bytes          = 8192;
    // static constexpr std::uint32_t max_local_sets                = 1023;
-   // static constexpr std::uint32_t eosio_max_nested_structures   = 1023;
+   // static constexpr std::uint32_t dcd_max_nested_structures   = 1023;
    // static constexpr std::uint32_t max_br_table_elements         = 8191;
    // static constexpr std::uint32_t max_symbol_bytes              = 8191;
    // static constexpr std::uint32_t max_memory_offset             = (33 * 1024 * 1024 - 1);
@@ -72,7 +72,7 @@ struct wasm_ql_backend_options {
 
 struct callbacks;
 using rhf_t     = registered_host_functions<callbacks>;
-using backend_t = eosio::vm::backend<rhf_t, eosio::vm::jit, wasm_ql_backend_options>;
+using backend_t = dcd::vm::backend<rhf_t, dcd::vm::jit, wasm_ql_backend_options>;
 
 struct callbacks : action_callbacks<callbacks>,
                    chaindb_callbacks<callbacks>,
@@ -111,8 +111,8 @@ void register_callbacks() {
 }
 
 struct backend_entry {
-   eosio::name                name; // only for wasms loaded from disk
-   eosio::checksum256         hash; // only for wasms loaded from chain
+   dcd::name                name; // only for wasms loaded from disk
+   dcd::checksum256         hash; // only for wasms loaded from chain
    std::unique_ptr<backend_t> backend;
 };
 
@@ -123,8 +123,8 @@ struct by_hash;
 using backend_container = multi_index_container<
       backend_entry,
       indexed_by<sequenced<tag<by_age>>, //
-                 ordered_non_unique<tag<by_name>, member<backend_entry, eosio::name, &backend_entry::name>>,
-                 ordered_non_unique<tag<by_hash>, member<backend_entry, eosio::checksum256, &backend_entry::hash>>>>;
+                 ordered_non_unique<tag<by_name>, member<backend_entry, dcd::name, &backend_entry::name>>,
+                 ordered_non_unique<tag<by_hash>, member<backend_entry, dcd::checksum256, &backend_entry::hash>>>>;
 
 class backend_cache {
  private:
@@ -142,7 +142,7 @@ class backend_cache {
       while (ind.size() > shared_state.wasm_cache_size) ind.pop_front();
    }
 
-   std::optional<backend_entry> get(eosio::name name) {
+   std::optional<backend_entry> get(dcd::name name) {
       std::optional<backend_entry> result;
       std::lock_guard<std::mutex>  lock{ mutex };
       auto&                        ind = backends.get<by_name>();
@@ -154,7 +154,7 @@ class backend_cache {
       return result;
    }
 
-   std::optional<backend_entry> get(const eosio::checksum256& hash) {
+   std::optional<backend_entry> get(const dcd::checksum256& hash) {
       std::optional<backend_entry> result;
       std::lock_guard<std::mutex>  lock{ mutex };
       auto&                        ind = backends.get<by_hash>();
@@ -172,7 +172,7 @@ shared_state::shared_state(std::shared_ptr<chain_kv::database> db)
 
 shared_state::~shared_state() {}
 
-std::optional<std::vector<uint8_t>> read_code(wasm_ql::thread_state& thread_state, eosio::name account) {
+std::optional<std::vector<uint8_t>> read_code(wasm_ql::thread_state& thread_state, dcd::name account) {
    std::optional<std::vector<uint8_t>> code;
    if (!thread_state.shared->contract_dir.empty()) {
       auto          filename = thread_state.shared->contract_dir + "/" + (std::string)account + ".wasm";
@@ -192,11 +192,11 @@ std::optional<std::vector<uint8_t>> read_code(wasm_ql::thread_state& thread_stat
    return code;
 }
 
-std::optional<eosio::checksum256> get_contract_hash(db_view_state& db_view_state, eosio::name account) {
-   std::optional<eosio::checksum256> result;
+std::optional<dcd::checksum256> get_contract_hash(db_view_state& db_view_state, dcd::name account) {
+   std::optional<dcd::checksum256> result;
    auto                              meta = get_state_row<ship_protocol::account_metadata>(
          db_view_state.kv_state.view,
-         std::make_tuple(eosio::name{ "account.meta" }, eosio::name{ "primary" }, account));
+         std::make_tuple(dcd::name{ "account.meta" }, dcd::name{ "primary" }, account));
    if (!meta)
       return result;
    auto& meta0 = std::get<ship_protocol::account_metadata_v0>(meta->second);
@@ -205,19 +205,19 @@ std::optional<eosio::checksum256> get_contract_hash(db_view_state& db_view_state
    return result;
 }
 
-std::optional<std::vector<uint8_t>> read_contract(db_view_state& db_view_state, const eosio::checksum256& hash,
-                                                  eosio::name account) {
+std::optional<std::vector<uint8_t>> read_contract(db_view_state& db_view_state, const dcd::checksum256& hash,
+                                                  dcd::name account) {
    std::optional<std::vector<uint8_t>> result;
    auto                                code_row = get_state_row<ship_protocol::code>(
          db_view_state.kv_state.view,
-         std::make_tuple(eosio::name{ "code" }, eosio::name{ "primary" }, uint8_t(0), uint8_t(0), hash));
+         std::make_tuple(dcd::name{ "code" }, dcd::name{ "primary" }, uint8_t(0), uint8_t(0), hash));
    if (!code_row)
       return result;
    auto& code0 = std::get<ship_protocol::code_v0>(code_row->second);
 
    // todo: avoid copy
    result.emplace(code0.code.pos, code0.code.end);
-   ilog("compiling ${h}: ${a}", ("h", eosio::convert_to_json(hash))("a", (std::string)account));
+   ilog("compiling ${h}: ${a}", ("h", dcd::convert_to_json(hash))("a", (std::string)account));
    return result;
 }
 
@@ -225,7 +225,7 @@ void run_action(wasm_ql::thread_state& thread_state, const std::vector<char>& co
                 ship_protocol::action& action, action_trace_v1& atrace, const rocksdb::Snapshot* snapshot,
                 const std::chrono::steady_clock::time_point& stop_time, std::vector<std::vector<char>>& memory) {
    if (std::chrono::steady_clock::now() >= stop_time)
-      throw eosio::vm::timeout_exception("execution timed out");
+      throw dcd::vm::timeout_exception("execution timed out");
 
    chain_kv::write_session write_session{ *thread_state.shared->db, snapshot };
    db_view_state           db_view_state{ state_account, *thread_state.shared->db, write_session, contract_kv_prefix };
@@ -234,7 +234,7 @@ void run_action(wasm_ql::thread_state& thread_state, const std::vector<char>& co
    std::optional<std::vector<uint8_t>> code;
    if (!entry)
       code = read_code(thread_state, action.account);
-   std::optional<eosio::checksum256> hash;
+   std::optional<dcd::checksum256> hash;
    if (!entry && !code) {
       hash = get_contract_hash(db_view_state, action.account);
       if (hash) {
@@ -280,7 +280,7 @@ void run_action(wasm_ql::thread_state& thread_state, const std::vector<char>& co
    entry->backend->set_wasm_allocator(&thread_state.wa);
 
    try {
-      eosio::vm::watchdog wd{ stop_time - std::chrono::steady_clock::now() };
+      dcd::vm::watchdog wd{ stop_time - std::chrono::steady_clock::now() };
       entry->backend->timed_run(wd, [&] {
          entry->backend->initialize(&cb);
          (*entry->backend)(cb, "env", "apply", action.account.value, action.account.value, action.name.value);
@@ -310,7 +310,7 @@ const std::vector<char>& query_get_info(wasm_ql::thread_state&   thread_state,
          auto record = table.primary_index.begin().value();
          if (auto* obj = std::get_if<ship_protocol::global_property_v1>(&record)) {
             found = true;
-            result += ",\"chain_id\":" + eosio::convert_to_json(obj->chain_id);
+            result += ",\"chain_id\":" + dcd::convert_to_json(obj->chain_id);
          }
       }
       if (!found)
@@ -323,9 +323,9 @@ const std::vector<char>& query_get_info(wasm_ql::thread_state&   thread_state,
          std::visit(
                [&](auto& obj) {
                   result += ",\"head_block_num\":\"" + std::to_string(obj.head) + "\"";
-                  result += ",\"head_block_id\":" + eosio::convert_to_json(obj.head_id);
+                  result += ",\"head_block_id\":" + dcd::convert_to_json(obj.head_id);
                   result += ",\"last_irreversible_block_num\":\"" + std::to_string(obj.irreversible) + "\"";
-                  result += ",\"last_irreversible_block_id\":" + eosio::convert_to_json(obj.irreversible_id);
+                  result += ",\"last_irreversible_block_id\":" + dcd::convert_to_json(obj.irreversible_id);
                },
                sing.get());
       } else
@@ -342,13 +342,13 @@ struct get_block_params {
    std::string block_num_or_id = {};
 };
 
-EOSIO_REFLECT(get_block_params, block_num_or_id)
+DCD_REFLECT(get_block_params, block_num_or_id)
 
 const std::vector<char>& query_get_block(wasm_ql::thread_state&   thread_state,
                                          const std::vector<char>& contract_kv_prefix, std::string_view body) {
    get_block_params         params;
    std::string              s{ body.begin(), body.end() };
-   eosio::json_token_stream stream{ s.data() };
+   dcd::json_token_stream stream{ s.data() };
    try {
       from_json(params, stream);
    } catch (std::exception& e) {
@@ -360,18 +360,18 @@ const std::vector<char>& query_get_block(wasm_ql::thread_state&   thread_state,
    db_view_state            db_view_state{ state_account, *thread_state.shared->db, write_session, contract_kv_prefix };
 
    std::string              bn_json = "\"" + params.block_num_or_id + "\"";
-   eosio::json_token_stream bn_stream{ bn_json.data() };
+   dcd::json_token_stream bn_stream{ bn_json.data() };
 
    std::optional<std::pair<std::shared_ptr<const chain_kv::bytes>, block_info>> info;
    if (params.block_num_or_id.size() == 64) {
-      eosio::checksum256 id;
+      dcd::checksum256 id;
       try {
          from_json(id, bn_stream);
       } catch (std::exception& e) {
          throw std::runtime_error("An error occurred deserializing block_num_or_id: "s + e.what());
       }
       info = get_state_row_secondary<block_info>(db_view_state.kv_state.view,
-                                                 std::make_tuple(eosio::name{ "block.info" }, eosio::name{ "id" }, id));
+                                                 std::make_tuple(dcd::name{ "block.info" }, dcd::name{ "id" }, id));
    } else {
       uint32_t num;
       try {
@@ -380,7 +380,7 @@ const std::vector<char>& query_get_block(wasm_ql::thread_state&   thread_state,
          throw std::runtime_error("An error occurred deserializing block_num_or_id: "s + e.what());
       }
       info = get_state_row<block_info>(db_view_state.kv_state.view,
-                                       std::make_tuple(eosio::name{ "block.info" }, eosio::name{ "primary" }, num));
+                                       std::make_tuple(dcd::name{ "block.info" }, dcd::name{ "primary" }, num));
    }
 
    if (info) {
@@ -389,17 +389,17 @@ const std::vector<char>& query_get_block(wasm_ql::thread_state&   thread_state,
       memcpy(&ref_block_prefix, obj.id.value.begin() + 8, sizeof(ref_block_prefix));
 
       std::string result = "{";
-      result += "\"block_num\":" + eosio::convert_to_json(obj.num);
-      result += ",\"id\":" + eosio::convert_to_json(obj.id);
-      result += ",\"timestamp\":" + eosio::convert_to_json(obj.timestamp);
-      result += ",\"producer\":" + eosio::convert_to_json(obj.producer);
-      result += ",\"confirmed\":" + eosio::convert_to_json(obj.confirmed);
-      result += ",\"previous\":" + eosio::convert_to_json(obj.previous);
-      result += ",\"transaction_mroot\":" + eosio::convert_to_json(obj.transaction_mroot);
-      result += ",\"action_mroot\":" + eosio::convert_to_json(obj.action_mroot);
-      result += ",\"schedule_version\":" + eosio::convert_to_json(obj.schedule_version);
-      result += ",\"producer_signature\":" + eosio::convert_to_json(obj.producer_signature);
-      result += ",\"ref_block_prefix\":" + eosio::convert_to_json(ref_block_prefix);
+      result += "\"block_num\":" + dcd::convert_to_json(obj.num);
+      result += ",\"id\":" + dcd::convert_to_json(obj.id);
+      result += ",\"timestamp\":" + dcd::convert_to_json(obj.timestamp);
+      result += ",\"producer\":" + dcd::convert_to_json(obj.producer);
+      result += ",\"confirmed\":" + dcd::convert_to_json(obj.confirmed);
+      result += ",\"previous\":" + dcd::convert_to_json(obj.previous);
+      result += ",\"transaction_mroot\":" + dcd::convert_to_json(obj.transaction_mroot);
+      result += ",\"action_mroot\":" + dcd::convert_to_json(obj.action_mroot);
+      result += ",\"schedule_version\":" + dcd::convert_to_json(obj.schedule_version);
+      result += ",\"producer_signature\":" + dcd::convert_to_json(obj.producer_signature);
+      result += ",\"ref_block_prefix\":" + dcd::convert_to_json(ref_block_prefix);
       result += "}";
 
       thread_state.action_return_value.assign(result.data(), result.data() + result.size());
@@ -410,23 +410,23 @@ const std::vector<char>& query_get_block(wasm_ql::thread_state&   thread_state,
 } // query_get_block
 
 struct get_abi_params {
-   eosio::name account_name = {};
+   dcd::name account_name = {};
 };
 
-EOSIO_REFLECT(get_abi_params, account_name)
+DCD_REFLECT(get_abi_params, account_name)
 
 struct get_abi_result {
-   eosio::name                   account_name;
-   std::optional<eosio::abi_def> abi;
+   dcd::name                   account_name;
+   std::optional<dcd::abi_def> abi;
 };
 
-EOSIO_REFLECT(get_abi_result, account_name, abi)
+DCD_REFLECT(get_abi_result, account_name, abi)
 
 const std::vector<char>& query_get_abi(wasm_ql::thread_state& thread_state, const std::vector<char>& contract_kv_prefix,
                                        std::string_view body) {
    get_abi_params           params;
    std::string              s{ body.begin(), body.end() };
-   eosio::json_token_stream stream{ s.data() };
+   dcd::json_token_stream stream{ s.data() };
    try {
       from_json(params, stream);
    } catch (std::exception& e) {
@@ -439,7 +439,7 @@ const std::vector<char>& query_get_abi(wasm_ql::thread_state& thread_state, cons
 
    auto acc = get_state_row<ship_protocol::account>(
          db_view_state.kv_state.view,
-         std::make_tuple(eosio::name{ "account" }, eosio::name{ "primary" }, params.account_name));
+         std::make_tuple(dcd::name{ "account" }, dcd::name{ "primary" }, params.account_name));
    if (!acc)
       throw std::runtime_error("account " + (std::string)params.account_name + " not found");
    auto& acc0 = std::get<ship_protocol::account_v0>(acc->second);
@@ -448,30 +448,30 @@ const std::vector<char>& query_get_abi(wasm_ql::thread_state& thread_state, cons
    result.account_name = acc0.name;
    if (acc0.abi.pos != acc0.abi.end) {
       result.abi.emplace();
-      eosio::from_bin(*result.abi, acc0.abi);
+      dcd::from_bin(*result.abi, acc0.abi);
    }
 
    // todo: avoid the extra copy
-   auto json = eosio::convert_to_json(result);
+   auto json = dcd::convert_to_json(result);
    thread_state.action_return_value.assign(json.begin(), json.end());
    return thread_state.action_return_value;
 } // query_get_abi
 
 // Ignores data field
 struct action_no_data {
-   eosio::name                                  account       = {};
-   eosio::name                                  name          = {};
+   dcd::name                                  account       = {};
+   dcd::name                                  name          = {};
    std::vector<ship_protocol::permission_level> authorization = {};
 };
 
 struct extension_hex_data {
    uint16_t     type = {};
-   eosio::bytes data = {};
+   dcd::bytes data = {};
 };
 
-EOSIO_REFLECT(extension_hex_data, type, data)
+DCD_REFLECT(extension_hex_data, type, data)
 
-EOSIO_REFLECT(action_no_data, account, name, authorization)
+DCD_REFLECT(action_no_data, account, name, authorization)
 
 struct transaction_for_get_keys : ship_protocol::transaction_header {
    std::vector<action_no_data>     context_free_actions   = {};
@@ -479,26 +479,26 @@ struct transaction_for_get_keys : ship_protocol::transaction_header {
    std::vector<extension_hex_data> transaction_extensions = {};
 };
 
-EOSIO_REFLECT(transaction_for_get_keys, base ship_protocol::transaction_header, context_free_actions, actions,
+DCD_REFLECT(transaction_for_get_keys, base ship_protocol::transaction_header, context_free_actions, actions,
               transaction_extensions)
 
 struct get_required_keys_params {
    transaction_for_get_keys       transaction    = {};
-   std::vector<eosio::public_key> available_keys = {};
+   std::vector<dcd::public_key> available_keys = {};
 };
 
-EOSIO_REFLECT(get_required_keys_params, transaction, available_keys)
+DCD_REFLECT(get_required_keys_params, transaction, available_keys)
 
 struct get_required_keys_result {
-   std::vector<eosio::public_key> required_keys = {};
+   std::vector<dcd::public_key> required_keys = {};
 };
 
-EOSIO_REFLECT(get_required_keys_result, required_keys)
+DCD_REFLECT(get_required_keys_result, required_keys)
 
 const std::vector<char>& query_get_required_keys(wasm_ql::thread_state& thread_state, std::string_view body) {
    get_required_keys_params params;
    std::string              s{ body.begin(), body.end() };
-   eosio::json_token_stream stream{ s.data() };
+   dcd::json_token_stream stream{ s.data() };
    try {
       from_json(params, stream);
    } catch (std::exception& e) {
@@ -514,26 +514,26 @@ const std::vector<char>& query_get_required_keys(wasm_ql::thread_state& thread_s
          throw std::runtime_error("Actions may not have authorizations"); // todo
 
    // todo: avoid the extra copy
-   auto json = eosio::convert_to_json(result);
+   auto json = dcd::convert_to_json(result);
    thread_state.action_return_value.assign(json.begin(), json.end());
    return thread_state.action_return_value;
 } // query_get_required_keys
 
 struct send_transaction_params {
-   std::vector<eosio::signature> signatures               = {};
+   std::vector<dcd::signature> signatures               = {};
    std::string                   compression              = {};
-   eosio::bytes                  packed_context_free_data = {};
-   eosio::bytes                  packed_trx               = {};
+   dcd::bytes                  packed_context_free_data = {};
+   dcd::bytes                  packed_trx               = {};
 };
 
-EOSIO_REFLECT(send_transaction_params, signatures, compression, packed_context_free_data, packed_trx)
+DCD_REFLECT(send_transaction_params, signatures, compression, packed_context_free_data, packed_trx)
 
 struct send_transaction_results {
-   eosio::checksum256   transaction_id; // todo: redundant with processed.id
+   dcd::checksum256   transaction_id; // todo: redundant with processed.id
    transaction_trace_v0 processed;
 };
 
-EOSIO_REFLECT(send_transaction_results, transaction_id, processed)
+DCD_REFLECT(send_transaction_results, transaction_id, processed)
 
 const std::vector<char>& query_send_transaction(wasm_ql::thread_state&   thread_state,
                                                 const std::vector<char>& contract_kv_prefix, std::string_view body,
@@ -541,7 +541,7 @@ const std::vector<char>& query_send_transaction(wasm_ql::thread_state&   thread_
    send_transaction_params params;
    {
       std::string              s{ body.begin(), body.end() };
-      eosio::json_token_stream stream{ s.data() };
+      dcd::json_token_stream stream{ s.data() };
       try {
          from_json(params, stream);
       } catch (std::exception& e) {
@@ -564,7 +564,7 @@ const std::vector<char>& query_send_transaction(wasm_ql::thread_state&   thread_
 
    // todo: hide variants during json conversion
    // todo: avoid the extra copy
-   auto json = eosio::convert_to_json(results);
+   auto json = dcd::convert_to_json(results);
    thread_state.action_return_value.assign(json.begin(), json.end());
    return thread_state.action_return_value;
 } // query_send_transaction
@@ -590,10 +590,10 @@ transaction_trace_v0 query_send_transaction(wasm_ql::thread_state&              
                                             const rocksdb::Snapshot*                 snapshot,           //
                                             std::vector<std::vector<char>>&          memory,             //
                                             bool                                     return_trace_on_except) {
-   eosio::input_stream        s{ trx.packed_trx };
+   dcd::input_stream        s{ trx.packed_trx };
    ship_protocol::transaction unpacked;
    try {
-      eosio::from_bin(unpacked, s);
+      dcd::from_bin(unpacked, s);
    } catch (std::exception& e) { throw std::runtime_error("An error occurred deserializing packed_trx: "s + e.what()); }
    if (s.end != s.pos)
       throw std::runtime_error("Extra data in packed_trx");
@@ -636,7 +636,7 @@ transaction_trace_v0 query_send_transaction(wasm_ql::thread_state&              
 
       try {
          run_action(thread_state, contract_kv_prefix, action, at, snapshot, stop_time, memory);
-      } catch (eosio::vm::timeout_exception&) { //
+      } catch (dcd::vm::timeout_exception&) { //
          throw std::runtime_error(
                "timeout after " +
                std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(stop_time - start_time).count()) +

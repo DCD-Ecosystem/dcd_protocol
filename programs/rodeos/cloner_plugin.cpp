@@ -17,11 +17,11 @@ namespace b1 {
 
 using namespace appbase;
 using namespace std::literals;
-using namespace eosio::ship_protocol;
+using namespace dcd::ship_protocol;
 
 namespace asio          = boost::asio;
 namespace bpo           = boost::program_options;
-namespace ship_protocol = eosio::ship_protocol;
+namespace ship_protocol = dcd::ship_protocol;
 namespace websocket     = boost::beast::websocket;
 
 using asio::ip::tcp;
@@ -38,7 +38,7 @@ struct cloner_config : ship_client::connection_config {
    uint32_t    skip_to     = 0;
    uint32_t    stop_before = 0;
    bool        exit_on_filter_wasm_error = false;
-   eosio::name filter_name = {}; // todo: remove
+   dcd::name filter_name = {}; // todo: remove
    std::string filter_wasm = {}; // todo: remove
 };
 
@@ -87,12 +87,12 @@ struct cloner_session : ship_client::connection_callbacks, std::enable_shared_fr
       ilog("cloner database status:");
       ilog("    revisions:    ${f} - ${r}",
            ("f", rodeos_snapshot->undo_stack->first_revision())("r", rodeos_snapshot->undo_stack->revision()));
-      ilog("    chain:        ${a}", ("a", eosio::convert_to_json(rodeos_snapshot->chain_id)));
+      ilog("    chain:        ${a}", ("a", dcd::convert_to_json(rodeos_snapshot->chain_id)));
       ilog("    head:         ${a} ${b}",
-           ("a", rodeos_snapshot->head)("b", eosio::convert_to_json(rodeos_snapshot->head_id)));
+           ("a", rodeos_snapshot->head)("b", dcd::convert_to_json(rodeos_snapshot->head_id)));
       ilog("    irreversible: ${a} ${b}",
            ("a", rodeos_snapshot->irreversible)(
-                 "b", eosio::convert_to_json(rodeos_snapshot->irreversible_id)));
+                 "b", dcd::convert_to_json(rodeos_snapshot->irreversible_id)));
 
       rodeos_snapshot->end_write(true);
       db->flush(true, true);
@@ -106,14 +106,14 @@ struct cloner_session : ship_client::connection_callbacks, std::enable_shared_fr
       connection->send(get_status_request_v0{});
    }
 
-   bool received(get_status_result_v0& status, eosio::input_stream bin) override {
-      ilog("nodeos has chain ${c}", ("c", eosio::convert_to_json(status.chain_id)));
-      if (rodeos_snapshot->chain_id == eosio::checksum256{})
+   bool received(get_status_result_v0& status, dcd::input_stream bin) override {
+      ilog("dcdnode has chain ${c}", ("c", dcd::convert_to_json(status.chain_id)));
+      if (rodeos_snapshot->chain_id == dcd::checksum256{})
          rodeos_snapshot->chain_id = status.chain_id;
       if (rodeos_snapshot->chain_id != status.chain_id)
          throw std::runtime_error(
-               "database is for chain " + eosio::convert_to_json(rodeos_snapshot->chain_id) +
-               " but nodeos has chain " + eosio::convert_to_json(status.chain_id));
+               "database is for chain " + dcd::convert_to_json(rodeos_snapshot->chain_id) +
+               " but dcdnode has chain " + dcd::convert_to_json(status.chain_id));
       ilog("request blocks");
       connection->request_blocks(status, std::max(config->skip_to, rodeos_snapshot->head + 1), get_positions(),
                                  ship_client::request_block | ship_client::request_traces |
@@ -128,7 +128,7 @@ struct cloner_session : ship_client::connection_callbacks, std::enable_shared_fr
                                            partition->contract_kv_prefix };
          for (uint32_t i = rodeos_snapshot->irreversible; i <= rodeos_snapshot->head; ++i) {
             auto info = rodeos::get_state_row<rodeos::block_info>(
-                  view_state.kv_state.view, std::make_tuple(eosio::name{ "block.info" }, eosio::name{ "primary" }, i));
+                  view_state.kv_state.view, std::make_tuple(dcd::name{ "block.info" }, dcd::name{ "primary" }, i));
             if (!info)
                throw std::runtime_error("database is missing block.info for block " + std::to_string(i));
             auto& info0 = std::get<rodeos::block_info_v0>(info->second);
@@ -139,7 +139,7 @@ struct cloner_session : ship_client::connection_callbacks, std::enable_shared_fr
    }
 
    template<typename Get_Blocks_Result>
-   bool process_received(Get_Blocks_Result& result, eosio::input_stream bin) {
+   bool process_received(Get_Blocks_Result& result, dcd::input_stream bin) {
       if (!result.this_block)
          return true;
       if (config->stop_before && result.this_block->block_num >= config->stop_before) {
@@ -178,11 +178,11 @@ struct cloner_session : ship_client::connection_callbacks, std::enable_shared_fr
       return true;
    }
 
-   bool received(get_blocks_result_v0& result, eosio::input_stream bin) override {
+   bool received(get_blocks_result_v0& result, dcd::input_stream bin) override {
       return process_received(result, bin);
    }
 
-   bool received(get_blocks_result_v1& result, eosio::input_stream bin) override {
+   bool received(get_blocks_result_v1& result, dcd::input_stream bin) override {
       return process_received(result, bin);
    }
 
@@ -220,7 +220,7 @@ void cloner_plugin::set_program_options(options_description& cli, options_descri
    auto op   = cfg.add_options();
    auto clop = cli.add_options();
    op("clone-connect-to,f", bpo::value<std::string>()->default_value("127.0.0.1:8080"),
-      "State-history endpoint to connect to (nodeos)");
+      "State-history endpoint to connect to (dcdnode)");
    clop("clone-skip-to,k", bpo::value<uint32_t>(), "Skip blocks before [arg]");
    clop("clone-stop,x", bpo::value<uint32_t>(), "Stop before block [arg]");
    op("clone-exit-on-filter-wasm-error", bpo::bool_switch()->default_value(false),
@@ -250,7 +250,7 @@ void cloner_plugin::plugin_initialize(const variables_map& options) {
       my->config->stop_before = options.count("clone-stop") ? options["clone-stop"].as<uint32_t>() : 0;
       my->config->exit_on_filter_wasm_error = options["clone-exit-on-filter-wasm-error"].as<bool>();
       if (options.count("filter-name") && options.count("filter-wasm")) {
-         my->config->filter_name = eosio::name{ options["filter-name"].as<std::string>() };
+         my->config->filter_name = dcd::name{ options["filter-name"].as<std::string>() };
          my->config->filter_wasm = options["filter-wasm"].as<std::string>();
       } else if (options.count("filter-name") || options.count("filter-wasm")) {
          throw std::runtime_error("filter-name and filter-wasm must be used together");

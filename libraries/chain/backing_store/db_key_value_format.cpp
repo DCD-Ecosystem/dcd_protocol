@@ -1,9 +1,9 @@
-#include <eosio/chain/backing_store/db_key_value_format.hpp>
-#include <eosio/chain/combined_database.hpp>
+#include <dcd/chain/backing_store/db_key_value_format.hpp>
+#include <dcd/chain/combined_database.hpp>
 #include <algorithm>
 #include <cstring>
 
-namespace eosio { namespace chain { namespace backing_store { namespace db_key_value_format {
+namespace dcd { namespace chain { namespace backing_store { namespace db_key_value_format {
    namespace detail {
       constexpr std::size_t key_size(key_type kt) {
          switch(kt) {
@@ -12,7 +12,7 @@ namespace eosio { namespace chain { namespace backing_store { namespace db_key_v
             case key_type::sec_i64:
                return sizeof(uint64_t);
             case key_type::sec_i128:
-               return sizeof(eosio::chain::uint128_t);
+               return sizeof(dcd::chain::uint128_t);
             case key_type::sec_i256:
                return sizeof(key256_t);
             case key_type::sec_double:
@@ -84,7 +84,7 @@ namespace eosio { namespace chain { namespace backing_store { namespace db_key_v
       }
 
       // NOTE: very limited use till redesign
-      constexpr uint64_t db_type_and_code_size = detail::prefix_size<eosio::session::shared_bytes>() - detail::prefix_size<b1::chain_kv::bytes>(); // 1 (db type) + 8 (contract)
+      constexpr uint64_t db_type_and_code_size = detail::prefix_size<dcd::session::shared_bytes>() - detail::prefix_size<b1::chain_kv::bytes>(); // 1 (db type) + 8 (contract)
       static_assert(db_type_and_code_size == sizeof(char) + sizeof(name), "Some assumptions on formatting have been broken");
    } // namespace detail
 
@@ -121,15 +121,15 @@ namespace eosio { namespace chain { namespace backing_store { namespace db_key_v
       return create_prefix_type_key(scope, table, key_type::table);
    }
 
-   eosio::session::shared_bytes create_table_key(const eosio::session::shared_bytes& prefix_key) {
-      const std::size_t full_prefix_size = db_key_value_format::detail::prefix_size<eosio::session::shared_bytes>();
+   dcd::session::shared_bytes create_table_key(const dcd::session::shared_bytes& prefix_key) {
+      const std::size_t full_prefix_size = db_key_value_format::detail::prefix_size<dcd::session::shared_bytes>();
       EOS_ASSERT(prefix_key.size() >= full_prefix_size, bad_composite_key_exception,
                  "DB intrinsic key-value store composite key is malformed, create_table_key expects to be given a full "
                  "key that has a full prefix leading up to the type");
       const auto new_kt = static_cast<char>(key_type::table);
       const char* new_kt_ptr = &new_kt;
       // already have everything in char format/order, so just need to assemble it
-      return detail::assemble<2, eosio::session::shared_bytes>({rocksdb::Slice{prefix_key.data(), full_prefix_size},
+      return detail::assemble<2, dcd::session::shared_bytes>({rocksdb::Slice{prefix_key.data(), full_prefix_size},
                                                                 rocksdb::Slice{new_kt_ptr, 1}});
    }
 
@@ -199,23 +199,23 @@ namespace eosio { namespace chain { namespace backing_store { namespace db_key_v
       return detail::extract_from_composite_key(composite_key.cbegin(), composite_key.cend());
    }
 
-   b1::chain_kv::bytes extract_legacy_key(const eosio::session::shared_bytes& complete_key) {
+   b1::chain_kv::bytes extract_legacy_key(const dcd::session::shared_bytes& complete_key) {
       const auto slice = extract_legacy_slice(complete_key);
       b1::chain_kv::bytes ret {slice.data(), slice.data() + slice.size()};
       return ret;
    }
 
-   rocksdb::Slice extract_legacy_slice(const eosio::session::shared_bytes& full_key) {
+   rocksdb::Slice extract_legacy_slice(const dcd::session::shared_bytes& full_key) {
       // offset into the whole key for the old postfix (after db type and contract)
       return {full_key.data() + detail::db_type_and_code_size,
               full_key.size() - detail::db_type_and_code_size};
    }
 
-   eosio::session::shared_bytes create_full_key(const b1::chain_kv::bytes& composite_key, name code) {
+   dcd::session::shared_bytes create_full_key(const b1::chain_kv::bytes& composite_key, name code) {
       static const char db_type_prefix = make_rocksdb_contract_db_prefix();
       b1::chain_kv::bytes code_as_bytes;
       b1::chain_kv::append_key(code_as_bytes, code.to_uint64_t());
-      auto ret = eosio::session::make_shared_bytes<std::string_view, 3>({std::string_view{&db_type_prefix, 1},
+      auto ret = dcd::session::make_shared_bytes<std::string_view, 3>({std::string_view{&db_type_prefix, 1},
                                                                      std::string_view{code_as_bytes.data(),
                                                                                       code_as_bytes.size()},
                                                                      std::string_view{composite_key.data(),
@@ -223,7 +223,7 @@ namespace eosio { namespace chain { namespace backing_store { namespace db_key_v
       return ret;
    }
 
-   eosio::session::shared_bytes create_full_key_prefix(const eosio::session::shared_bytes& full_key, end_of_prefix prefix_end) {
+   dcd::session::shared_bytes create_full_key_prefix(const dcd::session::shared_bytes& full_key, end_of_prefix prefix_end) {
       auto calc_extension = [](end_of_prefix prefix_end) {
          switch (prefix_end) {
             case end_of_prefix::pre_type: return std::size_t(0);
@@ -233,14 +233,14 @@ namespace eosio { namespace chain { namespace backing_store { namespace db_key_v
          }
       };
       const std::size_t extension_size = calc_extension(prefix_end);
-      const std::size_t full_prefix_size = db_key_value_format::detail::prefix_size<eosio::session::shared_bytes>() + extension_size;
+      const std::size_t full_prefix_size = db_key_value_format::detail::prefix_size<dcd::session::shared_bytes>() + extension_size;
       EOS_ASSERT( full_prefix_size < full_key.size(), db_rocksdb_invalid_operation_exception,
                   "invariant failure in prefix_bundle, the passed in full_key was: ${size1} bytes, but it needs to "
                   "be at least: ${size2}", ("size1", full_key.size())("size2", full_prefix_size));
-      return eosio::session::shared_bytes(full_key.data(), full_prefix_size);
+      return dcd::session::shared_bytes(full_key.data(), full_prefix_size);
    }
 
-   full_key_data parse_full_key(const eosio::session::shared_bytes& full_key) {
+   full_key_data parse_full_key(const dcd::session::shared_bytes& full_key) {
       static const char db_type_prefix = make_rocksdb_contract_db_prefix();
       EOS_ASSERT( full_key.size() >= 1, db_rocksdb_invalid_operation_exception,
                   "parse_full_key was passed an empty key.");
@@ -251,7 +251,7 @@ namespace eosio { namespace chain { namespace backing_store { namespace db_key_v
       if (data.db_type != db_type_prefix || full_key.size() == db_type_size) {
          return data;
       }
-      const std::size_t full_prefix_size = db_key_value_format::detail::prefix_size<eosio::session::shared_bytes>();
+      const std::size_t full_prefix_size = db_key_value_format::detail::prefix_size<dcd::session::shared_bytes>();
       const std::size_t full_prefix_type_size = full_prefix_size + sizeof(key_type);
       const std::size_t db_type_and_contract_size = db_type_size + sizeof(name);
       EOS_ASSERT( full_key.size() >= db_type_and_contract_size, db_rocksdb_invalid_operation_exception,
@@ -281,13 +281,13 @@ namespace eosio { namespace chain { namespace backing_store { namespace db_key_v
       return data;
    }
 
-   eosio::session::shared_bytes create_full_primary_key(name code, name scope, name table, uint64_t primary_key) {
+   dcd::session::shared_bytes create_full_primary_key(name code, name scope, name table, uint64_t primary_key) {
       bytes composite_key = create_primary_key(scope, table, primary_key);
       return create_full_key(composite_key, code);
    }
 
-   eosio::session::shared_bytes create_full_prefix_key(name code, name scope, name table, std::optional<key_type> kt) {
+   dcd::session::shared_bytes create_full_prefix_key(name code, name scope, name table, std::optional<key_type> kt) {
       bytes composite_key = kt ? create_prefix_type_key(scope, table, *kt) : create_prefix_key(scope, table);
       return create_full_key(composite_key, code);
    }
-}}}} // namespace eosio::chain::backing_store::db_key_value_format
+}}}} // namespace dcd::chain::backing_store::db_key_value_format

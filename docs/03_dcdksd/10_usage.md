@@ -3,7 +3,7 @@ content_title: dcdksd Usage
 ---
 
 [[info | Recommended Usage]]
-| For most users, the easiest way to use `dcdksd` is to have `dcdcli` launch it automatically. Wallet files will be created in the default directory (`~/eosio-wallet`).
+| For most users, the easiest way to use `dcdksd` is to have `dcdcli` launch it automatically. Wallet files will be created in the default directory (`~/dcd-wallet`).
 
 ## Launching dcdksd manually
 
@@ -13,7 +13,7 @@ content_title: dcdksd Usage
 dcdksd
 ```
 
-By default, `dcdksd` creates the folder `~/eosio-wallet` and populates it with a basic `config.ini` file.  The location of the config file can be specified on the command line using the `--config-dir` argument.  The configuration file contains the HTTP server endpoint for incoming HTTP connections and other parameters for cross-origin resource sharing.
+By default, `dcdksd` creates the folder `~/dcd-wallet` and populates it with a basic `config.ini` file.  The location of the config file can be specified on the command line using the `--config-dir` argument.  The configuration file contains the HTTP server endpoint for incoming HTTP connections and other parameters for cross-origin resource sharing.
 
 [[info | Wallet Location]]
 | The location of the wallet data folder can be specified on the command line with the `--data-dir` option.
@@ -37,7 +37,7 @@ dcdksd --help
 ```console
 Application Options:
 
-Config Options for eosio::http_plugin:
+Config Options for dcd::http_plugin:
   --unix-socket-path arg (=dcdksd.sock)  The filename (relative to data-dir) to
                                         create a unix socket for HTTP RPC; set
                                         blank to disable.
@@ -81,7 +81,7 @@ Config Options for eosio::http_plugin:
   --http-threads arg (=2)               Number of worker threads in http thread
                                         pool
 
-Config Options for eosio::wallet_plugin:
+Config Options for dcd::wallet_plugin:
   --wallet-dir arg (=".")               The path of the wallet files (absolute
                                         path or relative to application data
                                         dir)

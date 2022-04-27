@@ -148,7 +148,7 @@ namespace detail {
    }
 
    template <typename T, std::size_t N>
-   auto insert_key(eosio::session::shared_bytes& dest, size_t index, T value) {
+   auto insert_key(dcd::session::shared_bytes& dest, size_t index, T value) {
 
       using t_type = typename value_storage<T>::type;
       t_type t_array[N];
@@ -235,21 +235,21 @@ inline void append_key(bytes& dest, float128_t value) {
 }
 
 template <typename T>
-auto insert_key(eosio::session::shared_bytes& dest, size_t index, T value) -> std::enable_if_t<std::is_unsigned_v<T>, void> {
+auto insert_key(dcd::session::shared_bytes& dest, size_t index, T value) -> std::enable_if_t<std::is_unsigned_v<T>, void> {
    detail::insert_key<T, 1>(dest, index, value);
 }
 
 template <typename T, std::size_t N>
-auto insert_key(eosio::session::shared_bytes& dest, size_t index, std::array<T, N> value) -> std::enable_if_t<std::is_unsigned_v<T>, void> {
+auto insert_key(dcd::session::shared_bytes& dest, size_t index, std::array<T, N> value) -> std::enable_if_t<std::is_unsigned_v<T>, void> {
    detail::insert_key<T*, N>(dest, index, value.data());
 }
 
-inline void insert_key(eosio::session::shared_bytes& dest, size_t index, float64_t value) {
+inline void insert_key(dcd::session::shared_bytes& dest, size_t index, float64_t value) {
    auto float_key = detail::float_to_key<uint64_t>(value);
    detail::insert_key<uint64_t, 1>(dest, index, float_key);
 }
 
-inline void insert_key(eosio::session::shared_bytes& dest, size_t index, float128_t value) {
+inline void insert_key(dcd::session::shared_bytes& dest, size_t index, float128_t value) {
    auto float_key = detail::float_to_key<detail::uint128_t>(value);
    // underlying storage is implemented as uint64_t[2], but it is laid out like it is uint128_t
    detail::insert_key<detail::uint128_t, 1>(dest, index, float_key);
@@ -775,7 +775,7 @@ struct write_session {
 }; // write_session
 
 // A view of the database with a restricted range (prefix). Implements part of
-// https://github.com/EOSIO/spec-repo/blob/master/esr_key_value_database_intrinsics.md
+// https://github.com/DCD/spec-repo/blob/master/esr_key_value_database_intrinsics.md
 // including iterator wrap-around behavior.
 //
 // Keys have this format: prefix, contract, user-provided key.

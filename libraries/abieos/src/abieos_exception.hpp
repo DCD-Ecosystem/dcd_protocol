@@ -47,21 +47,21 @@ inline time_point string_to_time_point(const std::string& s) {
 
 inline uint64_t string_to_symbol_code(const char* s) {
     uint64_t result;
-    if (!eosio::string_to_symbol_code(result, s, s + strlen(s)))
+    if (!dcd::string_to_symbol_code(result, s, s + strlen(s)))
         throw abieos::error("invalid symbol_code");
     return result;
 }
 
 inline uint64_t string_to_symbol(const char* s) {
     uint64_t result;
-    if (!eosio::string_to_symbol(result, s, s + strlen(s)))
+    if (!dcd::string_to_symbol(result, s, s + strlen(s)))
         throw abieos::error("invalid symbol");
     return result;
 }
 
 inline asset string_to_asset(const char* s) {
     asset result;
-    if (!eosio::string_to_asset(result.amount, result.sym.value, s, s + strlen(s)))
+    if (!dcd::string_to_asset(result.amount, result.sym.value, s, s + strlen(s)))
         throw abieos::error("invalid asset");
     return result;
 }

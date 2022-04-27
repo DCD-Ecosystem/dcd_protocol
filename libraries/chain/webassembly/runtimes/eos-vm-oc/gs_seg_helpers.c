@@ -1,4 +1,4 @@
-#include <eosio/chain/webassembly/eos-vm-oc/gs_seg_helpers.h>
+#include <dcd/chain/webassembly/eos-vm-oc/gs_seg_helpers.h>
 
 #include <asm/prctl.h>
 #include <sys/prctl.h>

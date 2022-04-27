@@ -1,5 +1,5 @@
 ## Goal
-Create a keypair consisting of a public and a private key for signing transactions in the EOSIO blockchain.
+Create a keypair consisting of a public and a private key for signing transactions in the DCD blockchain.
 
 ## Before you begin
 Before you follow the steps to create a new key pair, make sure the following items are fulfilled:
@@ -8,7 +8,7 @@ Before you follow the steps to create a new key pair, make sure the following it
 * Install the currently supported version of `dcdcli`
 
 [[info | Note]]
-| The dcdcli tool is bundled with the EOSIO software. [Installing EOSIO](../../00_install/index.md) will also install the dcdcli tool. 
+| The dcdcli tool is bundled with the DCD software. [Installing DCD](../../00_install/index.md) will also install the dcdcli tool. 
 
 * Acquire functional understanding of asymmetric cryptography (public and private keypair) in the context of blockchain
 

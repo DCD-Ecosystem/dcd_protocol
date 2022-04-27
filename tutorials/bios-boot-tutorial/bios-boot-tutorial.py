@@ -14,19 +14,19 @@ args = None
 logFile = None
 
 unlockTimeout = 999999999
-fastUnstakeSystem = './fast.refund/eosio.system/eosio.system.wasm'
+fastUnstakeSystem = './fast.refund/dcd.system/dcd.system.wasm'
 
 systemAccounts = [
-    'eosio.bpay',
-    'eosio.msig',
-    'eosio.names',
-    'eosio.ram',
-    'eosio.ramfee',
-    'eosio.saving',
-    'eosio.stake',
-    'eosio.token',
-    'eosio.vpay',
-    'eosio.rex',
+    'dcd.bpay',
+    'dcd.msig',
+    'dcd.names',
+    'dcd.ram',
+    'dcd.ramfee',
+    'dcd.saving',
+    'dcd.stake',
+    'dcd.token',
+    'dcd.vpay',
+    'dcd.rex',
 ]
 
 def jsonArg(a):
@@ -97,14 +97,14 @@ def startNode(nodeIndex, account):
     run('mkdir -p ' + dir)
     otherOpts = ''.join(list(map(lambda i: '    --p2p-peer-address localhost:' + str(9000 + i), range(nodeIndex))))
     if not nodeIndex: otherOpts += (
-        '    --plugin eosio::history_plugin'
-        '    --plugin eosio::history_api_plugin'
+        '    --plugin dcd::history_plugin'
+        '    --plugin dcd::history_api_plugin'
     )
     cmd = (
-        args.nodeos +
+        args.dcdnode +
         '    --max-irreversible-block-age -1'
         # max-transaction-time must be less than block time
-        # (which is defined in .../chain/include/eosio/chain/config.hpp
+        # (which is defined in .../chain/include/dcd/chain/config.hpp
         # as block_interval_ms = 500)
         '    --max-transaction-time=200'
         '    --contracts-console'
@@ -120,11 +120,11 @@ def startNode(nodeIndex, account):
         '    --enable-stale-production'
         '    --producer-name ' + account['name'] +
         '    --private-key \'["' + account['pub'] + '","' + account['pvt'] + '"]\''
-        '    --plugin eosio::http_plugin'
-        '    --plugin eosio::chain_api_plugin'
-        '    --plugin eosio::chain_plugin'
-        '    --plugin eosio::producer_api_plugin'
-        '    --plugin eosio::producer_plugin' +
+        '    --plugin dcd::http_plugin'
+        '    --plugin dcd::chain_api_plugin'
+        '    --plugin dcd::chain_plugin'
+        '    --plugin dcd::producer_api_plugin'
+        '    --plugin dcd::producer_plugin' +
         otherOpts)
     with open(dir + 'stderr', mode='w') as f:
         f.write(cmd + '\n\n')
@@ -136,7 +136,7 @@ def startProducers(b, e):
 
 def createSystemAccounts():
     for a in systemAccounts:
-        run(args.dcdcli + 'create account eosio ' + a + ' ' + args.public_key)
+        run(args.dcdcli + 'create account dcd ' + a + ' ' + args.public_key)
 
 def intToCurrency(i):
     return '%d.%04d %s' % (i // 10000, i % 10000, args.symbol)
@@ -175,10 +175,10 @@ def createStakedAccounts(b, e):
         stakeCpu = stake - stakeNet
         print('%s: total funds=%s, ram=%s, net=%s, cpu=%s, unstaked=%s' % (a['name'], intToCurrency(a['funds']), intToCurrency(ramFunds), intToCurrency(stakeNet), intToCurrency(stakeCpu), intToCurrency(unstaked)))
         assert(funds == ramFunds + stakeNet + stakeCpu + unstaked)
-        retry(args.dcdcli + 'system newaccount --transfer eosio %s %s --stake-net "%s" --stake-cpu "%s" --buy-ram "%s"   ' % 
+        retry(args.dcdcli + 'system newaccount --transfer dcd %s %s --stake-net "%s" --stake-cpu "%s" --buy-ram "%s"   ' % 
             (a['name'], a['pub'], intToCurrency(stakeNet), intToCurrency(stakeCpu), intToCurrency(ramFunds)))
         if unstaked:
-            retry(args.dcdcli + 'transfer eosio %s "%s"' % (a['name'], intToCurrency(unstaked)))
+            retry(args.dcdcli + 'transfer dcd %s "%s"' % (a['name'], intToCurrency(unstaked)))
 
 def regProducers(b, e):
     for i in range(b, e):
@@ -199,7 +199,7 @@ def vote(b, e):
         retry(args.dcdcli + 'system voteproducer prods ' + voter + ' ' + prods)
 
 def claimRewards():
-    table = getJsonOutput(args.dcdcli + 'get table eosio eosio producers -l 100')
+    table = getJsonOutput(args.dcdcli + 'get table dcd dcd producers -l 100')
     times = []
     for row in table['rows']:
         if row['unpaid_blocks'] and not row['last_claim_time']:
@@ -216,7 +216,7 @@ def proxyVotes(b, e):
         retry(args.dcdcli + 'system voteproducer proxy ' + voter + ' ' + proxy)
 
 def updateAuth(account, permission, parent, controller):
-    run(args.dcdcli + 'push action eosio updateauth' + jsonArg({
+    run(args.dcdcli + 'push action dcd updateauth' + jsonArg({
         'account': account,
         'permission': permission,
         'parent': parent,
@@ -247,11 +247,11 @@ def msigProposeReplaceSystem(proposer, proposalName):
     requestedPermissions = []
     for i in range(firstProducer, firstProducer + numProducers):
         requestedPermissions.append({'actor': accounts[i]['name'], 'permission': 'active'})
-    trxPermissions = [{'actor': 'eosio', 'permission': 'active'}]
+    trxPermissions = [{'actor': 'dcd', 'permission': 'active'}]
     with open(fastUnstakeSystem, mode='rb') as f:
-        setcode = {'account': 'eosio', 'vmtype': 0, 'vmversion': 0, 'code': f.read().hex()}
+        setcode = {'account': 'dcd', 'vmtype': 0, 'vmversion': 0, 'code': f.read().hex()}
     run(args.dcdcli + 'multisig propose ' + proposalName + jsonArg(requestedPermissions) + 
-        jsonArg(trxPermissions) + 'eosio setcode' + jsonArg(setcode) + ' -p ' + proposer)
+        jsonArg(trxPermissions) + 'dcd setcode' + jsonArg(setcode) + ' -p ' + proposer)
 
 def msigApproveReplaceSystem(proposer, proposalName):
     for i in range(firstProducer, firstProducer + numProducers):
@@ -263,7 +263,7 @@ def msigExecReplaceSystem(proposer, proposalName):
     retry(args.dcdcli + 'multisig exec ' + proposer + ' ' + proposalName + ' -p ' + proposer)
 
 def msigReplaceSystem():
-    run(args.dcdcli + 'push action eosio buyrambytes' + jsonArg(['eosio', accounts[0]['name'], 200000]) + '-p eosio')
+    run(args.dcdcli + 'push action dcd buyrambytes' + jsonArg(['dcd', accounts[0]['name'], 200000]) + '-p dcd')
     sleep(1)
     msigProposeReplaceSystem(accounts[0]['name'], 'fast.unstake')
     sleep(1)
@@ -282,83 +282,83 @@ def produceNewAccounts():
             f.write('        {"name":"%s", "pvt":"%s", "pub":"%s"},\n' % (name, r[1], r[2]))
 
 def stepKillAll():
-    run('killall dcdksd nodeos || true')
+    run('killall dcdksd dcdnode || true')
     sleep(1.5)
 def stepStartWallet():
     startWallet()
     importKeys()
 def stepStartBoot():
-    startNode(0, {'name': 'eosio', 'pvt': args.private_key, 'pub': args.public_key})
+    startNode(0, {'name': 'dcd', 'pvt': args.private_key, 'pub': args.public_key})
     sleep(10.0)
 def stepInstallSystemContracts():
-    run(args.dcdcli + 'set contract eosio.token ' + args.contracts_dir + '/eosio.token/')
-    run(args.dcdcli + 'set contract eosio.msig ' + args.contracts_dir + '/eosio.msig/')
+    run(args.dcdcli + 'set contract dcd.token ' + args.contracts_dir + '/dcd.token/')
+    run(args.dcdcli + 'set contract dcd.msig ' + args.contracts_dir + '/dcd.msig/')
 def stepCreateTokens():
-    run(args.dcdcli + 'push action eosio.token create \'["eosio", "10000000000.0000 %s"]\' -p eosio.token' % (args.symbol))
+    run(args.dcdcli + 'push action dcd.token create \'["dcd", "10000000000.0000 %s"]\' -p dcd.token' % (args.symbol))
     totalAllocation = allocateFunds(0, len(accounts))
-    run(args.dcdcli + 'push action eosio.token issue \'["eosio", "%s", "memo"]\' -p eosio' % intToCurrency(totalAllocation))
+    run(args.dcdcli + 'push action dcd.token issue \'["dcd", "%s", "memo"]\' -p dcd' % intToCurrency(totalAllocation))
     sleep(1)
 def stepSetSystemContract():
     # All of the protocol upgrade features introduced in v1.8 first require a special protocol 
     # feature (codename PREACTIVATE_FEATURE) to be activated and for an updated version of the system 
     # contract that makes use of the functionality introduced by that feature to be deployed. 
 
-    # activate PREACTIVATE_FEATURE before installing eosio.boot
+    # activate PREACTIVATE_FEATURE before installing dcd.boot
     retry('curl -X POST http://127.0.0.1:%d' % args.http_port + 
         '/v1/producer/schedule_protocol_feature_activations ' +
         '-d \'{"protocol_features_to_activate": ["0ec7e080177b2c02b278d5088611686b49d739925a92d9bfcacd7fc6b74053bd"]}\'')
     sleep(3)
 
-    # install eosio.boot which supports the native actions and activate 
+    # install dcd.boot which supports the native actions and activate 
     # action that allows activating desired protocol features prior to 
-    # deploying a system contract with more features such as eosio.bios 
-    # or eosio.system
-    retry(args.dcdcli + 'set contract eosio ' + args.contracts_dir + '/eosio.boot/')
+    # deploying a system contract with more features such as dcd.bios 
+    # or dcd.system
+    retry(args.dcdcli + 'set contract dcd ' + args.contracts_dir + '/dcd.boot/')
     sleep(3)
 
     # activate remaining features
     # KV_DATABASE
-    retry(args.dcdcli + 'push action eosio activate \'["825ee6288fb1373eab1b5187ec2f04f6eacb39cb3a97f356a07c91622dd61d16"]\' -p eosio@active')
+    retry(args.dcdcli + 'push action dcd activate \'["825ee6288fb1373eab1b5187ec2f04f6eacb39cb3a97f356a07c91622dd61d16"]\' -p dcd@active')
     # ACTION_RETURN_VALUE
-    retry(args.dcdcli + 'push action eosio activate \'["c3a6138c5061cf291310887c0b5c71fcaffeab90d5deb50d3b9e687cead45071"]\' -p eosio@active')
+    retry(args.dcdcli + 'push action dcd activate \'["c3a6138c5061cf291310887c0b5c71fcaffeab90d5deb50d3b9e687cead45071"]\' -p dcd@active')
     # CONFIGURABLE_WASM_LIMITS
-    retry(args.dcdcli + 'push action eosio activate \'["bf61537fd21c61a60e542a5d66c3f6a78da0589336868307f94a82bccea84e88"]\' -p eosio@active')
+    retry(args.dcdcli + 'push action dcd activate \'["bf61537fd21c61a60e542a5d66c3f6a78da0589336868307f94a82bccea84e88"]\' -p dcd@active')
     # BLOCKCHAIN_PARAMETERS
-    retry(args.dcdcli + 'push action eosio activate \'["5443fcf88330c586bc0e5f3dee10e7f63c76c00249c87fe4fbf7f38c082006b4"]\' -p eosio@active')
+    retry(args.dcdcli + 'push action dcd activate \'["5443fcf88330c586bc0e5f3dee10e7f63c76c00249c87fe4fbf7f38c082006b4"]\' -p dcd@active')
     # GET_SENDER
-    retry(args.dcdcli + 'push action eosio activate \'["f0af56d2c5a48d60a4a5b5c903edfb7db3a736a94ed589d0b797df33ff9d3e1d"]\' -p eosio@active')
+    retry(args.dcdcli + 'push action dcd activate \'["f0af56d2c5a48d60a4a5b5c903edfb7db3a736a94ed589d0b797df33ff9d3e1d"]\' -p dcd@active')
     # FORWARD_SETCODE
-    retry(args.dcdcli + 'push action eosio activate \'["2652f5f96006294109b3dd0bbde63693f55324af452b799ee137a81a905eed25"]\' -p eosio@active')
+    retry(args.dcdcli + 'push action dcd activate \'["2652f5f96006294109b3dd0bbde63693f55324af452b799ee137a81a905eed25"]\' -p dcd@active')
     # ONLY_BILL_FIRST_AUTHORIZER
-    retry(args.dcdcli + 'push action eosio activate \'["8ba52fe7a3956c5cd3a656a3174b931d3bb2abb45578befc59f283ecd816a405"]\' -p eosio@active')
+    retry(args.dcdcli + 'push action dcd activate \'["8ba52fe7a3956c5cd3a656a3174b931d3bb2abb45578befc59f283ecd816a405"]\' -p dcd@active')
     # RESTRICT_ACTION_TO_SELF
-    retry(args.dcdcli + 'push action eosio activate \'["ad9e3d8f650687709fd68f4b90b41f7d825a365b02c23a636cef88ac2ac00c43"]\' -p eosio@active')
+    retry(args.dcdcli + 'push action dcd activate \'["ad9e3d8f650687709fd68f4b90b41f7d825a365b02c23a636cef88ac2ac00c43"]\' -p dcd@active')
     # DISALLOW_EMPTY_PRODUCER_SCHEDULE
-    retry(args.dcdcli + 'push action eosio activate \'["68dcaa34c0517d19666e6b33add67351d8c5f69e999ca1e37931bc410a297428"]\' -p eosio@active')
+    retry(args.dcdcli + 'push action dcd activate \'["68dcaa34c0517d19666e6b33add67351d8c5f69e999ca1e37931bc410a297428"]\' -p dcd@active')
      # FIX_LINKAUTH_RESTRICTION
-    retry(args.dcdcli + 'push action eosio activate \'["e0fb64b1085cc5538970158d05a009c24e276fb94e1a0bf6a528b48fbc4ff526"]\' -p eosio@active')
+    retry(args.dcdcli + 'push action dcd activate \'["e0fb64b1085cc5538970158d05a009c24e276fb94e1a0bf6a528b48fbc4ff526"]\' -p dcd@active')
      # REPLACE_DEFERRED
-    retry(args.dcdcli + 'push action eosio activate \'["ef43112c6543b88db2283a2e077278c315ae2c84719a8b25f25cc88565fbea99"]\' -p eosio@active')
+    retry(args.dcdcli + 'push action dcd activate \'["ef43112c6543b88db2283a2e077278c315ae2c84719a8b25f25cc88565fbea99"]\' -p dcd@active')
     # NO_DUPLICATE_DEFERRED_ID
-    retry(args.dcdcli + 'push action eosio activate \'["4a90c00d55454dc5b059055ca213579c6ea856967712a56017487886a4d4cc0f"]\' -p eosio@active')
+    retry(args.dcdcli + 'push action dcd activate \'["4a90c00d55454dc5b059055ca213579c6ea856967712a56017487886a4d4cc0f"]\' -p dcd@active')
     # ONLY_LINK_TO_EXISTING_PERMISSION
-    retry(args.dcdcli + 'push action eosio activate \'["1a99a59d87e06e09ec5b028a9cbb7749b4a5ad8819004365d02dc4379a8b7241"]\' -p eosio@active')
+    retry(args.dcdcli + 'push action dcd activate \'["1a99a59d87e06e09ec5b028a9cbb7749b4a5ad8819004365d02dc4379a8b7241"]\' -p dcd@active')
     # RAM_RESTRICTIONS
-    retry(args.dcdcli + 'push action eosio activate \'["4e7bf348da00a945489b2a681749eb56f5de00b900014e137ddae39f48f69d67"]\' -p eosio@active')
+    retry(args.dcdcli + 'push action dcd activate \'["4e7bf348da00a945489b2a681749eb56f5de00b900014e137ddae39f48f69d67"]\' -p dcd@active')
     # WEBAUTHN_KEY
-    retry(args.dcdcli + 'push action eosio activate \'["4fca8bd82bbd181e714e283f83e1b45d95ca5af40fb89ad3977b653c448f78c2"]\' -p eosio@active')
+    retry(args.dcdcli + 'push action dcd activate \'["4fca8bd82bbd181e714e283f83e1b45d95ca5af40fb89ad3977b653c448f78c2"]\' -p dcd@active')
     # WTMSIG_BLOCK_SIGNATURES
-    retry(args.dcdcli + 'push action eosio activate \'["299dcb6af692324b899b39f16d5a530a33062804e41f09dc97e9f156b4476707"]\' -p eosio@active')
+    retry(args.dcdcli + 'push action dcd activate \'["299dcb6af692324b899b39f16d5a530a33062804e41f09dc97e9f156b4476707"]\' -p dcd@active')
     sleep(1)
 
-    # install eosio.system latest version
-    retry(args.dcdcli + 'set contract eosio ' + args.contracts_dir + '/eosio.system/')
-    # setpriv is only available after eosio.system is installed
-    run(args.dcdcli + 'push action eosio setpriv' + jsonArg(['eosio.msig', 1]) + '-p eosio@active')
+    # install dcd.system latest version
+    retry(args.dcdcli + 'set contract dcd ' + args.contracts_dir + '/dcd.system/')
+    # setpriv is only available after dcd.system is installed
+    run(args.dcdcli + 'push action dcd setpriv' + jsonArg(['dcd.msig', 1]) + '-p dcd@active')
     sleep(3)
 
 def stepInitSystemContract():
-    run(args.dcdcli + 'push action eosio init' + jsonArg(['0', '4,' + args.symbol]) + '-p eosio@active')
+    run(args.dcdcli + 'push action dcd init' + jsonArg(['0', '4,' + args.symbol]) + '-p dcd@active')
     sleep(1)
 def stepCreateStakedAccounts():
     createStakedAccounts(0, len(accounts))
@@ -377,24 +377,24 @@ def stepVote():
 def stepProxyVotes():
     proxyVotes(0, 0 + args.num_voters)
 def stepResign():
-    resign('eosio', 'eosio.prods')
+    resign('dcd', 'dcd.prods')
     for a in systemAccounts:
-        resign(a, 'eosio')
+        resign(a, 'dcd')
 def stepTransfer():
     while True:
         randomTransfer(0, args.num_senders)
 def stepLog():
-    run('tail -n 60 ' + args.nodes_dir + '00-eosio/stderr')
+    run('tail -n 60 ' + args.nodes_dir + '00-dcd/stderr')
 
 # Command Line Arguments
 
 parser = argparse.ArgumentParser()
 
 commands = [
-    ('k', 'kill',               stepKillAll,                True,    "Kill all nodeos and dcdksd processes"),
+    ('k', 'kill',               stepKillAll,                True,    "Kill all dcdnode and dcdksd processes"),
     ('w', 'wallet',             stepStartWallet,            True,    "Start dcdksd, create wallet, fill with keys"),
     ('b', 'boot',               stepStartBoot,              True,    "Start boot node"),
-    ('s', 'sys',                createSystemAccounts,       True,    "Create system accounts (eosio.*)"),
+    ('s', 'sys',                createSystemAccounts,       True,    "Create system accounts (dcd.*)"),
     ('c', 'contracts',          stepInstallSystemContracts, True,    "Install system contracts (token, msig)"),
     ('t', 'tokens',             stepCreateTokens,           True,    "Create tokens"),
     ('S', 'sys-contract',       stepSetSystemContract,      True,    "Set system contract"),
@@ -405,23 +405,23 @@ commands = [
     ('v', 'vote',               stepVote,                   True,    "Vote for producers"),
     ('R', 'claim',              claimRewards,               True,    "Claim rewards"),
     ('x', 'proxy',              stepProxyVotes,             True,    "Proxy votes"),
-    ('q', 'resign',             stepResign,                 True,    "Resign eosio"),
+    ('q', 'resign',             stepResign,                 True,    "Resign dcd"),
     ('m', 'msg-replace',        msigReplaceSystem,          False,   "Replace system contract using msig"),
     ('X', 'xfer',               stepTransfer,               False,   "Random transfer tokens (infinite loop)"),
     ('l', 'log',                stepLog,                    True,    "Show tail of node's log"),
 ]
 
-parser.add_argument('--public-key', metavar='', help="EOSIO Public Key", default='EOS8Znrtgwt8TfpmbVpTKvA2oB8Nqey625CLN8bCN3TEbgx86Dsvr', dest="public_key")
-parser.add_argument('--private-Key', metavar='', help="EOSIO Private Key", default='5K463ynhZoCDDa4RDcr63cUwWLTnKqmdcoTKTHBjqoKfv4u5V7p', dest="private_key")
+parser.add_argument('--public-key', metavar='', help="DCD Public Key", default='EOS8Znrtgwt8TfpmbVpTKvA2oB8Nqey625CLN8bCN3TEbgx86Dsvr', dest="public_key")
+parser.add_argument('--private-Key', metavar='', help="DCD Private Key", default='5K463ynhZoCDDa4RDcr63cUwWLTnKqmdcoTKTHBjqoKfv4u5V7p', dest="private_key")
 parser.add_argument('--dcdcli', metavar='', help="dcdcli command", default='../../build/programs/dcdcli/dcdcli --wallet-url http://127.0.0.1:6666 ')
-parser.add_argument('--nodeos', metavar='', help="Path to nodeos binary", default='../../build/programs/nodeos/nodeos')
+parser.add_argument('--dcdnode', metavar='', help="Path to dcdnode binary", default='../../build/programs/dcdnode/dcdnode')
 parser.add_argument('--dcdksd', metavar='', help="Path to dcdksd binary", default='../../build/programs/dcdksd/dcdksd')
 parser.add_argument('--contracts-dir', metavar='', help="Path to contracts directory", default='../../build/contracts/')
 parser.add_argument('--nodes-dir', metavar='', help="Path to nodes directory", default='./nodes/')
 parser.add_argument('--genesis', metavar='', help="Path to genesis.json", default="./genesis.json")
 parser.add_argument('--wallet-dir', metavar='', help="Path to wallet directory", default='./wallet/')
 parser.add_argument('--log-path', metavar='', help="Path to log file", default='./output.log')
-parser.add_argument('--symbol', metavar='', help="The eosio.system symbol", default='SYS')
+parser.add_argument('--symbol', metavar='', help="The dcd.system symbol", default='SYS')
 parser.add_argument('--user-limit', metavar='', help="Max number of users. (0 = no limit)", type=int, default=3000)
 parser.add_argument('--max-user-keys', metavar='', help="Maximum user keys to import into wallet", type=int, default=10)
 parser.add_argument('--ram-funds', metavar='', help="How much funds for each user to spend on ram", type=float, default=0.1)

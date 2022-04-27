@@ -1,22 +1,22 @@
-#include <eosio/chain/apply_context.hpp>
-#include <eosio/chain/exceptions.hpp>
-#include <eosio/chain/backing_store/db_context.hpp>
-#include <eosio/chain/backing_store/db_key_value_format.hpp>
-#include <eosio/chain/backing_store/db_key_value_iter_store.hpp>
-#include <eosio/chain/backing_store/db_key_value_any_lookup.hpp>
-#include <eosio/chain/backing_store/db_key_value_sec_lookup.hpp>
-#include <eosio/chain/backing_store/chain_kv_payer.hpp>
+#include <dcd/chain/apply_context.hpp>
+#include <dcd/chain/exceptions.hpp>
+#include <dcd/chain/backing_store/db_context.hpp>
+#include <dcd/chain/backing_store/db_key_value_format.hpp>
+#include <dcd/chain/backing_store/db_key_value_iter_store.hpp>
+#include <dcd/chain/backing_store/db_key_value_any_lookup.hpp>
+#include <dcd/chain/backing_store/db_key_value_sec_lookup.hpp>
+#include <dcd/chain/backing_store/chain_kv_payer.hpp>
 #include <b1/chain_kv/chain_kv.hpp>
-#include <eosio/chain/combined_database.hpp>
+#include <dcd/chain/combined_database.hpp>
 
-namespace eosio { namespace chain { namespace backing_store {
+namespace dcd { namespace chain { namespace backing_store {
 
    class db_context_rocksdb : public db_context {
    public:
       using prim_key_iter_type = secondary_key<uint64_t>;
-      using session_type = eosio::session::session<eosio::session::session<eosio::session::rocksdb_t>>;
-      using session_variant_type = eosio::session::session_variant<session_type::parent_type, session_type>;
-      using shared_bytes = eosio::session::shared_bytes;
+      using session_type = dcd::session::session<dcd::session::session<dcd::session::rocksdb_t>>;
+      using session_variant_type = dcd::session::session_variant<session_type::parent_type, session_type>;
+      using shared_bytes = dcd::session::shared_bytes;
 
       db_context_rocksdb(apply_context& context, name receiver, session_variant_type session);
 
@@ -149,8 +149,8 @@ namespace eosio { namespace chain { namespace backing_store {
       enum class comp { equals, gte, gt};
       int32_t find_i64(name code, name scope, name table, uint64_t id, comp comparison);
 
-      using uint128_t = eosio::chain::uint128_t;
-      using key256_t = eosio::chain::key256_t;
+      using uint128_t = dcd::chain::uint128_t;
+      using key256_t = dcd::chain::key256_t;
       session_variant_type                 current_session;
       db_key_value_iter_store<uint64_t>    primary_iter_store;
       db_key_value_any_lookup              primary_lookup;
@@ -480,13 +480,13 @@ namespace eosio { namespace chain { namespace backing_store {
       return sec_lookup_i128.previous_secondary(iterator, primary);
    }
 
-   eosio::chain::key256_t convert(const uint128_t* data) {
-      eosio::chain::key256_t secondary;
+   dcd::chain::key256_t convert(const uint128_t* data) {
+      dcd::chain::key256_t secondary;
       std::memcpy(secondary.data(), data, sizeof(secondary));
       return secondary;
    }
 
-   void convert_back(uint128_t* data, const eosio::chain::key256_t& secondary) {
+   void convert_back(uint128_t* data, const dcd::chain::key256_t& secondary) {
       std::memcpy(data, secondary.data(), sizeof(secondary));
    }
 
@@ -761,4 +761,4 @@ namespace eosio { namespace chain { namespace backing_store {
       return std::make_unique<db_context_rocksdb>(context, receiver, std::move(session));
    }
 
-}}} // namespace eosio::chain::backing_store
+}}} // namespace dcd::chain::backing_store

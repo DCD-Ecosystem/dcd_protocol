@@ -1,11 +1,11 @@
-#include <eosio/history_api_plugin/history_api_plugin.hpp>
-#include <eosio/chain/exceptions.hpp>
+#include <dcd/history_api_plugin/history_api_plugin.hpp>
+#include <dcd/chain/exceptions.hpp>
 
 #include <fc/io/json.hpp>
 
-namespace eosio {
+namespace dcd {
 
-using namespace eosio;
+using namespace dcd;
 
 static appbase::abstract_plugin& _history_api_plugin = app().register_plugin<history_api_plugin>();
 

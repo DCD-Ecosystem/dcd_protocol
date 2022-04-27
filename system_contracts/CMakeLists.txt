@@ -2,12 +2,12 @@ if( DCD_COMPILE_CONTRACTS )
 
    include(ExternalProject)
 
-   set(EOSIO_WASM_OLD_BEHAVIOR "Off")
-   find_package(eosio.cdt REQUIRED)
+   set(DCD_WASM_OLD_BEHAVIOR "Off")
+   find_package(dcd.cdt REQUIRED)
 
-   set(CMAKE_ARGS_VAL -DCMAKE_TOOLCHAIN_FILE=${EOSIO_CDT_ROOT}/lib/cmake/eosio.cdt/EosioWasmToolchain.cmake -DEOSIO_COMPILE_TEST_CONTRACTS=${EOSIO_COMPILE_TEST_CONTRACTS} )
-   if( USE_EOSIO_CDT_1_7_X)
-      list(APPEND CMAKE_ARGS_VAL -DUSE_EOSIO_CDT_1_7_X=${USE_EOSIO_CDT_1_7_X})
+   set(CMAKE_ARGS_VAL -DCMAKE_TOOLCHAIN_FILE=${DCD_CDT_ROOT}/lib/cmake/dcd.cdt/DcdWasmToolchain.cmake -DDCD_COMPILE_TEST_CONTRACTS=${DCD_COMPILE_TEST_CONTRACTS} )
+   if( USE_DCD_CDT_1_7_X)
+      list(APPEND CMAKE_ARGS_VAL -DUSE_DCD_CDT_1_7_X=${USE_DCD_CDT_1_7_X})
    endif()
    ExternalProject_Add(
       bios_boot_contracts_project
@@ -25,7 +25,7 @@ endif()
 if (DCD_CONTRACTS_STANDALONE)
    cmake_minimum_required(VERSION 3.5)
 
-   project(eosio_contracts)
+   project(dcd_contracts)
 
    set(VERSION_MAJOR 1)
    set(VERSION_MINOR 9)
@@ -40,27 +40,27 @@ if (DCD_CONTRACTS_STANDALONE)
 
    include(ExternalProject)
 
-   find_package(eosio.cdt)
+   find_package(dcd.cdt)
 
-   message(STATUS "Building eosio.contracts v${VERSION_FULL}")
+   message(STATUS "Building dcd.contracts v${VERSION_FULL}")
 
-   set(EOSIO_CDT_VERSION_MIN "1.7")
-   set(EOSIO_CDT_VERSION_SOFT_MAX "1.7")
-   #set(EOSIO_CDT_VERSION_HARD_MAX "")
+   set(DCD_CDT_VERSION_MIN "1.7")
+   set(DCD_CDT_VERSION_SOFT_MAX "1.7")
+   #set(DCD_CDT_VERSION_HARD_MAX "")
 
-   ### Check the version of eosio.cdt
+   ### Check the version of dcd.cdt
    set(VERSION_MATCH_ERROR_MSG "")
-   EOSIO_CHECK_VERSION(VERSION_OUTPUT "${EOSIO_CDT_VERSION}"
-                                    "${EOSIO_CDT_VERSION_MIN}"
-                                    "${EOSIO_CDT_VERSION_SOFT_MAX}"
-                                    "${EOSIO_CDT_VERSION_HARD_MAX}"
+   DCD_CHECK_VERSION(VERSION_OUTPUT "${DCD_CDT_VERSION}"
+                                    "${DCD_CDT_VERSION_MIN}"
+                                    "${DCD_CDT_VERSION_SOFT_MAX}"
+                                    "${DCD_CDT_VERSION_HARD_MAX}"
                                     VERSION_MATCH_ERROR_MSG)
    if(VERSION_OUTPUT STREQUAL "MATCH")
-      message(STATUS "Using eosio.cdt version ${EOSIO_CDT_VERSION}")
+      message(STATUS "Using dcd.cdt version ${DCD_CDT_VERSION}")
    elseif(VERSION_OUTPUT STREQUAL "WARN")
-      message(WARNING "Using eosio.cdt version ${EOSIO_CDT_VERSION} even though it exceeds the maximum supported version of ${EOSIO_CDT_VERSION_SOFT_MAX}; continuing with configuration, however build may fail.\nIt is recommended to use eosio.cdt version ${EOSIO_CDT_VERSION_SOFT_MAX}.x")
+      message(WARNING "Using dcd.cdt version ${DCD_CDT_VERSION} even though it exceeds the maximum supported version of ${DCD_CDT_VERSION_SOFT_MAX}; continuing with configuration, however build may fail.\nIt is recommended to use dcd.cdt version ${DCD_CDT_VERSION_SOFT_MAX}.x")
    else() # INVALID OR MISMATCH
-      message(FATAL_ERROR "Found eosio.cdt version ${EOSIO_CDT_VERSION} but it does not satisfy version requirements: ${VERSION_MATCH_ERROR_MSG}\nPlease use eosio.cdt version ${EOSIO_CDT_VERSION_SOFT_MAX}.x")
+      message(FATAL_ERROR "Found dcd.cdt version ${DCD_CDT_VERSION} but it does not satisfy version requirements: ${VERSION_MATCH_ERROR_MSG}\nPlease use dcd.cdt version ${DCD_CDT_VERSION_SOFT_MAX}.x")
    endif(VERSION_OUTPUT STREQUAL "MATCH")
 
    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -74,7 +74,7 @@ if (DCD_CONTRACTS_STANDALONE)
       contracts_project
       SOURCE_DIR ${CMAKE_SOURCE_DIR}/contracts
       BINARY_DIR ${CMAKE_BINARY_DIR}/contracts
-      CMAKE_ARGS -DCMAKE_TOOLCHAIN_FILE=${EOSIO_CDT_ROOT}/lib/cmake/eosio.cdt/EosioWasmToolchain.cmake
+      CMAKE_ARGS -DCMAKE_TOOLCHAIN_FILE=${DCD_CDT_ROOT}/lib/cmake/dcd.cdt/DcdWasmToolchain.cmake
       UPDATE_COMMAND ""
       PATCH_COMMAND ""
       TEST_COMMAND ""
@@ -107,7 +107,7 @@ if (DCD_CONTRACTS_STANDALONE)
       ExternalProject_Add(
       contracts_unit_tests
       LIST_SEPARATOR | # Use the alternate list separator
-      CMAKE_ARGS -DCMAKE_BUILD_TYPE=${TEST_BUILD_TYPE} -DCMAKE_PREFIX_PATH=${TEST_PREFIX_PATH} -DCMAKE_FRAMEWORK_PATH=${TEST_FRAMEWORK_PATH} -DCMAKE_MODULE_PATH=${TEST_MODULE_PATH} -DEOSIO_ROOT=${EOSIO_ROOT} -DLLVM_DIR=${LLVM_DIR} -DBOOST_ROOT=${BOOST_ROOT}
+      CMAKE_ARGS -DCMAKE_BUILD_TYPE=${TEST_BUILD_TYPE} -DCMAKE_PREFIX_PATH=${TEST_PREFIX_PATH} -DCMAKE_FRAMEWORK_PATH=${TEST_FRAMEWORK_PATH} -DCMAKE_MODULE_PATH=${TEST_MODULE_PATH} -DDCD_ROOT=${DCD_ROOT} -DLLVM_DIR=${LLVM_DIR} -DBOOST_ROOT=${BOOST_ROOT}
       SOURCE_DIR ${CMAKE_SOURCE_DIR}/tests
       BINARY_DIR ${CMAKE_BINARY_DIR}/tests
       BUILD_ALWAYS 1

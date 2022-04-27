@@ -35,7 +35,7 @@ Retrieves the contents of a database kv_table
 
 ## Examples
 
-Point query to return the row that matches eosio name key `boba` from kv_table named `kvtable` owned by `contr_acct` account using kv_table index `primarykey`:
+Point query to return the row that matches dcd name key `boba` from kv_table named `kvtable` owned by `contr_acct` account using kv_table index `primarykey`:
 ```sh
 dcdcli get kv_table --encode-type name -i boba contr_acct kvtable primarykey -b
 ```
@@ -63,7 +63,7 @@ dcdcli get kv_table --encode-type dec -i 1 contr_acct kvtable foo
 }
 ```
 
-Range query to return all rows starting from eosio name key `bobd` up to `bobh` (exclusive) from kv_table named `kvtable` owned by `contr_acct` account using kv_table index `primarykey`:
+Range query to return all rows starting from dcd name key `bobd` up to `bobh` (exclusive) from kv_table named `kvtable` owned by `contr_acct` account using kv_table index `primarykey`:
 ```sh
 dcdcli get kv_table --encode-type name -L bobd -U bobh contr_acct kvtable primarykey -b
 ```
@@ -80,7 +80,7 @@ dcdcli get kv_table --encode-type name -L bobd -U bobh contr_acct kvtable primar
 }
 ```
 
-Range query to return all rows (in reverse order) starting from eosio name key `bobh` down to `bobd` (exclusive) from kv_table named `kvtable` owned by `contr_acct` account using kv_table index `primarykey`:
+Range query to return all rows (in reverse order) starting from dcd name key `bobh` down to `bobd` (exclusive) from kv_table named `kvtable` owned by `contr_acct` account using kv_table index `primarykey`:
 ```sh
 dcdcli get kv_table --encode-type name -L bobd -U bobh contr_acct kvtable primarykey -b -r
 ```
@@ -97,7 +97,7 @@ dcdcli get kv_table --encode-type name -L bobd -U bobh contr_acct kvtable primar
 }
 ```
 
-Range query to return all rows starting from eosio name key `bobg` up to the last row key from kv_table named `kvtable` owned by `contr_acct` account using kv_table index `primarykey`:
+Range query to return all rows starting from dcd name key `bobg` up to the last row key from kv_table named `kvtable` owned by `contr_acct` account using kv_table index `primarykey`:
 ```sh
 dcdcli get kv_table --encode-type name -L bobg contr_acct kvtable primarykey -b
 ```
@@ -114,7 +114,7 @@ dcdcli get kv_table --encode-type name -L bobg contr_acct kvtable primarykey -b
 }
 ```
 
-Range query to return all rows (in reverse order) starting from the last row key down to eosio name key `bobg` (exclusive) from kv_table named `kvtable` owned by `contr_acct` account using kv_table index `primarykey`:
+Range query to return all rows (in reverse order) starting from the last row key down to dcd name key `bobg` (exclusive) from kv_table named `kvtable` owned by `contr_acct` account using kv_table index `primarykey`:
 ```sh
 dcdcli get kv_table --encode-type name -L bobg contr_acct kvtable primarykey -b -r
 ```
@@ -130,7 +130,7 @@ dcdcli get kv_table --encode-type name -L bobg contr_acct kvtable primarykey -b 
 }
 ```
 
-Range query to return all rows starting from the first row key up to eosio name key `bobe` (exclusive) from kv_table named `kvtable` owned by `contr_acct` account using kv_table index `primarykey`:
+Range query to return all rows starting from the first row key up to dcd name key `bobe` (exclusive) from kv_table named `kvtable` owned by `contr_acct` account using kv_table index `primarykey`:
 ```sh
 dcdcli get kv_table --encode-type name -U bobe contr_acct kvtable primarykey -b
 ```
@@ -147,7 +147,7 @@ dcdcli get kv_table --encode-type name -U bobe contr_acct kvtable primarykey -b
 }
 ```
 
-Range query to return all rows (in reverse order) starting from eosio name key `bobe` down to the first row key from kv_table named `kvtable` owned by `contr_acct` account using kv_table index `primarykey`:
+Range query to return all rows (in reverse order) starting from dcd name key `bobe` down to the first row key from kv_table named `kvtable` owned by `contr_acct` account using kv_table index `primarykey`:
 ```sh
 dcdcli get kv_table --encode-type name -U bobe contr_acct kvtable primarykey -b -r
 ```
@@ -165,7 +165,7 @@ dcdcli get kv_table --encode-type name -U bobe contr_acct kvtable primarykey -b 
 }
 ```
 
-Range query to return all rows (in reverse order, limit results to 2 rows) starting from eosio name key `bobe` down to the first row key from kv_table named `kvtable` owned by `contr_acct` account using kv_table index `primarykey`:
+Range query to return all rows (in reverse order, limit results to 2 rows) starting from dcd name key `bobe` down to the first row key from kv_table named `kvtable` owned by `contr_acct` account using kv_table index `primarykey`:
 ```sh
 dcdcli get kv_table --encode-type name -U bobe contr_acct kvtable primarykey -b -r -l 2
 ```

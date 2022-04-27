@@ -1,7 +1,7 @@
-#include <eosio/chain/thread_utils.hpp>
+#include <dcd/chain/thread_utils.hpp>
 #include <fc/log/logger_config.hpp>
 
-namespace eosio { namespace chain {
+namespace dcd { namespace chain {
 
 
 //
@@ -33,4 +33,4 @@ void named_thread_pool::stop() {
 }
 
 
-} } // eosio::chain
+} } // dcd::chain

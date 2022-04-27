@@ -1,10 +1,10 @@
-#include <eosio/state_history/compression.hpp>
-#include <eosio/state_history/create_deltas.hpp>
-#include <eosio/state_history/log.hpp>
-#include <eosio/state_history/serialization.hpp>
-#include <eosio/state_history/trace_converter.hpp>
+#include <dcd/state_history/compression.hpp>
+#include <dcd/state_history/create_deltas.hpp>
+#include <dcd/state_history/log.hpp>
+#include <dcd/state_history/serialization.hpp>
+#include <dcd/state_history/trace_converter.hpp>
 
-namespace eosio {
+namespace dcd {
 
 uint64_t state_history_log_data::payload_size_at(uint64_t pos) const {
    EOS_ASSERT(file.size() >= pos + sizeof(state_history_log_header), chain::state_history_exception,
@@ -404,4 +404,4 @@ void state_history_chain_state_log::store(const chain::combined_database& db,
    this->write_entry(header, block_state->block->previous, [&deltas](auto& stream) { zlib_pack(stream, deltas); });
 }
 
-} // namespace eosio
+} // namespace dcd

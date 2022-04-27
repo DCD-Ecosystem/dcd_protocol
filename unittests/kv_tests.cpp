@@ -1,8 +1,8 @@
-#include <eosio/chain/abi_serializer.hpp>
-#include <eosio/chain/kv_chainbase_objects.hpp>
-//#include <eosio/chain/resource_limits.hpp>
-#include <eosio/testing/tester.hpp>
-#include <eosio/chain/kv_chainbase_objects.hpp>
+#include <dcd/chain/abi_serializer.hpp>
+#include <dcd/chain/kv_chainbase_objects.hpp>
+//#include <dcd/chain/resource_limits.hpp>
+#include <dcd/testing/tester.hpp>
+#include <dcd/chain/kv_chainbase_objects.hpp>
 
 #include <Runtime/Runtime.h>
 
@@ -14,10 +14,10 @@
 
 #include <contracts.hpp>
 
-using namespace eosio::testing;
-using namespace eosio;
-using namespace eosio::chain;
-using namespace eosio::testing;
+using namespace dcd::testing;
+using namespace dcd;
+using namespace dcd::chain;
+using namespace dcd::testing;
 using namespace fc;
 using namespace std;
 namespace bdata = boost::unit_test::data;
@@ -25,8 +25,8 @@ namespace bdata = boost::unit_test::data;
 using mvo = fc::mutable_variant_object;
 
 struct kv {
-   eosio::chain::bytes k;
-   eosio::chain::bytes v;
+   dcd::chain::bytes k;
+   dcd::chain::bytes v;
 };
 FC_REFLECT(kv, (k)(v))
 
@@ -548,7 +548,7 @@ class kv_tester : public tester {
 
    action make_set_limit_action(int64_t limit) {
       action act;
-      act.account = "eosio"_n;
+      act.account = "dcd"_n;
       act.name    = "setramlimit"_n;
       act.data    = sys_abi_ser.variant_to_binary(act.name.to_string(), mvo()("account", "kvtest"_n)("limit", limit), abi_serializer::create_yield_function(abi_serializer_max_time));
       act.authorization = vector<permission_level>{{"kvtest"_n, config::active_name}};
@@ -604,20 +604,20 @@ class kv_tester : public tester {
    void test_max_iterators() {
       BOOST_TEST_REQUIRE(set_kv_limits(1024, 1024, 7) == "");
       // individual limits
-      BOOST_TEST(iterlimit({{"eosio.kvram"_n, 7, false}}) == "");
-      BOOST_TEST(iterlimit({{"eosio.kvram"_n, 2000, false}}) == "Too many iterators");
+      BOOST_TEST(iterlimit({{"dcd.kvram"_n, 7, false}}) == "");
+      BOOST_TEST(iterlimit({{"dcd.kvram"_n, 2000, false}}) == "Too many iterators");
       // erase iterators and create more
-      BOOST_TEST(iterlimit({{"eosio.kvram"_n, 6, false},
-                            {"eosio.kvram"_n, 2, true},
-                            {"eosio.kvram"_n, 3, false}}) == "");
-      BOOST_TEST(iterlimit({{"eosio.kvram"_n, 6, false},
-                            {"eosio.kvram"_n, 2, true},
-                            {"eosio.kvram"_n, 4, false}}) == "Too many iterators");
+      BOOST_TEST(iterlimit({{"dcd.kvram"_n, 6, false},
+                            {"dcd.kvram"_n, 2, true},
+                            {"dcd.kvram"_n, 3, false}}) == "");
+      BOOST_TEST(iterlimit({{"dcd.kvram"_n, 6, false},
+                            {"dcd.kvram"_n, 2, true},
+                            {"dcd.kvram"_n, 4, false}}) == "Too many iterators");
       // fallback limit - testing this is impractical because it uses too much memory
       // This many iterators would consume at least 400 GiB.
-      // BOOST_TEST_REQUIRE(set_kv_limits("eosio.kvram"_n, 1024, 1024, 0xFFFFFFFF) == "");
-      // BOOST_TEST_REQUIRE(set_kv_limits("eosio.kvram"_n, 1024, 1024, 0xFFFFFFFF) == "");
-      // BOOST_TEST(iterlimit({{"eosio.kvram"_n, 0xFFFFFFFF, false}, {"eosio.kvram"_n, 1, false}}) == "Too many iterators");
+      // BOOST_TEST_REQUIRE(set_kv_limits("dcd.kvram"_n, 1024, 1024, 0xFFFFFFFF) == "");
+      // BOOST_TEST_REQUIRE(set_kv_limits("dcd.kvram"_n, 1024, 1024, 0xFFFFFFFF) == "");
+      // BOOST_TEST(iterlimit({{"dcd.kvram"_n, 0xFFFFFFFF, false}, {"dcd.kvram"_n, 1, false}}) == "Too many iterators");
    }
 
    // Make sure that a failed transaction correctly rolls back changes to the database,
@@ -637,7 +637,7 @@ class kv_tester : public tester {
       }
       set_transaction_headers(trx);
       trx.sign(get_private_key("kvtest"_n, "active"), control->get_chain_id());
-      BOOST_CHECK_THROW(push_transaction(trx), eosio_assert_code_exception);
+      BOOST_CHECK_THROW(push_transaction(trx), dcd_assert_code_exception);
 
       scan("", "kvtest"_n, "", nullptr,
               {
@@ -742,7 +742,7 @@ BOOST_FIXTURE_TEST_CASE(kv_key_value_limit, kv_chainbase_tester) try { //
 }
 FC_LOG_AND_RETHROW()
 
-constexpr name databases[] = { "eosio.kvram"_n };
+constexpr name databases[] = { "dcd.kvram"_n };
 
 BOOST_DATA_TEST_CASE_F(kv_chainbase_tester, kv_inc_dec_usage, bdata::make(databases), db) try { //
    test_kv_inc_dec_usage();
@@ -931,11 +931,11 @@ static const char kv_notified_wast[] = R"=====(
  (func $kv_it_create (import "env" "kv_it_create")(param i64 i32 i32) (result i32))
  (func $kv_get_data (import "env" "kv_get_data") (param i32 i32 i32) (result i32))
  (func $kv_set (import "env" "kv_set") (param i64 i32 i32 i32 i32 i64) (result i64))
- (func $eosio_assert (import "env" "eosio_assert") (param i32 i32))
+ (func $dcd_assert (import "env" "dcd_assert") (param i32 i32))
  (memory 1)
  (func (export "apply") (param i64 i64 i64)
-  (call $eosio_assert (i32.eq (call $kv_it_create (get_local 0) (i32.const 0) (i32.const 0)) (i32.const 1)) (i32.const 80))
-  (call $eosio_assert (i32.eq (call $kv_get_data (i32.const 0) (i32.const 0) (i32.const 0)) (i32.const 0)) (i32.const 160))
+  (call $dcd_assert (i32.eq (call $kv_it_create (get_local 0) (i32.const 0) (i32.const 0)) (i32.const 1)) (i32.const 80))
+  (call $dcd_assert (i32.eq (call $kv_get_data (i32.const 0) (i32.const 0) (i32.const 0)) (i32.const 0)) (i32.const 160))
   (drop (call $kv_set (get_local 0) (i32.const 0) (i32.const 0) (i32.const 1) (i32.const 1) (get_local 0)))
  )
  (data (i32.const 80) "Wrong iterator value")
@@ -946,7 +946,7 @@ static const char kv_notified_wast[] = R"=====(
 BOOST_DATA_TEST_CASE_F(tester, notify, bdata::make(databases), db) {
    create_accounts({ "setup"_n, "notified"_n, "notify"_n });
    set_code( "setup"_n, kv_setup_wast );
-   push_action( "eosio"_n, "setpriv"_n, "eosio"_n, mutable_variant_object()("account", "setup"_n)("is_priv", 1));
+   push_action( "dcd"_n, "setpriv"_n, "dcd"_n, mutable_variant_object()("account", "setup"_n)("is_priv", 1));
    BOOST_TEST_REQUIRE(push_action( action({}, "setup"_n, db, construct_names_payload({"notified"_n, "notify"_n})), "setup"_n.to_uint64_t() ) == "");
 
    set_code( "notify"_n, kv_notify_wast );
@@ -1002,7 +1002,7 @@ BOOST_DATA_TEST_CASE_F(tester, alias, bdata::make(databases), db) {
 
    create_accounts({ "setup"_n, alias_pass_account, alias_general_account });
    set_code( "setup"_n, kv_setup_wast );
-   push_action( "eosio"_n, "setpriv"_n, "eosio"_n, mutable_variant_object()("account", "setup"_n)("is_priv", 1));
+   push_action( "dcd"_n, "setpriv"_n, "dcd"_n, mutable_variant_object()("account", "setup"_n)("is_priv", 1));
    BOOST_TEST_REQUIRE(push_action( action({}, "setup"_n, db, construct_names_payload({alias_pass_account, alias_general_account})), "setup"_n.to_uint64_t() ) == "");
 
    set_code( alias_pass_account, kv_alias_pass_wast );

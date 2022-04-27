@@ -1,16 +1,16 @@
-#include <eosio/chain/block_log.hpp>
-#include <eosio/chain/exceptions.hpp>
-#include <eosio/chain/log_data_base.hpp>
-#include <eosio/chain/log_index.hpp>
-#include <eosio/chain/log_catalog.hpp>
-#include <eosio/chain/block_log_config.hpp>
-#include <eosio/chain/thread_utils.hpp>
+#include <dcd/chain/block_log.hpp>
+#include <dcd/chain/exceptions.hpp>
+#include <dcd/chain/log_data_base.hpp>
+#include <dcd/chain/log_index.hpp>
+#include <dcd/chain/log_catalog.hpp>
+#include <dcd/chain/block_log_config.hpp>
+#include <dcd/chain/thread_utils.hpp>
 #include <fc/bitutil.hpp>
 #include <fc/io/raw.hpp>
 #include <future>
 #include <regex>
 
-namespace eosio { namespace chain {
+namespace dcd { namespace chain {
 
    /**
     * History:
@@ -390,7 +390,7 @@ namespace eosio { namespace chain {
       void construct_index(const fc::path& index_file_name);
    };
 
-   using block_log_index = eosio::chain::log_index<block_log_exception>;
+   using block_log_index = dcd::chain::log_index<block_log_exception>;
 
    /// Provide the read only view for both blocks.log and blocks.index files
    struct block_log_bundle {
@@ -503,7 +503,7 @@ namespace eosio { namespace chain {
          }
       }
    };
-   using block_log_catalog = eosio::chain::log_catalog<block_log_data, block_log_index, block_log_verifier>;
+   using block_log_catalog = dcd::chain::log_catalog<block_log_data, block_log_index, block_log_verifier>;
 
    
    namespace detail {
@@ -1201,4 +1201,4 @@ namespace eosio { namespace chain {
    bool block_log::exists(const fc::path& data_dir) {
       return fc::exists(data_dir / "blocks.log") && fc::exists(data_dir / "blocks.index");
    }
-}} /// eosio::chain
+}} /// dcd::chain

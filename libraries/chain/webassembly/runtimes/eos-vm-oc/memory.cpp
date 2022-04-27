@@ -1,6 +1,6 @@
-#include <eosio/chain/webassembly/eos-vm-oc/memory.hpp>
-#include <eosio/chain/webassembly/eos-vm-oc/intrinsic.hpp>
-#include <eosio/chain/webassembly/eos-vm-oc/intrinsic_mapping.hpp>
+#include <dcd/chain/webassembly/eos-vm-oc/memory.hpp>
+#include <dcd/chain/webassembly/eos-vm-oc/intrinsic.hpp>
+#include <dcd/chain/webassembly/eos-vm-oc/intrinsic_mapping.hpp>
 
 #include <fc/scoped_exit.hpp>
 
@@ -9,7 +9,7 @@
 #include <sys/mman.h>
 #include <linux/memfd.h>
 
-namespace eosio { namespace chain { namespace eosvmoc {
+namespace dcd { namespace chain { namespace eosvmoc {
 
 memory::memory(uint64_t max_pages) {
    uint64_t number_slices = max_pages + 1;

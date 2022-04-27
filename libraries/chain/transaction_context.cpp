@@ -1,12 +1,12 @@
-#include <eosio/chain/apply_context.hpp>
-#include <eosio/chain/transaction_context.hpp>
-#include <eosio/chain/authorization_manager.hpp>
-#include <eosio/chain/exceptions.hpp>
-//#include <eosio/chain/resource_limits.hpp>
-#include <eosio/chain/generated_transaction_object.hpp>
-#include <eosio/chain/transaction_object.hpp>
-#include <eosio/chain/global_property_object.hpp>
-#include <eosio/chain/transaction_fee_manager.hpp>
+#include <dcd/chain/apply_context.hpp>
+#include <dcd/chain/transaction_context.hpp>
+#include <dcd/chain/authorization_manager.hpp>
+#include <dcd/chain/exceptions.hpp>
+//#include <dcd/chain/resource_limits.hpp>
+#include <dcd/chain/generated_transaction_object.hpp>
+#include <dcd/chain/transaction_object.hpp>
+#include <dcd/chain/global_property_object.hpp>
+#include <dcd/chain/transaction_fee_manager.hpp>
 
 #pragma push_macro("N")
 #undef N
@@ -23,7 +23,7 @@
 //TODO: Remove later
 #include <iostream>
 
-namespace eosio { namespace chain {
+namespace dcd { namespace chain {
 
    transaction_checktime_timer::transaction_checktime_timer(platform_timer& timer)
          : expired(timer.expired), _timer(timer) {
@@ -296,18 +296,18 @@ namespace eosio { namespace chain {
       EOS_ASSERT(fee_payer != name{}, transaction_exception, "fee_payer nil");
 
       //TODO: Move to static list and under cycle for optimizations
-      if(fee_payer == name{"eosio"}  ||
-         fee_payer == name{"eosio.bpay"} ||
-         fee_payer == name{"eosio.msig"} ||
-         fee_payer == name{"eosio.names"} ||
-         fee_payer == name{"eosio.ram"} ||
-         fee_payer == name{"eosio.ramfee"} ||
-         fee_payer == name{"eosio.saving"} ||
-         fee_payer == name{"eosio.stake"} ||
-         fee_payer == name{"eosio.token"} ||
-         fee_payer == name{"eosio.vpay"} ||
-         fee_payer == name{"eosio.rex"} ||
-         fee_payer == name{"eosio.system"} ||
+      if(fee_payer == name{"dcd"}  ||
+         fee_payer == name{"dcd.bpay"} ||
+         fee_payer == name{"dcd.msig"} ||
+         fee_payer == name{"dcd.names"} ||
+         fee_payer == name{"dcd.ram"} ||
+         fee_payer == name{"dcd.ramfee"} ||
+         fee_payer == name{"dcd.saving"} ||
+         fee_payer == name{"dcd.stake"} ||
+         fee_payer == name{"dcd.token"} ||
+         fee_payer == name{"dcd.vpay"} ||
+         fee_payer == name{"dcd.rex"} ||
+         fee_payer == name{"dcd.system"} ||
          fee_payer == name{"dcd.feebank"} 
          ) 
          return;
@@ -806,4 +806,4 @@ namespace eosio { namespace chain {
    }
 
 
-} } /// eosio::chain
+} } /// dcd::chain

@@ -1,15 +1,15 @@
-#include <eosio/producer_plugin/producer_plugin.hpp>
-#include <eosio/producer_plugin/pending_snapshot.hpp>
-//#include <eosio/producer_plugin/subjective_billing.hpp>
-#include <eosio/chain/plugin_interface.hpp>
-#include <eosio/chain/global_property_object.hpp>
-#include <eosio/chain/generated_transaction_object.hpp>
-#include <eosio/chain/snapshot.hpp>
-#include <eosio/chain/transaction_object.hpp>
-#include <eosio/chain/thread_utils.hpp>
-#include <eosio/chain/unapplied_transaction_queue.hpp>
-#include <eosio/resource_monitor_plugin/resource_monitor_plugin.hpp>
-#include <eosio/blockvault_client_plugin/blockvault_client_plugin.hpp>
+#include <dcd/producer_plugin/producer_plugin.hpp>
+#include <dcd/producer_plugin/pending_snapshot.hpp>
+//#include <dcd/producer_plugin/subjective_billing.hpp>
+#include <dcd/chain/plugin_interface.hpp>
+#include <dcd/chain/global_property_object.hpp>
+#include <dcd/chain/generated_transaction_object.hpp>
+#include <dcd/chain/snapshot.hpp>
+#include <dcd/chain/transaction_object.hpp>
+#include <dcd/chain/thread_utils.hpp>
+#include <dcd/chain/unapplied_transaction_queue.hpp>
+#include <dcd/resource_monitor_plugin/resource_monitor_plugin.hpp>
+#include <dcd/blockvault_client_plugin/blockvault_client_plugin.hpp>
 
 #include <fc/io/json.hpp>
 #include <fc/log/logger_config.hpp>
@@ -74,12 +74,12 @@ fc::logger       _trx_successful_trace_log;
 const fc::string trx_failed_trace_logger_name("transaction_failure_tracing");
 fc::logger       _trx_failed_trace_log;
 
-namespace eosio {
+namespace dcd {
 
 static appbase::abstract_plugin& _producer_plugin = app().register_plugin<producer_plugin>();
 
-using namespace eosio::chain;
-using namespace eosio::chain::plugin_interface;
+using namespace dcd::chain;
+using namespace dcd::chain::plugin_interface;
 
 namespace {
    bool exception_is_exhausted(const fc::exception& e, bool deadline_is_subjective) {
@@ -135,7 +135,7 @@ class block_only_sync : public blockvault::sync_callback {
    void cancel() { _start_sync_timer.cancel(); }
    void schedule();
    void on_snapshot(const char* snapshot_filename) override;
-   void on_block(eosio::chain::signed_block_ptr block) override;
+   void on_block(dcd::chain::signed_block_ptr block) override;
 };
 
 class producer_plugin_impl : public std::enable_shared_from_this<producer_plugin_impl> {
@@ -190,7 +190,7 @@ class producer_plugin_impl : public std::enable_shared_from_this<producer_plugin
       bool                                                      _protocol_features_signaled = false; // to mark whether it has been signaled in start_block
 
       chain_plugin*                                             chain_plug = nullptr;
-      eosio::blockvault::block_vault_interface*                 blockvault = nullptr;
+      dcd::blockvault::block_vault_interface*                 blockvault = nullptr;
       uint32_t                                                  _latest_rejected_block_num = 0;
 
       incoming::channels::block::channel_type::handle           _incoming_block_subscription;
@@ -635,13 +635,13 @@ class producer_plugin_impl : public std::enable_shared_from_this<producer_plugin
 
 };
 
-void new_chain_banner(const eosio::chain::controller& db)
+void new_chain_banner(const dcd::chain::controller& db)
 {
    std::cerr << "\n"
       "*******************************\n"
       "*                             *\n"
       "*   ------ NEW CHAIN ------   *\n"
-      "*   -  Welcome to EOSIO!  -   *\n"
+      "*   -  Welcome to DCD!  -   *\n"
       "*   -----------------------   *\n"
       "*                             *\n"
       "*******************************\n"
@@ -759,7 +759,7 @@ T dejsonify(const string& s) {
 if( options.count(op_name) ) { \
    const std::vector<std::string>& ops = options[op_name].as<std::vector<std::string>>(); \
    for( const auto& v : ops ) { \
-      container.emplace( eosio::chain::name( v ) ); \
+      container.emplace( dcd::chain::name( v ) ); \
    } \
 }
 
@@ -1780,7 +1780,7 @@ public:
                   if( !reason.empty() ) reason += ", ";
                   reason += "tx_cpu_usage";
                }
-               if( e.second.is_eosio_assert() ) {
+               if( e.second.is_dcd_assert() ) {
                   if( !reason.empty() ) reason += ", ";
                   reason += "assert";
                }
@@ -1800,7 +1800,7 @@ private:
       enum class ex_fields : uint8_t {
          ex_deadline_exception = 1,
          ex_tx_cpu_usage_exceeded = 2,
-         ex_eosio_assert_exception = 4,
+         ex_dcd_assert_exception = 4,
          ex_other_exception = 8
       };
 
@@ -1809,9 +1809,9 @@ private:
             ex_flags = set_field( ex_flags, ex_fields::ex_tx_cpu_usage_exceeded );
          } else if( exception_code == deadline_exception::code_value ) {
             ex_flags = set_field( ex_flags, ex_fields::ex_deadline_exception );
-         } else if( exception_code == eosio_assert_message_exception::code_value ||
-                    exception_code == eosio_assert_code_exception::code_value ) {
-            ex_flags = set_field( ex_flags, ex_fields::ex_eosio_assert_exception );
+         } else if( exception_code == dcd_assert_message_exception::code_value ||
+                    exception_code == dcd_assert_code_exception::code_value ) {
+            ex_flags = set_field( ex_flags, ex_fields::ex_dcd_assert_exception );
          } else {
             ex_flags = set_field( ex_flags, ex_fields::ex_other_exception );
             fc_dlog( _log, "Failed trx, account: ${a}, reason: ${r}",
@@ -1821,7 +1821,7 @@ private:
 
       bool is_deadline() const { return has_field( ex_flags, ex_fields::ex_deadline_exception ); }
       bool is_tx_cpu_usage() const { return has_field( ex_flags, ex_fields::ex_tx_cpu_usage_exceeded ); }
-      bool is_eosio_assert() const { return has_field( ex_flags, ex_fields::ex_eosio_assert_exception ); }
+      bool is_dcd_assert() const { return has_field( ex_flags, ex_fields::ex_dcd_assert_exception ); }
       bool is_other() const { return has_field( ex_flags, ex_fields::ex_other_exception ); }
 
       uint32_t num_failures = 0;
@@ -2264,7 +2264,7 @@ void block_only_sync::on_snapshot(const char*) {
    EOS_THROW(producer_exception, "a snapshot");
 }
 
-void block_only_sync::on_block(eosio::chain::signed_block_ptr block) {
+void block_only_sync::on_block(dcd::chain::signed_block_ptr block) {
    try {
       bool connectivity_check = false; // use false right now, should investigate further after 3.0 rc
       _impl->on_sync_block(block, connectivity_check);
@@ -2338,4 +2338,4 @@ void producer_plugin::log_failed_transaction(const transaction_id_type& trx_id, 
            ("txid", trx_id)("why", reason));
 }
 
-} // namespace eosio
+} // namespace dcd

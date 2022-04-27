@@ -7,10 +7,10 @@
 
 #include "utils.hpp"
 
-#include <eosio/vm/backend.hpp>
+#include <dcd/vm/backend.hpp>
 
-using namespace eosio;
-using namespace eosio::vm;
+using namespace dcd;
+using namespace dcd::vm;
 
 TEST_CASE("small parse test", "[small_parse_test]") {
    module mod;

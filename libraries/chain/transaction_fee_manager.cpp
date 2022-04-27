@@ -3,13 +3,13 @@
  *  @copyright defined in eos/LICENSE.txt
  */
 
-#include <eosio/chain/exceptions.hpp>
-#include <eosio/chain/transaction_fee_manager.hpp>
-#include <eosio/chain/controller.hpp>
-#include <eosio/chain/contract_table_objects.hpp>
+#include <dcd/chain/exceptions.hpp>
+#include <dcd/chain/transaction_fee_manager.hpp>
+#include <dcd/chain/controller.hpp>
+#include <dcd/chain/contract_table_objects.hpp>
 #include <iostream>
 
-namespace eosio { namespace chain {
+namespace dcd { namespace chain {
 
    transaction_fee_manager::transaction_fee_manager(){
       init_native_fee(config::system_account_name, name{"defaultfee"} , asset::from_string("0.0000 USD"));

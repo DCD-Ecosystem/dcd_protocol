@@ -10,10 +10,10 @@ Make sure to meet the following requirements:
 * Install the currently supported version of `dcdcli`.
 
 [[info | Note]]
-| `dcdcli` is bundled with the EOSIO software. [Installing EOSIO](../../00_install/index.md) will also install `dcdcli`.
+| `dcdcli` is bundled with the DCD software. [Installing DCD](../../00_install/index.md) will also install `dcdcli`.
 
 * Understand what a [block](https://developers.eos.io/welcome/v2.1/glossary/index/#block) is and its role in the blockchain.
-* Understand the [block lifecycle](https://developers.eos.io/welcome/v2.1/protocol-guides/consensus_protocol/#5-block-lifecycle) in the EOSIO consensus protocol.
+* Understand the [block lifecycle](https://developers.eos.io/welcome/v2.1/protocol-guides/consensus_protocol/#5-block-lifecycle) in the DCD consensus protocol.
 
 ## Steps
 

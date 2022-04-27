@@ -5,10 +5,10 @@
 ./a.out ~/wasm_interpreter/tests/fuzz/afl_in/crash_section_size_too_big.wasm
 ./a.out ~/wasm_interpreter/tests/fuzz/afl_in/deep_loops_ext_report.wasm
 ./a.out ~/wasm_interpreter/tests/fuzz/afl_in/dice.wasm
-./a.out ~/wasm_interpreter/tests/fuzz/afl_in/eosio.msig.wasm
-./a.out ~/wasm_interpreter/tests/fuzz/afl_in/eosio.sudo.wasm
-./a.out ~/wasm_interpreter/tests/fuzz/afl_in/eosio.system.wasm
-./a.out ~/wasm_interpreter/tests/fuzz/afl_in/eosio.token.wasm
+./a.out ~/wasm_interpreter/tests/fuzz/afl_in/dcd.msig.wasm
+./a.out ~/wasm_interpreter/tests/fuzz/afl_in/dcd.sudo.wasm
+./a.out ~/wasm_interpreter/tests/fuzz/afl_in/dcd.system.wasm
+./a.out ~/wasm_interpreter/tests/fuzz/afl_in/dcd.token.wasm
 ./a.out ~/wasm_interpreter/tests/fuzz/afl_in/exchange.wasm
 ./a.out ~/wasm_interpreter/tests/fuzz/afl_in/fuzz1.wasm
 ./a.out ~/wasm_interpreter/tests/fuzz/afl_in/fuzz10.wasm

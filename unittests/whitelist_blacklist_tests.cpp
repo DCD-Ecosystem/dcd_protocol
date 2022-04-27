@@ -1,6 +1,6 @@
-#include <eosio/chain/generated_transaction_object.hpp>
-//#include <eosio/chain/resource_limits.hpp>
-#include <eosio/testing/tester.hpp>
+#include <dcd/chain/generated_transaction_object.hpp>
+//#include <dcd/chain/resource_limits.hpp>
+#include <dcd/testing/tester.hpp>
 
 #include <fc/variant_object.hpp>
 
@@ -14,9 +14,9 @@
 #define TESTER validating_tester
 #endif
 
-using namespace eosio;
-using namespace eosio::chain;
-using namespace eosio::testing;
+using namespace dcd;
+using namespace dcd::chain;
+using namespace dcd::testing;
 
 using mvo = fc::mutable_variant_object;
 
@@ -41,15 +41,15 @@ class whitelist_blacklist_tester {
 
          if( !bootstrap ) return;
 
-         chain->create_accounts({"eosio.token"_n, "alice"_n, "bob"_n, "charlie"_n});
-         chain->set_code("eosio.token"_n, contracts::eosio_token_wasm() );
-         chain->set_abi("eosio.token"_n, contracts::eosio_token_abi().data() );
-         chain->push_action( "eosio.token"_n, "create"_n, "eosio.token"_n, mvo()
-              ( "issuer", "eosio.token" )
+         chain->create_accounts({"dcd.token"_n, "alice"_n, "bob"_n, "charlie"_n});
+         chain->set_code("dcd.token"_n, contracts::dcd_token_wasm() );
+         chain->set_abi("dcd.token"_n, contracts::dcd_token_abi().data() );
+         chain->push_action( "dcd.token"_n, "create"_n, "dcd.token"_n, mvo()
+              ( "issuer", "dcd.token" )
               ( "maximum_supply", "1000000.00 TOK" )
          );
-         chain->push_action( "eosio.token"_n, "issue"_n, "eosio.token"_n, mvo()
-              ( "to", "eosio.token" )
+         chain->push_action( "dcd.token"_n, "issue"_n, "dcd.token"_n, mvo()
+              ( "to", "dcd.token" )
               ( "quantity", "1000000.00 TOK" )
               ( "memo", "issue" )
          );
@@ -65,7 +65,7 @@ class whitelist_blacklist_tester {
       }
 
       transaction_trace_ptr transfer( account_name from, account_name to, string quantity = "1.00 TOK" ) {
-         return chain->push_action( "eosio.token"_n, "transfer"_n, from, mvo()
+         return chain->push_action( "dcd.token"_n, "transfer"_n, from, mvo()
             ( "from", from )
             ( "to", to )
             ( "quantity", quantity )
@@ -101,10 +101,10 @@ BOOST_AUTO_TEST_SUITE(whitelist_blacklist_tests)
 
 BOOST_AUTO_TEST_CASE( actor_whitelist ) { try {
    whitelist_blacklist_tester<> test;
-   test.actor_whitelist = {config::system_account_name, "eosio.token"_n, "alice"_n};
+   test.actor_whitelist = {config::system_account_name, "dcd.token"_n, "alice"_n};
    test.init();
 
-   test.transfer( "eosio.token"_n, "alice"_n, "1000.00 TOK" );
+   test.transfer( "dcd.token"_n, "alice"_n, "1000.00 TOK" );
 
    test.transfer( "alice"_n, "bob"_n,  "100.00 TOK" );
 
@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE( actor_whitelist ) { try {
                        );
    signed_transaction trx;
    trx.actions.emplace_back( vector<permission_level>{{"alice"_n,config::active_name}, {"bob"_n,config::active_name}},
-                             "eosio.token"_n, "transfer"_n,
+                             "dcd.token"_n, "transfer"_n,
                              fc::raw::pack(transfer_args{
                                .from  = "alice"_n,
                                .to    = "bob"_n,
@@ -137,7 +137,7 @@ BOOST_AUTO_TEST_CASE( actor_blacklist ) { try {
    test.actor_blacklist = {"bob"_n};
    test.init();
 
-   test.transfer( "eosio.token"_n, "alice"_n, "1000.00 TOK" );
+   test.transfer( "dcd.token"_n, "alice"_n, "1000.00 TOK" );
 
    test.transfer( "alice"_n, "bob"_n,  "100.00 TOK" );
 
@@ -148,7 +148,7 @@ BOOST_AUTO_TEST_CASE( actor_blacklist ) { try {
 
    signed_transaction trx;
    trx.actions.emplace_back( vector<permission_level>{{"alice"_n,config::active_name}, {"bob"_n,config::active_name}},
-                             "eosio.token"_n, "transfer"_n,
+                             "dcd.token"_n, "transfer"_n,
                              fc::raw::pack(transfer_args{
                                 .from  = "alice"_n,
                                 .to    = "bob"_n,
@@ -168,12 +168,12 @@ BOOST_AUTO_TEST_CASE( actor_blacklist ) { try {
 
 BOOST_AUTO_TEST_CASE( contract_whitelist ) { try {
    whitelist_blacklist_tester<> test;
-   test.contract_whitelist = {config::system_account_name, "eosio.token"_n, "bob"_n};
+   test.contract_whitelist = {config::system_account_name, "dcd.token"_n, "bob"_n};
    test.init();
 
-   test.transfer( "eosio.token"_n, "alice"_n, "1000.00 TOK" );
+   test.transfer( "dcd.token"_n, "alice"_n, "1000.00 TOK" );
 
-   test.transfer( "alice"_n, "eosio.token"_n );
+   test.transfer( "alice"_n, "dcd.token"_n );
 
    test.transfer( "alice"_n, "bob"_n );
    test.transfer( "alice"_n, "charlie"_n, "100.00 TOK" );
@@ -182,13 +182,13 @@ BOOST_AUTO_TEST_CASE( contract_whitelist ) { try {
 
    test.chain->produce_blocks();
 
-   test.chain->set_code("bob"_n, contracts::eosio_token_wasm() );
-   test.chain->set_abi("bob"_n, contracts::eosio_token_abi().data() );
+   test.chain->set_code("bob"_n, contracts::dcd_token_wasm() );
+   test.chain->set_abi("bob"_n, contracts::dcd_token_abi().data() );
 
    test.chain->produce_blocks();
 
-   test.chain->set_code("charlie"_n, contracts::eosio_token_wasm() );
-   test.chain->set_abi("charlie"_n, contracts::eosio_token_abi().data() );
+   test.chain->set_code("charlie"_n, contracts::dcd_token_wasm() );
+   test.chain->set_abi("charlie"_n, contracts::dcd_token_abi().data() );
 
    test.chain->produce_blocks();
 
@@ -220,9 +220,9 @@ BOOST_AUTO_TEST_CASE( contract_blacklist ) { try {
    test.contract_blacklist = {"charlie"_n};
    test.init();
 
-   test.transfer( "eosio.token"_n, "alice"_n, "1000.00 TOK" );
+   test.transfer( "dcd.token"_n, "alice"_n, "1000.00 TOK" );
 
-   test.transfer( "alice"_n, "eosio.token"_n );
+   test.transfer( "alice"_n, "dcd.token"_n );
 
    test.transfer( "alice"_n, "bob"_n );
    test.transfer( "alice"_n, "charlie"_n, "100.00 TOK" );
@@ -231,13 +231,13 @@ BOOST_AUTO_TEST_CASE( contract_blacklist ) { try {
 
    test.chain->produce_blocks();
 
-   test.chain->set_code("bob"_n, contracts::eosio_token_wasm() );
-   test.chain->set_abi("bob"_n, contracts::eosio_token_abi().data() );
+   test.chain->set_code("bob"_n, contracts::dcd_token_wasm() );
+   test.chain->set_abi("bob"_n, contracts::dcd_token_abi().data() );
 
    test.chain->produce_blocks();
 
-   test.chain->set_code("charlie"_n, contracts::eosio_token_wasm() );
-   test.chain->set_abi("charlie"_n, contracts::eosio_token_abi().data() );
+   test.chain->set_code("charlie"_n, contracts::dcd_token_wasm() );
+   test.chain->set_abi("charlie"_n, contracts::dcd_token_abi().data() );
 
    test.chain->produce_blocks();
 
@@ -266,21 +266,21 @@ BOOST_AUTO_TEST_CASE( contract_blacklist ) { try {
 
 BOOST_AUTO_TEST_CASE( action_blacklist ) { try {
    whitelist_blacklist_tester<> test;
-   test.contract_whitelist = {config::system_account_name, "eosio.token"_n, "bob"_n, "charlie"_n};
+   test.contract_whitelist = {config::system_account_name, "dcd.token"_n, "bob"_n, "charlie"_n};
    test.action_blacklist = {{"charlie"_n, "create"_n}};
    test.init();
 
-   test.transfer( "eosio.token"_n, "alice"_n, "1000.00 TOK" );
+   test.transfer( "dcd.token"_n, "alice"_n, "1000.00 TOK" );
 
    test.chain->produce_blocks();
 
-   test.chain->set_code("bob"_n, contracts::eosio_token_wasm() );
-   test.chain->set_abi("bob"_n, contracts::eosio_token_abi().data() );
+   test.chain->set_code("bob"_n, contracts::dcd_token_wasm() );
+   test.chain->set_abi("bob"_n, contracts::dcd_token_abi().data() );
 
    test.chain->produce_blocks();
 
-   test.chain->set_code("charlie"_n, contracts::eosio_token_wasm() );
-   test.chain->set_abi("charlie"_n, contracts::eosio_token_abi().data() );
+   test.chain->set_code("charlie"_n, contracts::dcd_token_wasm() );
+   test.chain->set_abi("charlie"_n, contracts::dcd_token_abi().data() );
 
    test.chain->produce_blocks();
 
@@ -303,11 +303,11 @@ BOOST_AUTO_TEST_CASE( action_blacklist ) { try {
    test.chain->produce_blocks();
 } FC_LOG_AND_RETHROW() }
 
-BOOST_AUTO_TEST_CASE( blacklist_eosio ) { try {
+BOOST_AUTO_TEST_CASE( blacklist_dcd ) { try {
    whitelist_blacklist_tester<tester> tester1;
    tester1.init();
    tester1.chain->produce_blocks();
-   tester1.chain->set_code(config::system_account_name, contracts::eosio_token_wasm() );
+   tester1.chain->set_code(config::system_account_name, contracts::dcd_token_wasm() );
    tester1.chain->produce_blocks();
    tester1.shutdown();
    tester1.contract_blacklist = {config::system_account_name};
@@ -411,7 +411,7 @@ BOOST_AUTO_TEST_CASE( blacklist_onerror ) { try {
    );
 
    BOOST_CHECK_EXCEPTION( tester1.chain->produce_blocks(), fc::exception,
-                          fc_exception_message_is("action 'eosio::onerror' is on the action blacklist")
+                          fc_exception_message_is("action 'dcd::onerror' is on the action blacklist")
                         );
 
 } FC_LOG_AND_RETHROW() }
@@ -428,31 +428,31 @@ BOOST_AUTO_TEST_CASE( actor_blacklist_inline_deferred ) { try {
    tester1.chain->set_abi( "charlie"_n,  contracts::deferred_test_abi().data() );
    tester1.chain->produce_blocks();
 
-   auto auth = authority(eosio::testing::base_tester::get_public_key(name("alice"), "active"));
-   auth.accounts.push_back( permission_level_weight{{"alice"_n, config::eosio_code_name}, 1} );
+   auto auth = authority(dcd::testing::base_tester::get_public_key(name("alice"), "active"));
+   auth.accounts.push_back( permission_level_weight{{"alice"_n, config::dcd_code_name}, 1} );
 
-   tester1.chain->push_action( "eosio"_n, "updateauth"_n, "alice"_n, mvo()
+   tester1.chain->push_action( "dcd"_n, "updateauth"_n, "alice"_n, mvo()
       ( "account", "alice" )
       ( "permission", "active" )
       ( "parent", "owner" )
       ( "auth", auth )
    );
 
-   auth = authority(eosio::testing::base_tester::get_public_key(name("bob"), "active"));
-   auth.accounts.push_back( permission_level_weight{{"alice"_n, config::eosio_code_name}, 1} );
-   auth.accounts.push_back( permission_level_weight{{"bob"_n, config::eosio_code_name}, 1} );
+   auth = authority(dcd::testing::base_tester::get_public_key(name("bob"), "active"));
+   auth.accounts.push_back( permission_level_weight{{"alice"_n, config::dcd_code_name}, 1} );
+   auth.accounts.push_back( permission_level_weight{{"bob"_n, config::dcd_code_name}, 1} );
 
-   tester1.chain->push_action( "eosio"_n, "updateauth"_n, "bob"_n, mvo()
+   tester1.chain->push_action( "dcd"_n, "updateauth"_n, "bob"_n, mvo()
       ( "account", "bob" )
       ( "permission", "active" )
       ( "parent", "owner" )
       ( "auth", auth )
    );
 
-   auth = authority(eosio::testing::base_tester::get_public_key(name("charlie"), "active"));
-   auth.accounts.push_back( permission_level_weight{{"charlie"_n, config::eosio_code_name}, 1} );
+   auth = authority(dcd::testing::base_tester::get_public_key(name("charlie"), "active"));
+   auth.accounts.push_back( permission_level_weight{{"charlie"_n, config::dcd_code_name}, 1} );
 
-   tester1.chain->push_action( "eosio"_n, "updateauth"_n, "charlie"_n, mvo()
+   tester1.chain->push_action( "dcd"_n, "updateauth"_n, "charlie"_n, mvo()
       ( "account", "charlie" )
       ( "permission", "active" )
       ( "parent", "owner" )
@@ -479,7 +479,7 @@ BOOST_AUTO_TEST_CASE( actor_blacklist_inline_deferred ) { try {
       if( !t || t->action_traces.size() == 0 ) return;
 
       const auto& act = t->action_traces[0].act;
-      if( act.account == "eosio"_n && act.name == "onblock"_n ) return;
+      if( act.account == "dcd"_n && act.name == "onblock"_n ) return;
 
       if( t->receipt && t->receipt->status == transaction_receipt::executed ) {
          wlog( "${trx_type} ${id} executed (first action is ${code}::${action})",
@@ -572,30 +572,30 @@ BOOST_AUTO_TEST_CASE( blacklist_sender_bypass ) { try {
    tester1.chain->set_abi( "charlie"_n,  contracts::deferred_test_abi().data() );
    tester1.chain->produce_blocks();
 
-   auto auth = authority(eosio::testing::base_tester::get_public_key(name("alice"), "active"));
-   auth.accounts.push_back( permission_level_weight{{"alice"_n, config::eosio_code_name}, 1} );
+   auto auth = authority(dcd::testing::base_tester::get_public_key(name("alice"), "active"));
+   auth.accounts.push_back( permission_level_weight{{"alice"_n, config::dcd_code_name}, 1} );
 
-   tester1.chain->push_action( "eosio"_n, "updateauth"_n, "alice"_n, mvo()
+   tester1.chain->push_action( "dcd"_n, "updateauth"_n, "alice"_n, mvo()
       ( "account", "alice" )
       ( "permission", "active" )
       ( "parent", "owner" )
       ( "auth", auth )
    );
 
-   auth = authority(eosio::testing::base_tester::get_public_key(name("bob"), "active"));
-   auth.accounts.push_back( permission_level_weight{{"bob"_n, config::eosio_code_name}, 1} );
+   auth = authority(dcd::testing::base_tester::get_public_key(name("bob"), "active"));
+   auth.accounts.push_back( permission_level_weight{{"bob"_n, config::dcd_code_name}, 1} );
 
-   tester1.chain->push_action( "eosio"_n, "updateauth"_n, "bob"_n, mvo()
+   tester1.chain->push_action( "dcd"_n, "updateauth"_n, "bob"_n, mvo()
       ( "account", "bob" )
       ( "permission", "active" )
       ( "parent", "owner" )
       ( "auth", auth )
    );
 
-   auth = authority(eosio::testing::base_tester::get_public_key(name("charlie"), "active"));
-   auth.accounts.push_back( permission_level_weight{{"charlie"_n, config::eosio_code_name}, 1} );
+   auth = authority(dcd::testing::base_tester::get_public_key(name("charlie"), "active"));
+   auth.accounts.push_back( permission_level_weight{{"charlie"_n, config::dcd_code_name}, 1} );
 
-   tester1.chain->push_action( "eosio"_n, "updateauth"_n, "charlie"_n, mvo()
+   tester1.chain->push_action( "dcd"_n, "updateauth"_n, "charlie"_n, mvo()
       ( "account", "charlie" )
       ( "permission", "active" )
       ( "parent", "owner" )

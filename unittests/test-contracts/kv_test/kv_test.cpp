@@ -1,8 +1,8 @@
-#include <eosio/eosio.hpp>
+#include <dcd/dcd.hpp>
 
 
-using namespace eosio;
-using namespace eosio::internal_use_do_not_use;
+using namespace dcd;
+using namespace dcd::internal_use_do_not_use;
 
 enum it_stat : int32_t {
    iterator_ok     = 0,
@@ -25,11 +25,11 @@ struct itparam {
 #define STR(x) STR_I(x)
 #define TEST(condition) check(condition, "kv_test.cpp:" STR(__LINE__) ": " #condition) 
 
-class [[eosio::contract("kv_test")]] kvtest : public eosio::contract {
+class [[dcd::contract("kv_test")]] kvtest : public dcd::contract {
  public:
-   using eosio::contract::contract;
+   using dcd::contract::contract;
 
-   [[eosio::action]] void itlifetime() {
+   [[dcd::action]] void itlifetime() {
       check(1 == kv_it_create(""_n.value, nullptr, 0), "itlifetime a");
       check(2 == kv_it_create(""_n.value, nullptr, 0), "itlifetime b");
       check(3 == kv_it_create(""_n.value, nullptr, 0), "itlifetime c");
@@ -54,7 +54,7 @@ class [[eosio::contract("kv_test")]] kvtest : public eosio::contract {
       check(kv_it_status(7) == iterator_end, "itlifetime r");
    }
 
-   [[eosio::action]] void itlimit(std::vector<itparam> params) {
+   [[dcd::action]] void itlimit(std::vector<itparam> params) {
       bool has_erase = false;
       for(auto& itop : params) {
          if(itop.erase) {
@@ -86,15 +86,15 @@ class [[eosio::contract("kv_test")]] kvtest : public eosio::contract {
       }
    }
 
-   [[eosio::action]] void erase(name contract, const std::vector<char>& k) {
+   [[dcd::action]] void erase(name contract, const std::vector<char>& k) {
       kv_erase(contract.value, k.data(), k.size());
    }
 
-   [[eosio::action]] void set(name contract, const std::vector<char>& k, const std::vector<char>& v, name payer) {
+   [[dcd::action]] void set(name contract, const std::vector<char>& k, const std::vector<char>& v, name payer) {
       kv_set(contract.value, k.data(), k.size(), v.data(), v.size(), payer.value);
    }
 
-   [[eosio::action]] void get(name contract, const std::vector<char>& k,
+   [[dcd::action]] void get(name contract, const std::vector<char>& k,
                               const std::optional<std::vector<char>>& v) {
       if (v) {
          uint32_t value_size = 0xffff'ffff;
@@ -109,12 +109,12 @@ class [[eosio::contract("kv_test")]] kvtest : public eosio::contract {
       }
    }
 
-   [[eosio::action]] void setmany(name contract, const std::vector<kv_t>& kvs) {
+   [[dcd::action]] void setmany(name contract, const std::vector<kv_t>& kvs) {
       for (auto& kv : kvs) //
          kv_set(contract.value, kv.k.data(), kv.k.size(), kv.v.data(), kv.v.size(), contract.value);
    }
 
-   [[eosio::action]] void getdata() {
+   [[dcd::action]] void getdata() {
       const std::vector<char> orig_buf(1024, '\xcc');
       std::vector<char> buf = orig_buf;
       // The buffer starts empty
@@ -168,7 +168,7 @@ class [[eosio::contract("kv_test")]] kvtest : public eosio::contract {
       TEST(kv_get_data(0, buf.data(), 1024) == 0);
    }
 
-   [[eosio::action]] void scan(name contract, const std::vector<char>& prefix,
+   [[dcd::action]] void scan(name contract, const std::vector<char>& prefix,
                                const std::optional<std::vector<char>>& lower, const std::vector<kv_t>& expected) {
       auto itr = kv_it_create(contract.value, prefix.data(), prefix.size());
       int32_t stat;
@@ -240,7 +240,7 @@ class [[eosio::contract("kv_test")]] kvtest : public eosio::contract {
       kv_it_destroy(itr);
    } // scan()
 
-   [[eosio::action]] void scanrev(name contract, const std::vector<char>& prefix,
+   [[dcd::action]] void scanrev(name contract, const std::vector<char>& prefix,
                                   const std::optional<std::vector<char>>& lower, const std::vector<kv_t>& expected) {
       auto itr = kv_it_create(contract.value, prefix.data(), prefix.size());
       uint32_t stat;
@@ -297,7 +297,7 @@ class [[eosio::contract("kv_test")]] kvtest : public eosio::contract {
       kv_it_destroy(itr);
    } // scanrev()
 
-   [[eosio::action]] void itstaterased(name contract, const std::vector<char>& prefix,
+   [[dcd::action]] void itstaterased(name contract, const std::vector<char>& prefix,
                                        const std::vector<char>& k, const std::vector<char>& v,
                                        int test_id, bool insert, bool reinsert) {
       if(insert) kv_set(contract.value, k.data(), k.size(), v.data(), v.size(), contract.value);

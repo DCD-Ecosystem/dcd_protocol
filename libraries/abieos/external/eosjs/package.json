@@ -25,7 +25,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/EOSIO/eosjs.git"
+    "url": "https://github.com/DCD/eosjs.git"
   },
   "dependencies": {
     "babel-runtime": "6.26.0",

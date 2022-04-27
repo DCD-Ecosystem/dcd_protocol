@@ -1,23 +1,23 @@
-#include <eosio/chain/webassembly/eos-vm.hpp>
-#include <eosio/chain/webassembly/interface.hpp>
-#include <eosio/chain/apply_context.hpp>
-#include <eosio/chain/transaction_context.hpp>
-#include <eosio/chain/global_property_object.hpp>
-#include <eosio/chain/wasm_eosio_constraints.hpp>
+#include <dcd/chain/webassembly/eos-vm.hpp>
+#include <dcd/chain/webassembly/interface.hpp>
+#include <dcd/chain/apply_context.hpp>
+#include <dcd/chain/transaction_context.hpp>
+#include <dcd/chain/global_property_object.hpp>
+#include <dcd/chain/wasm_dcd_constraints.hpp>
 //eos-vm includes
-#include <eosio/vm/backend.hpp>
-#include <eosio/chain/webassembly/preconditions.hpp>
-#ifdef EOSIO_EOS_VM_OC_RUNTIME_ENABLED
-#include <eosio/chain/webassembly/eos-vm-oc.hpp>
+#include <dcd/vm/backend.hpp>
+#include <dcd/chain/webassembly/preconditions.hpp>
+#ifdef DCD_EOS_VM_OC_RUNTIME_ENABLED
+#include <dcd/chain/webassembly/eos-vm-oc.hpp>
 #endif
 #include <boost/hana/string.hpp>
 #include <boost/hana/equal.hpp>
 
-namespace eosio { namespace chain { namespace webassembly { namespace eos_vm_runtime {
+namespace dcd { namespace chain { namespace webassembly { namespace eos_vm_runtime {
 
-using namespace eosio::vm;
+using namespace dcd::vm;
 
-namespace wasm_constraints = eosio::chain::wasm_constraints;
+namespace wasm_constraints = dcd::chain::wasm_constraints;
 
 namespace {
 
@@ -136,7 +136,7 @@ class eos_vm_instantiated_module : public wasm_instantiated_module_interface {
             opts = {config.max_pages, config.max_call_depth};
          }
          auto fn = [&]() {
-            eosio::chain::webassembly::interface iface(context);
+            dcd::chain::webassembly::interface iface(context);
             _runtime->_bkend->initialize(&iface, opts);
             _runtime->_bkend->call(
                 iface, "env", "apply",
@@ -147,11 +147,11 @@ class eos_vm_instantiated_module : public wasm_instantiated_module_interface {
          try {
             checktime_watchdog wd(context.trx_context.transaction_timer);
             _runtime->_bkend->timed_run(wd, fn);
-         } catch(eosio::vm::timeout_exception&) {
+         } catch(dcd::vm::timeout_exception&) {
             //context.trx_context.checktime();
-         } catch(eosio::vm::wasm_memory_exception& e) {
+         } catch(dcd::vm::wasm_memory_exception& e) {
             FC_THROW_EXCEPTION(wasm_execution_error, "access violation");
-         } catch(eosio::vm::exception& e) {
+         } catch(dcd::vm::exception& e) {
             FC_THROW_EXCEPTION(wasm_execution_error, "eos-vm system failure");
          }
          _runtime->_bkend = nullptr;
@@ -187,13 +187,13 @@ std::unique_ptr<wasm_instantiated_module_interface> eos_vm_runtime<Impl>::instan
       std::unique_ptr<backend_t> bkend = std::make_unique<backend_t>(code, code_size, nullptr, options);
       eos_vm_host_functions_t::resolve(bkend->get_module());
       return std::make_unique<eos_vm_instantiated_module<Impl>>(this, std::move(bkend));
-   } catch(eosio::vm::exception& e) {
+   } catch(dcd::vm::exception& e) {
       FC_THROW_EXCEPTION(wasm_execution_error, "Error building eos-vm interp: ${e}", ("e", e.what()));
    }
 }
 
-template class eos_vm_runtime<eosio::vm::interpreter>;
-template class eos_vm_runtime<eosio::vm::jit>;
+template class eos_vm_runtime<dcd::vm::interpreter>;
+template class eos_vm_runtime<dcd::vm::jit>;
 
 } 
 
@@ -203,8 +203,8 @@ struct host_function_registrator {
    constexpr host_function_registrator(Mod mod_name, Name fn_name) {
       using rhf_t = eos_vm_host_functions_t;
       rhf_t::add<HostFunction, Preconditions...>(mod_name.c_str(), fn_name.c_str());
-#ifdef EOSIO_EOS_VM_OC_RUNTIME_ENABLED
-      constexpr bool is_injected = (Mod() == BOOST_HANA_STRING(EOSIO_INJECTED_MODULE_NAME));
+#ifdef DCD_EOS_VM_OC_RUNTIME_ENABLED
+      constexpr bool is_injected = (Mod() == BOOST_HANA_STRING(DCD_INJECTED_MODULE_NAME));
       eosvmoc::register_eosvm_oc<HostFunction, is_injected, std::tuple<Preconditions...>>(
           mod_name + BOOST_HANA_STRING(".") + fn_name);
 #endif
@@ -213,7 +213,7 @@ struct host_function_registrator {
 
 #define REGISTER_INJECTED_HOST_FUNCTION(NAME, ...)                                                                     \
    static host_function_registrator<&interface::NAME, ##__VA_ARGS__> NAME##_registrator_impl() {                       \
-      return {BOOST_HANA_STRING(EOSIO_INJECTED_MODULE_NAME), BOOST_HANA_STRING(#NAME)};                                \
+      return {BOOST_HANA_STRING(DCD_INJECTED_MODULE_NAME), BOOST_HANA_STRING(#NAME)};                                \
    }                                                                                                                   \
    inline static auto NAME##_registrator = NAME##_registrator_impl();
 
@@ -276,64 +276,64 @@ REGISTER_HOST_FUNCTION(is_privileged, privileged_check);
 REGISTER_HOST_FUNCTION(set_privileged, privileged_check);
 
 // softfloat api
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f32_add);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f32_sub);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f32_div);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f32_mul);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f32_min);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f32_max);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f32_copysign);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f32_abs);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f32_neg);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f32_sqrt);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f32_ceil);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f32_floor);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f32_trunc);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f32_nearest);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f32_eq);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f32_ne);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f32_lt);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f32_le);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f32_gt);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f32_ge);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f64_add);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f64_sub);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f64_div);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f64_mul);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f64_min);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f64_max);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f64_copysign);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f64_abs);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f64_neg);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f64_sqrt);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f64_ceil);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f64_floor);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f64_trunc);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f64_nearest);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f64_eq);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f64_ne);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f64_lt);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f64_le);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f64_gt);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f64_ge);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f32_promote);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f64_demote);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f32_trunc_i32s);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f64_trunc_i32s);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f32_trunc_i32u);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f64_trunc_i32u);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f32_trunc_i64s);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f64_trunc_i64s);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f32_trunc_i64u);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_f64_trunc_i64u);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_i32_to_f32);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_i64_to_f32);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_ui32_to_f32);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_ui64_to_f32);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_i32_to_f64);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_i64_to_f64);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_ui32_to_f64);
-REGISTER_INJECTED_HOST_FUNCTION(_eosio_ui64_to_f64);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f32_add);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f32_sub);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f32_div);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f32_mul);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f32_min);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f32_max);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f32_copysign);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f32_abs);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f32_neg);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f32_sqrt);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f32_ceil);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f32_floor);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f32_trunc);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f32_nearest);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f32_eq);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f32_ne);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f32_lt);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f32_le);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f32_gt);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f32_ge);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f64_add);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f64_sub);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f64_div);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f64_mul);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f64_min);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f64_max);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f64_copysign);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f64_abs);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f64_neg);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f64_sqrt);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f64_ceil);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f64_floor);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f64_trunc);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f64_nearest);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f64_eq);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f64_ne);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f64_lt);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f64_le);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f64_gt);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f64_ge);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f32_promote);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f64_demote);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f32_trunc_i32s);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f64_trunc_i32s);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f32_trunc_i32u);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f64_trunc_i32u);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f32_trunc_i64s);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f64_trunc_i64s);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f32_trunc_i64u);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_f64_trunc_i64u);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_i32_to_f32);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_i64_to_f32);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_ui32_to_f32);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_ui64_to_f32);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_i32_to_f64);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_i64_to_f64);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_ui32_to_f64);
+REGISTER_INJECTED_HOST_FUNCTION(_dcd_ui64_to_f64);
 
 // producer api
 REGISTER_LEGACY_HOST_FUNCTION(get_active_producers);
@@ -372,10 +372,10 @@ REGISTER_HOST_FUNCTION(get_sender);
 
 // context-free system api
 REGISTER_CF_HOST_FUNCTION(abort)
-REGISTER_LEGACY_CF_HOST_FUNCTION(eosio_assert)
-REGISTER_LEGACY_CF_HOST_FUNCTION(eosio_assert_message)
-REGISTER_CF_HOST_FUNCTION(eosio_assert_code)
-REGISTER_CF_HOST_FUNCTION(eosio_exit)
+REGISTER_LEGACY_CF_HOST_FUNCTION(dcd_assert)
+REGISTER_LEGACY_CF_HOST_FUNCTION(dcd_assert_message)
+REGISTER_CF_HOST_FUNCTION(dcd_assert_code)
+REGISTER_CF_HOST_FUNCTION(dcd_exit)
 
 // action api
 REGISTER_LEGACY_CF_HOST_FUNCTION(read_action_data);
@@ -553,4 +553,4 @@ REGISTER_CF_HOST_FUNCTION(__unordtf2);
 
 } // namespace webassembly
 } // namespace chain
-} // namespace eosio
+} // namespace dcd

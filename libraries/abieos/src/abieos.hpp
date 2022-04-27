@@ -2,24 +2,24 @@
 
 #pragma once
 
-#include <eosio/chain_conversions.hpp>
-#include <eosio/from_bin.hpp>
-#include <eosio/from_json.hpp>
-#include <eosio/reflection.hpp>
-#include <eosio/to_bin.hpp>
-#include <eosio/to_json.hpp>
-#include <eosio/abi.hpp>
-#include <eosio/operators.hpp>
-#include <eosio/bytes.hpp>
-#include <eosio/crypto.hpp>
-#include <eosio/symbol.hpp>
-#include <eosio/asset.hpp>
-#include <eosio/time.hpp>
-#include <eosio/fixed_bytes.hpp>
-#include <eosio/float.hpp>
-#include <eosio/varint.hpp>
+#include <dcd/chain_conversions.hpp>
+#include <dcd/from_bin.hpp>
+#include <dcd/from_json.hpp>
+#include <dcd/reflection.hpp>
+#include <dcd/to_bin.hpp>
+#include <dcd/to_json.hpp>
+#include <dcd/abi.hpp>
+#include <dcd/operators.hpp>
+#include <dcd/bytes.hpp>
+#include <dcd/crypto.hpp>
+#include <dcd/symbol.hpp>
+#include <dcd/asset.hpp>
+#include <dcd/time.hpp>
+#include <dcd/fixed_bytes.hpp>
+#include <dcd/float.hpp>
+#include <dcd/varint.hpp>
 
-#ifdef __eosio_cdt__
+#ifdef __dcd_cdt__
 #include <cwchar>
 
 #pragma clang diagnostic push
@@ -32,7 +32,7 @@
 #include <variant>
 #include <vector>
 
-#ifdef __eosio_cdt__
+#ifdef __dcd_cdt__
 #pragma clang diagnostic pop
 #endif
 
@@ -44,8 +44,8 @@
 
 namespace abieos {
 
-using eosio::from_bin;
-using eosio::to_bin;
+using dcd::from_bin;
+using dcd::to_bin;
 
 inline constexpr bool trace_json_to_jvalue_event = false;
 inline constexpr bool trace_json_to_jvalue = false;
@@ -195,7 +195,7 @@ struct jvalue {
 // state and serializers
 ///////////////////////////////////////////////////////////////////////////////
 
-using eosio::abi_type;
+using dcd::abi_type;
 
 struct size_insertion {
     size_t position = 0;
@@ -237,55 +237,55 @@ struct json_to_jvalue_state : json_reader_handler<json_to_jvalue_state> {
 };
 
 struct jvalue_to_bin_state {
-    eosio::vector_stream writer;
+    dcd::vector_stream writer;
     const jvalue* received_value = nullptr;
     std::vector<jvalue_to_bin_stack_entry> stack{};
     bool skipped_extension = false;
 
     bool get_bool() const {
       auto* b = std::get_if<bool>(&received_value->value);
-      eosio::check(b, eosio::convert_json_error(eosio::from_json_error::expected_bool));
+      dcd::check(b, dcd::convert_json_error(dcd::from_json_error::expected_bool));
       return *b;
     }
 
     std::string_view get_string() const {
         auto* s = std::get_if<std::string>(&received_value->value);
-        eosio::check(s, eosio::convert_json_error(eosio::from_json_error::expected_string));
+        dcd::check(s, dcd::convert_json_error(dcd::from_json_error::expected_string));
         return *s;
     }
     void get_null() {
-       eosio::check(std::holds_alternative<std::nullptr_t>(received_value->value),
-              eosio::convert_json_error(eosio::from_json_error::expected_null));
+       dcd::check(std::holds_alternative<std::nullptr_t>(received_value->value),
+              dcd::convert_json_error(dcd::from_json_error::expected_null));
     }
     bool get_null_pred() {
        return std::holds_alternative<std::nullptr_t>(received_value->value);
     }
 };
 
-struct json_to_bin_state : eosio::json_token_stream {
+struct json_to_bin_state : dcd::json_token_stream {
     using json_token_stream::json_token_stream;
-    eosio::vector_stream& writer;
+    dcd::vector_stream& writer;
     std::vector<size_insertion> size_insertions{};
     std::vector<json_to_bin_stack_entry> stack{};
     bool skipped_extension = false;
 
-    explicit json_to_bin_state(char* in, eosio::vector_stream& out)
-      : eosio::json_token_stream(in), writer(out) {}
+    explicit json_to_bin_state(char* in, dcd::vector_stream& out)
+      : dcd::json_token_stream(in), writer(out) {}
 };
 
 struct bin_to_json_state {
-    eosio::input_stream& bin;
-    eosio::vector_stream& writer;
+    dcd::input_stream& bin;
+    dcd::vector_stream& writer;
     std::vector<bin_to_json_stack_entry> stack{};
     bool skipped_extension = false;
 
-    bin_to_json_state(eosio::input_stream& bin, eosio::vector_stream& writer)
+    bin_to_json_state(dcd::input_stream& bin, dcd::vector_stream& writer)
         : bin{bin}, writer{writer} {}
 };
 
 }
 
-namespace eosio {
+namespace dcd {
 
 struct abi_serializer {
   virtual void json_to_bin(::abieos::jvalue_to_bin_state& state, bool allow_extensions, const abi_type* type,
@@ -346,18 +346,18 @@ void bin_to_json(pseudo_variant*, bin_to_json_state& state, bool allow_extension
 // serializable types
 ///////////////////////////////////////////////////////////////////////////////
 
-using eosio::bytes;
+using dcd::bytes;
 
 template <typename State>
 void json_to_bin(bytes*, State& state, bool, const abi_type*, bool start) {
     auto s = state.get_string();;
     if (trace_json_to_bin)
         printf("%*sbytes (%d hex digits)\n", int(state.stack.size() * 4), "", int(s.size()));
-    eosio::check( !(s.size() & 1), eosio::convert_json_error(eosio::from_json_error::expected_hex_string) );
-    eosio::varuint32_to_bin(s.size() / 2, state.writer);
+    dcd::check( !(s.size() & 1), dcd::convert_json_error(dcd::from_json_error::expected_hex_string) );
+    dcd::varuint32_to_bin(s.size() / 2, state.writer);
     // FIXME: Add a function to encode a hex string to a stream
-    eosio::check(eosio::unhex(std::back_inserter(state.writer.data), s.begin(), s.end()),
-        eosio::convert_json_error(eosio::from_json_error::expected_hex_string));
+    dcd::check(dcd::unhex(std::back_inserter(state.writer.data), s.begin(), s.end()),
+        dcd::convert_json_error(dcd::from_json_error::expected_hex_string));
 }
 
 inline void bin_to_json(bytes*, bin_to_json_state& state, bool, const abi_type*, bool start) {
@@ -368,31 +368,31 @@ inline void bin_to_json(bytes*, bin_to_json_state& state, bool, const abi_type*,
     return to_json_hex(data, size, state.writer);
 }
 
-using eosio::float128;
-using eosio::checksum160;
-using eosio::checksum256;
-using eosio::checksum512;
+using dcd::float128;
+using dcd::checksum160;
+using dcd::checksum256;
+using dcd::checksum512;
 
 #ifndef ABIEOS_NO_INT128
 using uint128 = unsigned __int128;
 using int128 = __int128;
 #endif
 
-using eosio::public_key;
-using eosio::private_key;
-using eosio::signature;
-using eosio::name;
+using dcd::public_key;
+using dcd::private_key;
+using dcd::signature;
+using dcd::name;
 
-using eosio::varuint32;
-using eosio::varint32;
+using dcd::varuint32;
+using dcd::varint32;
 
-using eosio::time_point;
-using eosio::time_point_sec;
-using eosio::block_timestamp;
-using eosio::symbol_code;
-using eosio::symbol;
-using eosio::asset;
-using eosio::extended_asset;
+using dcd::time_point;
+using dcd::time_point_sec;
+using dcd::block_timestamp;
+using dcd::symbol_code;
+using dcd::symbol;
+using dcd::asset;
+using dcd::extended_asset;
 
 ///////////////////////////////////////////////////////////////////////////////
 // 128-bit support when native support is absent
@@ -403,12 +403,12 @@ using eosio::extended_asset;
 struct uint128 {
     std::array<uint8_t, 16> data = {};
 };
-EOSIO_REFLECT(uint128, data)
+DCD_REFLECT(uint128, data)
 
 struct int128 {
     std::array<uint8_t, 16> data = {};
 };
-EOSIO_REFLECT(int128, data)
+DCD_REFLECT(int128, data)
 
 template <typename S>
 void from_json(uint128& obj, S& stream) {
@@ -421,10 +421,10 @@ void from_json(int128& obj, S& stream) {
     if (s.size() && s[0] == '-') {
         decimal_to_binary(obj.data, {s.data() + 1, s.size() - 1});
         negate(obj.data);
-        eosio::check(is_negative(obj.data), eosio::convert_json_error(eosio::from_json_error::number_out_of_range));
+        dcd::check(is_negative(obj.data), dcd::convert_json_error(dcd::from_json_error::number_out_of_range));
     } else {
         decimal_to_binary(obj.data, s);
-        eosio::check(!is_negative(obj.data), eosio::convert_json_error(eosio::from_json_error::number_out_of_range));
+        dcd::check(!is_negative(obj.data), dcd::convert_json_error(dcd::from_json_error::number_out_of_range));
     }
 }
 
@@ -455,7 +455,7 @@ void to_json(const int128& obj, S& stream) {
 
 using extensions_type = std::vector<std::pair<uint16_t, bytes>>;
 
-using eosio::abi_def;
+using dcd::abi_def;
 
 ABIEOS_NODISCARD inline bool check_abi_version(const std::string& s, std::string& error) {
     if (s.substr(0, 13) != "eosio::abi/1.")
@@ -517,9 +517,9 @@ inline void json_to_jvalue(jvalue& value, std::string_view json, F&& f) {
     state.stack.push_back({&value});
     rapidjson::Reader reader;
     rapidjson::InsituStringStream ss(mutable_json.data());
-    eosio::check(reader.Parse<rapidjson::kParseValidateEncodingFlag | rapidjson::kParseIterativeFlag |
+    dcd::check(reader.Parse<rapidjson::kParseValidateEncodingFlag | rapidjson::kParseIterativeFlag |
         rapidjson::kParseNumbersAsStringsFlag>(ss, state),
-        eosio::convert_json_error(eosio::from_json_error::unspecific_syntax_error));
+        dcd::convert_json_error(dcd::from_json_error::unspecific_syntax_error));
 }
 
 ABIEOS_NODISCARD inline bool json_to_jobject(jvalue& value, json_to_jvalue_state& state, event_type event, bool start) {
@@ -579,7 +579,7 @@ ABIEOS_NODISCARD inline bool json_to_jarray(jvalue& value, json_to_jvalue_state&
 // abi handling
 ///////////////////////////////////////////////////////////////////////////////
 
-using abi = eosio::abi;
+using abi = dcd::abi;
 
 ///////////////////////////////////////////////////////////////////////////////
 // json_to_bin (jvalue)
@@ -617,8 +617,8 @@ inline void json_to_bin(pseudo_extension*, State& state, bool allow_extensions,
 inline void json_to_bin(pseudo_object*, jvalue_to_bin_state& state, bool allow_extensions,
                                        const abi_type* type, bool start) {
     if (start) {
-       eosio::check(!(!state.received_value || !std::holds_alternative<jobject>(state.received_value->value)),
-            eosio::convert_json_error(eosio::from_json_error::expected_start_object));
+       dcd::check(!(!state.received_value || !std::holds_alternative<jobject>(state.received_value->value)),
+            dcd::convert_json_error(dcd::from_json_error::expected_start_object));
         if (trace_jvalue_to_bin)
             printf("%*s{ %d fields, allow_ex=%d\n", int(state.stack.size() * 4), "", int(type->as_struct()->fields.size()),
                    allow_extensions);
@@ -626,7 +626,7 @@ inline void json_to_bin(pseudo_object*, jvalue_to_bin_state& state, bool allow_e
     }
     auto& stack_entry = state.stack.back();
     ++stack_entry.position;
-    const std::vector<eosio::abi_field>& fields = stack_entry.type->as_struct()->fields;
+    const std::vector<dcd::abi_field>& fields = stack_entry.type->as_struct()->fields;
     if (stack_entry.position == (int)fields.size()) {
         if (trace_jvalue_to_bin)
             printf("%*s}\n", int((state.stack.size() - 1) * 4), "");
@@ -645,10 +645,10 @@ inline void json_to_bin(pseudo_object*, jvalue_to_bin_state& state, bool allow_e
             return;
         }
         stack_entry.position = -1;
-        eosio::check(false, eosio::convert_json_error(eosio::from_json_error::expected_field));
+        dcd::check(false, dcd::convert_json_error(dcd::from_json_error::expected_field));
     }
-    eosio::check(!state.skipped_extension,
-        eosio::convert_json_error(eosio::from_json_error::unexpected_field));
+    dcd::check(!state.skipped_extension,
+        dcd::convert_json_error(dcd::from_json_error::unexpected_field));
     state.received_value = &it->second;
     return field.type->ser->json_to_bin(state, allow_extensions && &field == &fields.back(),
                                         field.type, true);
@@ -657,12 +657,12 @@ inline void json_to_bin(pseudo_object*, jvalue_to_bin_state& state, bool allow_e
 inline void json_to_bin(pseudo_array*, jvalue_to_bin_state& state, bool, const abi_type* type,
                                        bool start) {
     if (start) {
-       eosio::check(!(!state.received_value || !std::holds_alternative<jarray>(state.received_value->value)),
-            eosio::convert_json_error(eosio::from_json_error::expected_start_array));
+       dcd::check(!(!state.received_value || !std::holds_alternative<jarray>(state.received_value->value)),
+            dcd::convert_json_error(dcd::from_json_error::expected_start_array));
         if (trace_jvalue_to_bin)
             printf("%*s[ %d elements\n", int(state.stack.size() * 4), "",
                    int(std::get<jarray>(state.received_value->value).size()));
-        eosio::varuint32_to_bin(std::get<jarray>(state.received_value->value).size(), state.writer);
+        dcd::varuint32_to_bin(std::get<jarray>(state.received_value->value).size(), state.writer);
         state.stack.push_back({type, false, state.received_value, -1});
     }
     auto& stack_entry = state.stack.back();
@@ -684,13 +684,13 @@ inline void json_to_bin(pseudo_array*, jvalue_to_bin_state& state, bool, const a
 inline void json_to_bin(pseudo_variant*, jvalue_to_bin_state& state, bool allow_extensions,
                                        const abi_type* type, bool start) {
     if (start) {
-       eosio::check(!(!state.received_value || !std::holds_alternative<jarray>(state.received_value->value)),
-            eosio::convert_json_error(eosio::from_json_error::expected_variant));
+       dcd::check(!(!state.received_value || !std::holds_alternative<jarray>(state.received_value->value)),
+            dcd::convert_json_error(dcd::from_json_error::expected_variant));
         auto& arr = std::get<jarray>(state.received_value->value);
-        eosio::check(arr.size() == 2,
-            eosio::convert_json_error(eosio::from_json_error::expected_variant));
-        eosio::check(std::holds_alternative<std::string>(arr[0].value),
-            eosio::convert_json_error(eosio::from_json_error::expected_variant));
+        dcd::check(arr.size() == 2,
+            dcd::convert_json_error(dcd::from_json_error::expected_variant));
+        dcd::check(std::holds_alternative<std::string>(arr[0].value),
+            dcd::convert_json_error(dcd::from_json_error::expected_variant));
         auto& typeName = std::get<std::string>(arr[0].value);
         if (trace_jvalue_to_bin)
             printf("%*s[ variant %s\n", int(state.stack.size() * 4), "", typeName.c_str());
@@ -701,12 +701,12 @@ inline void json_to_bin(pseudo_variant*, jvalue_to_bin_state& state, bool allow_
     auto& arr = std::get<jarray>(stack_entry.value->value);
     if (stack_entry.position == 0) {
         auto& typeName = std::get<std::string>(arr[0].value);
-        const std::vector<eosio::abi_field>& fields = *stack_entry.type->as_variant();
+        const std::vector<dcd::abi_field>& fields = *stack_entry.type->as_variant();
         auto it = std::find_if(fields.begin(), fields.end(),
                                [&](auto& field) { return field.name == typeName; });
-        eosio::check(it != fields.end(),
-            eosio::convert_json_error(eosio::from_json_error::invalid_type_for_variant));
-        eosio::varuint32_to_bin(it - fields.begin(), state.writer);
+        dcd::check(it != fields.end(),
+            dcd::convert_json_error(dcd::from_json_error::invalid_type_for_variant));
+        dcd::varuint32_to_bin(it - fields.begin(), state.writer);
         state.received_value = &arr[++stack_entry.position];
         return it->type->ser->json_to_bin(state, allow_extensions, it->type, true);
     } else {
@@ -718,7 +718,7 @@ inline void json_to_bin(pseudo_variant*, jvalue_to_bin_state& state, bool allow_
 
 template <typename T, typename State>
 void json_to_bin(T*, State& state, bool, const abi_type*, bool start) {
-    using eosio::from_json;
+    using dcd::from_json;
     T x;
     from_json(x, state);
     return to_bin(x, state.writer);
@@ -744,7 +744,7 @@ inline void json_to_bin(std::vector<char>& bin, const abi_type* type, std::strin
     mutable_json.push_back(0);
     mutable_json.push_back(0);
     std::vector<char> out_buf;
-    eosio::vector_stream out(out_buf);
+    dcd::vector_stream out(out_buf);
     json_to_bin_state state(mutable_json.data(), out);
 
     type->ser->json_to_bin(state, true, type, true);
@@ -752,17 +752,17 @@ inline void json_to_bin(std::vector<char>& bin, const abi_type* type, std::strin
         f();
         auto entry = state.stack.back();
         auto* type = entry.type;
-        eosio::check(state.stack.size() <= max_stack_size,
-            eosio::convert_abi_error(eosio::abi_error::recursion_limit_reached));
+        dcd::check(state.stack.size() <= max_stack_size,
+            dcd::convert_abi_error(dcd::abi_error::recursion_limit_reached));
         type->ser->json_to_bin(state, entry.allow_extensions, type, false);
     }
-    eosio::check(state.complete(),
-        eosio::convert_json_error(eosio::from_json_error::expected_end));
+    dcd::check(state.complete(),
+        dcd::convert_json_error(dcd::from_json_error::expected_end));
 
     size_t pos = 0;
     for (auto& insertion : state.size_insertions) {
         bin.insert(bin.end(), out_buf.begin() + pos, out_buf.begin() + insertion.position);
-        eosio::push_varuint32(bin, insertion.size);
+        dcd::push_varuint32(bin, insertion.size);
         pos = insertion.position;
     }
     bin.insert(bin.end(), out_buf.begin() + pos, out_buf.end());
@@ -778,13 +778,13 @@ inline void json_to_bin(pseudo_object*, json_to_bin_state& state, bool allow_ext
         state.stack.push_back({type, allow_extensions});
     }
     auto& stack_entry = state.stack.back();
-    const std::vector<eosio::abi_field>& fields = type->as_struct()->fields;
+    const std::vector<dcd::abi_field>& fields = type->as_struct()->fields;
     if (state.get_end_object_pred()) {
         if (stack_entry.position + 1 != (ptrdiff_t)fields.size()) {
             auto& field = fields[stack_entry.position + 1];
             if (!field.type->extension_of() || !allow_extensions) {
                 stack_entry.position = -1;
-                eosio::check(false, eosio::convert_json_error(eosio::from_json_error::expected_field));
+                dcd::check(false, dcd::convert_json_error(dcd::from_json_error::expected_field));
             }
             ++stack_entry.position;
             state.skipped_extension = true;
@@ -796,12 +796,12 @@ inline void json_to_bin(pseudo_object*, json_to_bin_state& state, bool allow_ext
     }
     auto key = state.maybe_get_key();
     if (key) {
-       eosio::check(!(++stack_entry.position >= (ptrdiff_t)fields.size() || state.skipped_extension),
-             eosio::convert_json_error(eosio::from_json_error::unexpected_field));
+       dcd::check(!(++stack_entry.position >= (ptrdiff_t)fields.size() || state.skipped_extension),
+             dcd::convert_json_error(dcd::from_json_error::unexpected_field));
         auto& field = fields[stack_entry.position];
         if (*key != field.name) {
             stack_entry.position = -1;
-            eosio::check(false, eosio::convert_json_error(eosio::from_json_error::expected_field));
+            dcd::check(false, dcd::convert_json_error(dcd::from_json_error::expected_field));
         }
     } else {
         auto& field = fields[stack_entry.position];
@@ -852,29 +852,29 @@ inline void json_to_bin(pseudo_variant*, json_to_bin_state& state, bool allow_ex
     auto& stack_entry = state.stack.back();
     ++stack_entry.position;
     if (state.get_end_array_pred()) {
-       eosio::check(stack_entry.position == 2,
-            eosio::convert_json_error(eosio::from_json_error::expected_variant));
+       dcd::check(stack_entry.position == 2,
+            dcd::convert_json_error(dcd::from_json_error::expected_variant));
         if (trace_json_to_bin)
             printf("%*s]\n", int((state.stack.size() - 1) * 4), "");
         state.stack.pop_back();
         return;
     }
-    const std::vector<eosio::abi_field>& fields = *stack_entry.type->as_variant();
+    const std::vector<dcd::abi_field>& fields = *stack_entry.type->as_variant();
     if (stack_entry.position == 0) {
         auto typeName = state.get_string();
         if (trace_json_to_bin)
             printf("%*stype: %.*s\n", int(state.stack.size() * 4), "", (int)typeName.size(), typeName.data());
         auto it = std::find_if(fields.begin(), fields.end(),
                                [&](auto& field) { return field.name == typeName; });
-        eosio::check(it != fields.end(),
-            eosio::convert_json_error(eosio::from_json_error::invalid_type_for_variant));
+        dcd::check(it != fields.end(),
+            dcd::convert_json_error(dcd::from_json_error::invalid_type_for_variant));
         stack_entry.variant_type_index = it - fields.begin();
-        eosio::varuint32_to_bin(stack_entry.variant_type_index, state.writer);
+        dcd::varuint32_to_bin(stack_entry.variant_type_index, state.writer);
     } else if (stack_entry.position == 1) {
         auto& field = fields[stack_entry.variant_type_index];
         field.type->ser->json_to_bin(state, allow_extensions, field.type, true);
     } else {
-       eosio::check(false, eosio::convert_json_error(eosio::from_json_error::expected_variant));
+       dcd::check(false, dcd::convert_json_error(dcd::from_json_error::expected_variant));
     }
 }
 
@@ -883,18 +883,18 @@ inline void json_to_bin(pseudo_variant*, json_to_bin_state& state, bool allow_ex
 ///////////////////////////////////////////////////////////////////////////////
 
 template<typename F>
-inline void bin_to_json(eosio::input_stream& bin, const abi_type* type, std::string& dest, F&& f) {
+inline void bin_to_json(dcd::input_stream& bin, const abi_type* type, std::string& dest, F&& f) {
     // FIXME: Write directly to the string instead of creating an additional buffer
     std::vector<char> buffer;
-    eosio::vector_stream writer{buffer};
+    dcd::vector_stream writer{buffer};
     bin_to_json_state state{bin, writer};
     type->ser->bin_to_json(state, true, type, true);
     while (!state.stack.empty()) {
         f();
         auto& entry = state.stack.back();
         entry.type->ser->bin_to_json(state, entry.allow_extensions, entry.type, false);
-        eosio::check(state.stack.size() <= max_stack_size,
-            eosio::convert_abi_error(eosio::abi_error::recursion_limit_reached));
+        dcd::check(state.stack.size() <= max_stack_size,
+            dcd::convert_abi_error(dcd::abi_error::recursion_limit_reached));
     }
     dest = std::string_view(writer.data.data(), writer.data.size());
 }
@@ -927,7 +927,7 @@ inline void bin_to_json(pseudo_object*, bin_to_json_state& state, bool allow_ext
         return;
     }
     auto& stack_entry = state.stack.back();
-    const std::vector<eosio::abi_field>& fields = type->as_struct()->fields;
+    const std::vector<dcd::abi_field>& fields = type->as_struct()->fields;
     if (++stack_entry.position < (ptrdiff_t)fields.size()) {
         auto& field = fields[stack_entry.position];
         if (trace_bin_to_json)
@@ -985,8 +985,8 @@ inline void bin_to_json(pseudo_variant*, bin_to_json_state& state, bool allow_ex
     if (++stack_entry.position == 0) {
         uint32_t index;
         varuint32_from_bin(index, state.bin);
-        const std::vector<eosio::abi_field>& fields = *stack_entry.type->as_variant();
-        eosio::check(index < fields.size(), eosio::convert_stream_error(eosio::stream_error::bad_variant_index));
+        const std::vector<dcd::abi_field>& fields = *stack_entry.type->as_variant();
+        dcd::check(index < fields.size(), dcd::convert_stream_error(dcd::stream_error::bad_variant_index));
         auto& f = fields[index];
         to_json(f.name, state.writer);
         state.writer.write(',');

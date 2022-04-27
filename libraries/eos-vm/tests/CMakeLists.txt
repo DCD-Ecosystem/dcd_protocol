@@ -88,7 +88,7 @@ endif(ENABLE_SPEC_TESTS)
 
 add_executable(unit_tests main.cpp
                           allocator_tests.cpp
-                          eosio_max_nested_structures_tests.cpp
+                          dcd_max_nested_structures_tests.cpp
                           guarded_ptr_tests.cpp
                           varint_tests.cpp
                           variant_tests.cpp

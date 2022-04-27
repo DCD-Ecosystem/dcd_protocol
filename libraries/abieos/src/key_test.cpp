@@ -1,4 +1,4 @@
-#include <eosio/to_key.hpp>
+#include <dcd/to_key.hpp>
 #include "abieos.hpp"
 
 int error_count;
@@ -20,7 +20,7 @@ using abieos::float128;
 using abieos::time_point;
 using abieos::time_point_sec;
 using abieos::block_timestamp;
-using eosio::name;
+using dcd::name;
 using abieos::bytes;
 using abieos::checksum160;
 using abieos::checksum256;
@@ -38,14 +38,14 @@ struct struct_type {
    std::optional<int> o;
    std::variant<int, double> va;
 };
-EOSIO_REFLECT(struct_type, v, o, va);
-EOSIO_COMPARE(struct_type);
+DCD_REFLECT(struct_type, v, o, va);
+DCD_COMPARE(struct_type);
 
 // Verifies that the ordering of keys is the same as the ordering of the original objects
 template<typename T>
 void test_key(const T& x, const T& y) {
-   auto keyx = eosio::convert_to_key(x);
-   auto keyy = eosio::convert_to_key(y);
+   auto keyx = dcd::convert_to_key(x);
+   auto keyy = dcd::convert_to_key(y);
    CHECK(std::lexicographical_compare(keyx.begin(), keyx.end(), keyy.begin(), keyy.end(), std::less<unsigned char>()) == (x < y));
    CHECK(std::lexicographical_compare(keyy.begin(), keyy.end(), keyx.begin(), keyx.end(), std::less<unsigned char>()) == (y < x));
 }
@@ -74,7 +74,7 @@ enum class enum_s16 : std::int16_t {
 
 template<typename T>
 std::size_t key_size(const T& obj) {
-   eosio::size_stream ss;
+   dcd::size_stream ss;
    to_key(obj, ss);
    return ss.size;
 }
@@ -106,7 +106,7 @@ void test_compare() {
    test_key(-std::numeric_limits<double>::infinity(), 0.);
    test_key(std::numeric_limits<double>::infinity(), 0.);
    test_key(-std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
-   using namespace eosio::literals;
+   using namespace dcd::literals;
    test_key("a"_n, "a"_n);
    test_key(name(), name());
    test_key("a"_n, "b"_n);
@@ -118,9 +118,9 @@ void test_compare() {
    test_key(checksum256(std::array{0xffffffffffffffffull, 0xffffffffffffff00ull, 0xffffffffffffffffull, 0xffffffffffffffffull}),
             checksum256(std::array{0xffffffffffffffffull, 0x00ffffffffffffffull, 0xffffffffffffffffull, 0xffffffffffffffffull}));
    test_key(public_key(), public_key());
-   test_key(public_key(std::in_place_index<0>, eosio::ecc_public_key{1}), public_key(std::in_place_index<1>));
-   test_key(public_key(eosio::webauthn_public_key{{}, eosio::webauthn_public_key::user_presence_t::USER_PRESENCE_NONE, "b"}),
-            public_key(eosio::webauthn_public_key{{}, eosio::webauthn_public_key::user_presence_t::USER_PRESENCE_PRESENT, "a"}));
+   test_key(public_key(std::in_place_index<0>, dcd::ecc_public_key{1}), public_key(std::in_place_index<1>));
+   test_key(public_key(dcd::webauthn_public_key{{}, dcd::webauthn_public_key::user_presence_t::USER_PRESENCE_NONE, "b"}),
+            public_key(dcd::webauthn_public_key{{}, dcd::webauthn_public_key::user_presence_t::USER_PRESENCE_PRESENT, "a"}));
 
    using namespace std::literals;
    test_key(""s, ""s);

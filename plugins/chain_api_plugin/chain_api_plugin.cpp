@@ -1,13 +1,13 @@
-#include <eosio/chain_api_plugin/chain_api_plugin.hpp>
-#include <eosio/chain/exceptions.hpp>
+#include <dcd/chain_api_plugin/chain_api_plugin.hpp>
+#include <dcd/chain/exceptions.hpp>
 
 #include <fc/io/json.hpp>
 
-namespace eosio {
+namespace dcd {
 
 static appbase::abstract_plugin& _chain_api_plugin = app().register_plugin<chain_api_plugin>();
 
-using namespace eosio;
+using namespace dcd;
 
 class chain_api_plugin_impl {
 public:

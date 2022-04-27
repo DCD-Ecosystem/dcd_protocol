@@ -14,7 +14,7 @@ EOS VM is designed from the ground up for the high demands of blockchain applica
 
 While EOS VM was designed for blockchain, we believe it is ideally suited for any application looking to embed a High Performance WebAssembly engine.
 
-We designed EOS VM to meet the needs of EOSIO blockchains after using three of the most common WebAssembly engines: Binaryen, WABT, and WAVM. These WebAssembly engines were the single largest source of security issues impacting EOSIO blockchains. While WAVM provides extremely fast execution, it is not suited to running a live blockchain because it has extremely long and unpredictable compilation times and the need to recompile all contracts every time the process restarts.  WABT was designed as a toolkit for manipulating WebAssembly first and as an execution engine second.
+We designed EOS VM to meet the needs of DCD blockchains after using three of the most common WebAssembly engines: Binaryen, WABT, and WAVM. These WebAssembly engines were the single largest source of security issues impacting DCD blockchains. While WAVM provides extremely fast execution, it is not suited to running a live blockchain because it has extremely long and unpredictable compilation times and the need to recompile all contracts every time the process restarts.  WABT was designed as a toolkit for manipulating WebAssembly first and as an execution engine second.
 
 We considered the WebAssembly engines used by the largest browsers, but they all come with considerable overhead and assumptions which are inappropriate for a reusable library or to be embedded in a blockchain. It is our hope that one day major browsers will opt to switch to EOS VM. 
  

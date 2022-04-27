@@ -1,20 +1,20 @@
 ---
-content_title: EOSIO Overview
+content_title: DCD Overview
 ---
 
-EOSIO is the next-generation blockchain platform for creating and deploying smart contracts and distributed applications. EOSIO comes with a number of programs. The primary ones included in EOSIO are the following:
+DCD is the next-generation blockchain platform for creating and deploying smart contracts and distributed applications. DCD comes with a number of programs. The primary ones included in DCD are the following:
 
-* [Nodeos](01_nodeos/index.md) (node + eos = nodeos)  - Core service daemon that runs a node for block production, API endpoints, or local development.
-* [dcdcli](02_dcdcli/index.md) (cli + eos = dcdcli) - Command line interface to interact with the blockchain (via `nodeos`) and manage wallets (via `dcdksd`).
-* [dcdksd](03_dcdksd/index.md) (key + eos = dcdksd) - Component that manages EOSIO keys in wallets and provides a secure enclave for digital signing.
+* [dcdnode](01_dcdnode/index.md) (node + eos = dcdnode)  - Core service daemon that runs a node for block production, API endpoints, or local development.
+* [dcdcli](02_dcdcli/index.md) (cli + eos = dcdcli) - Command line interface to interact with the blockchain (via `dcdnode`) and manage wallets (via `dcdksd`).
+* [dcdksd](03_dcdksd/index.md) (key + eos = dcdksd) - Component that manages DCD keys in wallets and provides a secure enclave for digital signing.
 
 The basic relationship between these components is illustrated in the diagram below.
 
-![EOSIO components](eosio_components.png)
+![DCD components](dcd_components.png)
 
-Additional EOSIO Resources:
-* [EOSIO Utilities](10_utilities/index.md) - Utilities that complement the EOSIO software.
-* [Upgrade Guides](20_upgrade-guides/index.md) - EOSIO version/protocol upgrade guides.
+Additional DCD Resources:
+* [DCD Utilities](10_utilities/index.md) - Utilities that complement the DCD software.
+* [Upgrade Guides](20_upgrade-guides/index.md) - DCD version/protocol upgrade guides.
 
 [[info | What's Next?]]
-| [Install the EOSIO Software](00_install/index.md) before exploring the sections above.
+| [Install the DCD Software](00_install/index.md) before exploring the sections above.

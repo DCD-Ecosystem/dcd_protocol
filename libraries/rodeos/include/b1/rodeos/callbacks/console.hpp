@@ -1,7 +1,7 @@
 #pragma once
 
 #include <b1/rodeos/callbacks/vm_types.hpp>
-#include <eosio/to_json.hpp>
+#include <dcd/to_json.hpp>
 
 namespace b1::rodeos {
 
@@ -48,7 +48,7 @@ struct console_callbacks {
       auto& state = derived().get_state();
       if (!state.max_console_size)
          return;
-      auto s = eosio::name{ value }.to_string();
+      auto s = dcd::name{ value }.to_string();
       append_console(s.c_str(), s.size());
    }
 

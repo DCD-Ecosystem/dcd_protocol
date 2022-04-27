@@ -1,5 +1,5 @@
 #pragma once
-#include <eosio/abi.hpp>
+#include <dcd/abi.hpp>
 #include <fc/log/logger.hpp>
 
 namespace b1 {
@@ -7,10 +7,10 @@ namespace b1 {
 class stream_handler {
  public:
    virtual ~stream_handler() {}
-   virtual const std::vector<eosio::name>& get_routes() const = 0;
-   virtual void publish(const char* data, uint64_t data_size, const eosio::name& routing_key) = 0;
+   virtual const std::vector<dcd::name>& get_routes() const = 0;
+   virtual void publish(const char* data, uint64_t data_size, const dcd::name& routing_key) = 0;
 
-   bool check_route(const eosio::name& stream_route) {
+   bool check_route(const dcd::name& stream_route) {
       if (get_routes().size() == 0) {
          return true;
       }
@@ -25,8 +25,8 @@ class stream_handler {
    }
 };
 
-inline std::vector<eosio::name> extract_routes(const std::string& routes_str) {
-   std::vector<eosio::name> streaming_routes{};
+inline std::vector<dcd::name> extract_routes(const std::string& routes_str) {
+   std::vector<dcd::name> streaming_routes{};
    bool star = false;
    std::string routings = routes_str;
    while (routings.size() > 0) {
@@ -35,7 +35,7 @@ inline std::vector<eosio::name> extract_routes(const std::string& routes_str) {
       std::string route        = routings.substr(0, pos);
       ilog("extracting route ${route}", ("route", route));
       if (route != "*") {
-         streaming_routes.emplace_back(eosio::name(route));
+         streaming_routes.emplace_back(dcd::name(route));
       } else {
          star = true;
       }

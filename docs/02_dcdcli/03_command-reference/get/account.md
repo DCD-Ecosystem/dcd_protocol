@@ -24,18 +24,18 @@ The following information shows the different positionals and options you can us
 ## Requirements
 * Install the currently supported version of `dcdcli.`
 [[info | Note]] 
-| The `dcdcli` tool is bundled with the EOSIO software. [Installing EOSIO](../../00_install/index.md) will install the `dcdcli` and `dcdksd` command line tools. 
-* You have access to an EOSIO blockchain.
+| The `dcdcli` tool is bundled with the DCD software. [Installing DCD](../../00_install/index.md) will install the `dcdcli` and `dcdksd` command line tools. 
+* You have access to an DCD blockchain.
 
 ## Examples
 
-1. Get formatted data for user **eosio**
+1. Get formatted data for user **dcd**
 
 ```shell
-dcdcli get account eosio
+dcdcli get account dcd
 ```
 **Where**
-`eosio` = The name of the account.
+`dcd` = The name of the account.
 
 **Example Output**
 ```console
@@ -58,16 +58,16 @@ cpu bandwidth: (averaged over 3 days)
 
 producers:     <not voted>
 ```
-2. Get JSON data for user **eosio**
+2. Get JSON data for user **dcd**
 
 ```sh
-dcdcli get account eosio --json
+dcdcli get account dcd --json
 ```
 **Example Output**
 
 ```json
 {
-  "account_name": "eosio",
+  "account_name": "dcd",
   "privileged": true,
   "last_code_update": "2018-05-23T18:00:25.500",
   "created": "2018-03-02T12:00:00.000",
@@ -116,7 +116,7 @@ dcdcli get account eosio --json
   "total_resources": null,
   "delegated_bandwidth": null,
   "voter_info": {
-    "owner": "eosio",
+    "owner": "dcd",
     "proxy": "",
     "producers": [],
     "staked": 0,

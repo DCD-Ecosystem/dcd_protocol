@@ -1,9 +1,9 @@
 #define BOOST_TEST_MODULE blockvault_sync_strategy
 #include <boost/test/included/unit_test.hpp>
-#include <eosio/chain/permission_object.hpp>
-#include <eosio/chain/types.hpp>
-#include <eosio/chain_plugin/blockvault_sync_strategy.hpp>
-#include <eosio/testing/tester.hpp>
+#include <dcd/chain/permission_object.hpp>
+#include <dcd/chain/types.hpp>
+#include <dcd/chain_plugin/blockvault_sync_strategy.hpp>
+#include <dcd/testing/tester.hpp>
 
 #ifdef NON_VALIDATING_TEST
 #define TESTER tester
@@ -11,11 +11,11 @@
 #define TESTER validating_tester
 #endif
 
-using namespace eosio;
-using namespace eosio::chain;
-using namespace eosio::testing;
-using namespace eosio::chain_apis;
-using namespace eosio::blockvault;
+using namespace dcd;
+using namespace dcd::chain;
+using namespace dcd::testing;
+using namespace dcd::chain_apis;
+using namespace dcd::blockvault;
 
 struct mock_genesis_t {};
 
@@ -49,17 +49,17 @@ struct mock_chain_t {
 };
 
 struct mock_blockvault_t : public block_vault_interface {
-   eosio::chain::block_id_type _previous_block_id{};
+   dcd::chain::block_id_type _previous_block_id{};
    bool                        _previous_block_id_sent = false;
 
    virtual void async_propose_constructed_block(uint32_t lib,
-                                                eosio::chain::signed_block_ptr block,
+                                                dcd::chain::signed_block_ptr block,
                                                 std::function<void(bool)>      handler) override {}
-   virtual void async_append_external_block(uint32_t lib, eosio::chain::signed_block_ptr block,
+   virtual void async_append_external_block(uint32_t lib, dcd::chain::signed_block_ptr block,
                                             std::function<void(bool)> handler) override {}
 
    virtual bool propose_snapshot(watermark_t watermark, const char* snapshot_filename) override { return true; }
-   virtual void sync(const eosio::chain::block_id_type* previous_block_id, sync_callback& callback) override {
+   virtual void sync(const dcd::chain::block_id_type* previous_block_id, sync_callback& callback) override {
       if (nullptr != previous_block_id) {
          _previous_block_id      = *previous_block_id;
          _previous_block_id_sent = true;

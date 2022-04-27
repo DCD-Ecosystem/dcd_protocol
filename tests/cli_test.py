@@ -8,9 +8,9 @@ import subprocess
 import re
 
 
-def nodeos_help_test():
-    """Test that nodeos help contains option descriptions"""
-    help_text = subprocess.check_output(["./programs/nodeos/nodeos", "--help"])
+def dcdnode_help_test():
+    """Test that dcdnode help contains option descriptions"""
+    help_text = subprocess.check_output(["./programs/dcdnode/dcdnode", "--help"])
 
     assert(re.search(b'Application.*Options', help_text))
     assert(re.search(b'Options for .*_plugin', help_text))
@@ -38,7 +38,7 @@ def cli11_bugfix_test():
 
     # Make sure that the command failed because of the connection error,
     # not the command line parsing error.
-    assert(b'Failed to connect to nodeos' in completed_process.stderr)
+    assert(b'Failed to connect to dcdnode' in completed_process.stderr)
 
 
 def cli11_optional_option_arg_test():
@@ -73,10 +73,10 @@ def dcdcli_sign_test():
         '"delay_sec": 0,'
         '"context_free_actions": [],'
         '"actions": [{'
-            '"account": "eosio.token",'
+            '"account": "dcd.token",'
             '"name": "transfer",'
             '"authorization": [{'
-            '"actor": "eosio",'
+            '"actor": "dcd",'
             '"permission": "active"'
         '}'
         '],'
@@ -95,9 +95,9 @@ def dcdcli_sign_test():
     assert(b'"expiration": "2019-08-01T07:15:49"' in output)
     assert(b'"ref_block_num": 34881' in output)
     assert(b'"ref_block_prefix": 2972818865' in output)
-    assert(b'"account": "eosio.token"' in output)
+    assert(b'"account": "dcd.token"' in output)
     assert(b'"name": "transfer"' in output)
-    assert(b'"actor": "eosio"' in output)
+    assert(b'"actor": "dcd"' in output)
     assert(b'"permission": "active"' in output)
     assert(b'"data": "000000000000a6690000000000ea305501000000000000000453595300000000016d"' in output)
 
@@ -118,9 +118,9 @@ def dcdcli_sign_test():
     assert(b'"expiration": "2019-08-01T07:15:49"' in errs)
     assert(b'"ref_block_num": 34881' in errs)
     assert(b'"ref_block_prefix": 2972818865' in errs)
-    assert(b'"account": "eosio.token"' in errs)
+    assert(b'"account": "dcd.token"' in errs)
     assert(b'"name": "transfer"' in errs)
-    assert(b'"actor": "eosio"' in errs)
+    assert(b'"actor": "dcd"' in errs)
     assert(b'"permission": "active"' in errs)
     assert(b'"data": "000000000000a6690000000000ea305501000000000000000453595300000000016d"' in errs)
 
@@ -131,7 +131,7 @@ def dcdcli_sign_test():
     assert(b'signatures' in output)
     assert(b'"signatures": []' not in output)
 
-nodeos_help_test()
+dcdnode_help_test()
 
 dcdcli_help_test(['--help'])
 dcdcli_help_test(['system', '--help'])

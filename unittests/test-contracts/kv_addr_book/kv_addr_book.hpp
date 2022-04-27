@@ -1,18 +1,18 @@
-#include <eosio/eosio.hpp>
+#include <dcd/dcd.hpp>
 
-using namespace eosio;
+using namespace dcd;
 using namespace std;
 
 // this structure defines the data stored in the kv::table
 struct person {
-   eosio::name account_name;
-   eosio::non_unique<eosio::name, std::string> first_name;
-   eosio::non_unique<eosio::name, std::string> last_name;
-   eosio::non_unique<eosio::name, std::string, std::string, std::string, std::string> street_city_state_cntry;
-   eosio::non_unique<eosio::name, std::string> personal_id;
+   dcd::name account_name;
+   dcd::non_unique<dcd::name, std::string> first_name;
+   dcd::non_unique<dcd::name, std::string> last_name;
+   dcd::non_unique<dcd::name, std::string, std::string, std::string, std::string> street_city_state_cntry;
+   dcd::non_unique<dcd::name, std::string> personal_id;
    std::pair<std::string, std::string> country_personal_id;
 
-   eosio::name get_account_name() const {
+   dcd::name get_account_name() const {
       return account_name;
    }
    std::string get_first_name() const {
@@ -48,7 +48,7 @@ struct person {
 // helper factory to easily build person objects
 struct person_factory {
    static person get_person(
-      eosio::name account_name,
+      dcd::name account_name,
       std::string first_name,
       std::string last_name,
       std::string street,
@@ -67,9 +67,9 @@ struct person_factory {
       }
 };
 
-class [[eosio::contract]] kv_addr_book : public eosio::contract {
+class [[dcd::contract]] kv_addr_book : public dcd::contract {
 
-   struct [[eosio::table]] address_table : eosio::kv::table<person, "kvaddrbook"_n> {
+   struct [[dcd::table]] address_table : dcd::kv::table<person, "kvaddrbook"_n> {
       // unique indexes definitions
       // 1. they are defined for just one property of the kv::table parameter type (person)
       // 2. unique indexes for multiple properties of the kv::table parameter type
@@ -89,13 +89,13 @@ class [[eosio::contract]] kv_addr_book : public eosio::contract {
       //    index, and by providing as the first property one that has unique values
       //    it ensures the uniques of the values combined (including non-unique ones)
       // 3. the rest of the properties are the ones wanted to be indexed non-uniquely
-      index<non_unique<eosio::name, std::string>> first_name_idx {
+      index<non_unique<dcd::name, std::string>> first_name_idx {
          name{"firstname"_n},
          &person::first_name};
-      index<non_unique<eosio::name, std::string>> last_name_idx {
+      index<non_unique<dcd::name, std::string>> last_name_idx {
          name{"lastname"_n},
          &person::last_name};
-      index<non_unique<eosio::name, std::string>> personal_id_idx {
+      index<non_unique<dcd::name, std::string>> personal_id_idx {
          name{"persid"_n},
          &person::personal_id};
       // non-unique index defined using the KV_NAMED_INDEX macro
@@ -104,7 +104,7 @@ class [[eosio::contract]] kv_addr_book : public eosio::contract {
       // is indexed and that will give the name of the index as well
       KV_NAMED_INDEX("address"_n, street_city_state_cntry)
 
-      address_table(eosio::name contract_name) {
+      address_table(dcd::name contract_name) {
          init(contract_name,
             account_name_uidx,
             country_personal_id_uidx,
@@ -117,23 +117,23 @@ class [[eosio::contract]] kv_addr_book : public eosio::contract {
 
    public:
       using contract::contract;
-      kv_addr_book(eosio::name receiver, eosio::name code, eosio::datastream<const char*> ds)
+      kv_addr_book(dcd::name receiver, dcd::name code, dcd::datastream<const char*> ds)
          : contract(receiver, code, ds) {}
 
       // retrieves a person based on primary key account_name
-      [[eosio::action]]
-      person get(eosio::name account_name);
+      [[dcd::action]]
+      person get(dcd::name account_name);
 
       // retrieves a person based on unique index defined by country and personal_id
-      [[eosio::action]]
+      [[dcd::action]]
       person getbycntrpid(std::string country, std::string personal_id);
 
       // retrieves list of persons with the same last name
-      [[eosio::action]]
+      [[dcd::action]]
       std::vector<person> getbylastname(std::string last_name);
 
       // retrieves list of persons with the same address
-      [[eosio::action]]
+      [[dcd::action]]
       std::vector<person> getbyaddress(
          std::string street, 
          std::string city, 
@@ -141,12 +141,12 @@ class [[eosio::contract]] kv_addr_book : public eosio::contract {
          std::string country);
 
 
-      [[eosio::action]]
+      [[dcd::action]]
       void test();
 
       // creates if not exists, or updates if already exists, a person
-      [[eosio::action]]
-      void upsert(eosio::name account_name,
+      [[dcd::action]]
+      void upsert(dcd::name account_name,
          std::string first_name,
          std::string last_name,
          std::string street,
@@ -156,26 +156,26 @@ class [[eosio::contract]] kv_addr_book : public eosio::contract {
          std::string personal_id);
 
       // deletes a person based on primary key account_name
-      [[eosio::action]]
-      void del(eosio::name account_name);
+      [[dcd::action]]
+      void del(dcd::name account_name);
 
       // checks if a person exists in addressbook with a specific personal_id and country
-      [[eosio::action]]
+      [[dcd::action]]
       bool checkpidcntr(std::string personal_id, std::string country);
 
       // iterates over the first iterations_count persons in the table 
       // and prints their first and last names
-      [[eosio::action]]
+      [[dcd::action]]
       void iterate(int iterations_count);
 
-      using get_action = eosio::action_wrapper<"get"_n, &kv_addr_book::get>;
-      using get_by_cntry_pers_id_action = eosio::action_wrapper<"getbycntrpid"_n, &kv_addr_book::getbycntrpid>;
-      using get_by_last_name_action = eosio::action_wrapper<"getbylastname"_n, &kv_addr_book::getbylastname>;
-      using get_buy_address_action = eosio::action_wrapper<"getbyaddress"_n, &kv_addr_book::getbyaddress>;
-      using upsert_action = eosio::action_wrapper<"upsert"_n, &kv_addr_book::upsert>;
-      using del_action = eosio::action_wrapper<"del"_n, &kv_addr_book::del>;
-      using is_pers_id_in_cntry_action = eosio::action_wrapper<"checkpidcntr"_n, &kv_addr_book::checkpidcntr>;
-      using iterate_action = eosio::action_wrapper<"iterate"_n, &kv_addr_book::iterate>;
+      using get_action = dcd::action_wrapper<"get"_n, &kv_addr_book::get>;
+      using get_by_cntry_pers_id_action = dcd::action_wrapper<"getbycntrpid"_n, &kv_addr_book::getbycntrpid>;
+      using get_by_last_name_action = dcd::action_wrapper<"getbylastname"_n, &kv_addr_book::getbylastname>;
+      using get_buy_address_action = dcd::action_wrapper<"getbyaddress"_n, &kv_addr_book::getbyaddress>;
+      using upsert_action = dcd::action_wrapper<"upsert"_n, &kv_addr_book::upsert>;
+      using del_action = dcd::action_wrapper<"del"_n, &kv_addr_book::del>;
+      using is_pers_id_in_cntry_action = dcd::action_wrapper<"checkpidcntr"_n, &kv_addr_book::checkpidcntr>;
+      using iterate_action = dcd::action_wrapper<"iterate"_n, &kv_addr_book::iterate>;
 
    private:
       void print_person(const person& person);

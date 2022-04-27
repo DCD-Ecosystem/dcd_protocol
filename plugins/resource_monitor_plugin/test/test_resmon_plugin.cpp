@@ -5,9 +5,9 @@
 
 #include <fc/variant_object.hpp>
 
-#include <eosio/resource_monitor_plugin/resource_monitor_plugin.hpp>
+#include <dcd/resource_monitor_plugin/resource_monitor_plugin.hpp>
 
-using namespace eosio;
+using namespace dcd;
 using namespace boost::system;
 
 namespace bfs = boost::filesystem;

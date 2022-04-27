@@ -19,8 +19,8 @@ struct unimplemented_callbacks {
    int64_t set_proposed_producers(int, int) { return unimplemented<int64_t>("set_proposed_producers"); }
    int     get_blockchain_parameters_packed(int, int) { return unimplemented<int>("get_blockchain_parameters_packed"); }
    void set_blockchain_parameters_packed(int, int) { return unimplemented<void>("set_blockchain_parameters_packed"); }
-   uint32_t get_parameters_packed(eosio::vm::span<const char>, eosio::vm::span<char>) const { return unimplemented<uint32_t>("get_parameters_packed"); }
-   void set_parameters_packed( eosio::vm::span<const char> ) { return unimplemented<uint32_t>("set_parameters_packed"); }
+   uint32_t get_parameters_packed(dcd::vm::span<const char>, dcd::vm::span<char>) const { return unimplemented<uint32_t>("get_parameters_packed"); }
+   void set_parameters_packed( dcd::vm::span<const char> ) { return unimplemented<uint32_t>("set_parameters_packed"); }
 
    int  is_privileged(int64_t) { return unimplemented<int>("is_privileged"); }
    void set_privileged(int64_t, int) { return unimplemented<void>("set_privileged"); }
@@ -111,8 +111,8 @@ struct unimplemented_callbacks {
    int64_t get_sender() { return unimplemented<int64_t>("get_sender"); }
 
    // context_free_system_api
-   void eosio_assert_code(int, int64_t) { return unimplemented<void>("eosio_assert_code"); }
-   void eosio_exit(int) { return unimplemented<void>("eosio_exit"); }
+   void dcd_assert_code(int, int64_t) { return unimplemented<void>("dcd_assert_code"); }
+   void dcd_exit(int) { return unimplemented<void>("dcd_exit"); }
 
    // authorization_api
    void require_recipient(int64_t) { return unimplemented<void>("require_recipient"); }
@@ -216,8 +216,8 @@ struct unimplemented_callbacks {
       Rft::template add<&Derived::get_sender>("env", "get_sender");
 
       // context_free_system_api
-      Rft::template add<&Derived::eosio_assert_code>("env", "eosio_assert_code");
-      Rft::template add<&Derived::eosio_exit>("env", "eosio_exit");
+      Rft::template add<&Derived::dcd_assert_code>("env", "dcd_assert_code");
+      Rft::template add<&Derived::dcd_exit>("env", "dcd_exit");
 
       // authorization_api
       Rft::template add<&Derived::require_recipient>("env", "require_recipient");

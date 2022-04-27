@@ -1,9 +1,9 @@
-#include <eosio/vm/allocator.hpp>
+#include <dcd/vm/allocator.hpp>
 
 #include <catch2/catch.hpp>
 
-using namespace eosio;
-using namespace eosio::vm;
+using namespace dcd;
+using namespace dcd::vm;
 
 template<typename T>
 bool check_alignment(T* ptr) {

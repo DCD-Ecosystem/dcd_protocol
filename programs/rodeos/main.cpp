@@ -1,7 +1,7 @@
 #include <appbase/application.hpp>
 #include <boost/dll/runtime_symbol_info.hpp>
 #include <boost/exception/diagnostic_information.hpp>
-#include <eosio/version/version.hpp>
+#include <dcd/version/version.hpp>
 #include <fc/exception/exception.hpp>
 #include <fc/filesystem.hpp>
 #include <fc/log/appender.hpp>
@@ -67,12 +67,12 @@ enum return_codes {
 int main(int argc, char** argv) {
    try {
       app().set_version(b1::rodeos::config::version);
-      app().set_version_string(eosio::version::version_client());
-      app().set_full_version_string(eosio::version::version_full());
+      app().set_version_string(dcd::version::version_client());
+      app().set_full_version_string(dcd::version::version_full());
 
       auto root = fc::app_path();
-      app().set_default_data_dir(root / "eosio" / b1::rodeos::config::rodeos_executable_name / "data");
-      app().set_default_config_dir(root / "eosio" / b1::rodeos::config::rodeos_executable_name / "config");
+      app().set_default_data_dir(root / "dcd" / b1::rodeos::config::rodeos_executable_name / "data");
+      app().set_default_config_dir(root / "dcd" / b1::rodeos::config::rodeos_executable_name / "config");
       if (!app().initialize<b1::cloner_plugin, b1::wasm_ql_plugin>(argc, argv)) {
          const auto& opts = app().get_options();
          if (opts.count("help") || opts.count("version") || opts.count("full-version") ||

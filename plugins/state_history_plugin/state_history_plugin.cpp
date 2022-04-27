@@ -1,8 +1,8 @@
-#include <eosio/chain/config.hpp>
-#include <eosio/resource_monitor_plugin/resource_monitor_plugin.hpp>
-#include <eosio/state_history/log.hpp>
-#include <eosio/state_history/serialization.hpp>
-#include <eosio/state_history_plugin/state_history_plugin.hpp>
+#include <dcd/chain/config.hpp>
+#include <dcd/resource_monitor_plugin/resource_monitor_plugin.hpp>
+#include <dcd/state_history/log.hpp>
+#include <dcd/state_history/serialization.hpp>
+#include <dcd/state_history_plugin/state_history_plugin.hpp>
 
 #include <fc/log/trace.hpp>
 
@@ -19,7 +19,7 @@ namespace ws = boost::beast::websocket;
 
 extern const char* const state_history_plugin_abi;
 
-namespace eosio {
+namespace dcd {
 using namespace chain;
 using namespace state_history;
 using boost::signals2::scoped_connection;
@@ -479,7 +479,7 @@ void state_history_plugin::set_program_options(options_description& cli, options
    options("state-history-archive-dir", bpo::value<bfs::path>()->default_value("archive"),
            "the location of the state history archive directory (absolute path or relative to state-history dir).\n"
            "If the value is empty, blocks files beyond the retained limit will be deleted.\n"
-           "All files in the archive directory are completely under user's control, i.e. they won't be accessed by nodeos anymore.");
+           "All files in the archive directory are completely under user's control, i.e. they won't be accessed by dcdnode anymore.");
    options("state-history-stride", bpo::value<uint32_t>()->default_value(UINT32_MAX),
          "split the state history log files when the block number is the multiple of the stride\n"
          "When the stride is reached, the current history log and index will be renamed '*-history-<start num>-<end num>.log/index'\n"
@@ -520,7 +520,7 @@ void state_history_plugin::plugin_initialize(const variables_map& options) {
 
       auto  dir_option = options.at("state-history-dir").as<bfs::path>();
 
-      static eosio::state_history_config config;
+      static dcd::state_history_config config;
 
       if (dir_option.is_relative())
          config.log_dir = app().data_dir() / dir_option;
@@ -586,4 +586,4 @@ void state_history_plugin::handle_sighup() {
    fc::logger::update( logger_name, _log );
 }
 
-} // namespace eosio
+} // namespace dcd

@@ -1,13 +1,13 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
-#include <eosio/testing/tester.hpp>
-#include <eosio/chain/abi_serializer.hpp>
-#include <eosio/chain/wasm_eosio_constraints.hpp>
-//#include <eosio/chain/resource_limits.hpp>
-#include <eosio/chain/exceptions.hpp>
-#include <eosio/chain/wast_to_wasm.hpp>
-#include <eosio/chain_plugin/chain_plugin.hpp>
+#include <dcd/testing/tester.hpp>
+#include <dcd/chain/abi_serializer.hpp>
+#include <dcd/chain/wasm_dcd_constraints.hpp>
+//#include <dcd/chain/resource_limits.hpp>
+#include <dcd/chain/exceptions.hpp>
+#include <dcd/chain/wast_to_wasm.hpp>
+#include <dcd/chain_plugin/chain_plugin.hpp>
 
 #include <contracts.hpp>
 
@@ -27,9 +27,9 @@
 #define TESTER validating_tester
 #endif
 
-using namespace eosio;
-using namespace eosio::chain;
-using namespace eosio::testing;
+using namespace dcd;
+using namespace dcd::chain;
+using namespace dcd::testing;
 using namespace fc;
 
 namespace std{

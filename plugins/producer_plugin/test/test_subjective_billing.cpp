@@ -1,14 +1,14 @@
 #define BOOST_TEST_MODULE subjective_billing
 #include <boost/test/included/unit_test.hpp>
 
-//#include <eosio/producer_plugin/subjective_billing.hpp>
+//#include <dcd/producer_plugin/subjective_billing.hpp>
 
-#include <eosio/testing/tester.hpp>
+#include <dcd/testing/tester.hpp>
 
 namespace {
 
-using namespace eosio;
-using namespace eosio::chain;
+using namespace dcd;
+using namespace dcd::chain;
 
 BOOST_AUTO_TEST_SUITE( subjective_billing_test )
 

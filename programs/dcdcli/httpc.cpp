@@ -19,15 +19,15 @@
 #include <fc/variant.hpp>
 #include <fc/io/json.hpp>
 #include <fc/network/platform_root_ca.hpp>
-#include <eosio/chain/exceptions.hpp>
-#include <eosio/http_plugin/http_plugin.hpp>
-#include <eosio/chain_plugin/chain_plugin.hpp>
+#include <dcd/chain/exceptions.hpp>
+#include <dcd/http_plugin/http_plugin.hpp>
+#include <dcd/chain_plugin/chain_plugin.hpp>
 #include <boost/asio/ssl/rfc2818_verification.hpp>
 #include "httpc.hpp"
 
 using boost::asio::ip::tcp;
-using namespace eosio::chain;
-namespace eosio { namespace client { namespace http {
+using namespace dcd::chain;
+namespace dcd { namespace client { namespace http {
 
    namespace detail {
       class http_context_impl {
@@ -283,7 +283,7 @@ namespace eosio { namespace client { namespace http {
             throw chain::missing_net_api_plugin_exception(FC_LOG_MESSAGE(error, "Net API plugin is not enabled"));
          }
       } else {
-         auto &&error_info = response_result.as<eosio::error_results>().error;
+         auto &&error_info = response_result.as<dcd::error_results>().error;
          // Construct fc exception from error
          const auto &error_details = error_info.details;
 

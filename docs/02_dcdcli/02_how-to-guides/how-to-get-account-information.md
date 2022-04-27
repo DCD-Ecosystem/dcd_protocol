@@ -1,15 +1,15 @@
 ## Goal
 
-Query infomation of an EOSIO account
+Query infomation of an DCD account
 
 ## Before you begin
 
 * Install the currently supported version of `dcdcli`
 
 [[info | Note]]
-| The dcdcli tool is bundled with the EOSIO software. [Installing EOSIO](../../00_install/index.md) will also install the dcdcli tool. 
+| The dcdcli tool is bundled with the DCD software. [Installing DCD](../../00_install/index.md) will also install the dcdcli tool. 
 
-* Acquire functional understanding of [EOSIO Accounts and Permissions](https://developers.eos.io/welcome/v2.1/protocol/accounts_and_permissions)
+* Acquire functional understanding of [DCD Accounts and Permissions](https://developers.eos.io/welcome/v2.1/protocol/accounts_and_permissions)
 
 
 ## Steps
@@ -19,7 +19,7 @@ Execute the command below:
 ```sh
 dcdcli get account ACCOUNT_NAME
 ```
-Where ACCOUNT_NAME = name of the existing account in the EOSIO blockchain.
+Where ACCOUNT_NAME = name of the existing account in the DCD blockchain.
 
 **Example Output**
 
@@ -44,4 +44,4 @@ cpu bandwidth:
 ```
 
 [[info | Account Fields]]
-| Depending on the EOSIO network you are connected, you might see different fields associated with an account. That depends on which system contract has been deployed on the network.
+| Depending on the DCD network you are connected, you might see different fields associated with an account. That depends on which system contract has been deployed on the network.

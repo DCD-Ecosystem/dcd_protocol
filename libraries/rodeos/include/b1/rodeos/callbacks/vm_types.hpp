@@ -2,20 +2,20 @@
 
 #include <fc/exception/exception.hpp>
 
-#include <eosio/vm/backend.hpp>
+#include <dcd/vm/backend.hpp>
 
 namespace b1::rodeos {
 
-using wasm_size_t = eosio::vm::wasm_size_t;
+using wasm_size_t = dcd::vm::wasm_size_t;
 
 template <typename T, std::size_t Align = alignof(T)>
-using legacy_ptr = eosio::vm::argument_proxy<T*, Align>;
+using legacy_ptr = dcd::vm::argument_proxy<T*, Align>;
 
 template <typename T, std::size_t Align = alignof(T)>
-using legacy_span = eosio::vm::argument_proxy<eosio::vm::span<T>, Align>;
+using legacy_span = dcd::vm::argument_proxy<dcd::vm::span<T>, Align>;
 
-struct null_terminated_ptr : eosio::vm::span<const char> {
-   using base_type = eosio::vm::span<const char>;
+struct null_terminated_ptr : dcd::vm::span<const char> {
+   using base_type = dcd::vm::span<const char>;
    null_terminated_ptr(const char* ptr) : base_type(ptr, strlen(ptr)) {}
 };
 
@@ -37,9 +37,9 @@ inline size_t legacy_copy_to_wasm(char* dest, size_t dest_size, const char* src,
    return copy_size;
 }
 
-template <typename Host, typename Execution_Interface = eosio::vm::execution_interface>
-struct type_converter : eosio::vm::type_converter<Host, Execution_Interface> {
-   using base_type = eosio::vm::type_converter<Host, Execution_Interface>;
+template <typename Host, typename Execution_Interface = dcd::vm::execution_interface>
+struct type_converter : dcd::vm::type_converter<Host, Execution_Interface> {
+   using base_type = dcd::vm::type_converter<Host, Execution_Interface>;
    using base_type::base_type;
    using base_type::from_wasm;
 
@@ -54,7 +54,7 @@ struct type_converter : eosio::vm::type_converter<Host, Execution_Interface> {
    }
 
    template <typename T>
-   auto from_wasm(void* ptr) const -> std::enable_if_t<std::is_pointer_v<T>, eosio::vm::argument_proxy<T>> {
+   auto from_wasm(void* ptr) const -> std::enable_if_t<std::is_pointer_v<T>, dcd::vm::argument_proxy<T>> {
       this->template validate_pointer<std::remove_pointer_t<T>>(ptr, 1);
       return { ptr };
    }
@@ -67,7 +67,7 @@ struct type_converter : eosio::vm::type_converter<Host, Execution_Interface> {
 
 template <typename Cls>
 using registered_host_functions =
-      eosio::vm::registered_host_functions<Cls, eosio::vm::execution_interface,
-                                           type_converter<Cls, eosio::vm::execution_interface>>;
+      dcd::vm::registered_host_functions<Cls, dcd::vm::execution_interface,
+                                           type_converter<Cls, dcd::vm::execution_interface>>;
 
 } // namespace b1::rodeos

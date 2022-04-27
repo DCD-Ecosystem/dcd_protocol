@@ -118,18 +118,18 @@ class Utils:
     EosWalletName="dcdksd"
     EosWalletPath="programs/dcdksd/"+ EosWalletName
 
-    EosServerName="nodeos"
-    EosServerPath="programs/nodeos/"+ EosServerName
+    EosServerName="dcdnode"
+    EosServerPath="programs/dcdnode/"+ EosServerName
 
-    EosLauncherPath="programs/eosio-launcher/eosio-launcher"
+    EosLauncherPath="programs/dcd-launcher/dcd-launcher"
     ShuttingDown=False
 
-    EosBlockLogPath="programs/eosio-blocklog/eosio-blocklog"
+    EosBlockLogPath="programs/dcd-blocklog/dcd-blocklog"
 
     FileDivider="================================================================="
     DataRoot="var"
     DataDir="%s/lib/" % (DataRoot)
-    ConfigDir="etc/eosio/"
+    ConfigDir="etc/dcd/"
 
     TimeFmt='%Y-%m-%dT%H:%M:%S.%f'
 

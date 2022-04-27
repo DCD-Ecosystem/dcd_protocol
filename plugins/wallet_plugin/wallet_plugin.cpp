@@ -1,7 +1,7 @@
-#include <eosio/wallet_plugin/wallet_plugin.hpp>
-#include <eosio/wallet_plugin/wallet_manager.hpp>
-#include <eosio/wallet_plugin/yubihsm_wallet.hpp>
-#include <eosio/chain/exceptions.hpp>
+#include <dcd/wallet_plugin/wallet_plugin.hpp>
+#include <dcd/wallet_plugin/wallet_manager.hpp>
+#include <dcd/wallet_plugin/yubihsm_wallet.hpp>
+#include <dcd/chain/exceptions.hpp>
 #include <boost/filesystem/path.hpp>
 #include <chrono>
 
@@ -9,7 +9,7 @@
 
 namespace fc { class variant; }
 
-namespace eosio {
+namespace dcd {
 
 static appbase::abstract_plugin& _wallet_plugin = app().register_plugin<wallet_plugin>();
 
@@ -65,4 +65,4 @@ void wallet_plugin::plugin_initialize(const variables_map& options) {
    } FC_LOG_AND_RETHROW()
 }
 
-} // namespace eosio
+} // namespace dcd

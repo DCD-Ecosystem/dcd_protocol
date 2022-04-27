@@ -1,18 +1,18 @@
-#include <eosio/chain/authorization_manager.hpp>
-#include <eosio/chain/exceptions.hpp>
-#include <eosio/chain/permission_object.hpp>
-#include <eosio/chain/permission_link_object.hpp>
-#include <eosio/chain/authority_checker.hpp>
-#include <eosio/chain/controller.hpp>
-#include <eosio/chain/global_property_object.hpp>
-#include <eosio/chain/contract_types.hpp>
-#include <eosio/chain/generated_transaction_object.hpp>
+#include <dcd/chain/authorization_manager.hpp>
+#include <dcd/chain/exceptions.hpp>
+#include <dcd/chain/permission_object.hpp>
+#include <dcd/chain/permission_link_object.hpp>
+#include <dcd/chain/authority_checker.hpp>
+#include <dcd/chain/controller.hpp>
+#include <dcd/chain/global_property_object.hpp>
+#include <dcd/chain/contract_types.hpp>
+#include <dcd/chain/generated_transaction_object.hpp>
 #include <boost/tuple/tuple_io.hpp>
-#include <eosio/chain/database_utils.hpp>
-#include <eosio/chain/protocol_state_object.hpp>
+#include <dcd/chain/database_utils.hpp>
+#include <dcd/chain/protocol_state_object.hpp>
 
 
-namespace eosio { namespace chain {
+namespace dcd { namespace chain {
 
    using authorization_index_set = index_set<
       permission_index,
@@ -324,7 +324,7 @@ namespace eosio { namespace chain {
          if( !linked_permission )
             return config::active_name;
 
-         if( *linked_permission == config::eosio_any_name )
+         if( *linked_permission == config::dcd_any_name )
             return std::optional<permission_name>();
 
          return linked_permission;
@@ -386,20 +386,20 @@ namespace eosio { namespace chain {
             || !_control.is_builtin_activated( builtin_protocol_feature_t::fix_linkauth_restriction ) )
       {
          EOS_ASSERT( link.type != updateauth::get_name(),  action_validate_exception,
-                     "Cannot link eosio::updateauth to a minimum permission" );
+                     "Cannot link dcd::updateauth to a minimum permission" );
          EOS_ASSERT( link.type != deleteauth::get_name(),  action_validate_exception,
-                     "Cannot link eosio::deleteauth to a minimum permission" );
+                     "Cannot link dcd::deleteauth to a minimum permission" );
          EOS_ASSERT( link.type != linkauth::get_name(),    action_validate_exception,
-                     "Cannot link eosio::linkauth to a minimum permission" );
+                     "Cannot link dcd::linkauth to a minimum permission" );
          EOS_ASSERT( link.type != unlinkauth::get_name(),  action_validate_exception,
-                     "Cannot link eosio::unlinkauth to a minimum permission" );
+                     "Cannot link dcd::unlinkauth to a minimum permission" );
          EOS_ASSERT( link.type != canceldelay::get_name(), action_validate_exception,
-                     "Cannot link eosio::canceldelay to a minimum permission" );
+                     "Cannot link dcd::canceldelay to a minimum permission" );
       }
 
       const auto linked_permission_name = lookup_minimum_permission(link.account, link.code, link.type);
 
-      if( !linked_permission_name ) // if action is linked to eosio.any permission
+      if( !linked_permission_name ) // if action is linked to dcd.any permission
          return;
 
       EOS_ASSERT( get_permission(auth).satisfies( get_permission({link.account, *linked_permission_name}),
@@ -424,7 +424,7 @@ namespace eosio { namespace chain {
                   "cannot unlink non-existent permission link of account '${account}' for actions matching '${code}::${action}'",
                   ("account", unlink.account)("code", unlink.code)("action", unlink.type) );
 
-      if( *unlinked_permission_name == config::eosio_any_name )
+      if( *unlinked_permission_name == config::dcd_any_name )
          return;
 
       EOS_ASSERT( get_permission(auth).satisfies( get_permission({unlink.account, *unlinked_permission_name}),
@@ -534,7 +534,7 @@ namespace eosio { namespace chain {
 
             if( !special_case ) {
                auto min_permission_name = lookup_minimum_permission(declared_auth.actor, act.account, act.name);
-               if( min_permission_name ) { // since special cases were already handled, it should only be false if the permission is eosio.any
+               if( min_permission_name ) { // since special cases were already handled, it should only be false if the permission is dcd.any
                   const auto& min_permission = get_permission({declared_auth.actor, *min_permission_name});
                   EOS_ASSERT( get_permission(declared_auth).satisfies( min_permission,
                                                                        _db.get_index<permission_index>().indices() ),
@@ -647,4 +647,4 @@ namespace eosio { namespace chain {
       return checker.used_keys();
    }
 
-} } /// namespace eosio::chain
+} } /// namespace dcd::chain

@@ -1,11 +1,11 @@
-#include <eosio/chain/webassembly/interface.hpp>
+#include <dcd/chain/webassembly/interface.hpp>
 
 #include <compiler_builtins.hpp>
 #include <softfloat.hpp>
 
 #include <fc/uint128.hpp>
 
-namespace eosio { namespace chain { namespace webassembly {
+namespace dcd { namespace chain { namespace webassembly {
 
    void interface::__ashlti3(legacy_ptr<__int128> ret, uint64_t low, uint64_t high, uint32_t shift) const {
       fc::uint128 i(high, low);
@@ -252,4 +252,4 @@ namespace eosio { namespace chain { namespace webassembly {
          return 1;
       return 0;
    }
-}}} // ns eosio::chain::webassembly
+}}} // ns dcd::chain::webassembly

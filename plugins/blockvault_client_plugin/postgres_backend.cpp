@@ -5,7 +5,7 @@
 #include <limits.h>
 #include <unistd.h>
 
-namespace eosio {
+namespace dcd {
 namespace blockvault {
 
 postgres_backend::postgres_backend(const std::string& options)
@@ -207,4 +207,4 @@ void postgres_backend::sync(std::string_view previous_block_id, backend::sync_ca
 }
 
 } // namespace blockvault
-} // namespace eosio
+} // namespace dcd

@@ -1,8 +1,8 @@
-#include <eosio/vm/span.hpp>
+#include <dcd/vm/span.hpp>
 
 #include <catch2/catch.hpp>
 
-using eosio::vm::span;
+using dcd::vm::span;
 
 TEST_CASE("span static_extent tests", "[span_static_extent]") {
    // currently we only support a static extent of 1
@@ -16,7 +16,7 @@ TEST_CASE("span static_extent tests", "[span_static_extent]") {
    CHECK(3 == a);
 
    int* lta = &a;
-   CHECK_THROWS_AS(span<int>(&a, lta-1), eosio::vm::span_exception);
+   CHECK_THROWS_AS(span<int>(&a, lta-1), dcd::vm::span_exception);
 }
 
 TEST_CASE("default constructor", "[span_dynamic_extent]") {
@@ -62,7 +62,7 @@ TEST_CASE("std::array constructor", "[span]") {
    CHECK(s1.size() == 1);
 }
 
-namespace eosio::vm {
+namespace dcd::vm {
 template<typename T, std::size_t Extent>
 bool operator==(const span<T, Extent>& lhs, const span<T, Extent>& rhs) {
    return lhs.data() == rhs.data() && lhs.size() == rhs.size();
@@ -94,5 +94,5 @@ TEST_CASE("span dynamic_extent tests", "[span_dynamic_extent]") {
    CHECK(s.first(3) == span<int>(a, 3));
    CHECK(s.last(3)  == span<int>(a+7, 3));
    CHECK(s.subspan(3, 3) == span<int>(a+3, 3));
-   CHECK(s.subspan(3, eosio::vm::dynamic_extent) == span<int>(a+3, 7));
+   CHECK(s.subspan(3, dcd::vm::dynamic_extent) == span<int>(a+3, 7));
 }

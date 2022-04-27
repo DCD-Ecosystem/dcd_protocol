@@ -1,9 +1,9 @@
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/eosio/chain/core_symbol.hpp.in ${CMAKE_CURRENT_BINARY_DIR}/include/eosio/chain/core_symbol.hpp)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/dcd/chain/core_symbol.hpp.in ${CMAKE_CURRENT_BINARY_DIR}/include/dcd/chain/core_symbol.hpp)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/genesis_state_root_key.cpp.in ${CMAKE_CURRENT_BINARY_DIR}/genesis_state_root_key.cpp)
 
-file(GLOB HEADERS "include/eosio/chain/*.hpp"
-                  "include/eosio/chain/webassembly/*.hpp"
-                  "${CMAKE_CURRENT_BINARY_DIR}/include/eosio/chain/core_symbol.hpp" )
+file(GLOB HEADERS "include/dcd/chain/*.hpp"
+                  "include/dcd/chain/webassembly/*.hpp"
+                  "${CMAKE_CURRENT_BINARY_DIR}/include/dcd/chain/core_symbol.hpp" )
 
 if(APPLE AND UNIX)
    set(PLATFORM_TIMER_IMPL platform_timer_macos.cpp)
@@ -17,7 +17,7 @@ else()
    endif()
 endif()
 
-if("eos-vm-oc" IN_LIST EOSIO_WASM_RUNTIMES)
+if("eos-vm-oc" IN_LIST DCD_WASM_RUNTIMES)
    enable_language(ASM)
    set(CHAIN_EOSVMOC_SOURCES webassembly/runtimes/eos-vm-oc/code_cache.cpp
                              webassembly/runtimes/eos-vm-oc/executor.cpp
@@ -48,7 +48,7 @@ if("eos-vm-oc" IN_LIST EOSIO_WASM_RUNTIMES)
    option(EOSVMOC_ENABLE_DEVELOPER_OPTIONS "enable developer options for EOS VM OC" OFF)
 endif()
 
-if("eos-vm" IN_LIST EOSIO_WASM_RUNTIMES OR "eos-vm-jit" IN_LIST EOSIO_WASM_RUNTIMES)
+if("eos-vm" IN_LIST DCD_WASM_RUNTIMES OR "eos-vm-jit" IN_LIST DCD_WASM_RUNTIMES)
    set(CHAIN_EOSVM_SOURCES "webassembly/runtimes/eos-vm.cpp")
    set(CHAIN_EOSVM_LIBRARIES eos-vm)
 endif()
@@ -74,7 +74,7 @@ set(CHAIN_WEBASSEMBLY_SOURCES
 )
 
 ## SORT .cpp by most likely to change / break compile
-add_library( eosio_chain
+add_library( dcd_chain
              merkle.cpp
              name.cpp
              transaction.cpp
@@ -90,9 +90,9 @@ add_library( eosio_chain
              block_log.cpp
              transaction_context.cpp
              transaction_fee_manager.cpp
-             eosio_contract.cpp
-             eosio_contract_abi.cpp
-             eosio_contract_abi_bin.cpp
+             dcd_contract.cpp
+             dcd_contract_abi.cpp
+             dcd_contract_abi_bin.cpp
              chain_config.cpp
              chain_id_type.cpp
              genesis_state.cpp
@@ -100,8 +100,8 @@ add_library( eosio_chain
 
               wast_to_wasm.cpp
               wasm_interface.cpp
-              wasm_eosio_validation.cpp
-              wasm_eosio_injection.cpp
+              wasm_dcd_validation.cpp
+              wasm_dcd_injection.cpp
               wasm_config.cpp
               apply_context.cpp
               abi_serializer.cpp
@@ -133,10 +133,10 @@ add_library( eosio_chain
              ${HEADERS}
              )
 
-target_link_libraries( eosio_chain fc chainbase Logging IR WAST WASM Runtime
+target_link_libraries( dcd_chain fc chainbase Logging IR WAST WASM Runtime
                        softfloat builtins rocksdb ${CHAIN_EOSVM_LIBRARIES} ${LLVM_LIBS} ${CHAIN_RT_LINKAGE}
                      )
-target_include_directories( eosio_chain
+target_include_directories( dcd_chain
                             PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include" "${CMAKE_CURRENT_BINARY_DIR}/include"
                                    "${CMAKE_CURRENT_SOURCE_DIR}/../wasm-jit/Include"
                                    "${CMAKE_CURRENT_SOURCE_DIR}/libraries/eos-vm/include"
@@ -144,36 +144,36 @@ target_include_directories( eosio_chain
                                    "${CMAKE_CURRENT_SOURCE_DIR}/../chain_kv/include"
                             )
 
-add_library(eosio_chain_wrap INTERFACE )
-target_link_libraries(eosio_chain_wrap INTERFACE eosio_chain)
+add_library(dcd_chain_wrap INTERFACE )
+target_link_libraries(dcd_chain_wrap INTERFACE dcd_chain)
 
-if("eos-vm-oc" IN_LIST EOSIO_WASM_RUNTIMES)
-   target_link_libraries(eosio_chain_wrap INTERFACE "-Wl,-wrap=main")
+if("eos-vm-oc" IN_LIST DCD_WASM_RUNTIMES)
+   target_link_libraries(dcd_chain_wrap INTERFACE "-Wl,-wrap=main")
 endif()
 
-foreach(RUNTIME ${EOSIO_WASM_RUNTIMES})
+foreach(RUNTIME ${DCD_WASM_RUNTIMES})
    string(TOUPPER "${RUNTIME}" RUNTIMEUC)
    string(REPLACE "-" "_" RUNTIMEUC ${RUNTIMEUC})
-   target_compile_definitions(eosio_chain PUBLIC "EOSIO_${RUNTIMEUC}_RUNTIME_ENABLED")
+   target_compile_definitions(dcd_chain PUBLIC "DCD_${RUNTIMEUC}_RUNTIME_ENABLED")
 endforeach()
 
 if(EOSVMOC_ENABLE_DEVELOPER_OPTIONS)
    message(WARNING "EOS VM OC Developer Options are enabled; these are NOT supported")
-   target_compile_definitions(eosio_chain PUBLIC EOSIO_EOS_VM_OC_DEVELOPER)
+   target_compile_definitions(dcd_chain PUBLIC DCD_EOS_VM_OC_DEVELOPER)
 endif()
 
 add_subdirectory ( backing_store/tests )
 
-install( TARGETS eosio_chain
+install( TARGETS dcd_chain
    RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}
    LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
    ARCHIVE DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
 )
-install( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/eosio/chain/
-      DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR}/eosio/chain
+install( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/dcd/chain/
+      DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR}/dcd/chain
       FILES_MATCHING PATTERN "*.hpp" PATTERN "*.h" EXCLUDE
 )
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/eosio/chain/core_symbol.hpp DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR}/eosio/chain)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/dcd/chain/core_symbol.hpp DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR}/dcd/chain)
 #if(MSVC)
 #  set_source_files_properties( db_init.cpp db_block.cpp database.cpp block_log.cpp PROPERTIES COMPILE_FLAGS "/bigobj" )
 #endif(MSVC)

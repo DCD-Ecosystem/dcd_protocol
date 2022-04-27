@@ -1,10 +1,10 @@
-#include <eosio/wasm_backend/parser.hpp>
+#include <dcd/wasm_backend/parser.hpp>
 #include <fstream>
 #include <iostream>
 #include <chrono>
 
-using namespace eosio;
-using namespace eosio::wasm_backend;
+using namespace dcd;
+using namespace dcd::wasm_backend;
 using namespace std::chrono;
 
 

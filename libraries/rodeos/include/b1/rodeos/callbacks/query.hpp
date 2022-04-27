@@ -20,7 +20,7 @@ struct query_callbacks {
          return;
       auto info = get_state_row<rodeos::block_info>(
             derived().get_db_view_state().kv_state.view,
-            std::make_tuple(eosio::name{ "block.info" }, eosio::name{ "primary" }, state.block_num));
+            std::make_tuple(dcd::name{ "block.info" }, dcd::name{ "primary" }, state.block_num));
       if (!info)
          throw std::runtime_error("database is missing block.info for block " + std::to_string(state.block_num));
       state.block_info = info->second;

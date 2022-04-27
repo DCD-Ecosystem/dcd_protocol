@@ -1,14 +1,14 @@
-#include <eosio/chain/webassembly/eos-vm-oc.hpp>
-#include <eosio/chain/wasm_eosio_constraints.hpp>
-#include <eosio/chain/wasm_eosio_injection.hpp>
-#include <eosio/chain/apply_context.hpp>
-#include <eosio/chain/exceptions.hpp>
-#include <eosio/chain/global_property_object.hpp>
+#include <dcd/chain/webassembly/eos-vm-oc.hpp>
+#include <dcd/chain/wasm_dcd_constraints.hpp>
+#include <dcd/chain/wasm_dcd_injection.hpp>
+#include <dcd/chain/apply_context.hpp>
+#include <dcd/chain/exceptions.hpp>
+#include <dcd/chain/global_property_object.hpp>
 
 #include <vector>
 #include <iterator>
 
-namespace eosio { namespace chain { namespace webassembly { namespace eosvmoc {
+namespace dcd { namespace chain { namespace webassembly { namespace eosvmoc {
 
 class eosvmoc_instantiated_module : public wasm_instantiated_module_interface {
    public:
@@ -49,7 +49,7 @@ std::unique_ptr<wasm_instantiated_module_interface> eosvmoc_runtime::instantiate
    return std::make_unique<eosvmoc_instantiated_module>(code_hash, vm_type, *this);
 }
 
-//never called. EOS VM OC overrides eosio_exit to its own implementation
+//never called. EOS VM OC overrides dcd_exit to its own implementation
 void eosvmoc_runtime::immediately_exit_currently_running_module() {}
 
 }}}}

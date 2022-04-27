@@ -13,10 +13,10 @@ Retrieve the balance of an account for a given currency
 There are no options for this subcommand
 
 ## Example
-Get balance of eosio from eosio.token contract for SYS symbol. 
+Get balance of dcd from dcd.token contract for SYS symbol. 
 
 ```sh
-dcdcli get currency balance eosio.token eosio SYS
+dcdcli get currency balance dcd.token dcd SYS
 ```
 ```console
 999999920.0000 SYS

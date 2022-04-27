@@ -1,15 +1,15 @@
-#include <eosio/chain/controller.hpp>
-#include <eosio/chain/global_property_object.hpp>
-#include <eosio/chain/permission_object.hpp>
-//#include <eosio/chain/resource_limits.hpp>
+#include <dcd/chain/controller.hpp>
+#include <dcd/chain/global_property_object.hpp>
+#include <dcd/chain/permission_object.hpp>
+//#include <dcd/chain/resource_limits.hpp>
 #include <boost/test/unit_test.hpp>
-#include <eosio/testing/tester.hpp>
+#include <dcd/testing/tester.hpp>
 
 #include "fork_test_utilities.hpp"
 
-using namespace eosio;
-using namespace eosio::chain;
-using namespace eosio::testing;
+using namespace dcd;
+using namespace dcd::chain;
+using namespace dcd::testing;
 
 BOOST_AUTO_TEST_SUITE(chain_tests)
 

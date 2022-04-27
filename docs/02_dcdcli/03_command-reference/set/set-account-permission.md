@@ -24,8 +24,8 @@ The following information shows the different positionals and options you can us
 
 ### Options:
 - `-h,--help` Print this help message and exit
--  `--add-code` [code] Add 'eosio.code' permission to specified permission authority
--  `--remove-code` [code] Remove 'eosio.code' permission from specified permission authority
+-  `--add-code` [code] Add 'dcd.code' permission to specified permission authority
+-  `--remove-code` [code] Remove 'dcd.code' permission from specified permission authority
 -  `-x`,`--expiration` Set the time in seconds before a transaction expires, defaults to 30s
 -  `-f`,`--force-unique` Force the transaction to be unique. this will consume extra bandwidth and remove any protections against accidently issuing the same transaction multiple times
 -  `-s`,`--skip-sign` Specify if unlocked wallet keys should be used to sign transaction
@@ -43,9 +43,9 @@ The following information shows the different positionals and options you can us
 ## Requirements
 * Install the currently supported version of `dcdcli`.
 [[info | Note]] 
-| `dcdcli` is bundled with the EOSIO software. [Installing EOSIO](../../../00_install/index.md) will also install the `dcdcli` and `dcdksd` comand line tools.  
-* You have access to an EOSIO blockchain.
-* You have an EOSIO account and access to the account's private key.
+| `dcdcli` is bundled with the DCD software. [Installing DCD](../../../00_install/index.md) will also install the `dcdcli` and `dcdksd` comand line tools.  
+* You have access to an DCD blockchain.
+* You have an DCD account and access to the account's private key.
 
 ## Examples
 
@@ -64,25 +64,25 @@ dcdcli set account permission alice active EOS5zG7PsdtzQ9achTdRtXwHieL7yyigBFiJD
 **Example Output**
 ```shell
 executed transaction: ab5752ecb017f166d56e7f4203ea02631e58f06f2e0b67103b71874f608793e3  160 bytes  231 us
-#         eosio <= eosio::updateauth            {"account":"alice","permission":"active","parent":"owner","auth":{"threshold":1,"keys":[{"key":"E...
+#         dcd <= dcd::updateauth            {"account":"alice","permission":"active","parent":"owner","auth":{"threshold":1,"keys":[{"key":"E...
 ```
 
-2. Add the `eosio.code` permission to the contract account `active` permission to enable calling inline actions by the contract account's `active` permission:
+2. Add the `dcd.code` permission to the contract account `active` permission to enable calling inline actions by the contract account's `active` permission:
 
 ```shell
 dcdcli set account permission alice active --add-code -p alice@active
 ```
 
 **Where**
-* `alice` = The name of the account to add `eosio.code`.
-* `active`= The name of the permission to add `eosio.code`.
-* `--add-code` = Tells the command to add `eosio.code`. 
+* `alice` = The name of the account to add `dcd.code`.
+* `active`= The name of the permission to add `dcd.code`.
+* `--add-code` = Tells the command to add `dcd.code`. 
 * `-p alice@active` = The permission used to authorize the transaction.
 
 **Example Output**
 ```shell
 executed transaction: ab5752ecb017f166d56e7f4203ea02631e58f06f2e0b67103b71874f608793e3  160 bytes  231 us
-#         eosio <= eosio::updateauth            {"account":"alice","permission":"active","parent":"owner","auth":{"threshold":1,"keys":[{"key":"E...
+#         dcd <= dcd::updateauth            {"account":"alice","permission":"active","parent":"owner","auth":{"threshold":1,"keys":[{"key":"E...
 ```
 
 3. Add a custom permission to the **alice** account:
@@ -101,7 +101,7 @@ dcdcli set account permission alice customp EOS58wmANoBtT7RdPgMRCGDb37tcCQswfwVp
 **Example Output**
 ```shell
 executed transaction: 69c5297571ce3503edb9a1fd8a2f2a5cc1805ad19197a8751ca09093487c3cf8  160 bytes  134 us
-#         eosio <= eosio::updateauth            {"account":"alice","permission":"customp","parent":"active","auth":{"threshold":1,"keys":[{"key":"EOS...```
+#         dcd <= dcd::updateauth            {"account":"alice","permission":"customp","parent":"active","auth":{"threshold":1,"keys":[{"key":"EOS...```
 
 ## See Also
 - [Accounts and Permissions](https://developers.eos.io/welcome/v2.1/protocol/accounts_and_permissions) protocol document.

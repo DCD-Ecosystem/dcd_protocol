@@ -11,7 +11,7 @@ PointerAlignment: Left
 
 # regroup includes to these classes
 IncludeCategories:
-   - Regex: '(<|"(eosio)/)'
+   - Regex: '(<|"(dcd)/)'
      Priority: 4
    - Regex: '(<|"(boost)/)'
      Priority: 3

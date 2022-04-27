@@ -722,7 +722,7 @@ class Node(object):
     def getAccountEosBalanceStr(self, scope):
         """Returns SYS currency0000 account balance from dcdcli get table command. Returned balance is string following syntax "98.0311 SYS". """
         assert isinstance(scope, str)
-        amount=self.getTableAccountBalance("eosio.token", scope)
+        amount=self.getTableAccountBalance("dcd.token", scope)
         if Utils.Debug: Utils.Print("getNodeAccountEosBalance %s %s" % (scope, amount))
         assert isinstance(amount, str)
         return amount
@@ -1229,8 +1229,8 @@ class Node(object):
 
 
     # pylint: disable=too-many-locals
-    # If nodeosPath is equal to None, it will use the existing nodeos path
-    def relaunch(self, chainArg=None, newChain=False, skipGenesis=True, timeout=Utils.systemWaitTimeout, addSwapFlags=None, cachePopen=False, nodeosPath=None):
+    # If dcdnodePath is equal to None, it will use the existing dcdnode path
+    def relaunch(self, chainArg=None, newChain=False, skipGenesis=True, timeout=Utils.systemWaitTimeout, addSwapFlags=None, cachePopen=False, dcdnodePath=None):
 
         assert(self.pid is None)
         assert(self.killed)
@@ -1239,7 +1239,7 @@ class Node(object):
 
         cmdArr=[]
         splittedCmd=self.cmd.split()
-        if nodeosPath: splittedCmd[0] = nodeosPath
+        if dcdnodePath: splittedCmd[0] = dcdnodePath
         myCmd=" ".join(splittedCmd)
         toAddOrSwap=copy.deepcopy(addSwapFlags) if addSwapFlags is not None else {}
         if not newChain:
@@ -1448,19 +1448,19 @@ class Node(object):
                     break
         return protocolFeatures
 
-    # Require PREACTIVATE_FEATURE to be activated and require eosio.bios with preactivate_feature
+    # Require PREACTIVATE_FEATURE to be activated and require dcd.bios with preactivate_feature
     def preactivateProtocolFeatures(self, featureDigests:list):
         for digest in featureDigests:
             Utils.Print("push activate action with digest {}".format(digest))
             data="{{\"feature_digest\":{}}}".format(digest)
-            opts="--permission eosio@active"
-            trans=self.pushMessage("eosio", "activate", data, opts)
+            opts="--permission dcd@active"
+            trans=self.pushMessage("dcd", "activate", data, opts)
             if trans is None or not trans[0]:
                 Utils.Print("ERROR: Failed to preactive digest {}".format(digest))
                 return None
         self.waitForHeadToAdvance()
 
-    # Require PREACTIVATE_FEATURE to be activated and require eosio.bios with preactivate_feature
+    # Require PREACTIVATE_FEATURE to be activated and require dcd.bios with preactivate_feature
     def preactivateAllBuiltinProtocolFeature(self):
         allBuiltinProtocolFeatureDigests = self.getAllBuiltinFeatureDigestsToPreactivate()
         self.preactivateProtocolFeatures(allBuiltinProtocolFeatureDigests)
@@ -1507,9 +1507,9 @@ class Node(object):
         msg="contract=%s" % (contract);
         return self.processdcdcliCmd(cmd, cmdDesc, exitOnError=exitOnError, exitMsg=msg)
 
-    # kill all exsiting nodeos in case lingering from previous test
+    # kill all exsiting dcdnode in case lingering from previous test
     @staticmethod
-    def killAllNodeos():
+    def killAlldcdnode():
         # kill the eos server
         cmd="pkill -9 %s" % (Utils.EosServerName)
         ret_code = subprocess.call(cmd.split(), stdout=Utils.FNull)

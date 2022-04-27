@@ -1,6 +1,6 @@
-#include <eosio/chain/abi_serializer.hpp>
-#include <eosio/chain/asset.hpp>
-#include <eosio/chain/exceptions.hpp>
+#include <dcd/chain/abi_serializer.hpp>
+#include <dcd/chain/asset.hpp>
+#include <dcd/chain/exceptions.hpp>
 #include <fc/io/raw.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <fc/io/varint.hpp>
@@ -8,7 +8,7 @@
 using namespace boost;
 
 
-namespace eosio { namespace chain {
+namespace dcd { namespace chain {
 
    const size_t abi_serializer::max_recursion_depth;
 
@@ -129,7 +129,7 @@ namespace eosio { namespace chain {
       impl::abi_traverse_context ctx(yield);
 
       EOS_ASSERT(starts_with(abi.version, "eosio::abi/1."), unsupported_abi_version_exception, "ABI has an unsupported version");
-
+   
       typedefs.clear();
       structs.clear();
       actions.clear();
@@ -244,7 +244,7 @@ namespace eosio { namespace chain {
       if( typedefs.find(type) != typedefs.end() ) return _is_type(typedefs.find(type)->second, ctx);
       if( structs.find(type) != structs.end() ) return true;
       if( variants.find(type) != variants.end() ) return true;
-      if( eosio::chain::is_string_valid_name(type) ) {
+      if( dcd::chain::is_string_valid_name(type) ) {
          if( kv_tables.find(name(type)) != kv_tables.end() ) return true;
       }
       return false;

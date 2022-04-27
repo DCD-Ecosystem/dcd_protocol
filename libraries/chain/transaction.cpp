@@ -7,11 +7,11 @@
 #include <boost/iostreams/device/back_inserter.hpp>
 #include <boost/iostreams/filter/zlib.hpp>
 
-#include <eosio/chain/config.hpp>
-#include <eosio/chain/exceptions.hpp>
-#include <eosio/chain/transaction.hpp>
+#include <dcd/chain/config.hpp>
+#include <dcd/chain/exceptions.hpp>
+#include <dcd/chain/transaction.hpp>
 
-namespace eosio { namespace chain {
+namespace dcd { namespace chain {
 
 void deferred_transaction_generation_context::reflector_init() {
       static_assert( fc::raw::has_feature_reflector_init_on_unpacked_reflected_types,
@@ -643,4 +643,4 @@ void packed_transaction::reflector_init()
    }
    estimated_size = calculate_estimated_size();
 }
-} } // eosio::chain
+} } // dcd::chain

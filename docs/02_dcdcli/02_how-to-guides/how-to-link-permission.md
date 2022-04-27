@@ -8,8 +8,8 @@ Make sure you meet the following requirements:
 
 * Install the currently supported version of `dcdcli.`
 [[info | Note]]
-| `dcdcli` is bundled with the EOSIO software. [Installing EOSIO](../../00_install/index.md) will also install the `dcdcli` and `dcdksd` comand line tools. 
-* You have an EOSIO account and access to the account's `active` private key.
+| `dcdcli` is bundled with the DCD software. [Installing DCD](../../00_install/index.md) will also install the `dcdcli` and `dcdksd` comand line tools. 
+* You have an DCD account and access to the account's `active` private key.
 * You have created a custom permission. See [dcdcli set account permission](../03_command-reference/set/set-account-permission.md).
 
 ## Command Reference
@@ -36,7 +36,7 @@ dcdcli set action permission alice scontract hi customp -p alice@active
 **Example Output**
 ```shell
 executed transaction: 4eb4cf3aea232d46e0e949bc273c3f0575be5bdba7b61851ab51d927cf74a838  128 bytes  141 us
-#         eosio <= eosio::linkauth              {"account":"alice","code":"scontract","type":"hi","requirement":"customp"}
+#         dcd <= dcd::linkauth              {"account":"alice","code":"scontract","type":"hi","requirement":"customp"}
 ```
 ## Summary
 In conclusion, by following these instructions you are able to link a permission to a smart contract action.

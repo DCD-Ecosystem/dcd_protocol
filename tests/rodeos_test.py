@@ -153,9 +153,9 @@ try:
         totalNodes=1,
         useBiosBootFile=False,
         loadSystemContract=False,
-        specificExtraNodeosArgs={
-            0: ("--plugin eosio::state_history_plugin --trace-history --chain-state-history --disable-replay-opts --state-history-stride 20 --max-retained-history-files 3 " 
-                "--state-history-endpoint {} --plugin eosio::net_api_plugin --wasm-runtime eos-vm-jit -l logging.json").format(stateHistoryEndpoint)})
+        specificExtradcdnodeArgs={
+            0: ("--plugin dcd::state_history_plugin --trace-history --chain-state-history --disable-replay-opts --state-history-stride 20 --max-retained-history-files 3 " 
+                "--state-history-endpoint {} --plugin dcd::net_api_plugin --wasm-runtime eos-vm-jit -l logging.json").format(stateHistoryEndpoint)})
 
     producerNodeIndex = 0
     producerNode = cluster.getNode(producerNodeIndex)
@@ -165,7 +165,7 @@ try:
     payloadlessAcc = Account("payloadless")
     payloadlessAcc.ownerPublicKey = "EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"
     payloadlessAcc.activePublicKey = "EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"
-    producerNode.createAccount(payloadlessAcc, cluster.eosioAccount)
+    producerNode.createAccount(payloadlessAcc, cluster.dcdAccount)
 
 
     contractDir="unittests/test-contracts/payloadless"

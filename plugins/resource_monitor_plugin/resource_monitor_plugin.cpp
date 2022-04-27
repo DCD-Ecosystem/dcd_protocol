@@ -4,7 +4,7 @@
    continued to produce blocks and update state but the blocks log was
    "corrupted" in that it no longer contained all the irreversible blocks.
    It was also observed that when file system which "data/state"
-   belons to is running out of space, nodeos will crash with SIGBUS as
+   belons to is running out of space, dcdnode will crash with SIGBUS as
    the state file is unable to acquire new pages.
 
    The solution is to have a dedicated plugin to monitor resource 
@@ -15,11 +15,11 @@
    is over a predefined threshold, a graceful shutdown is initiated.
 **/
 
-#include <eosio/resource_monitor_plugin/resource_monitor_plugin.hpp>
-#include <eosio/resource_monitor_plugin/file_space_handler.hpp>
-#include <eosio/resource_monitor_plugin/system_file_space_provider.hpp>
+#include <dcd/resource_monitor_plugin/resource_monitor_plugin.hpp>
+#include <dcd/resource_monitor_plugin/file_space_handler.hpp>
+#include <dcd/resource_monitor_plugin/system_file_space_provider.hpp>
 
-#include <eosio/chain/exceptions.hpp>
+#include <dcd/chain/exceptions.hpp>
 
 #include <fc/exception/exception.hpp>
 #include <fc/log/logger_config.hpp> // set_os_thread_name
@@ -30,11 +30,11 @@
 
 #include <sys/stat.h>
 
-using namespace eosio::resource_monitor;
+using namespace dcd::resource_monitor;
 
 namespace bfs = boost::filesystem;
 
-namespace eosio {
+namespace dcd {
    static appbase::abstract_plugin& _resource_monitor_plugin = app().register_plugin<resource_monitor_plugin>();
 
 class resource_monitor_plugin_impl {
@@ -51,7 +51,7 @@ public:
          ( "resource-monitor-space-threshold", bpo::value<uint32_t>()->default_value(def_space_threshold),
            "Threshold in terms of percentage of used space vs total space. If used space is above (threshold - 5%), a warning is generated.  If used space is above the threshold and resource-monitor-not-shutdown-on-threshold-exceeded is enabled, a graceful shutdown is initiated. The value should be between 6 and 99" )
          ( "resource-monitor-not-shutdown-on-threshold-exceeded",
-           "Used to indicate nodeos will not shutdown when threshold is exceeded." )
+           "Used to indicate dcdnode will not shutdown when threshold is exceeded." )
          ( "resource-monitor-warning-interval", bpo::value<uint32_t>()->default_value(def_monitor_warning_interval),
            "Number of resource monitor intervals between two consecutive warnings when the threshold is hit. Should be between 1 and 450" )
          ;

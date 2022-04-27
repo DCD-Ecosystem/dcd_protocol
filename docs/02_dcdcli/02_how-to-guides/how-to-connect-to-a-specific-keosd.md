@@ -4,15 +4,15 @@ This guide provides instructions on how to connect to specifc wallet when using 
 The example uses the `wallet-url` optional arguments to request data from the the specified `dcdksd` instance.
 
 [[info | Default address:port]]
-| If no optional arguments are used (i.e. no `--wallet-url`), `dcdcli` attempts to connect to a local `nodeos` or `dcdksd` running at localhost or `127.0.0.1` and default port `8900`. Use the `dcdksd` command line arguments or [config.ini](../../03_dcdksd/10_usage.md/#launching-dcdksd-manually) file to specify a different address.
+| If no optional arguments are used (i.e. no `--wallet-url`), `dcdcli` attempts to connect to a local `dcdnode` or `dcdksd` running at localhost or `127.0.0.1` and default port `8900`. Use the `dcdksd` command line arguments or [config.ini](../../03_dcdksd/10_usage.md/#launching-dcdksd-manually) file to specify a different address.
 
 ## Before you Begin
 Make sure you meet the following requirements: 
 
 * Install the currently supported version of `dcdcli` and `dcdksd`.
 [[info | Note]]
-| The `dcdcli` tool and `dcdksd` are bundled with the EOSIO software. [Installing EOSIO](../../00_install/index.md) will install the `dcdcli` and `dcdksd` command line tools. 
-* You have access to an EOSIO blockchain and the http address and port number of a `nodeos` instance. 
+| The `dcdcli` tool and `dcdksd` are bundled with the DCD software. [Installing DCD](../../00_install/index.md) will install the `dcdcli` and `dcdksd` command line tools. 
+* You have access to an DCD blockchain and the http address and port number of a `dcdnode` instance. 
 
 ## Reference
 See the following reference guides for command line usage and related options:

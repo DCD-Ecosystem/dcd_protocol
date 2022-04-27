@@ -16,7 +16,7 @@ bioscontractpath=$BIOS_CONTRACT_PATH
 if [ -z "$bioscontractpath" ]; then
     # this is defaulted to the version of bios that only requires the preactivate_feature
     # newer versions may require 
-    bioscontractpath="unittests/contracts/old_versions/v1.7.0-develop-preactivate_feature/eosio.bios"
+    bioscontractpath="unittests/contracts/old_versions/v1.7.0-develop-preactivate_feature/dcd.bios"
 fi
 
 bioscurrencysymbol=$BIOS_CURRENCY_SYMBOL
@@ -24,7 +24,7 @@ if [ -z "$bioscurrencysymbol" ]; then
     bioscurrencysymbol="SYS"
 fi
 
-wddir=eosio-ignition-wd
+wddir=dcd-ignition-wd
 wdaddr=localhost:8899
 wdurl=http://$wdaddr
 # Manual deployers, add a line below this block that looks like:
@@ -33,7 +33,7 @@ wdurl=http://$wdaddr
 #    cnt_dir=$CONTRACT_DIR
 #    sys=$SYS_CONTRACT
 # where $BIOS_HOSTNAME is replaced by the hostname portion of the http-server-address configured
-# for the nodeos instance running to bios producer
+# for the dcdnode instance running to bios producer
 # ------ DO NOT ALTER THE NEXT LINE -------
 ###INSERT envars
 
@@ -70,7 +70,7 @@ wcmd () {
 }
 
 cacmd () {
-    programs/dcdcli/dcdcli  --wallet-url $wdurl --url http://$bioshost:$biosport system newaccount --transfer --stake-net "10000000.0000 "$bioscurrencysymbol --stake-cpu "10000000.0000 "$bioscurrencysymbol  --buy-ram "10000000.0000 "$bioscurrencysymbol eosio $* >> $logfile 2>&1
+    programs/dcdcli/dcdcli  --wallet-url $wdurl --url http://$bioshost:$biosport system newaccount --transfer --stake-net "10000000.0000 "$bioscurrencysymbol --stake-cpu "10000000.0000 "$bioscurrencysymbol  --buy-ram "10000000.0000 "$bioscurrencysymbol dcd $* >> $logfile 2>&1
     ecmd system regproducer $1 $2
     ecmd system voteproducer prods $1 $1
 }
@@ -90,46 +90,46 @@ wcmd create --to-console -n ignition
 ###INSERT prodkeys
 echo "Activated Features Check:" >> $logfile
 curl http://$bioshost:$biosport/v1/chain/get_activated_protocol_features >> $logfile
-ecmd set contract eosio $bioscontractpath eosio.bios.wasm eosio.bios.abi
+ecmd set contract dcd $bioscontractpath dcd.bios.wasm dcd.bios.abi
 
 # Preactivate all digests
 for digest in $FEATURE_DIGESTS;
 do
-ecmd push action eosio activate "{\"feature_digest\":\"$digest\"}" -p eosio
+ecmd push action dcd activate "{\"feature_digest\":\"$digest\"}" -p dcd
 done
 
 # Create required system accounts
 ecmd create key --to-console
 pubsyskey=`grep "^Public key:" $logfile | tail -1 | sed "s/^Public key://"`
 prisyskey=`grep "^Private key:" $logfile | tail -1 | sed "s/^Private key://"`
-echo eosio.* keys: $prisyskey $pubsyskey >> $logfile
+echo dcd.* keys: $prisyskey $pubsyskey >> $logfile
 wcmd import -n ignition --private-key $prisyskey
-ecmd create account eosio eosio.bpay $pubsyskey $pubsyskey
-ecmd create account eosio eosio.msig $pubsyskey $pubsyskey
-ecmd create account eosio eosio.names $pubsyskey $pubsyskey
-ecmd create account eosio eosio.ram $pubsyskey $pubsyskey
-ecmd create account eosio eosio.ramfee $pubsyskey $pubsyskey
-ecmd create account eosio eosio.saving $pubsyskey $pubsyskey
-ecmd create account eosio eosio.stake $pubsyskey $pubsyskey
-ecmd create account eosio eosio.token $pubsyskey $pubsyskey
-ecmd create account eosio eosio.vpay $pubsyskey $pubsyskey
-ecmd create account eosio eosio.wrap $pubsyskey $pubsyskey
+ecmd create account dcd dcd.bpay $pubsyskey $pubsyskey
+ecmd create account dcd dcd.msig $pubsyskey $pubsyskey
+ecmd create account dcd dcd.names $pubsyskey $pubsyskey
+ecmd create account dcd dcd.ram $pubsyskey $pubsyskey
+ecmd create account dcd dcd.ramfee $pubsyskey $pubsyskey
+ecmd create account dcd dcd.saving $pubsyskey $pubsyskey
+ecmd create account dcd dcd.stake $pubsyskey $pubsyskey
+ecmd create account dcd dcd.token $pubsyskey $pubsyskey
+ecmd create account dcd dcd.vpay $pubsyskey $pubsyskey
+ecmd create account dcd dcd.wrap $pubsyskey $pubsyskey
 
-ecmd set contract eosio.token unittests/contracts/eosio.token eosio.token.wasm eosio.token.abi
-ecmd set contract eosio.msig unittests/contracts/eosio.msig eosio.msig.wasm eosio.msig.abi
-ecmd set contract eosio.wrap unittests/contracts/eosio.wrap eosio.wrap.wasm eosio.wrap.abi
+ecmd set contract dcd.token unittests/contracts/dcd.token dcd.token.wasm dcd.token.abi
+ecmd set contract dcd.msig unittests/contracts/dcd.msig dcd.msig.wasm dcd.msig.abi
+ecmd set contract dcd.wrap unittests/contracts/dcd.wrap dcd.wrap.wasm dcd.wrap.abi
 
 echo ===== Start: $step ============ >> $logfile
-echo executing: dcdcli --wallet-url $wdurl --url http://$bioshost:$biosport push action eosio.token create '[ "eosio", "10000000000.0000 '$bioscurrencysymbol'" ]' -p eosio.token | tee -a $logfile
-echo executing: dcdcli --wallet-url $wdurl --url http://$bioshost:$biosport push action eosio.token issue '[ "eosio", "1000000000.0000 '$bioscurrencysymbol'", "memo" ]' -p eosio | tee -a $logfile
+echo executing: dcdcli --wallet-url $wdurl --url http://$bioshost:$biosport push action dcd.token create '[ "dcd", "10000000000.0000 '$bioscurrencysymbol'" ]' -p dcd.token | tee -a $logfile
+echo executing: dcdcli --wallet-url $wdurl --url http://$bioshost:$biosport push action dcd.token issue '[ "dcd", "1000000000.0000 '$bioscurrencysymbol'", "memo" ]' -p dcd | tee -a $logfile
 echo ----------------------- >> $logfile
-programs/dcdcli/dcdcli --wallet-url $wdurl --url http://$bioshost:$biosport push action eosio.token create '[ "eosio", "10000000000.0000 '$bioscurrencysymbol'" ]' -p eosio.token >> $logfile 2>&1
-programs/dcdcli/dcdcli --wallet-url $wdurl --url http://$bioshost:$biosport push action eosio.token issue '[ "eosio", "1000000000.0000 '$bioscurrencysymbol'", "memo" ]' -p eosio >> $logfile 2>&1
+programs/dcdcli/dcdcli --wallet-url $wdurl --url http://$bioshost:$biosport push action dcd.token create '[ "dcd", "10000000000.0000 '$bioscurrencysymbol'" ]' -p dcd.token >> $logfile 2>&1
+programs/dcdcli/dcdcli --wallet-url $wdurl --url http://$bioshost:$biosport push action dcd.token issue '[ "dcd", "1000000000.0000 '$bioscurrencysymbol'", "memo" ]' -p dcd >> $logfile 2>&1
 echo ==== End: $step ============== >> $logfile
 step=$(($step + 1))
 
-ecmd set contract eosio unittests/contracts/eosio.system eosio.system.wasm eosio.system.abi
-programs/dcdcli/dcdcli --wallet-url $wdurl --url http://$bioshost:$biosport push action eosio init '[0, "4,'$bioscurrencysymbol'"]' -p eosio >> $logfile 2>&1
+ecmd set contract dcd unittests/contracts/dcd.system dcd.system.wasm dcd.system.abi
+programs/dcdcli/dcdcli --wallet-url $wdurl --url http://$bioshost:$biosport push action dcd init '[0, "4,'$bioscurrencysymbol'"]' -p dcd >> $logfile 2>&1
 
 # Manual deployers, add a series of lines below this block that looks like:
 #    cacmd $PRODNAME[0] $OWNERKEY[0] $ACTIVEKEY[0]

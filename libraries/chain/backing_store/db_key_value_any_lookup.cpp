@@ -1,19 +1,19 @@
-#include <eosio/chain/apply_context.hpp>
-#include <eosio/chain/exceptions.hpp>
-#include <eosio/chain/backing_store/db_key_value_any_lookup.hpp>
-#include <eosio/chain/backing_store/db_key_value_format.hpp>
-#include <eosio/chain/backing_store/db_context.hpp>
-#include <eosio/chain/backing_store/chain_kv_payer.hpp>
-#include <eosio/chain/combined_database.hpp>
+#include <dcd/chain/apply_context.hpp>
+#include <dcd/chain/exceptions.hpp>
+#include <dcd/chain/backing_store/db_key_value_any_lookup.hpp>
+#include <dcd/chain/backing_store/db_key_value_format.hpp>
+#include <dcd/chain/backing_store/db_context.hpp>
+#include <dcd/chain/backing_store/chain_kv_payer.hpp>
+#include <dcd/chain/combined_database.hpp>
 
-namespace eosio { namespace chain { namespace backing_store {
+namespace dcd { namespace chain { namespace backing_store {
 
-   eosio::session::shared_bytes make_useless_value() {
+   dcd::session::shared_bytes make_useless_value() {
       const char null = '\0';
-      return eosio::session::shared_bytes {&null, 1};
+      return dcd::session::shared_bytes {&null, 1};
    }
 
-   const eosio::session::shared_bytes db_key_value_any_lookup::useless_value = make_useless_value();
+   const dcd::session::shared_bytes db_key_value_any_lookup::useless_value = make_useless_value();
 
    void db_key_value_any_lookup::add_table_if_needed(const shared_bytes& key, account_name payer) {
       auto table_key = db_key_value_format::create_full_key_prefix(key, end_of_prefix::pre_type);
@@ -125,4 +125,4 @@ namespace eosio { namespace chain { namespace backing_store {
      prefix_key(db_key_value_format::create_full_key_prefix(full_key, prefix_end)) {
    }
 
-}}} // namespace eosio::chain::backing_store
+}}} // namespace dcd::chain::backing_store

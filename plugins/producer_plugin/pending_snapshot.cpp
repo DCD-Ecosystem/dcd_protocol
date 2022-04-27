@@ -1,7 +1,7 @@
-#include <eosio/producer_plugin/pending_snapshot.hpp>
-#include <eosio/chain/exceptions.hpp>
+#include <dcd/producer_plugin/pending_snapshot.hpp>
+#include <dcd/chain/exceptions.hpp>
 
-namespace eosio {
+namespace dcd {
 
 producer_plugin::snapshot_information pending_snapshot::finalize( const chain::controller& chain ) const {
     auto block_ptr = chain.fetch_block_by_id( block_id );
@@ -29,4 +29,4 @@ producer_plugin::snapshot_information pending_snapshot::finalize( const chain::c
     return {block_id, block_ptr->block_num(), block_ptr->timestamp, chain::chain_snapshot_header::current_version, final_path};
 }
 
-} // namespace eosio
+} // namespace dcd

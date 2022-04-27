@@ -1,9 +1,9 @@
 #include <sys/resource.h>
 #include <sys/time.h>
 
-#include <eosio/chain/kv_chainbase_objects.hpp>
-#include <eosio/chain/backing_store/kv_context_rocksdb.hpp>
-#include <eosio/chain/backing_store/kv_context_chainbase.hpp>
+#include <dcd/chain/kv_chainbase_objects.hpp>
+#include <dcd/chain/backing_store/kv_context_rocksdb.hpp>
+#include <dcd/chain/backing_store/kv_context_chainbase.hpp>
 
 #include <b1/session/rocks_session.hpp>
 #include <b1/session/session.hpp>
@@ -11,8 +11,8 @@
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 
-using namespace eosio;
-using namespace eosio::chain;
+using namespace dcd;
+using namespace dcd::chain;
 
 namespace kv_benchmark {
 
@@ -495,8 +495,8 @@ void benchmark(const cmd_args& args) {
       boost::filesystem::remove_all(chain::config::default_state_dir_name);
 
       constexpr size_t max_rocks_iterators = 1024;
-      auto rocks_session = eosio::session::make_session(make_rocks_db("kvrdb-tmp"), max_rocks_iterators);
-      auto session = eosio::session::session<decltype(rocks_session)>{rocks_session};
+      auto rocks_session = dcd::session::make_session(make_rocks_db("kvrdb-tmp"), max_rocks_iterators);
+      auto session = dcd::session::session<decltype(rocks_session)>{rocks_session};
 
       std::unique_ptr<kv_context> kv_context_ptr = create_kv_rocksdb_context<decltype(session), mock_resource_manager>(session, receiver, resource_manager, limits); 
       benchmark_operation(args, std::move(kv_context_ptr)); // kv_context_ptr must be in the same scope as kv_db and usage_start, since they are references in create_kv_rocksdb_context

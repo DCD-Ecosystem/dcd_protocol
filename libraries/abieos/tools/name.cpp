@@ -1,4 +1,4 @@
-#include <eosio/name.hpp>
+#include <dcd/name.hpp>
 #include <iostream>
 #include <string>
 #include <string_view>
@@ -7,13 +7,13 @@
 bool handle_one(const std::string& s, bool reverse) {
    try {
       if (reverse) {
-         std::cout << eosio::name(s).value << std::endl;
+         std::cout << dcd::name(s).value << std::endl;
          return true;
       } else {
          std::size_t   pos;
          std::uint64_t value = std::stoull(s, &pos, 0);
          if (pos == s.size()) {
-            std::cout << eosio::name(value).to_string() << std::endl;
+            std::cout << dcd::name(value).to_string() << std::endl;
          } else {
             std::cerr << "Invalid name value: " << s << std::endl;
             return false;

@@ -8,15 +8,15 @@
 #include <memory>
 #include <thread>
 
-namespace eosio {
+namespace dcd {
 namespace blockvault {
 
 template <typename Compressor>
 struct transform_callback : backend::sync_callback {
    Compressor&                       compressor;
-   eosio::blockvault::sync_callback& target;
+   dcd::blockvault::sync_callback& target;
 
-   transform_callback(Compressor& comp, eosio::blockvault::sync_callback& t)
+   transform_callback(Compressor& comp, dcd::blockvault::sync_callback& t)
        : compressor(comp)
        , target(t) {}
 
@@ -65,7 +65,7 @@ class block_vault_impl : public block_vault_interface {
          try {
             fc::datastream<std::vector<char>> stream;
             fc::raw::pack(stream, *block);
-            eosio::chain::block_id_type block_id = block->calculate_id();
+            dcd::chain::block_id_type block_id = block->calculate_id();
 
             bool r = backend->propose_constructed_block({block->block_num(), block->timestamp.slot}, lib,
                                                         stream.storage(), {block_id.data(), block_id.data_size()},
@@ -92,7 +92,7 @@ class block_vault_impl : public block_vault_interface {
          try {
             fc::datastream<std::vector<char>> stream;
             fc::raw::pack(stream, *block);
-            eosio::chain::block_id_type block_id = block->calculate_id();
+            dcd::chain::block_id_type block_id = block->calculate_id();
 
             bool r = backend->append_external_block(block->block_num(), lib, stream.storage(),
                                                     {block_id.data(), block_id.data_size()},
@@ -120,7 +120,7 @@ class block_vault_impl : public block_vault_interface {
          return false;
       }
    }
-   void sync(const eosio::chain::block_id_type* ptr_block_id, sync_callback& callback) override {
+   void sync(const dcd::chain::block_id_type* ptr_block_id, sync_callback& callback) override {
       transform_callback<Compressor> cb{compressor, callback};
       std::string_view bid = ptr_block_id ? std::string_view{ptr_block_id->data(), ptr_block_id->data_size()}
                                           : std::string_view{nullptr, 0};
@@ -143,4 +143,4 @@ class block_vault_impl : public block_vault_interface {
    }
 };
 } // namespace blockvault
-} // namespace eosio
+} // namespace dcd

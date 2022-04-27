@@ -14,4 +14,4 @@ Documentation for all `dcdcli` main commands
 - [push](push) - Push arbitrary transactions to the blockchain
 - [multisig](multisig) - Multisig contract commands
 - [wrap](wrap) - Wrap contract commands
-- [system](system) - Send eosio.system contract action to the blockchain.
+- [system](system) - Send dcd.system contract action to the blockchain.

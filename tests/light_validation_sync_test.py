@@ -49,7 +49,7 @@ try:
         totalNodes=2,
         useBiosBootFile=False,
         loadSystemContract=False,
-        specificExtraNodeosArgs={
+        specificExtradcdnodeArgs={
             1:"--validation-mode light"})
 
     producerNode = cluster.getNode(0)
@@ -60,7 +60,7 @@ try:
     payloadlessAcc = Account("payloadless")
     payloadlessAcc.ownerPublicKey = "EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"
     payloadlessAcc.activePublicKey = "EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"
-    producerNode.createAccount(payloadlessAcc, cluster.eosioAccount)
+    producerNode.createAccount(payloadlessAcc, cluster.dcdAccount)
 
 
     contractDir="unittests/test-contracts/payloadless"

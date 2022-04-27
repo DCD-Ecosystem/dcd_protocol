@@ -1,11 +1,11 @@
 #pragma once
 
-#include <eosio/eosio.hpp>
+#include <dcd/dcd.hpp>
 
-class [[eosio::contract]] payloadless : public eosio::contract {
+class [[dcd::contract]] payloadless : public dcd::contract {
 public:
-   using eosio::contract::contract;
+   using dcd::contract::contract;
 
-   [[eosio::action]]
+   [[dcd::action]]
    void doit();
 };

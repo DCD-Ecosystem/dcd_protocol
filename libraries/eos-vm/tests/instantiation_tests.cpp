@@ -1,14 +1,14 @@
 #include <iostream>
 #include <list>
 
-#include <eosio/vm/backend.hpp>
-#include <eosio/vm/watchdog.hpp>
+#include <dcd/vm/backend.hpp>
+#include <dcd/vm/watchdog.hpp>
 
 #include "utils.hpp"
 #include <catch2/catch.hpp>
 
-using namespace eosio;
-using namespace eosio::vm;
+using namespace dcd;
+using namespace dcd::vm;
 
 #pragma GCC push_options
 #pragma GCC optimize ("O0")

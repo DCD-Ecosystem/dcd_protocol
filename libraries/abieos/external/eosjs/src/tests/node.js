@@ -17,7 +17,7 @@ const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), te
 
 const transactWithConfig = async () => await api.transact({
     actions: [{
-        account: 'eosio.token',
+        account: 'dcd.token',
         name: 'transfer',
         authorization: [{
             actor: 'bob',
@@ -48,7 +48,7 @@ const transactWithoutConfig = async () => {
         ref_block_num: blockInfo.block_num & 0xffff,
         ref_block_prefix: blockInfo.ref_block_prefix,
         actions: [{
-            account: 'eosio.token',
+            account: 'dcd.token',
             name: 'transfer',
             authorization: [{
                 actor: 'bob',
@@ -67,7 +67,7 @@ const transactWithoutConfig = async () => {
 
 const transactWithoutBroadcast = async () => await api.transact({
   actions: [{
-        account: 'eosio.token',
+        account: 'dcd.token',
         name: 'transfer',
         authorization: [{
             actor: 'bob',
@@ -90,7 +90,7 @@ const broadcastResult = async (signaturesAndPackedTransaction) => await api.push
 
 const transactShouldFail = async () => await api.transact({
     actions: [{
-        account: 'eosio.token',
+        account: 'dcd.token',
         name: 'transfer',
         authorization: [{
             actor: 'bob',

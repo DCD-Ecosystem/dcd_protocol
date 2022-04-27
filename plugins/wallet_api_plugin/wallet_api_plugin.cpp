@@ -1,24 +1,24 @@
-#include <eosio/wallet_api_plugin/wallet_api_plugin.hpp>
-#include <eosio/wallet_plugin/wallet_manager.hpp>
-#include <eosio/chain/exceptions.hpp>
-#include <eosio/chain/transaction.hpp>
+#include <dcd/wallet_api_plugin/wallet_api_plugin.hpp>
+#include <dcd/wallet_plugin/wallet_manager.hpp>
+#include <dcd/chain/exceptions.hpp>
+#include <dcd/chain/transaction.hpp>
 
 #include <fc/variant.hpp>
 #include <fc/io/json.hpp>
 
 #include <chrono>
 
-namespace eosio { namespace detail {
+namespace dcd { namespace detail {
   struct wallet_api_plugin_empty {};
 }}
 
-FC_REFLECT(eosio::detail::wallet_api_plugin_empty, );
+FC_REFLECT(dcd::detail::wallet_api_plugin_empty, );
 
-namespace eosio {
+namespace dcd {
 
 static appbase::abstract_plugin& _wallet_api_plugin = app().register_plugin<wallet_api_plugin>();
 
-using namespace eosio;
+using namespace dcd;
 
 #define CALL_WITH_400(api_name, api_handle, call_name, INVOKE, http_response_code) \
 {std::string("/v1/" #api_name "/" #call_name), \
@@ -57,7 +57,7 @@ using namespace eosio;
 #define INVOKE_V_R(api_handle, call_name, in_param) \
      auto params = parse_params<in_param, http_params_types::params_required>(body);\
      api_handle.call_name( std::move(params) ); \
-     eosio::detail::wallet_api_plugin_empty result;
+     dcd::detail::wallet_api_plugin_empty result;
 
 #define INVOKE_V_R_R(api_handle, call_name, in_param0, in_param1) \
      const auto& params = parse_params<fc::variants, http_params_types::params_required>(body);\
@@ -65,7 +65,7 @@ using namespace eosio;
         EOS_THROW(chain::invalid_http_request, "Missing valid input from POST body"); \
      } \
      api_handle.call_name(params.at(0).as<in_param0>(), params.at(1).as<in_param1>()); \
-     eosio::detail::wallet_api_plugin_empty result;
+     dcd::detail::wallet_api_plugin_empty result;
 
 #define INVOKE_V_R_R_R(api_handle, call_name, in_param0, in_param1, in_param2) \
      const auto& params = parse_params<fc::variants, http_params_types::params_required>(body);\
@@ -73,12 +73,12 @@ using namespace eosio;
         EOS_THROW(chain::invalid_http_request, "Missing valid input from POST body"); \
      } \
      api_handle.call_name(params.at(0).as<in_param0>(), params.at(1).as<in_param1>(), params.at(2).as<in_param2>()); \
-     eosio::detail::wallet_api_plugin_empty result;
+     dcd::detail::wallet_api_plugin_empty result;
 
 #define INVOKE_V_V(api_handle, call_name) \
      body = parse_params<std::string, http_params_types::no_params_required>(body); \
      api_handle.call_name(); \
-     eosio::detail::wallet_api_plugin_empty result;
+     dcd::detail::wallet_api_plugin_empty result;
 
 void wallet_api_plugin::plugin_startup() {
    ilog("starting wallet_api_plugin");

@@ -1,14 +1,14 @@
-#include <eosio/chain/types.hpp>
+#include <dcd/chain/types.hpp>
 
-#include <eosio/net_plugin/net_plugin.hpp>
-#include <eosio/net_plugin/protocol.hpp>
-#include <eosio/chain/controller.hpp>
-#include <eosio/chain/exceptions.hpp>
-#include <eosio/chain/block.hpp>
-#include <eosio/chain/plugin_interface.hpp>
-#include <eosio/chain/thread_utils.hpp>
-#include <eosio/producer_plugin/producer_plugin.hpp>
-#include <eosio/chain/contract_types.hpp>
+#include <dcd/net_plugin/net_plugin.hpp>
+#include <dcd/net_plugin/protocol.hpp>
+#include <dcd/chain/controller.hpp>
+#include <dcd/chain/exceptions.hpp>
+#include <dcd/chain/block.hpp>
+#include <dcd/chain/plugin_interface.hpp>
+#include <dcd/chain/thread_utils.hpp>
+#include <dcd/producer_plugin/producer_plugin.hpp>
+#include <dcd/chain/contract_types.hpp>
 
 #include <fc/network/message_buffer.hpp>
 #include <fc/network/ip.hpp>
@@ -28,9 +28,9 @@
 #include <atomic>
 #include <shared_mutex>
 
-using namespace eosio::chain::plugin_interface;
+using namespace dcd::chain::plugin_interface;
 
-namespace eosio {
+namespace dcd {
    static appbase::abstract_plugin& _net_plugin = app().register_plugin<net_plugin>();
 
    using std::vector;
@@ -42,8 +42,8 @@ namespace eosio {
 
    using fc::time_point;
    using fc::time_point_sec;
-   using eosio::chain::transaction_id_type;
-   using eosio::chain::sha256_less;
+   using dcd::chain::transaction_id_type;
+   using dcd::chain::sha256_less;
 
    class connection;
 
@@ -101,23 +101,23 @@ namespace eosio {
    struct by_peer_block_id;
 
    typedef multi_index_container<
-      eosio::peer_block_state,
+      dcd::peer_block_state,
       indexed_by<
          ordered_unique< tag<by_id>,
                composite_key< peer_block_state,
-                     member<peer_block_state, uint32_t, &eosio::peer_block_state::connection_id>,
-                     member<peer_block_state, block_id_type, &eosio::peer_block_state::id>
+                     member<peer_block_state, uint32_t, &dcd::peer_block_state::connection_id>,
+                     member<peer_block_state, block_id_type, &dcd::peer_block_state::id>
                >,
                composite_key_compare< std::less<uint32_t>, sha256_less >
          >,
          ordered_non_unique< tag<by_peer_block_id>,
                composite_key< peer_block_state,
-                     member<peer_block_state, block_id_type, &eosio::peer_block_state::id>,
-                     member<peer_block_state, bool, &eosio::peer_block_state::have_block>
+                     member<peer_block_state, block_id_type, &dcd::peer_block_state::id>,
+                     member<peer_block_state, bool, &dcd::peer_block_state::have_block>
                >,
                composite_key_compare< sha256_less, std::greater<bool> >
          >,
-         ordered_non_unique< tag<by_block_num>, member<eosio::peer_block_state, uint32_t, &eosio::peer_block_state::block_num > >
+         ordered_non_unique< tag<by_block_num>, member<dcd::peer_block_state, uint32_t, &dcd::peer_block_state::block_num > >
       >
       > peer_block_state_index;
 
@@ -272,7 +272,7 @@ namespace eosio {
       compat::channels::transaction_ack::channel_type::handle  incoming_transaction_ack_subscription;
 
       uint16_t                                       thread_pool_size = 2;
-      std::optional<eosio::chain::named_thread_pool> thread_pool;
+      std::optional<dcd::chain::named_thread_pool> thread_pool;
 
    private:
       mutable std::mutex            chain_info_mtx; // protects chain_*
@@ -417,7 +417,7 @@ namespace eosio {
     *  the need for compatibility hooks
     */
    constexpr uint16_t proto_base = 0;
-   constexpr uint16_t proto_explicit_sync = 1;       // version at time of eosio 1.0
+   constexpr uint16_t proto_explicit_sync = 1;       // version at time of dcd 1.0
    constexpr uint16_t proto_block_id_notify = 2;     // reserved. feature was removed. next net_version should be 3
    constexpr uint16_t proto_pruned_types = 3;        // supports new signed_block & packed_transaction types
    constexpr uint16_t heartbeat_interval = 4;        // supports configurable heartbeat interval

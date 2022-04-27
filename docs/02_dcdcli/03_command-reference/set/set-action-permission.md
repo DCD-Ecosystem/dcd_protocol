@@ -41,9 +41,9 @@ The following information shows the different positionals and options you can us
 ## Requirements
 * Install the currently supported version of `dcdcli`.
 [[info | Note]] 
-| `dcdcli` is bundled with the EOSIO software. [Installing EOSIO](../../../00_install/index.md) will also install the `dcdcli` and `dcdksd` comand line tools.  
-* You have access to an EOSIO blockchain.
-* You have an EOSIO account and access to the account's private key.
+| `dcdcli` is bundled with the DCD software. [Installing DCD](../../../00_install/index.md) will also install the `dcdcli` and `dcdksd` comand line tools.  
+* You have access to an DCD blockchain.
+* You have an DCD account and access to the account's private key.
 
 ## Examples
 
@@ -63,7 +63,7 @@ dcdcli set action permission bob scontract1 hi customp1 -p bob@active
 **Example Output**
 ```shell
 executed transaction: 4eb4cf3aea232d46e0e949bc273c3f0575be5bdba7b61851ab51d927cf74a838  128 bytes  141 us
-#         eosio <= eosio::linkauth              {"account":"bob","code":"scontract1","type":"hi","requirement":"customp1"}
+#         dcd <= dcd::linkauth              {"account":"bob","code":"scontract1","type":"hi","requirement":"customp1"}
 ```
 
 2. Set permissions on a _bye_ action deployed to the _scontract1_ account so that the _bob_ account's `active` permission and _customp2_ permission are authorized:
@@ -82,7 +82,7 @@ dcdcli set action permission bob scontract1 bye customp2 -p bob@active
 **Example Output**
 ```shell
 executed transaction: 4eb4cf3aea232d46e0e949bc273c3f0575be5bdba7b61851ab51d927cf74a838  128 bytes  141 us
-#         eosio <= eosio::linkauth              {"account":"bob","code":"scontract1","type":"bye","requirement":"customp2"}
+#         dcd <= dcd::linkauth              {"account":"bob","code":"scontract1","type":"bye","requirement":"customp2"}
 ```
 
 3. To remove the customp1 permission from the _hi_ action:
@@ -100,7 +100,7 @@ dcdcli set action permission bob scontract1 hi NULL -p bob@active
 **Example Output**
 ```shell
 executed transaction: 50fe754760a1b8bd0e56f57570290a3f5daa509c090deb54c81a721ee7048201  120 bytes  242 us
-#         eosio <= eosio::unlinkauth            {"account":"bob","code":"scontract1","type":"hi"}
+#         dcd <= dcd::unlinkauth            {"account":"bob","code":"scontract1","type":"hi"}
 ```
 
 ## See Also

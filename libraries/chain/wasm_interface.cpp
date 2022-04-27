@@ -1,20 +1,20 @@
-#include <eosio/chain/webassembly/interface.hpp>
-#include <eosio/chain/webassembly/eos-vm.hpp>
-#include <eosio/chain/wasm_interface.hpp>
-#include <eosio/chain/apply_context.hpp>
-#include <eosio/chain/controller.hpp>
-#include <eosio/chain/transaction_context.hpp>
-#include <eosio/chain/producer_schedule.hpp>
-#include <eosio/chain/exceptions.hpp>
+#include <dcd/chain/webassembly/interface.hpp>
+#include <dcd/chain/webassembly/eos-vm.hpp>
+#include <dcd/chain/wasm_interface.hpp>
+#include <dcd/chain/apply_context.hpp>
+#include <dcd/chain/controller.hpp>
+#include <dcd/chain/transaction_context.hpp>
+#include <dcd/chain/producer_schedule.hpp>
+#include <dcd/chain/exceptions.hpp>
 #include <boost/core/ignore_unused.hpp>
-#include <eosio/chain/authorization_manager.hpp>
-//#include <eosio/chain/resource_limits.hpp>
-#include <eosio/chain/wasm_interface_private.hpp>
-#include <eosio/chain/wasm_eosio_validation.hpp>
-#include <eosio/chain/wasm_eosio_injection.hpp>
-#include <eosio/chain/global_property_object.hpp>
-#include <eosio/chain/protocol_state_object.hpp>
-#include <eosio/chain/account_object.hpp>
+#include <dcd/chain/authorization_manager.hpp>
+//#include <dcd/chain/resource_limits.hpp>
+#include <dcd/chain/wasm_interface_private.hpp>
+#include <dcd/chain/wasm_dcd_validation.hpp>
+#include <dcd/chain/wasm_dcd_injection.hpp>
+#include <dcd/chain/global_property_object.hpp>
+#include <dcd/chain/protocol_state_object.hpp>
+#include <dcd/chain/account_object.hpp>
 #include <fc/exception/exception.hpp>
 #include <fc/crypto/sha256.hpp>
 #include <fc/crypto/sha1.hpp>
@@ -27,11 +27,11 @@
 #include <fstream>
 #include <string.h>
 
-#if defined(EOSIO_EOS_VM_RUNTIME_ENABLED) || defined(EOSIO_EOS_VM_JIT_RUNTIME_ENABLED)
-#include <eosio/vm/allocator.hpp>
+#if defined(DCD_EOS_VM_RUNTIME_ENABLED) || defined(DCD_EOS_VM_JIT_RUNTIME_ENABLED)
+#include <dcd/vm/allocator.hpp>
 #endif
 
-namespace eosio { namespace chain {
+namespace dcd { namespace chain {
 
    wasm_interface::wasm_interface(vm_type vm, bool eosvmoc_tierup, const chainbase::database& d, const boost::filesystem::path data_dir, const eosvmoc::config& eosvmoc_config)
      : my( new wasm_interface_impl(vm, eosvmoc_tierup, d, data_dir, eosvmoc_config) ) {}
@@ -79,7 +79,7 @@ namespace eosio { namespace chain {
    }
 
    void wasm_interface::apply( const digest_type& code_hash, const uint8_t& vm_type, const uint8_t& vm_version, apply_context& context ) {
-#ifdef EOSIO_EOS_VM_OC_RUNTIME_ENABLED
+#ifdef DCD_EOS_VM_OC_RUNTIME_ENABLED
       if(my->eosvmoc) {
          const chain::eosvmoc::code_descriptor* cd = nullptr;
          try {
@@ -113,14 +113,14 @@ std::istream& operator>>(std::istream& in, wasm_interface::vm_type& runtime) {
    std::string s;
    in >> s;
    if (s == "eos-vm")
-      runtime = eosio::chain::wasm_interface::vm_type::eos_vm;
+      runtime = dcd::chain::wasm_interface::vm_type::eos_vm;
    else if (s == "eos-vm-jit")
-      runtime = eosio::chain::wasm_interface::vm_type::eos_vm_jit;
+      runtime = dcd::chain::wasm_interface::vm_type::eos_vm_jit;
    else if (s == "eos-vm-oc")
-      runtime = eosio::chain::wasm_interface::vm_type::eos_vm_oc;
+      runtime = dcd::chain::wasm_interface::vm_type::eos_vm_oc;
    else
       in.setstate(std::ios_base::failbit);
    return in;
 }
 
-} } /// eosio::chain
+} } /// dcd::chain

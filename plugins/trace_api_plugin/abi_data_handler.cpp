@@ -1,7 +1,7 @@
-#include <eosio/trace_api/abi_data_handler.hpp>
-#include <eosio/chain/abi_serializer.hpp>
+#include <dcd/trace_api/abi_data_handler.hpp>
+#include <dcd/chain/abi_serializer.hpp>
 
-namespace eosio::trace_api {
+namespace dcd::trace_api {
 
    void abi_data_handler::add_abi( const chain::name& name, const chain::abi_def& abi ) {
       // currently abis are operator provided so no need to protect against abuse

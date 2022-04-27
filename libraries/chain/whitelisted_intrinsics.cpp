@@ -1,7 +1,7 @@
-#include <eosio/chain/whitelisted_intrinsics.hpp>
-#include <eosio/chain/exceptions.hpp>
+#include <dcd/chain/whitelisted_intrinsics.hpp>
+#include <dcd/chain/exceptions.hpp>
 
-namespace eosio { namespace chain {
+namespace dcd { namespace chain {
 
    template<typename Iterator>
    bool find_intrinsic_helper( uint64_t h, std::string_view name, Iterator& itr, const Iterator& end ) {

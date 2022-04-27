@@ -25,7 +25,7 @@
         
             const transactWithConfig = async () => await api.transact({
                 actions: [{
-                    account: 'eosio.token',
+                    account: 'dcd.token',
                     name: 'transfer',
                     authorization: [{
                         actor: 'bob',
@@ -79,7 +79,7 @@
                     ref_block_num: blockInfo.block_num & 0xffff,
                     ref_block_prefix: blockInfo.ref_block_prefix,
                     actions: [{
-                        account: 'eosio.token',
+                        account: 'dcd.token',
                         name: 'transfer',
                         authorization: [{
                             actor: 'bob',
@@ -121,7 +121,7 @@
         
             const transactWithoutBroadcast = async () => await api.transact({
             actions: [{
-                    account: 'eosio.token',
+                    account: 'dcd.token',
                     name: 'transfer',
                     authorization: [{
                         actor: 'bob',
@@ -192,7 +192,7 @@
         
             const transactShouldFail = async () => await api.transact({
                 actions: [{
-                    account: 'eosio.token',
+                    account: 'dcd.token',
                     name: 'transfer',
                     authorization: [{
                         actor: 'bob',

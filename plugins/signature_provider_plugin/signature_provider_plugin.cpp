@@ -1,5 +1,5 @@
-#include <eosio/signature_provider_plugin/signature_provider_plugin.hpp>
-#include <eosio/chain/exceptions.hpp>
+#include <dcd/signature_provider_plugin/signature_provider_plugin.hpp>
+#include <dcd/chain/exceptions.hpp>
 
 #include <fc/time.hpp>
 #include <fc/network/url.hpp>
@@ -7,10 +7,10 @@
 #include <boost/algorithm/string.hpp>
 
 #ifdef __APPLE__
-#include <eosio/se-helpers/se-helpers.hpp>
+#include <dcd/se-helpers/se-helpers.hpp>
 #endif
 
-namespace eosio {
+namespace dcd {
    static appbase::abstract_plugin& _signature_provider_plugin = app().register_plugin<signature_provider_plugin>();
 
 class signature_provider_plugin_impl {
@@ -73,10 +73,10 @@ void signature_provider_plugin::set_program_options(options_description&, option
 const char* const signature_provider_plugin::signature_provider_help_text() const {
    return "Key=Value pairs in the form <public-key>=<provider-spec>\n"
           "Where:\n"
-          "   <public-key>    \tis a string form of a vaild EOSIO public key\n\n"
+          "   <public-key>    \tis a string form of a vaild DCD public key\n\n"
           "   <provider-spec> \tis a string in the form <provider-type>:<data>\n\n"
           "   <provider-type> \tis KEY, dcdksd, or SE\n\n"
-          "   KEY:<data>      \tis a string form of a valid EOSIO private key which maps to the provided public key\n\n"
+          "   KEY:<data>      \tis a string form of a valid DCD private key which maps to the provided public key\n\n"
           "   dcdksd:<data>    \tis the URL where dcdksd is available and the approptiate wallet(s) are unlocked\n\n"
 #ifdef __APPLE__
           "   SE:             \tindicates the key resides in Secure Enclave"

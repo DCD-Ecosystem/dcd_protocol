@@ -1,14 +1,14 @@
-#include <eosio/chain/webassembly/interface.hpp>
-#include <eosio/chain/global_property_object.hpp>
-#include <eosio/chain/protocol_state_object.hpp>
-#include <eosio/chain/transaction_context.hpp>
-//#include <eosio/chain/resource_limits.hpp>
-#include <eosio/chain/apply_context.hpp>
+#include <dcd/chain/webassembly/interface.hpp>
+#include <dcd/chain/global_property_object.hpp>
+#include <dcd/chain/protocol_state_object.hpp>
+#include <dcd/chain/transaction_context.hpp>
+//#include <dcd/chain/resource_limits.hpp>
+#include <dcd/chain/apply_context.hpp>
 
 #include <vector>
 #include <set>
 
-namespace eosio { namespace chain { namespace webassembly {
+namespace dcd { namespace chain { namespace webassembly {
 
    int interface::is_feature_active( int64_t feature_name ) const { return false; }
 
@@ -288,4 +288,4 @@ namespace eosio { namespace chain { namespace webassembly {
          ma.set_privileged( is_priv );
       });
    }
-}}} // ns eosio::chain::webassembly
+}}} // ns dcd::chain::webassembly

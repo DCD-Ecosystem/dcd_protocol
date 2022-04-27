@@ -16,7 +16,7 @@ class PluginHttpTest(unittest.TestCase):
     base_wallet_cmd_str = ("curl http://%s:%s/v1/") % (TestHelper.LOCAL_HOST, TestHelper.DEFAULT_WALLET_PORT)
     dcdksd = WalletMgr(True, TestHelper.DEFAULT_PORT, TestHelper.LOCAL_HOST, TestHelper.DEFAULT_WALLET_PORT, TestHelper.LOCAL_HOST)
     node_id = 1
-    nodeos = Node(TestHelper.LOCAL_HOST, TestHelper.DEFAULT_PORT, node_id)
+    dcdnode = Node(TestHelper.LOCAL_HOST, TestHelper.DEFAULT_PORT, node_id)
     data_dir = Utils.getNodeDataDir(node_id)
     http_post_str = " -X POST -d "
     http_post_invalid_param = " '{invalid}' "
@@ -28,37 +28,37 @@ class PluginHttpTest(unittest.TestCase):
             shutil.rmtree(self.data_dir)
         os.makedirs(self.data_dir)
 
-    # kill nodeos and dcdksd and clean up dir
+    # kill dcdnode and dcdksd and clean up dir
     def cleanEnv(self) :
         self.dcdksd.killall(True)
         WalletMgr.cleanup()
-        Node.killAllNodeos()
+        Node.killAlldcdnode()
         if os.path.exists(self.data_dir):
             shutil.rmtree(self.data_dir)
         time.sleep(self.sleep_s)
 
-    # start dcdksd and nodeos
+    # start dcdksd and dcdnode
     def startEnv(self) :
         self.createDataDir(self)
         self.dcdksd.launch()
-        nodeos_plugins = (" --plugin %s --plugin %s --plugin %s --plugin %s --plugin %s --plugin %s --plugin %s --plugin %s "
-                          " --plugin %s --plugin %s --plugin %s --plugin %s ") % ( "eosio::trace_api_plugin",
-                                                                                   "eosio::test_control_api_plugin",
-                                                                                   "eosio::test_control_plugin",
-                                                                                   "eosio::net_plugin",
-                                                                                   "eosio::net_api_plugin",
-                                                                                   "eosio::producer_plugin",
-                                                                                   "eosio::producer_api_plugin",
-                                                                                   "eosio::chain_api_plugin",
-                                                                                   "eosio::http_plugin",
-                                                                                   "eosio::db_size_api_plugin",
-                                                                                   "eosio::history_plugin",
-                                                                                   "eosio::history_api_plugin")
-        nodeos_flags = (" --data-dir=%s --trace-dir=%s --trace-no-abis --filter-on=%s --access-control-allow-origin=%s "
+        dcdnode_plugins = (" --plugin %s --plugin %s --plugin %s --plugin %s --plugin %s --plugin %s --plugin %s --plugin %s "
+                          " --plugin %s --plugin %s --plugin %s --plugin %s ") % ( "dcd::trace_api_plugin",
+                                                                                   "dcd::test_control_api_plugin",
+                                                                                   "dcd::test_control_plugin",
+                                                                                   "dcd::net_plugin",
+                                                                                   "dcd::net_api_plugin",
+                                                                                   "dcd::producer_plugin",
+                                                                                   "dcd::producer_api_plugin",
+                                                                                   "dcd::chain_api_plugin",
+                                                                                   "dcd::http_plugin",
+                                                                                   "dcd::db_size_api_plugin",
+                                                                                   "dcd::history_plugin",
+                                                                                   "dcd::history_api_plugin")
+        dcdnode_flags = (" --data-dir=%s --trace-dir=%s --trace-no-abis --filter-on=%s --access-control-allow-origin=%s "
                         "--contracts-console --http-validate-host=%s --verbose-http-errors "
                         "--p2p-peer-address localhost:9011 ") % (self.data_dir, self.data_dir, "\"*\"", "\'*\'", "false")
-        start_nodeos_cmd = ("%s -e -p eosio %s %s ") % (Utils.EosServerPath, nodeos_plugins, nodeos_flags)
-        self.nodeos.launchCmd(start_nodeos_cmd, self.node_id)
+        start_dcdnode_cmd = ("%s -e -p dcd %s %s ") % (Utils.EosServerPath, dcdnode_plugins, dcdnode_flags)
+        self.dcdnode.launchCmd(start_dcdnode_cmd, self.node_id)
         time.sleep(self.sleep_s)
 
     # test all chain api
@@ -417,7 +417,7 @@ class PluginHttpTest(unittest.TestCase):
         self.assertEqual(ret_json["code"], 400)
         self.assertEqual(ret_json["error"]["code"], 3200006)
         # get_currency_balance with valid parameter
-        valid_cmd = default_cmd + self.http_post_str + ("'{\"code\":\"eosio.token\", \"account\":\"unknown\"}'")
+        valid_cmd = default_cmd + self.http_post_str + ("'{\"code\":\"dcd.token\", \"account\":\"unknown\"}'")
         ret_json = Utils.runCmdReturnJson(valid_cmd)
         self.assertEqual(ret_json["code"], 500)
 
@@ -437,7 +437,7 @@ class PluginHttpTest(unittest.TestCase):
         self.assertEqual(ret_json["code"], 400)
         self.assertEqual(ret_json["error"]["code"], 3200006)
         # get_currency_stats with valid parameter
-        valid_cmd = default_cmd + self.http_post_str + ("'{\"code\":\"eosio.token\",\"symbol\":\"SYS\"}'")
+        valid_cmd = default_cmd + self.http_post_str + ("'{\"code\":\"dcd.token\",\"symbol\":\"SYS\"}'")
         ret_json = Utils.runCmdReturnJson(valid_cmd)
         self.assertEqual(ret_json["code"], 500)
 
@@ -513,9 +513,9 @@ class PluginHttpTest(unittest.TestCase):
         # abi_json_to_bin with valid parameter
         valid_cmd = ("%s%s '{%s,%s,%s}'") % (default_cmd,
                                              self.http_post_str,
-                                             "\"code\":\"eosio.token\"",
+                                             "\"code\":\"dcd.token\"",
                                              "\"action\":\"issue\"",
-                                             "\"args\":{\"to\":\"eosio.token\", \"quantity\":\"1.0000\%20EOS\",\"memo\":\"m\"}")
+                                             "\"args\":{\"to\":\"dcd.token\", \"quantity\":\"1.0000\%20EOS\",\"memo\":\"m\"}")
         ret_json = Utils.runCmdReturnJson(valid_cmd)
         self.assertEqual(ret_json["code"], 500)
 
@@ -537,7 +537,7 @@ class PluginHttpTest(unittest.TestCase):
         # abi_bin_to_json with valid parameter
         valid_cmd = ("%s%s '{%s,%s,%s}'") % (default_cmd,
                                              self.http_post_str,
-                                             "\"code\":\"eosio.token\"",
+                                             "\"code\":\"dcd.token\"",
                                              "\"action\":\"issue\"",
                                              "\"args\":\"ee6fff5a5c02c55b6304000000000100a6823403ea3055000000572d3ccdcd0100000000007015d600000000a8ed32322a00000000007015d6000000005c95b1ca102700000000000004454f53000000000968656c6c6f206d616e00\"")
         ret_json = Utils.runCmdReturnJson(valid_cmd)
@@ -601,7 +601,7 @@ class PluginHttpTest(unittest.TestCase):
                      "\"max_cpu_usage_ms\":0",
                      "\"delay_sec\":0",
                      "\"context_free_actions\":[]",
-                     "\"actions\":[{\"account\":\"eosio.token\",\"name\": \"transfer\",\"authorization\": [{\"actor\": \"han\",\"permission\": \"active\"}],\"data\": \"000000000000a6690000000000ea305501000000000000000453595300000000016d\"}]",
+                     "\"actions\":[{\"account\":\"dcd.token\",\"name\": \"transfer\",\"authorization\": [{\"actor\": \"han\",\"permission\": \"active\"}],\"data\": \"000000000000a6690000000000ea305501000000000000000453595300000000016d\"}]",
                      "\"transaction_extensions\": []",
                      "\"signatures\": [\"SIG_K1_KeqfqiZu1GwUxQb7jzK9Fdks6HFaVBQ9AJtCZZj56eG9qGgvVMVtx8EerBdnzrhFoX437sgwtojf2gfz6S516Ty7c22oEp\"]",
                      "\"context_free_data\": []")

@@ -10,9 +10,9 @@ import random
 ###############################################################
 # terminate-scenarios-test
 #
-# Tests terminate scenarios for nodeos.  Uses "-c" flag to indicate "replay" (--replay-blockchain), "resync"
+# Tests terminate scenarios for dcdnode.  Uses "-c" flag to indicate "replay" (--replay-blockchain), "resync"
 # (--delete-all-blocks), "hardReplay"(--hard-replay-blockchain), and "none" to indicate what kind of restart flag should
-# be used. This is one of the only test that actually verify that nodeos terminates with a good exit status.
+# be used. This is one of the only test that actually verify that dcdnode terminates with a good exit status.
 #
 ###############################################################
 
@@ -72,7 +72,7 @@ try:
     Print("Kill %d cluster node instances." % (killCount))
     if cluster.killSomeEosInstances(killCount, killSignal) is False:
         errorExit("Failed to kill Eos instances")
-    Print("nodeos instances killed.")
+    Print("dcdnode instances killed.")
 
     Print ("Relaunch dead cluster nodes instances.")
     nodeArg = "--terminate-at-block %d" % terminate if terminate > 0 else ""
@@ -81,7 +81,7 @@ try:
             nodeArg += " --truncate-at-block %d" % terminate
     if cluster.relaunchEosInstances(cachePopen=True, nodeArgs=nodeArg) is False:
         errorExit("Failed to relaunch Eos instances")
-    Print("nodeos instances relaunched.")
+    Print("dcdnode instances relaunched.")
 
     testSuccessful=True
 finally:

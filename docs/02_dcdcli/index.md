@@ -4,15 +4,15 @@ content_title: dcdcli
 
 ## Introduction
 
-`dcdcli` is a command line tool that interfaces with the REST API exposed by `nodeos`. Developers can also use `dcdcli` to deploy and test EOSIO smart contracts.
+`dcdcli` is a command line tool that interfaces with the REST API exposed by `dcdnode`. Developers can also use `dcdcli` to deploy and test DCD smart contracts.
 
 ## Installation
 
-`dcdcli` is distributed as part of the [EOSIO software suite](https://github.com/EOSIO/eos/blob/master/README.md). To install `dcdcli` just visit the [EOSIO Software Installation](../00_install/index.md) section.
+`dcdcli` is distributed as part of the [DCD software suite](https://github.com/DCD/eos/blob/master/README.md). To install `dcdcli` just visit the [DCD Software Installation](../00_install/index.md) section.
 
 ## Using dcdcli
 
-To use `dcdcli`, you need the end point (IP address and port number) of a running `nodeos` instance. Also, the `nodeos` instance must be configured to load the `eosio::chain_api_plugin` when launched. This allows `nodeos` to respond to the RPC requests coming from `dcdcli`.
+To use `dcdcli`, you need the end point (IP address and port number) of a running `dcdnode` instance. Also, the `dcdnode` instance must be configured to load the `dcd::chain_api_plugin` when launched. This allows `dcdnode` to respond to the RPC requests coming from `dcdcli`.
 
 ### dcdcli Commands
 
@@ -23,14 +23,14 @@ dcdcli --help
 ```
 
 ```console
-Command Line Interface to EOSIO Client
+Command Line Interface to DCD Client
 Usage: dcdcli [OPTIONS] SUBCOMMAND
 
 Options:
   -h,--help                   Print this help message and exit
   -u,--url TEXT=http://127.0.0.1:8888/
-                              the http/https URL where nodeos is running
-  --wallet-url TEXT=unix:///Users/username/eosio-wallet/dcdksd.sock
+                              the http/https URL where dcdnode is running
+  --wallet-url TEXT=unix:///Users/username/dcd-wallet/dcdksd.sock
                               the http/https URL where dcdksd is running
   -r,--header                 pass specific HTTP header; repeat this option to pass multiple headers
   -n,--no-verify              don't verify peer certificate when using HTTPS
@@ -53,7 +53,7 @@ Subcommands:
   push                        Push arbitrary transactions to the blockchain
   multisig                    Multisig contract commands
   wrap                        Wrap contract commands
-  system                      Send eosio.system contract action to the blockchain.
+  system                      Send dcd.system contract action to the blockchain.
 ```
 
 ### dcdcli Subcommands

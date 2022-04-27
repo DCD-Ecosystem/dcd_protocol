@@ -1,7 +1,7 @@
-#include <eosio/chain/exceptions.hpp>
-#include <eosio/chain/trace.hpp>
+#include <dcd/chain/exceptions.hpp>
+#include <dcd/chain/trace.hpp>
 
-namespace eosio { namespace chain {
+namespace dcd { namespace chain {
 
 action_trace::action_trace(
    const transaction_trace& trace, const action& act, account_name receiver, bool context_free,
@@ -35,4 +35,4 @@ action_trace::action_trace(
 ,producer_block_id( trace.producer_block_id )
 {}
 
-} } // eosio::chain
+} } // dcd::chain

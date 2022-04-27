@@ -1,8 +1,8 @@
-#include <eosio/chain/webassembly/interface.hpp>
-#include <eosio/chain/apply_context.hpp>
+#include <dcd/chain/webassembly/interface.hpp>
+#include <dcd/chain/apply_context.hpp>
 #include <fc/uint128.hpp>
 
-namespace eosio { namespace chain { namespace webassembly {
+namespace dcd { namespace chain { namespace webassembly {
 
    template <typename Ctx, typename F>
    inline static void predicated_print(Ctx& context, F&& print_func) {
@@ -136,4 +136,4 @@ namespace eosio { namespace chain { namespace webassembly {
    void interface::printhex(legacy_span<const char> data ) {
       predicated_print(context, [&]() { context.console_append(fc::to_hex(data.data(), data.size())); });
    }
-}}} // ns eosio::chain::webassembly
+}}} // ns dcd::chain::webassembly

@@ -1,15 +1,15 @@
 #pragma once
 
 #include <b1/rodeos/callbacks/vm_types.hpp>
-#include <eosio/name.hpp>
-#include <eosio/stream.hpp>
-#include <eosio/chain/exceptions.hpp>
+#include <dcd/name.hpp>
+#include <dcd/stream.hpp>
+#include <dcd/chain/exceptions.hpp>
 
 namespace b1::rodeos {
 
 struct action_state {
-   eosio::name         receiver{};
-   eosio::input_stream action_data{};
+   dcd::name         receiver{};
+   dcd::input_stream action_data{};
    std::vector<char>   action_return_value{};
 };
 
@@ -17,7 +17,7 @@ template <typename Derived>
 struct action_callbacks {
    Derived& derived() { return static_cast<Derived&>(*this); }
 
-   int read_action_data(eosio::vm::span<char> data) {
+   int read_action_data(dcd::vm::span<char> data) {
       auto&  state = derived().get_state();
       size_t s     = state.action_data.end - state.action_data.pos;
       memcpy(data.data(), state.action_data.pos, std::min(data.size(), s));
@@ -31,11 +31,11 @@ struct action_callbacks {
 
    uint64_t current_receiver() { return derived().get_state().receiver.value; }
 
-   void set_action_return_value(eosio::vm::span<const char> packed_blob) {
+   void set_action_return_value(dcd::vm::span<const char> packed_blob) {
       uint32_t max_action_return_value_size = 
          derived().get_state().shared->max_action_return_value_size;
       EOS_ASSERT(packed_blob.size() <= max_action_return_value_size,
-                 eosio::chain::action_return_value_exception, 
+                 dcd::chain::action_return_value_exception, 
                  "action return value size must be less than ${s} bytes", 
                  ("s", max_action_return_value_size));
       derived().get_state().action_return_value.assign(packed_blob.begin(), packed_blob.end());

@@ -2,7 +2,7 @@
 
 #include "config.hpp"
 
-namespace eosio { namespace client { namespace http {
+namespace dcd { namespace client { namespace http {
 
    namespace detail {
       class http_context_impl;

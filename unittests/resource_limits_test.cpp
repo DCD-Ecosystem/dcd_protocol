@@ -1,17 +1,17 @@
 #include <algorithm>
 
-#include <eosio/chain/config.hpp>
-//#include <eosio/chain/resource_limits.hpp>
-#include <eosio/chain/config.hpp>
-#include <eosio/testing/chainbase_fixture.hpp>
-#include <eosio/testing/tester.hpp>
+#include <dcd/chain/config.hpp>
+//#include <dcd/chain/resource_limits.hpp>
+#include <dcd/chain/config.hpp>
+#include <dcd/testing/chainbase_fixture.hpp>
+#include <dcd/testing/tester.hpp>
 #include "fork_test_utilities.hpp"
 
 #include <boost/test/unit_test.hpp>
 
-//using namespace eosio::chain::resource_limits;
-using namespace eosio::testing;
-using namespace eosio::chain;
+//using namespace dcd::chain::resource_limits;
+using namespace dcd::testing;
+using namespace dcd::chain;
 
 //class resource_limits_fixture: private chainbase_fixture<1024*1024>, public resource_limits_manager
 //{
@@ -348,8 +348,8 @@ BOOST_AUTO_TEST_SUITE(resource_limits_test)
 
 //      const account_name cpu_test_account("cpuacc");
 //      const account_name net_test_account("netacc");
-//      constexpr uint32_t net_window = eosio::chain::config::account_net_usage_average_window_ms / eosio::chain::config::block_interval_ms;
-//      constexpr uint32_t cpu_window = eosio::chain::config::account_cpu_usage_average_window_ms / eosio::chain::config::block_interval_ms;
+//      constexpr uint32_t net_window = dcd::chain::config::account_net_usage_average_window_ms / dcd::chain::config::block_interval_ms;
+//      constexpr uint32_t cpu_window = dcd::chain::config::account_cpu_usage_average_window_ms / dcd::chain::config::block_interval_ms;
 
 //      constexpr int64_t unlimited = -1;
 
@@ -482,7 +482,7 @@ BOOST_AUTO_TEST_SUITE(resource_limits_test)
 //         trigger_block->transactions.back().net_usage_words.value = 2*((reqauth_net_usage_delta + 7)/8); // double the NET bill
 
          // Re-calculate the transaction merkle
-         eosio::chain::deque<digest_type> trx_digests;
+         dcd::chain::deque<digest_type> trx_digests;
          const auto& trxs = trigger_block->transactions;
          for( const auto& a : trxs )
             trx_digests.emplace_back( a.digest() );
@@ -524,7 +524,7 @@ BOOST_AUTO_TEST_SUITE(resource_limits_test)
 //         trigger_block->transactions.back().net_usage_words.value = ((reqauth_net_usage_delta + 7)/8)/2; // half the original NET bill
 
          // Re-calculate the transaction merkle
-         eosio::chain::deque<digest_type> trx_digests;
+         dcd::chain::deque<digest_type> trx_digests;
          const auto& trxs = trigger_block->transactions;
          for( const auto& a : trxs )
             trx_digests.emplace_back( a.digest() );

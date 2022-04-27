@@ -3,12 +3,12 @@
 #define BOOST_TEST_MAIN
 #include <boost/test/unit_test.hpp>
 
-using namespace eosio::literals;
+using namespace dcd::literals;
 
 static void parse_and_check(const std::string& cmdline_arg, const std::string& expected_address,
-                            const std::string& expected_queue_name, const std::vector<eosio::name>& expected_routes) {
+                            const std::string& expected_queue_name, const std::vector<dcd::name>& expected_routes) {
    std::string              queue_name;
-   std::vector<eosio::name> routes;
+   std::vector<dcd::name> routes;
 
    auto amqp_address = b1::parse_rabbitmq_address(cmdline_arg, queue_name, routes);
 
@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE(rabbitmq_address_parsing) {
 
    // Check that amqp-cpp detects invalid AMQP addresses.
    std::string              queue_name;
-   std::vector<eosio::name> routes;
+   std::vector<dcd::name> routes;
 
    BOOST_CHECK_EXCEPTION(
          b1::parse_rabbitmq_address("user:pass@host", queue_name, routes), std::runtime_error,

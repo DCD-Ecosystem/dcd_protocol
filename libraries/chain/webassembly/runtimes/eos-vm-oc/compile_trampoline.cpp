@@ -1,8 +1,8 @@
-#include <eosio/chain/webassembly/eos-vm-oc/ipc_helpers.hpp>
-#include <eosio/chain/webassembly/eos-vm-oc/ipc_protocol.hpp>
-#include <eosio/chain/webassembly/eos-vm-oc/memory.hpp>
-#include <eosio/chain/webassembly/eos-vm-oc/intrinsic.hpp>
-#include <eosio/chain/wasm_eosio_injection.hpp>
+#include <dcd/chain/webassembly/eos-vm-oc/ipc_helpers.hpp>
+#include <dcd/chain/webassembly/eos-vm-oc/ipc_protocol.hpp>
+#include <dcd/chain/webassembly/eos-vm-oc/memory.hpp>
+#include <dcd/chain/webassembly/eos-vm-oc/intrinsic.hpp>
+#include <dcd/chain/wasm_dcd_injection.hpp>
 
 #include <sys/prctl.h>
 #include <signal.h>
@@ -15,7 +15,7 @@
 
 using namespace IR;
 
-namespace eosio { namespace chain { namespace eosvmoc {
+namespace dcd { namespace chain { namespace eosvmoc {
 
 void run_compile(wrapped_fd&& response_sock, wrapped_fd&& wasm_code) noexcept {  //noexcept; we'll just blow up if anything tries to cross this boundry
    std::vector<uint8_t> wasm = vector_for_memfd(wasm_code);

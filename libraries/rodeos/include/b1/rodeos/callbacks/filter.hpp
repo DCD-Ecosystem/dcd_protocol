@@ -12,7 +12,7 @@ template <typename Derived>
 struct filter_callbacks {
    Derived& derived() { return static_cast<Derived&>(*this); }
 
-   void push_data(eosio::vm::span<const char> data) {
+   void push_data(dcd::vm::span<const char> data) {
       derived().get_filter_callback_state().push_data(data.data(), data.size());
    }
 
