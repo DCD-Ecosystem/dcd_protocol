@@ -106,6 +106,7 @@ namespace dcd { namespace client { namespace http {
    const string get_action_fee = chain_func_base + "/get_action_fee";
    const string get_required_fee = chain_func_base + "/get_required_fee";
    const string get_fee_rate = chain_func_base + "/get_fee_rate";
+   const string get_fee_proposals = chain_func_base + "/get_fee_proposals";
 
 
    const string history_func_base = "/v1/history";

@@ -24,8 +24,6 @@ namespace dcd { namespace chain {
       contract_cur_rate = ctl.active_rate().rate;
    }
 
-
-
    asset transaction_fee_manager::get_core_from_usd(const asset& usd) const {
       uint64_t core_precision = symbol(CORE_SYMBOL).precision();
       uint64_t usd_precision = usd.precision();
@@ -129,5 +127,9 @@ namespace dcd { namespace chain {
       return info;
    }
 
-
+   actions_fee_proposals transaction_fee_manager::get_fee_proposals(const controller& ctl) const {
+      actions_fee_proposals info;
+      info.owner = name{"test"};
+      return info;
+   }
 }}

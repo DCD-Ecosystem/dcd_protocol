@@ -3053,6 +3053,11 @@ int64_t controller::set_proposed_rate( double new_rate ) {
    return version;
 }
 
+int64_t controller::update_proposed_fee( actions_fee_proposals prop ) {
+
+}
+
+
 
 //Transaction fees get proposed rate from the chain
 std::optional<producer_rate_info> controller::proposed_rate()const {
@@ -3066,6 +3071,7 @@ std::optional<producer_rate_info> controller::proposed_rate()const {
 
    return res;
 }
+
 
 
 const producer_authority_schedule& controller::pending_producers()const {

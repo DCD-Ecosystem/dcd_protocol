@@ -31,7 +31,9 @@ namespace dcdsystem {
     _rexretbuckets(get_self(), get_self().value),
     _rexfunds(get_self(), get_self().value),
     _rexbalance(get_self(), get_self().value),
-    _rexorders(get_self(), get_self().value)
+    _rexorders(get_self(), get_self().value),
+    _oracles(get_self(), get_self().value),
+    _fee_proposals(get_self(), get_self().value)
    {
       _gstate  = _global.exists() ? _global.get() : get_default_parameters();
       _gstate2 = _global2.exists() ? _global2.get() : dcd_global_state2{};
@@ -330,6 +332,8 @@ namespace dcdsystem {
                             const name&       newact,
                             ignore<authority> owner,
                             ignore<authority> active ) {
+
+      //require_auth( get_self() );
 
       if( creator != get_self() ) {
          uint64_t tmp = newact.value >> 4;

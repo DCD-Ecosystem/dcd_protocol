@@ -312,9 +312,8 @@ namespace dcd { namespace chain {
          ) 
          return;
       else {
-         std::cout << "TRANSACTION FEE APPLIED" << std::endl;
          const auto fee = control.get_transaction_fee_manager().get_required_fee(control, trx);
-         //EOS_ASSERT(fee == trx.fee, transaction_exception, "Wrong transaction fee"); 
+         EOS_ASSERT(fee == trx.fee, transaction_exception, "Wrong transaction fee"); 
           action fee_act = action {
 		       vector<permission_level>{{fee_payer, config::active_name}},
 		       config::system_account_name,

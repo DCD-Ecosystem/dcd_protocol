@@ -320,13 +320,14 @@ public:
 
    struct get_required_fee_params {
       fc::variant transaction;
-   };
+   };   
    struct get_required_fee_result {
       asset required_fee;
    };
 
    struct get_fee_rate_params {
    };
+
 
    struct get_fee_rate_result {
       asset           base_rate_asset;
@@ -338,9 +339,28 @@ public:
       std::vector<chain::producers_rate_info>    cur_rate_producers;   
    };
 
+   struct action_fee_prop {
+         name account;
+         name action;
+         asset fee;     
+      };
+
+
+   struct get_fee_proposals_params {
+   };
+
+   struct get_fee_proposals_result {
+      name                                                     owner;
+      //std::vector <action_fee_prop>                            fee_prop_list;
+      //time_point                                               propose_rate_time;
+      //bool                                                     is_active;
+
+   };
+
    get_required_fee_result get_required_fee( const get_required_fee_params& params)const;
    get_fee_rate_result get_fee_rate(const get_fee_rate_params& params)const;
-
+   get_fee_proposals_result get_fee_proposals(const get_fee_proposals_params& params)const;
+   
    struct get_rate_schedule_params {
    };
 
@@ -1194,5 +1214,7 @@ FC_REFLECT( dcd::chain_apis::read_only::get_action_fee_params, (account)(action)
 FC_REFLECT( dcd::chain_apis::read_only::get_action_fee_result, (core_fee)(usd_fee)(rate) )
 FC_REFLECT( dcd::chain_apis::read_only::get_required_fee_params, (transaction) )
 FC_REFLECT( dcd::chain_apis::read_only::get_required_fee_result, (required_fee) )
+FC_REFLECT( dcd::chain_apis::read_only::get_fee_proposals_result, (owner) )
 FC_REFLECT_EMPTY( dcd::chain_apis::read_only::get_fee_rate_params )
+FC_REFLECT_EMPTY( dcd::chain_apis::read_only::get_fee_proposals_params )
 FC_REFLECT( dcd::chain_apis::read_only::get_fee_rate_result, (base_rate_asset)(new_rate_period)(out_of_date_time)(prev_rate)(cur_rate)(cur_rate_time)(cur_rate_producers) )

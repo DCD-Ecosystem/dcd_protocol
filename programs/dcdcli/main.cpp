@@ -392,6 +392,17 @@ fc::variant determine_required_keys(const signed_transaction& trx) {
    return required_keys["required_keys"];
 }
 
+fc::variant determine_required_fee(const signed_transaction& trx) {
+   // TODO better error checking
+   //wdump((trx));
+   auto get_arg = fc::mutable_variant_object
+           ("transaction", (transaction)trx);
+   const auto& required_fee = call(get_required_fee, get_arg);
+   return required_fee["required_fee"];
+}
+
+
+
 void sign_transaction(signed_transaction& trx, fc::variant& required_keys, const chain_id_type& chain_id) {
    fc::variants sign_args = {fc::variant(trx), required_keys, fc::variant(chain_id)};
    const auto& signed_trx = call(wallet_url, wallet_sign_trx, sign_args);
@@ -424,6 +435,10 @@ fc::variant push_transaction( signed_transaction& trx, const std::vector<public_
       trx.max_net_usage_words = (tx_max_net_usage + 7)/8;
       trx.delay_sec = delaysec;
    }
+
+   auto txfee = determine_required_fee(trx);
+   fc::from_variant(txfee, trx.fee);
+
 
    if (!tx_skip_sign) {
       fc::variant required_keys;
@@ -996,6 +1011,10 @@ bool local_port_used() {
     local::stream_protocol::socket socket(ios);
     boost::system::error_code ec;
     socket.connect(endpoint, ec);
+    std::cerr << wallet_url << std::endl;
+    if(ec)  
+      std::cerr << strerror(ec.value()) << std::endl;
+
 
     return !ec;
 }
@@ -1188,8 +1207,8 @@ struct create_account_subcommand {
                action buyram = create_buyrambytes(name(creator), name(account_name), 8192 * 1024);
 //               auto net = to_asset(stake_net);
 //               auto cpu = to_asset(stake_cpu);
-               auto net = to_asset("100000000.0000 SYS");
-               auto cpu = to_asset("100000000.0000 SYS");
+               auto net = to_asset("100000000.0000 DCD");
+               auto cpu = to_asset("100000000.0000 DCD");
                if ( net.get_amount() != 0 || cpu.get_amount() != 0 ) {
                   action delegate = create_delegate( name(creator), name(account_name), net, cpu, transfer);
                   send_actions( { create, buyram, delegate } );
@@ -1383,7 +1402,7 @@ struct list_producers_subcommand {
       auto list_producers = actionRoot->add_subcommand("listproducers", localized("List producers"));
       list_producers->add_flag("--json,-j", print_json, localized("Output in JSON format"));
       list_producers->add_option("-l,--limit", limit, localized("The maximum number of rows to return"));
-      list_producers->add_option("-L,--lower", lower, localized("Lower bound value of key, defaults to first"));
+      list_producers->add_option("-L,--lower", lower, localized("lower bound value of key, defaults to first"));
       list_producers->callback([this] {
          auto rawResult = call(get_producers_func, fc::mutable_variant_object
             ("json", true)("lower_bound", lower)("limit", limit));
@@ -1399,18 +1418,44 @@ struct list_producers_subcommand {
          auto weight = result.total_producer_vote_weight;
          if ( !weight )
             weight = 1;
-         printf("%-13s %-57s %-59s %s\n", "Producer", "Producer key", "Url", "Scaled votes");
+         printf("%-13s %-57s %-59s %-10s %-24s %s %s %-24s\n", "Producer", "Producer key", "Url", "Scaled votes", "fee_rate_time", "fee_rate", "confirmed", "confirmed_time");
          for ( auto& row : result.rows )
-            printf("%-13.13s %-57.57s %-59.59s %1.4f\n",
+            printf("%-13.13s %-57.57s %-59.59s %1.10f %-24s %s %s %-24s\n",
                    row["owner"].as_string().c_str(),
                    row["producer_key"].as_string().c_str(),
-                   clean_output( row["url"].as_string() ).c_str(),
-                   row["total_votes"].as_double() / weight);
+                   row["url"].as_string().c_str(),
+                   row["total_votes"].as_double() / weight,
+                   row["fee_rate_time"].as_string().c_str(),
+                   row["fee_rate"].as_string().c_str(),
+                   row["confirmed"].as_string().c_str(),
+                   row["confirmed_time"].as_string().c_str());
          if ( !result.more.empty() )
-            std::cout << "-L " << clean_output( result.more ) << " for more" << std::endl;
+            std::cout << "-L " << result.more << " for more" << std::endl;
       });
    }
 };
+
+struct confirm_producer_subcommand {
+
+   std::string producer_name;
+
+   confirm_producer_subcommand(CLI::App* actionRoot) {
+      auto confirm_producer = actionRoot->add_subcommand("confirmprod", localized("Confirm producer"));
+      confirm_producer->add_option("producer", producer_name, localized("The confirmed account."))->required();
+      add_standard_transaction_options(confirm_producer);
+
+      confirm_producer->callback([this] {
+
+         const auto permission_account = config::system_account_name;
+
+         fc::variant act_payload = fc::mutable_variant_object()
+                  ("producer", producer_name);
+         auto accountPermissions = get_account_permissions(tx_permission, {config::system_account_name, config::active_name});
+         send_actions({create_action({permission_level{ permission_account, config::active_name }}, config::system_account_name, "confirmprod"_n, act_payload )});
+      });
+   }
+};
+
 
 struct set_fee_rate_producer_subcommand {
    string producer_str;
@@ -1433,6 +1478,27 @@ struct set_fee_rate_producer_subcommand {
       });
    }
 };
+
+
+struct regoracle_subcommand {
+   string oracle_str;
+
+   regoracle_subcommand(CLI::App* actionRoot) {
+      auto regoracle_subcommand = actionRoot->add_subcommand("regoracle", localized("Register new oracle"));
+      regoracle_subcommand->add_option("oracle", oracle_str, localized("The oracle account"))->required();
+      add_standard_transaction_options(regoracle_subcommand, "account@active");
+
+      regoracle_subcommand->callback([this] {
+         fc::variant act_payload = fc::mutable_variant_object()
+                  ("oracle", oracle_str);
+                  
+         auto accountPermissions = get_account_permissions(tx_permission, {name(oracle_str), config::active_name});
+         send_actions({create_action(accountPermissions, config::system_account_name, "regoracle"_n, act_payload)}, signing_keys_opt.get_keys());
+
+      });
+   }
+};
+
 
 
 struct get_schedule_subcommand {
@@ -3149,6 +3215,13 @@ int main( int argc, char** argv ) {
       std::cout << fc::json::to_pretty_string(result) << std::endl;
    });
 
+   auto getProposedFees = get->add_subcommand("fee_propose_info",localized("Get proposed fee list"));
+      getProposedFees->callback([&] {
+      auto result = call(get_fee_proposals, fc::mutable_variant_object("json", false));
+      std::cout << fc::json::to_pretty_string(result) << std::endl;
+   });
+
+
    // get actions
    string account_name;
    string skip_seq_str;
@@ -3474,6 +3547,7 @@ int main( int argc, char** argv ) {
 
    auto setFeeSubcommand = set_fee_subcommand(setSubcommand);
    auto setfeeforceSubcommand = set_feerateforce_subcommand(setSubcommand);
+   auto confirmProducer = confirm_producer_subcommand(setSubcommand);
 
    auto contractSubcommand = setSubcommand->add_subcommand("contract", localized("Create or update the contract on an account"));
    contractSubcommand->add_option("account", account, localized("The account to publish a contract for"))
@@ -4486,6 +4560,8 @@ int main( int argc, char** argv ) {
    auto unregProxy = unregproxy_subcommand(system);
 
    auto cancelDelay = canceldelay_subcommand(system);
+
+   auto regOracle = regoracle_subcommand(system);
 
    auto rex = system->add_subcommand("rex", localized("Actions related to REX (the resource exchange)"));
    rex->require_subcommand();

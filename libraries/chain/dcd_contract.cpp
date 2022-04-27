@@ -491,7 +491,7 @@ void apply_dcd_setfeeforce(apply_context& context) {
 
    auto &db = context.db;
    auto act = context.get_action().data_as<setfeeforce>();
-
+   std::cout << "SET FEE FORCE CALLED" << std::endl;
    context.require_authorization(config::system_account_name);
    context.control.set_proposed_rate(act.new_rate);
 }

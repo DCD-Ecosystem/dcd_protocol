@@ -213,6 +213,8 @@ namespace dcd { namespace chain {
          const producer_rate_info&              pending_rate()const;
          std::optional<producer_rate_info>      proposed_rate()const;
          
+
+         
          uint32_t                              get_max_nonprivileged_inline_action_size()const;
          const config&                         get_config()const;
 
@@ -307,6 +309,7 @@ namespace dcd { namespace chain {
          int64_t set_proposed_producers( vector<producer_authority> producers );
 
          int64_t set_proposed_rate( double new_rate );
+         int64_t update_proposed_fee( actions_fee_proposals prop );
 
          bool light_validation_allowed() const;
          bool skip_auth_check()const;

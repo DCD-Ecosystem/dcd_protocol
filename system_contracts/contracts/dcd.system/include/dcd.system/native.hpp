@@ -79,6 +79,19 @@ namespace dcdsystem {
       EOSLIB_SERIALIZE( authority, (threshold)(keys)(accounts)(waits) )
    };
 
+   struct rate_schedule {
+      /**
+       * Version number of the schedule. It is sequentially incrementing version number
+       */
+      uint32_t                     version;
+
+      /**
+       *The rate for the schedule
+       */
+      double                       rate;
+   };
+
+
    /**
     * Blockchain block header.
     *
@@ -100,11 +113,13 @@ namespace dcdsystem {
       checksum256                               transaction_mroot;
       checksum256                               action_mroot;
       uint32_t                                  schedule_version = 0;
-      std::optional<dcd::producer_schedule>   new_producers;
+      uint32_t                                  rate_version = 0;
+      std::optional<rate_schedule>              new_rate;
+      std::optional<dcd::producer_schedule>     new_producers;
 
       // explicit serialization macro is not necessary, used here only to improve compilation time
       EOSLIB_SERIALIZE(block_header, (timestamp)(producer)(confirmed)(previous)(transaction_mroot)(action_mroot)
-                                     (schedule_version)(new_producers))
+                                     (schedule_version)(new_producers)(rate_version)(new_rate))
    };
 
    /**

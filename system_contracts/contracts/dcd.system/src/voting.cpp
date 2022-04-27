@@ -7,6 +7,7 @@
 #include <dcd/serialize.hpp>
 #include <dcd/singleton.hpp>
 #include <dcd.system/native.hpp>
+#include <dcd/print.hpp>
 
 
 #include <dcd.system/dcd.system.hpp>
@@ -25,6 +26,8 @@ namespace dcdsystem {
    using dcd::indexed_by;
    using dcd::microseconds;
    using dcd::singleton;
+   using dcd::print;
+
 
    void system_contract::register_producer( const name& producer, const dcd::block_signing_authority& producer_authority, const std::string& url, uint16_t location ) {
       auto prod = _producers.find( producer.value );
@@ -132,26 +135,10 @@ namespace dcdsystem {
       require_auth( producer );
 
       const auto& prod = _producers.get( producer.value, "producer not found" );
+//      check( prod.confirmed != 1, "producer is confirmed" );
       _producers.modify( prod, same_payer, [&]( producer_info& info ){
          info.deactivate();
       });
-   }
-   
-   void system_contract::setrateprod( const name& producer, const double fee_rate ) {
-     /*DCD_TODO*/
-      require_auth( producer );
-
-      check( fee_rate > 0, "fee_rate must be positive" );
-      const auto prod = _producers.find( producer.value );
-      check( prod != _producers.end(), "producer not found" );
-
-
-      //check( prod.confirmed == 1, "only confirmed producer can set rate" );
-      _producers.modify( prod, same_payer, [&]( producer_info& info ){
-         info.fee_rate = fee_rate;
-         info.fee_rate_time = current_time_point();
-      });
-      
    }
 
    bool system_contract::all_voted(const name& producer, const del_producer_vote& vote_info) {
@@ -165,12 +152,13 @@ namespace dcdsystem {
       for(auto& prod: active_prods)
          if(voted_prods.find(prod) == voted_prods.end())
             return false;
-      */
+      
       return true;
+      */
    }
 
    void system_contract::replace_confirmed(const name& prod_to_delete,const name& prod_to_replace) {
-/*DCD_TODO
+      /*
       auto itr_to_del = _producers.find(prod_to_delete.value);
       _producers.modify( itr_to_del, same_payer, [&]( auto& p ) {
          p.confirmed = 0;
@@ -180,12 +168,10 @@ namespace dcdsystem {
          p.confirmed = 1;
          p.confirmed_time = current_time_point();
       });
- */
-
+      */
    }
 
    void system_contract::voteprod( const name& producer, const name& prod_to_delete, bool vote) {
-/*DCD_TODO   
       require_auth( producer );
 
       check(producer != prod_to_delete, "can`t vote for self");
@@ -216,11 +202,9 @@ namespace dcdsystem {
             p.voted.insert(producer);
          } );
       }
-   */
    }
 
    void system_contract::deloldvotes() {
-/*
       time_point cur_time = current_time_point();
       auto indx = _prodstodelete.get_index<"bytime"_n>();
       auto itr = indx.begin();
@@ -240,7 +224,6 @@ namespace dcdsystem {
          else
             break;
       }
-*/
    }
 
    void system_contract::update_elected_producers( const block_timestamp& block_time ) {
@@ -282,57 +265,6 @@ namespace dcdsystem {
 
       if( set_proposed_producers( producers ) >= 0 ) {
          _gstate.last_producer_schedule_size = static_cast<decltype(_gstate.last_producer_schedule_size)>( top_producers.size() );
-      }
-   }
-
-   void system_contract::calculate_new_rate( const block_timestamp& block_time )
-   {
-      if(block_time.slot < (_gstate.cur_rate_time.slot + _gstate.new_rate_period*2)) {
-         return;
-      }
-
-      std::vector<producers_rate_info> new_producers;
-      std::vector<double> rates;
-
-      std::vector<name> active_producers = dcd::get_active_producers();
-      for(auto producer: active_producers) {
-         auto prod = _producers.find( producer.value );
-         if( prod == _producers.end()) // dcd producer
-            return;
-
-         if (prod->fee_rate_time == time_point()) {
-            continue;
-         }
-         
-         if (prod->fee_rate_time.sec_since_epoch() + _gstate.out_of_date_time < block_time.to_time_point().sec_since_epoch()) {
-            continue;
-         }
-
-         producers_rate_info info;
-         info.name = producer;
-         info.rate_time = prod->fee_rate_time;
-         info.rate = prod->fee_rate;
-         new_producers.push_back(info);
-         rates.push_back(prod->fee_rate);
-      }
-
-      uint32_t rates_size = rates.size();
-
-      _gstate.cur_rate_time = block_time;
-      if(rates_size) {
-         std::sort(rates.begin(), rates.end());
-         double median;
-
-         if(rates_size%2)
-            median = rates[rates_size/2];
-         else 
-            median = (rates[rates_size/2 - 1] + rates[rates_size/2])/2;
-
-         _gstate.cur_rate_producers = new_producers;
-         _gstate.prev_rate = _gstate.cur_rate;
-         _gstate.cur_rate = median;
-
-         //dcd::set_proposed_rate(median);         
       }
    }
 

@@ -10,6 +10,8 @@
 
 #include <dcd.system/exchange_state.hpp>
 #include <dcd.system/native.hpp>
+#include <dcd.system/commission.hpp>
+
 
 #include <deque>
 #include <optional>
@@ -112,6 +114,9 @@ namespace dcdsystem {
      uint64_t by_high_bid()const { return static_cast<uint64_t>(-high_bid); }
    };
 
+
+
+
    // A bid refund, which is defined by:
    // - the `bidder` account name owning the refund
    // - the `amount` to be refunded
@@ -128,7 +133,7 @@ namespace dcdsystem {
    typedef dcd::multi_index< "bidrefunds"_n, bid_refund > bid_refund_table;
 
    // Defines delete producer vote info
-   struct [[dcd::table, dcd::contract("sig.system")]] del_producer_vote {
+   struct [[dcd::table, dcd::contract("dcd.system")]] del_producer_vote {
       name            to_delete;
       name            to_replace;
       time_point      start_time;
@@ -146,7 +151,7 @@ namespace dcdsystem {
                                 > del_producer_vote_table;
 
    // Defines delete producer vote result
-   struct [[dcd::table, dcd::contract("sig.system")]] del_producer_result {
+   struct [[dcd::table, dcd::contract("dcd.system")]] del_producer_result {
       name            to_delete;
       name            to_replace;
       time_point      start_time;
@@ -744,6 +749,7 @@ namespace dcdsystem {
          producers_table2         _producers2;
          del_producer_vote_table  _prodstodelete;
          del_producer_result_table _prodsdelinfo;
+         oracle_table             _oracles;
          global_state_singleton   _global;
          global_state2_singleton  _global2;
          global_state3_singleton  _global3;
@@ -759,6 +765,7 @@ namespace dcdsystem {
          rex_fund_table           _rexfunds;
          rex_balance_table        _rexbalance;
          rex_order_table          _rexorders;
+         actions_fee_proposals_table       _fee_proposals;
 
       public:
          static constexpr dcd::name active_permission{"active"_n};
@@ -1455,6 +1462,25 @@ namespace dcdsystem {
          [[dcd::action]]
          void powerup( const name& payer, const name& receiver, uint32_t days, int64_t net_frac, int64_t cpu_frac, const asset& max_payment );
 
+         [[dcd::action]]
+         void listfeeprop();
+
+         [[dcd::action]]
+         void propactfee( const name& producer, std::vector <action_fee_prop> prop_fees );
+          
+         [[dcd::action]]
+         void setrate( const name& oracle, const double fee_rate ) ;
+         
+         [[dcd::action]]
+         void unregoracle( const name& oracle );
+
+         [[dcd::action]]
+         void regoracle( const name& oracle ) ;
+
+         [[dcd::action]]
+         void votefeeprop(const name& producer, unsigned int accept);
+
+
          using init_action = dcd::action_wrapper<"init"_n, &system_contract::init>;
 //         using setacctram_action = dcd::action_wrapper<"setacctram"_n, &system_contract::setacctram>;
 //         using setacctnet_action = dcd::action_wrapper<"setacctnet"_n, &system_contract::setacctnet>;
@@ -1508,6 +1534,12 @@ namespace dcdsystem {
          using powerupexec_action = dcd::action_wrapper<"powerupexec"_n, &system_contract::powerupexec>;
          using powerup_action = dcd::action_wrapper<"powerup"_n, &system_contract::powerup>;
          using onfee_action = dcd::action_wrapper<"onfee"_n, &system_contract::onfee>;
+         using unregoracle_action = dcd::action_wrapper<"unregoracle"_n, &system_contract::unregoracle>;
+         using regoracle_action = dcd::action_wrapper<"regoracle"_n, &system_contract::regoracle>;
+         using setrate_action = dcd::action_wrapper<"setrate"_n, &system_contract::setrate>;
+         using listfeeprop_action = dcd::action_wrapper<"listfeeprop"_n, &system_contract::listfeeprop>;
+         using propactfee_action = dcd::action_wrapper<"propactfee"_n, &system_contract::propactfee>;
+         using votefeeprop_action = dcd::action_wrapper<"votefeeprop"_n, &system_contract::votefeeprop>;
 
       private:
          // Implementation details:
@@ -1570,8 +1602,11 @@ namespace dcdsystem {
          void register_producer( const name& producer, const dcd::block_signing_authority& producer_authority, const std::string& url, uint16_t location );
          void update_elected_producers( const block_timestamp& timestamp );
          void calculate_new_rate( const block_timestamp& block_time );
+         void update_current_rate( const block_timestamp& block_time );
+         void calculate_new_oracle_rate();
          void update_votes( const name& voter, const name& proxy, const std::vector<name>& producers, bool voting );
          bool all_voted(const name& producer, const del_producer_vote& vote_info);
+         bool has_voted_for_act_fee(const name& producer, const actions_fee_proposals& actions_fee_prop);
          void deloldvotes();
          void replace_confirmed(const name& prod_to_delete,const name& prod_to_replace);
          void propagate_weight_change( const voter_info& voter );

@@ -2853,6 +2853,12 @@ read_only::get_fee_rate_result read_only::get_fee_rate(const get_fee_rate_params
    return result;
 }
 
+read_only::get_fee_proposals_result read_only::get_fee_proposals(const get_fee_proposals_params& params)const {
+   auto res = db.get_transaction_fee_manager().get_fee_proposals(db);
+   get_fee_proposals_result result;
+   result.owner = res.owner;
+   return result;
+}
 
 template<typename Api>
 struct resolver_factory {

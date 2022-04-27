@@ -1,5 +1,6 @@
 #include <dcd.system/dcd.system.hpp>
 #include <dcd.token/dcd.token.hpp>
+#include <dcd/print.hpp>
 
 namespace dcdsystem {
 
@@ -44,7 +45,7 @@ namespace dcdsystem {
       /// only update block producers once every minute, block_timestamp is in half seconds
       if( timestamp.slot - _gstate.last_producer_schedule_update.slot > 120 ) {
          update_elected_producers( timestamp );
-         calculate_new_rate( timestamp );
+
          if( (timestamp.slot - _gstate.last_name_close.slot) > blocks_per_day ) {
             name_bid_table bids(get_self(), get_self().value);
             auto idx = bids.get_index<"highbid"_n>();
@@ -64,7 +65,6 @@ namespace dcdsystem {
          }
       }
 
-//      deloldvotes();
    }
 
    void system_contract::claimrewards( const name& owner ) {
