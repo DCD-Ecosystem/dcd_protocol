@@ -13,7 +13,7 @@ namespace dcd { namespace chain { namespace webassembly {
    int interface::is_feature_active( int64_t feature_name ) const { return false; }
 
    void interface::activate_feature( int64_t feature_name ) const {
-      EOS_ASSERT( false, unsupported_feature, "Unsupported Hardfork Detected" );
+      DCD_ASSERT( false, unsupported_feature, "Unsupported Hardfork Detected" );
    }
 
    void interface::preactivate_feature( legacy_ptr<const digest_type> feature_digest ) {
@@ -24,9 +24,9 @@ namespace dcd { namespace chain { namespace webassembly {
     * Deprecated in favor of set_resource_limit.
     */
 //   void interface::set_resource_limits( account_name account, int64_t ram_bytes, int64_t net_weight, int64_t cpu_weight ) {
-//      EOS_ASSERT(ram_bytes >= -1, wasm_execution_error, "invalid value for ram resource limit expected [-1,INT64_MAX]");
-//      EOS_ASSERT(net_weight >= -1, wasm_execution_error, "invalid value for net resource weight expected [-1,INT64_MAX]");
-//      EOS_ASSERT(cpu_weight >= -1, wasm_execution_error, "invalid value for cpu resource weight expected [-1,INT64_MAX]");
+//      DCD_ASSERT(ram_bytes >= -1, wasm_execution_error, "invalid value for ram resource limit expected [-1,INT64_MAX]");
+//      DCD_ASSERT(net_weight >= -1, wasm_execution_error, "invalid value for net resource weight expected [-1,INT64_MAX]");
+//      DCD_ASSERT(cpu_weight >= -1, wasm_execution_error, "invalid value for cpu resource weight expected [-1,INT64_MAX]");
 //      if( context.control.get_mutable_resource_limits_manager().set_account_limits(account, ram_bytes, net_weight, cpu_weight) ) {
 //         context.trx_context.validate_ram_usage.insert( account );
 //      }
@@ -43,7 +43,7 @@ namespace dcd { namespace chain { namespace webassembly {
 //   }
 
 //   void interface::set_resource_limit( account_name account, name resource, int64_t limit ) {
-//      EOS_ASSERT(limit >= -1, wasm_execution_error, "invalid value for ${resource} resource limit expected [-1,INT64_MAX]", ("resource", resource));
+//      DCD_ASSERT(limit >= -1, wasm_execution_error, "invalid value for ${resource} resource limit expected [-1,INT64_MAX]", ("resource", resource));
 //      auto& manager = context.control.get_mutable_resource_limits_manager();
 //      if( resource == string_to_name("ram") ) {
 //         int64_t ram, net, cpu;
@@ -60,7 +60,7 @@ namespace dcd { namespace chain { namespace webassembly {
 //         manager.get_account_limits(account, ram, net, cpu);
 //         manager.set_account_limits( account, ram, net, limit );
 //      } else {
-//         EOS_THROW(wasm_execution_error, "unknown resource ${resource}", ("resource", resource));
+//         DCD_THROW(wasm_execution_error, "unknown resource ${resource}", ("resource", resource));
 //      }
 //   }
 
@@ -79,13 +79,13 @@ namespace dcd { namespace chain { namespace webassembly {
 //         manager.get_account_limits( account, ram, net, cpu );
 //         return cpu;
 //      } else {
-//         EOS_THROW(wasm_execution_error, "unknown resource ${resource}", ("resource", resource));
+//         DCD_THROW(wasm_execution_error, "unknown resource ${resource}", ("resource", resource));
 //      }
 //   }
 
    int64_t set_proposed_producers_common( apply_context& context, vector<producer_authority> && producers, bool validate_keys ) {
-      EOS_ASSERT(producers.size() <= config::max_producers, wasm_execution_error, "Producer schedule exceeds the maximum producer count for this chain");
-      EOS_ASSERT( producers.size() > 0
+      DCD_ASSERT(producers.size() <= config::max_producers, wasm_execution_error, "Producer schedule exceeds the maximum producer count for this chain");
+      DCD_ASSERT( producers.size() > 0
                   || !context.control.is_builtin_activated( builtin_protocol_feature_t::disallow_empty_producer_schedule ),
                   wasm_execution_error,
                   "Producer schedule cannot be empty"
@@ -96,16 +96,16 @@ namespace dcd { namespace chain { namespace webassembly {
       // check that producers are unique
       std::set<account_name> unique_producers;
       for (const auto& p: producers) {
-         EOS_ASSERT( context.is_account(p.producer_name), wasm_execution_error, "producer schedule includes a nonexisting account" );
+         DCD_ASSERT( context.is_account(p.producer_name), wasm_execution_error, "producer schedule includes a nonexisting account" );
          std::visit([&p, num_supported_key_types, validate_keys](const auto& a) {
             uint32_t sum_weights = 0;
             std::set<public_key_type> unique_keys;
             for (const auto& kw: a.keys ) {
-               EOS_ASSERT( kw.key.which() < num_supported_key_types, unactivated_key_type,
+               DCD_ASSERT( kw.key.which() < num_supported_key_types, unactivated_key_type,
                            "Unactivated key type used in proposed producer schedule");
 
                if( validate_keys ) {
-                  EOS_ASSERT( kw.key.valid(), wasm_execution_error, "producer schedule includes an invalid key" );
+                  DCD_ASSERT( kw.key.valid(), wasm_execution_error, "producer schedule includes an invalid key" );
                }
 
                if (std::numeric_limits<uint32_t>::max() - sum_weights <= kw.weight) {
@@ -117,14 +117,14 @@ namespace dcd { namespace chain { namespace webassembly {
                unique_keys.insert(kw.key);
             }
 
-            EOS_ASSERT( a.keys.size() == unique_keys.size(), wasm_execution_error, "producer schedule includes a duplicated key for ${account}", ("account", p.producer_name));
-            EOS_ASSERT( a.threshold > 0, wasm_execution_error, "producer schedule includes an authority with a threshold of 0 for ${account}", ("account", p.producer_name));
-            EOS_ASSERT( sum_weights >= a.threshold, wasm_execution_error, "producer schedule includes an unsatisfiable authority for ${account}", ("account", p.producer_name));
+            DCD_ASSERT( a.keys.size() == unique_keys.size(), wasm_execution_error, "producer schedule includes a duplicated key for ${account}", ("account", p.producer_name));
+            DCD_ASSERT( a.threshold > 0, wasm_execution_error, "producer schedule includes an authority with a threshold of 0 for ${account}", ("account", p.producer_name));
+            DCD_ASSERT( sum_weights >= a.threshold, wasm_execution_error, "producer schedule includes an unsatisfiable authority for ${account}", ("account", p.producer_name));
          }, p.authority);
 
          unique_producers.insert(p.producer_name);
       }
-      EOS_ASSERT( producers.size() == unique_producers.size(), wasm_execution_error, "duplicate producer name in producer schedule" );
+      DCD_ASSERT( producers.size() == unique_producers.size(), wasm_execution_error, "duplicate producer name in producer schedule" );
 
       return context.control.set_proposed_producers( std::move(producers) );
    }
@@ -150,7 +150,7 @@ namespace dcd { namespace chain { namespace webassembly {
       uint32_t version;
       chain::wasm_config cfg;
       fc::raw::unpack(ds, version);
-      EOS_ASSERT(version == 0, wasm_config_unknown_version, "set_wasm_parameters_packed: Unknown version: ${version}", ("version", version));
+      DCD_ASSERT(version == 0, wasm_config_unknown_version, "set_wasm_parameters_packed: Unknown version: ${version}", ("version", version));
       fc::raw::unpack(ds, cfg);
       cfg.validate();
       context.db.modify( context.control.get_global_properties(),
@@ -186,7 +186,7 @@ namespace dcd { namespace chain { namespace webassembly {
          fc::raw::unpack(ds, producers);
          return set_proposed_producers_common( context, std::move(producers), false);
       } else {
-         EOS_THROW(wasm_execution_error, "Producer schedule is in an unknown format!");
+         DCD_THROW(wasm_execution_error, "Producer schedule is in an unknown format!");
       }
    }
 
@@ -226,7 +226,7 @@ namespace dcd { namespace chain { namespace webassembly {
       auto size = fc::raw::pack_size( config_range );
       if( packed_parameters.size() == 0 ) return size;
 
-      EOS_ASSERT(size <= packed_parameters.size(),
+      DCD_ASSERT(size <= packed_parameters.size(),
                  chain::config_parse_error,
                  "get_parameters_packed: buffer size is smaller than ${size}", ("size", size));
       
@@ -270,7 +270,7 @@ namespace dcd { namespace chain { namespace webassembly {
       uint32_t version;
       chain::kv_database_config cfg;
       fc::raw::unpack(ds, version);
-      EOS_ASSERT(version == 0, kv_unknown_parameters_version, "set_kv_parameters_packed: Unknown version: ${version}", ("version", version));
+      DCD_ASSERT(version == 0, kv_unknown_parameters_version, "set_kv_parameters_packed: Unknown version: ${version}", ("version", version));
       fc::raw::unpack(ds, cfg);
       context.db.modify( context.control.get_global_properties(),
          [&]( auto& gprops ) {

@@ -2,7 +2,7 @@
   "name": "dcd",
   "version": "1.0.0",
   "dependencies": {
-    "eosjs": "^20.0.0",
+    "dcdjs": "^20.0.0",
     "ws": "7.2.0",
     "commander": "4.0.1",
     "zlib": "1.0.5",

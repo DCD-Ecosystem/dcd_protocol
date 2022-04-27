@@ -18,7 +18,7 @@ namespace dcd { namespace chain { namespace webassembly {
          datastream<const char*> ds( new_rate.data(), new_rate.size() );
          double rate;
          fc::raw::unpack( ds, rate );
-         EOS_ASSERT( rate > 0, wasm_execution_error, "rate must be lager than zero!");
+         DCD_ASSERT( rate > 0, wasm_execution_error, "rate must be lager than zero!");
          return context.control.set_proposed_rate( rate );
       }
 

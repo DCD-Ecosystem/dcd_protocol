@@ -4,9 +4,9 @@ content_title: DCD Overview
 
 DCD is the next-generation blockchain platform for creating and deploying smart contracts and distributed applications. DCD comes with a number of programs. The primary ones included in DCD are the following:
 
-* [dcdnode](01_dcdnode/index.md) (node + eos = dcdnode)  - Core service daemon that runs a node for block production, API endpoints, or local development.
-* [dcdcli](02_dcdcli/index.md) (cli + eos = dcdcli) - Command line interface to interact with the blockchain (via `dcdnode`) and manage wallets (via `dcdksd`).
-* [dcdksd](03_dcdksd/index.md) (key + eos = dcdksd) - Component that manages DCD keys in wallets and provides a secure enclave for digital signing.
+* [dcdnode](01_dcdnode/index.md) (node + dcd = dcdnode)  - Core service daemon that runs a node for block production, API endpoints, or local development.
+* [dcdcli](02_dcdcli/index.md) (cli + dcd = dcdcli) - Command line interface to interact with the blockchain (via `dcdnode`) and manage wallets (via `dcdksd`).
+* [dcdksd](03_dcdksd/index.md) (key + dcd = dcdksd) - Component that manages DCD keys in wallets and provides a secure enclave for digital signing.
 
 The basic relationship between these components is illustrated in the diagram below.
 

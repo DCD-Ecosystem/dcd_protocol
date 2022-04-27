@@ -55,7 +55,7 @@ cd $( dirname "${BASH_SOURCE[0]}" )/..
 # Load bash script helper functions
 . ./scripts/helpers/dcd.sh
 
-# Support relative paths : https://github.com/DCD/eos/issues/7560
+# Support relative paths : https://github.com/DCD/dcd/issues/7560
 ( [[ ! -z $INSTALL_LOCATION ]] && [[ ! $INSTALL_LOCATION =~ ^\/ ]] ) && export INSTALL_LOCATION="${CURRENT_WORKING_DIR}/$INSTALL_LOCATION"
 
 INSTALL_PATHS=()
@@ -80,7 +80,7 @@ export DCD_INSTALL_DIR=${INSTALL_LOCATION:-$DCD_INSTALL_DIR}
 if [[ ! -d "${DCD_INSTALL_DIR}" ]]; then
    echo "[DCD installation ${COLOR_YELLOW}NOT${COLOR_NC} found in ${DCD_INSTALL_DIR}]"
 else
-   # As of 1.8.0, we're using a versioned directories under home: https://github.com/DCD/eos/issues/6940
+   # As of 1.8.0, we're using a versioned directories under home: https://github.com/DCD/dcd/issues/6940
    echo "[DCD installation found: ${DCD_INSTALL_DIR}]" && INSTALL_PATHS+=("${DCD_INSTALL_DIR}") # DCD_INSTALL_DIR set in .environment
    while true; do
       [[ $NONINTERACTIVE == false ]] && read -p "Do you wish to remove the installation in ${DCD_INSTALL_DIR}? (y/n) " PROCEED

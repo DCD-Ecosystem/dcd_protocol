@@ -54,12 +54,12 @@ namespace dcd { namespace chain {
       }
 
       int32_t kv_it_compare(const kv_iterator& rhs) override {
-         EOS_ASSERT(rhs.is_kv_chainbase_context_iterator(), kv_bad_iter, "Incompatible key-value iterators");
+         DCD_ASSERT(rhs.is_kv_chainbase_context_iterator(), kv_bad_iter, "Incompatible key-value iterators");
          auto& r = static_cast<const kv_iterator_chainbase&>(rhs);
          
-         EOS_ASSERT(contract == r.contract, kv_bad_iter, "Incompatible key-value iterators");
-         EOS_ASSERT(!current || !tracker.is_removed(*current), kv_bad_iter, "Iterator to erased element");
-         EOS_ASSERT(!r.current || !tracker.is_removed(*r.current), kv_bad_iter, "Iterator to erased element");
+         DCD_ASSERT(contract == r.contract, kv_bad_iter, "Incompatible key-value iterators");
+         DCD_ASSERT(!current || !tracker.is_removed(*current), kv_bad_iter, "Iterator to erased element");
+         DCD_ASSERT(!r.current || !tracker.is_removed(*r.current), kv_bad_iter, "Iterator to erased element");
          if (!r.current) {
             if (!current)
                return 0;
@@ -77,7 +77,7 @@ namespace dcd { namespace chain {
       int32_t kv_it_key_compare(const char* key, uint32_t size) override {
          if (!current)
             return 1;
-         EOS_ASSERT(!tracker.is_removed(*current), kv_bad_iter, "Iterator to erased element");
+         DCD_ASSERT(!tracker.is_removed(*current), kv_bad_iter, "Iterator to erased element");
          return compare_blob(current->kv_key, std::string_view{ key, size });
       }
 
@@ -88,7 +88,7 @@ namespace dcd { namespace chain {
 
       kv_it_stat kv_it_next(uint32_t* found_key_size, uint32_t* found_value_size) override {
          if (current) {
-            EOS_ASSERT(!tracker.is_removed(*current), kv_bad_iter, "Iterator to erased element");
+            DCD_ASSERT(!tracker.is_removed(*current), kv_bad_iter, "Iterator to erased element");
             auto it = idx.iterator_to(*current);
             ++it;
             return move_to(it, found_key_size, found_value_size);
@@ -99,7 +99,7 @@ namespace dcd { namespace chain {
       kv_it_stat kv_it_prev(uint32_t* found_key_size, uint32_t* found_value_size) override {
          std::decay_t<decltype(idx.end())> it;
          if (current) {
-            EOS_ASSERT(!tracker.is_removed(*current), kv_bad_iter, "Iterator to erased element");
+            DCD_ASSERT(!tracker.is_removed(*current), kv_bad_iter, "Iterator to erased element");
             it = idx.iterator_to(*current);
          } else
             it = idx.upper_bound(boost::make_tuple(contract, blob_prefix{{prefix.data(), prefix.size()}}));
@@ -121,7 +121,7 @@ namespace dcd { namespace chain {
             actual_size = 0;
             return kv_it_stat::iterator_end;
          }
-         EOS_ASSERT(!tracker.is_removed(*current), kv_bad_iter, "Iterator to erased element");
+         DCD_ASSERT(!tracker.is_removed(*current), kv_bad_iter, "Iterator to erased element");
          if (offset < current->kv_key.size())
             memcpy(dest, current->kv_key.data() + offset, std::min((size_t)size, current->kv_key.size() - offset));
          actual_size = current->kv_key.size();
@@ -133,7 +133,7 @@ namespace dcd { namespace chain {
             actual_size = 0;
             return kv_it_stat::iterator_end;
          }
-         EOS_ASSERT(!tracker.is_removed(*current), kv_bad_iter, "Iterator to erased element");
+         DCD_ASSERT(!tracker.is_removed(*current), kv_bad_iter, "Iterator to erased element");
          if (offset < current->kv_value.size())
             memcpy(dest, current->kv_value.data() + offset, std::min((size_t)size, current->kv_value.size() - offset));
          actual_size = current->kv_value.size();
@@ -162,7 +162,7 @@ namespace dcd { namespace chain {
          : db{ db }, receiver{ receiver }, resource_manager{ resource_manager }, limits{limits} {}
 
       int64_t kv_erase(uint64_t contract, const char* key, uint32_t key_size) override {
-         EOS_ASSERT(name{ contract } == receiver, table_operation_not_permitted, "Can not write to this key");
+         DCD_ASSERT(name{ contract } == receiver, table_operation_not_permitted, "Can not write to this key");
          temp_data_buffer.reset();
          auto* kv = db.find<kv_object, by_kv_key>(boost::make_tuple(name{ contract }, std::string_view{ key, key_size }));
          if (!kv)
@@ -185,9 +185,9 @@ namespace dcd { namespace chain {
 
       int64_t kv_set(uint64_t contract, const char* key, uint32_t key_size, const char* value,
                      uint32_t value_size, account_name payer) override {
-         EOS_ASSERT(name{ contract } == receiver, table_operation_not_permitted, "Can not write to this key");
-         EOS_ASSERT(key_size <= limits.max_key_size, kv_limit_exceeded, "Key too large");
-         EOS_ASSERT(value_size <= limits.max_value_size, kv_limit_exceeded, "Value too large");
+         DCD_ASSERT(name{ contract } == receiver, table_operation_not_permitted, "Can not write to this key");
+         DCD_ASSERT(key_size <= limits.max_key_size, kv_limit_exceeded, "Key too large");
+         DCD_ASSERT(value_size <= limits.max_value_size, kv_limit_exceeded, "Value too large");
 
          temp_data_buffer.reset();
          auto* kv = db.find<kv_object, by_kv_key>(
@@ -260,8 +260,8 @@ namespace dcd { namespace chain {
       }
 
       std::unique_ptr<kv_iterator> kv_it_create(uint64_t contract, const char* prefix, uint32_t size) override {
-         EOS_ASSERT(num_iterators < limits.max_iterators, kv_bad_iter, "Too many iterators");
-         EOS_ASSERT(size <= limits.max_key_size, kv_bad_iter, "Prefix too large");
+         DCD_ASSERT(num_iterators < limits.max_iterators, kv_bad_iter, "Too many iterators");
+         DCD_ASSERT(size <= limits.max_key_size, kv_bad_iter, "Prefix too large");
          return std::make_unique<kv_iterator_chainbase>(db, tracker, num_iterators, name{ contract },
                                                         std::vector<char>{ prefix, prefix + size });
       }

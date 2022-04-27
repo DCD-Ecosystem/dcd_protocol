@@ -49,8 +49,8 @@ namespace dcd { namespace chain {
 
       void read_from(fc::datastream<const char*>& ds, const fc::path& log_path) {
         ds.read((char*)&version, sizeof(version));
-         EOS_ASSERT(version > 0, block_log_exception, "Block log was not setup properly");
-         EOS_ASSERT(
+         DCD_ASSERT(version > 0, block_log_exception, "Block log was not setup properly");
+         DCD_ASSERT(
              block_log::is_supported_version(version), block_log_unsupported_version,
              "Unsupported version of block log. Block log version is ${version} while code supports version(s) "
              "[${min},${max}], log file: ${log}",
@@ -68,7 +68,7 @@ namespace dcd { namespace chain {
             chain_context = chain_id_type{};
             ds >> std::get<chain_id_type>(chain_context);
          } else {
-            EOS_THROW(block_log_exception,
+            DCD_THROW(block_log_exception,
                       "Block log is not supported. version: ${ver} and first_block_num: ${fbn} does not contain "
                       "a genesis_state nor a chain_id.",
                       ("ver", version)("fbn", first_block_num));
@@ -79,7 +79,7 @@ namespace dcd { namespace chain {
             std::decay_t<decltype(block_log::npos)> actual_totem;
             ds.read((char*)&actual_totem, sizeof(actual_totem));
 
-            EOS_ASSERT(
+            DCD_ASSERT(
                 actual_totem == expected_totem, block_log_exception,
                 "Expected separator between block log header and blocks was not found( expected: ${e}, actual: ${a} )",
                 ("e", fc::to_hex((char*)&expected_totem, sizeof(expected_totem)))(
@@ -147,10 +147,10 @@ namespace dcd { namespace chain {
          fc::raw::unpack(ds, meta.size);
          uint8_t compression;
          fc::raw::unpack(ds, compression);
-         EOS_ASSERT(compression < static_cast<uint8_t>(packed_transaction::cf_compression_type::COMPRESSION_TYPE_COUNT), block_log_exception, 
+         DCD_ASSERT(compression < static_cast<uint8_t>(packed_transaction::cf_compression_type::COMPRESSION_TYPE_COUNT), block_log_exception, 
                   "Unknown compression_type");
          meta.compression = static_cast<packed_transaction::cf_compression_type>(compression);
-         EOS_ASSERT(meta.compression == packed_transaction::cf_compression_type::none, block_log_exception,
+         DCD_ASSERT(meta.compression == packed_transaction::cf_compression_type::none, block_log_exception,
                   "Only support compression_type none");         
          block.unpack(ds, meta.compression);
          const uint64_t current_stream_offset = ds.tellp() - start_pos;
@@ -159,7 +159,7 @@ namespace dcd { namespace chain {
          // In this case, the serialized block has fewer bytes than what's indicated by entry.size. We need to
          // skip over the extra bytes to allow ds to position to the last 8 bytes of the entry.  
          const int64_t bytes_to_skip = static_cast<int64_t>(meta.size) - sizeof(uint64_t) - current_stream_offset;
-         EOS_ASSERT(bytes_to_skip >= 0, block_log_exception,
+         DCD_ASSERT(bytes_to_skip >= 0, block_log_exception,
                     "Invalid block log entry size");
          ds.skip(bytes_to_skip);
          return meta;
@@ -245,7 +245,7 @@ namespace dcd { namespace chain {
       }
 
       if (expect_block_num != 0) {
-         EOS_ASSERT(!!block && block->block_num() == expect_block_num, block_log_exception,
+         DCD_ASSERT(!!block && block->block_num() == expect_block_num, block_log_exception,
                      "Wrong block was read from block log.");
       }
 
@@ -259,13 +259,13 @@ namespace dcd { namespace chain {
          uint8_t  compression;
          fc::raw::unpack(ds, size);
          fc::raw::unpack(ds, compression);
-         EOS_ASSERT(compression == static_cast<uint8_t>(packed_transaction::cf_compression_type::none),
+         DCD_ASSERT(compression == static_cast<uint8_t>(packed_transaction::cf_compression_type::none),
                      block_log_exception, "Only \"none\" compression type is supported.");
       }
       block_header bh;
       fc::raw::unpack(ds, bh);
 
-      EOS_ASSERT(bh.block_num() == expect_block_num, block_log_exception,
+      DCD_ASSERT(bh.block_num() == expect_block_num, block_log_exception,
                   "Wrong block header was read from block log.",
                   ("returned", bh.block_num())("expected", expect_block_num));
 
@@ -312,7 +312,7 @@ namespace dcd { namespace chain {
          //   block_id_type        previous;                   //bytes 14:45, low 4 bytes is big endian block number of
          //   previous block
 
-         EOS_ASSERT(position <= size(), block_log_exception, "Invalid block position ${position}", ("position", position));
+         DCD_ASSERT(position <= size(), block_log_exception, "Invalid block position ${position}", ("position", position));
 
          int blknum_offset = 14;
          blknum_offset += offset_to_block_start(version());
@@ -334,14 +334,14 @@ namespace dcd { namespace chain {
       void light_validate_block_entry_at(uint64_t pos, uint32_t expected_block_num) const {
          const uint32_t actual_block_num = block_num_at(pos);
 
-         EOS_ASSERT(actual_block_num == expected_block_num, block_log_exception,
+         DCD_ASSERT(actual_block_num == expected_block_num, block_log_exception,
                     "At position ${pos} expected to find block number ${exp_bnum} but found ${act_bnum}",
                     ("pos", pos)("exp_bnum", expected_block_num)("act_bnum", actual_block_num));
 
          if (version() >= pruned_transaction_version) {
             uint32_t entry_size     = read_buffer<uint32_t>(data()+pos);
             uint64_t entry_position = read_buffer<uint64_t>(data() + pos + entry_size - sizeof(uint64_t));
-            EOS_ASSERT(pos == entry_position, block_log_exception, 
+            DCD_ASSERT(pos == entry_position, block_log_exception, 
                "The last 8 bytes in the block entry of block number ${n} does not contain its own position", ("n", actual_block_num));
          }
       }
@@ -383,7 +383,7 @@ namespace dcd { namespace chain {
             ds.read(reinterpret_cast<char*>(&tmp_pos), sizeof(tmp_pos));
          }
 
-         EOS_ASSERT(pos == tmp_pos, block_log_exception, "the block position for block ${num} at the end of a block entry is incorrect", ("num", block_num));
+         DCD_ASSERT(pos == tmp_pos, block_log_exception, "the block position for block ${num} at the end of a block entry is incorrect", ("num", block_num));
          return std::make_tuple(block_num, id);
       }
 
@@ -408,7 +408,7 @@ namespace dcd { namespace chain {
          uint32_t log_num_blocks   = log_data.num_blocks();
          uint32_t index_num_blocks = log_index.num_blocks();
 
-         EOS_ASSERT(
+         DCD_ASSERT(
              log_num_blocks == index_num_blocks, block_log_exception,
              "${block_file_name} says it has ${log_num_blocks} blocks which disagrees with ${index_num_blocks} indicated by ${index_file_name}",
              ("block_file_name", block_file_name)("log_num_blocks", log_num_blocks)("index_num_blocks", index_num_blocks)("index_file_name", index_file_name));
@@ -437,7 +437,7 @@ namespace dcd { namespace chain {
       void set_value(uint64_t pos) { memcpy(addr(), &pos, sizeof(pos)); }
 
       reverse_block_position_iterator& operator++() {
-         EOS_ASSERT(current_position > begin_position && current_position < data.size(), block_log_exception,
+         DCD_ASSERT(current_position > begin_position && current_position < data.size(), block_log_exception,
                     "Block log file formatting is incorrect, it contains a block position value: ${pos}, which is not "
                     "in the range of (${begin_pos},${last_pos})",
                     ("pos", current_position)("begin_pos", begin_position)("last_pos", data.size()));
@@ -481,7 +481,7 @@ namespace dcd { namespace chain {
          index.write(iter.get_value());
       }
 
-      EOS_ASSERT(blocks_found == num_blocks, block_log_exception,
+      DCD_ASSERT(blocks_found == num_blocks, block_log_exception,
                  "Block log file at '${blocks_log}' formatting indicated last block: ${last_block_num}, first "
                  "block: ${first_block_num}, but found ${num} blocks",
                  ("blocks_log", index_file_name.replace(index_file_name.size() - 5, 5, "log"))(
@@ -498,7 +498,7 @@ namespace dcd { namespace chain {
          if (chain_id.empty()) {
             chain_id = log.chain_id();
          } else {
-            EOS_ASSERT(chain_id == log.chain_id(), block_log_exception,
+            DCD_ASSERT(chain_id == log.chain_id(), block_log_exception,
                        "block log file ${path} has a different chain id", ("path", log_path.generic_string()));
          }
       }
@@ -613,7 +613,7 @@ namespace dcd { namespace chain {
          preamble = log_data.get_preamble();
          future_version = preamble.version;
 
-         EOS_ASSERT(catalog.verifier.chain_id.empty() || catalog.verifier.chain_id == preamble.chain_id(), block_log_exception,
+         DCD_ASSERT(catalog.verifier.chain_id.empty() || catalog.verifier.chain_id == preamble.chain_id(), block_log_exception,
                     "block log file ${path} has a different chain id", ("path", block_file.get_file_path()));
 
          genesis_written_to_block_log = true; // Assume it was constructed properly.
@@ -667,8 +667,8 @@ namespace dcd { namespace chain {
          buffer = pack(b, segment_compression);
       } else {
          auto block_ptr = b.to_signed_block_v0();
-         EOS_ASSERT(block_ptr, block_log_append_fail, "Unable to convert block to legacy format");
-         EOS_ASSERT(segment_compression == packed_transaction::cf_compression_type::none, block_log_append_fail,
+         DCD_ASSERT(block_ptr, block_log_append_fail, "Unable to convert block to legacy format");
+         DCD_ASSERT(segment_compression == packed_transaction::cf_compression_type::none, block_log_append_fail,
                     "the compression must be \"none\" for legacy format");
          buffer = fc::raw::pack(*block_ptr);
       }
@@ -692,11 +692,11 @@ namespace dcd { namespace chain {
 
    uint64_t detail::block_log_impl::append(const signed_block_ptr& b, packed_transaction::cf_compression_type segment_compression) {
       try {
-         EOS_ASSERT( genesis_written_to_block_log, block_log_append_fail, "Cannot append to block log until the genesis is first written" );
+         DCD_ASSERT( genesis_written_to_block_log, block_log_append_fail, "Cannot append to block log until the genesis is first written" );
 
          block_file.seek_end(0);
          index_file.seek_end(0);
-         EOS_ASSERT(index_file.tellp() == sizeof(uint64_t) * (b->block_num() - preamble.first_block_num),
+         DCD_ASSERT(index_file.tellp() == sizeof(uint64_t) * (b->block_num() - preamble.first_block_num),
                    block_log_append_fail,
                    "Append to index file occuring at wrong position.",
                    ("position", (uint64_t) index_file.tellp())
@@ -715,12 +715,12 @@ namespace dcd { namespace chain {
 
    uint64_t detail::block_log_impl::append(std::future<std::tuple<signed_block_ptr, std::vector<char>>> f) {
       try {
-         EOS_ASSERT( genesis_written_to_block_log, block_log_append_fail, "Cannot append to block log until the genesis is first written" );
+         DCD_ASSERT( genesis_written_to_block_log, block_log_append_fail, "Cannot append to block log until the genesis is first written" );
 
          block_file.seek_end(0);
          index_file.seek_end(0);
          auto[b, buffer] = f.get();
-         EOS_ASSERT(index_file.tellp() == sizeof(uint64_t) * (b->block_num() - preamble.first_block_num),
+         DCD_ASSERT(index_file.tellp() == sizeof(uint64_t) * (b->block_num() - preamble.first_block_num),
                    block_log_append_fail,
                    "Append to index file occuring at wrong position.",
                    ("position", (uint64_t) index_file.tellp())
@@ -797,10 +797,10 @@ namespace dcd { namespace chain {
    }
 
    void block_log::reset(const chain_id_type& chain_id, uint32_t first_block_num) {
-      EOS_ASSERT(first_block_num > 1, block_log_exception,
+      DCD_ASSERT(first_block_num > 1, block_log_exception,
                  "Block log version ${ver} needs to be created with a genesis state if starting from block number 1.");
 
-      EOS_ASSERT(my->catalog.verifier.chain_id.empty() || chain_id == my->catalog.verifier.chain_id, block_log_exception,
+      DCD_ASSERT(my->catalog.verifier.chain_id.empty() || chain_id == my->catalog.verifier.chain_id, block_log_exception,
                  "Trying to reset to the chain to a different chain id");
 
       my->reset(first_block_num, chain_id);
@@ -931,7 +931,7 @@ namespace dcd { namespace chain {
 
    fc::path block_log::repair_log(const fc::path& data_dir, uint32_t truncate_at_block, const char* reversible_block_dir_name) {
       ilog("Recovering Block Log...");
-      EOS_ASSERT(fc::is_directory(data_dir) && fc::is_regular_file(data_dir / "blocks.log"), block_log_not_found,
+      DCD_ASSERT(fc::is_directory(data_dir) && fc::is_regular_file(data_dir / "blocks.log"), block_log_not_found,
                  "Block log not found in '${blocks_dir}'", ("blocks_dir", data_dir));
                  
       if (truncate_at_block == 0)
@@ -943,7 +943,7 @@ namespace dcd { namespace chain {
       auto blocks_dir_name = blocks_dir.filename();
       auto backup_dir      = blocks_dir.parent_path() / blocks_dir_name.generic_string().append("-").append(now);
 
-      EOS_ASSERT(!fc::exists(backup_dir), block_log_backup_dir_exist,
+      DCD_ASSERT(!fc::exists(backup_dir), block_log_backup_dir_exist,
                  "Cannot move existing blocks directory to already existing directory '${new_blocks_dir}'",
                  ("new_blocks_dir", backup_dir));
 
@@ -1025,14 +1025,14 @@ namespace dcd { namespace chain {
 
    size_t prune_trxs(fc::datastream<char*> strm, uint32_t block_num, std::vector<transaction_id_type>& ids, uint32_t version) {
 
-      EOS_ASSERT(version >= pruned_transaction_version, block_log_exception,
+      DCD_ASSERT(version >= pruned_transaction_version, block_log_exception,
                     "The block log version ${version} does not support transaction pruning.", ("version", version));
 
       auto         read_strm = strm;
       log_entry_v4 entry;
       unpack(read_strm, entry);
 
-      EOS_ASSERT(entry.block.block_num() == block_num, block_log_exception,
+      DCD_ASSERT(entry.block.block_num() == block_num, block_log_exception,
                      "Wrong block was read from block log.");
 
       auto pruner = overloaded{[](transaction_id_type&) { return false; },
@@ -1067,7 +1067,7 @@ namespace dcd { namespace chain {
       }
 
       const uint64_t pos = my->get_block_pos(block_num);
-      EOS_ASSERT(pos != npos, block_log_exception, "Specified block_num ${block_num} does not exist in block log.",
+      DCD_ASSERT(pos != npos, block_log_exception, "Specified block_num ${block_num} does not exist in block log.",
                  ("block_num", block_num));
 
       using boost::iostreams::mapped_file_sink;
@@ -1089,7 +1089,7 @@ namespace dcd { namespace chain {
    }
 
    bool block_log::trim_blocklog_front(const fc::path& block_dir, const fc::path& temp_dir, uint32_t truncate_at_block) {
-      EOS_ASSERT( block_dir != temp_dir, block_log_exception, "block_dir and temp_dir need to be different directories" );
+      DCD_ASSERT( block_dir != temp_dir, block_log_exception, "block_dir and temp_dir need to be different directories" );
       
       ilog("In directory ${dir} will trim all blocks before block ${n} from blocks.log and blocks.index.",
            ("dir", block_dir.generic_string())("n", truncate_at_block));

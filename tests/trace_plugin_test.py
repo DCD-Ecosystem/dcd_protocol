@@ -57,7 +57,7 @@ class TraceApiPluginTest(unittest.TestCase):
         expectedAmount = Node.currencyIntToStr(5000000, CORE_SYMBOL)
         account_balances = []
         for account in self.accounts:
-            amount = node.getAccountEosBalanceStr(account.name)
+            amount = node.getAccountDcdBalanceStr(account.name)
             self.assertEqual(amount, expectedAmount)
             account_balances.append(amount)
 
@@ -66,8 +66,8 @@ class TraceApiPluginTest(unittest.TestCase):
         transId = Node.getTransId(trans)
         blockNum = Node.getTransBlockNum(trans)
 
-        self.assertEqual(node.getAccountEosBalanceStr(self.accounts[0].name), Utils.deduceAmount(expectedAmount, xferAmount))
-        self.assertEqual(node.getAccountEosBalanceStr(self.accounts[1].name), Utils.addAmount(expectedAmount, xferAmount))
+        self.assertEqual(node.getAccountDcdBalanceStr(self.accounts[0].name), Utils.deduceAmount(expectedAmount, xferAmount))
+        self.assertEqual(node.getAccountDcdBalanceStr(self.accounts[1].name), Utils.addAmount(expectedAmount, xferAmount))
         time.sleep(self.sleep_s)
 
         # verify trans via node api before calling trace_api RPC

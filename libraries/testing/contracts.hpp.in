@@ -36,7 +36,7 @@ struct core_sym {
 namespace dcd {
    namespace testing {
       struct contracts {
-         // Contracts in `eos/unittests/contracts' directory
+         // Contracts in `dcd/unittests/contracts' directory
          MAKE_READ_WASM_ABI(dcd_bios,   dcd.bios, contracts)
          MAKE_READ_WASM_ABI(dcd_msig,   dcd.msig, contracts)
          MAKE_READ_WASM_ABI(dcd_system, dcd.system, contracts)
@@ -46,7 +46,7 @@ namespace dcd {
          MAKE_READ_WASM_ABI(before_producer_authority_dcd_bios,   dcd.bios, contracts/old_versions/v1.7.0-develop-preactivate_feature)
          MAKE_READ_WASM_ABI(before_preactivate_dcd_bios,          dcd.bios, contracts/old_versions/v1.6.0-rc3)
 
-         // Contracts in `eos/unittests/unittests/test-contracts' directory
+         // Contracts in `dcd/unittests/unittests/test-contracts' directory
          MAKE_READ_WASM_ABI(asserter,              asserter,              test-contracts)
          MAKE_READ_WASM_ABI(deferred_test,         deferred_test,         test-contracts)
          MAKE_READ_WASM_ABI(get_sender_test,       get_sender_test,       test-contracts)

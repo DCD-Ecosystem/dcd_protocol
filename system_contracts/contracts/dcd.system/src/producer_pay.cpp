@@ -21,7 +21,10 @@ namespace dcdsystem {
       // Although this field is deprecated, we will continue updating it for now until the last_block_num field
       // is eventually completely removed, at which point this line can be removed.
       _gstate2.last_block_num = timestamp;
-
+      
+      update_oracles_rate_state();
+      update_fee_vote_state();
+      
       /** until activation, no new rewards are paid */
       if( _gstate.thresh_activated_stake_time == time_point() )
          return;
@@ -64,7 +67,6 @@ namespace dcdsystem {
             }
          }
       }
-
    }
 
    void system_contract::claimrewards( const name& owner ) {

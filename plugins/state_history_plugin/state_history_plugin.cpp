@@ -378,7 +378,7 @@ struct state_history_plugin_impl : std::enable_shared_from_this<state_history_pl
          if (!ec)
             return;
          fc_elog(_log,"${w}: ${m}", ("w", what)("m", ec.message()));
-         EOS_ASSERT(false, plugin_exception, "unable to open listen socket");
+         DCD_ASSERT(false, plugin_exception, "unable to open listen socket");
       };
 
       acceptor->open(endpoint.protocol(), ec);
@@ -429,7 +429,7 @@ struct state_history_plugin_impl : std::enable_shared_from_this<state_history_pl
       // the exception would be caught and drop before reaching main(). The exception is
       // to ensure the block won't be committed.
       appbase::app().quit();
-      EOS_THROW(
+      DCD_THROW(
           chain::state_history_write_exception,
           "State history encountered an Error which it cannot recover from.  Please resolve the error and relaunch "
           "the process");
@@ -503,11 +503,11 @@ void state_history_plugin::set_program_options(options_description& cli, options
 
 void state_history_plugin::plugin_initialize(const variables_map& options) {
    try {
-      EOS_ASSERT(options.at("disable-replay-opts").as<bool>(), plugin_exception,
+      DCD_ASSERT(options.at("disable-replay-opts").as<bool>(), plugin_exception,
                  "state_history_plugin requires --disable-replay-opts");
 
       my->chain_plug = app().find_plugin<chain_plugin>();
-      EOS_ASSERT(my->chain_plug, chain::missing_chain_plugin_exception, "");
+      DCD_ASSERT(my->chain_plug, chain::missing_chain_plugin_exception, "");
       auto& chain = my->chain_plug->chain();
       my->applied_transaction_connection.emplace(
           chain.applied_transaction.connect([&](std::tuple<const transaction_trace_ptr&, const packed_transaction_ptr&> t) {

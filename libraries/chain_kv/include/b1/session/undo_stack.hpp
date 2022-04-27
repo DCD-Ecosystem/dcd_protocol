@@ -231,7 +231,7 @@ void undo_stack<Session>::open() {
          // validate totem
          uint32_t totem = 0;
          fc::raw::unpack( ds, totem );
-         EOS_ASSERT( totem == undo_stack_magic_number, dcd::chain::chain_exception,
+         DCD_ASSERT( totem == undo_stack_magic_number, dcd::chain::chain_exception,
                      "Undo stack data file '${filename}' has unexpected magic number: ${actual_totem}. Expected ${expected_totem}",
                      ("filename", undo_stack_dat.generic_string())
                      ("actual_totem", totem)
@@ -241,7 +241,7 @@ void undo_stack<Session>::open() {
          // validate version
          uint32_t version = 0;
          fc::raw::unpack( ds, version );
-         EOS_ASSERT( version >= undo_stack_min_supported_version && version <= undo_stack_max_supported_version,
+         DCD_ASSERT( version >= undo_stack_min_supported_version && version <= undo_stack_max_supported_version,
                     dcd::chain::chain_exception,
                     "Unsupported version of Undo stack data file '${filename}'. "
                     "Undo stack data version is ${version} while code supports version(s) [${min},${max}]",

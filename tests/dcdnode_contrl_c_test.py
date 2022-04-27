@@ -58,7 +58,7 @@ try:
                       totalNodes=totalNodes, totalProducers=totalProducers,
                       useBiosBootFile=False, specificExtradcdnodeArgs=specificExtradcdnodeArgs) is False:
         Utils.cmdError("launcher")
-        Utils.errorExit("Failed to stand up eos cluster.")
+        Utils.errorExit("Failed to stand up dcd cluster.")
     Print("Validating system accounts after bootstrap")
     cluster.validateAccounts(None)
 
@@ -88,7 +88,7 @@ try:
 
     testSuccessful = prodNode.kill(signal.SIGTERM)
     if not testSuccessful:
-        TestHelper.shutdown(cluster, walletMgr, testSuccessful=testSuccessful, killEosInstances=True, killWallet=True, keepLogs=True, cleanRun=True, dumpErrorDetails=True)
+        TestHelper.shutdown(cluster, walletMgr, testSuccessful=testSuccessful, killDcdInstances=True, killWallet=True, keepLogs=True, cleanRun=True, dumpErrorDetails=True)
         errorExit("Failed to kill the producer node")
 
     transferAmount="1.0000 {0}".format(CORE_SYMBOL)
@@ -98,9 +98,9 @@ try:
     testSuccessful = nonProdNode.kill(signal.SIGTERM)
 
     if not testSuccessful:
-        TestHelper.shutdown(cluster, walletMgr, testSuccessful=testSuccessful, killEosInstances=True, killWallet=True, keepLogs=True, cleanRun=True, dumpErrorDetails=True)
+        TestHelper.shutdown(cluster, walletMgr, testSuccessful=testSuccessful, killDcdInstances=True, killWallet=True, keepLogs=True, cleanRun=True, dumpErrorDetails=True)
         errorExit("Failed to kill the seed node")
 
 finally:
-    TestHelper.shutdown(cluster, walletMgr, testSuccessful=True, killEosInstances=True, killWallet=True, keepLogs=True, cleanRun=True, dumpErrorDetails=True)
+    TestHelper.shutdown(cluster, walletMgr, testSuccessful=True, killDcdInstances=True, killWallet=True, keepLogs=True, cleanRun=True, dumpErrorDetails=True)
     exit(0)

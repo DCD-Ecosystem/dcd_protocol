@@ -39,9 +39,9 @@ killAll=args.clean_run
 keepLogs=args.keep_logs
 
 killWallet=not dontKill
-killEosInstances=not dontKill
+killDcdInstances=not dontKill
 if nodesFile is not None:
-    killEosInstances=False
+    killDcdInstances=False
 
 Utils.Debug=debug
 testSuccessful=False
@@ -75,7 +75,7 @@ try:
 
         Print("Stand up cluster")
         if cluster.launch(pnodes=pnodes, totalNodes=total_nodes, topo=topo, delay=delay) is False:
-            errorExit("Failed to stand up eos cluster.")
+            errorExit("Failed to stand up dcd cluster.")
 
         Print ("Wait for Cluster stabilization")
         # wait for cluster to start producing blocks
@@ -119,6 +119,6 @@ try:
 
     testSuccessful=True
 finally:
-    TestHelper.shutdown(cluster, walletMgr, testSuccessful, killEosInstances, killWallet, keepLogs, killAll, dumpErrorDetails)
+    TestHelper.shutdown(cluster, walletMgr, testSuccessful, killDcdInstances, killWallet, keepLogs, killAll, dumpErrorDetails)
 
 exit(0)

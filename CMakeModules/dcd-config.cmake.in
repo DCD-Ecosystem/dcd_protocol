@@ -1,5 +1,5 @@
 if(DCD_ROOT STREQUAL "" OR NOT DCD_ROOT)
-   set(DCD_ROOT "@EOS_ROOT_DIR@")
+   set(DCD_ROOT "@DCD_ROOT_DIR@")
 endif()
 list(APPEND CMAKE_MODULE_PATH ${DCD_ROOT}/lib/cmake/dcd)
 list(APPEND CMAKE_MODULE_PATH ${DCD_ROOT}/lib64/cmake/dcd)

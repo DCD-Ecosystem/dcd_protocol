@@ -12,7 +12,7 @@ namespace dcd { namespace chain {
    static inline uint32_t actual_key_size(const uint32_t raw_key_size) {
       static auto rocks_prefix = make_rocksdb_contract_kv_prefix();
       static auto prefix_size = rocks_prefix.size() + sizeof(uint64_t); // kv.db prefix + contract size.
-      EOS_ASSERT(raw_key_size >= prefix_size, kv_rocksdb_bad_value_size_exception,
+      DCD_ASSERT(raw_key_size >= prefix_size, kv_rocksdb_bad_value_size_exception,
                  "The size of key returned from RocksDB is less than prefix size");
       return raw_key_size - prefix_size;
    }
@@ -118,12 +118,12 @@ namespace dcd { namespace chain {
       }
 
       int32_t kv_it_compare(const kv_iterator& rhs) override {
-         EOS_ASSERT(rhs.is_kv_rocksdb_context_iterator(), kv_bad_iter, "Incompatible key-value iterators");
+         DCD_ASSERT(rhs.is_kv_rocksdb_context_iterator(), kv_bad_iter, "Incompatible key-value iterators");
          auto& r = const_cast<kv_iterator_rocksdb&>(static_cast<const kv_iterator_rocksdb&>(rhs));
-         EOS_ASSERT(kv_session == r.kv_session && kv_prefix == r.kv_prefix, kv_bad_iter,
+         DCD_ASSERT(kv_session == r.kv_session && kv_prefix == r.kv_prefix, kv_bad_iter,
                     "Incompatible key-value iterators");
-         EOS_ASSERT(!kv_current.deleted(), kv_bad_iter, "Iterator to erased element");
-         EOS_ASSERT(!r.kv_current.deleted(), kv_bad_iter, "Iterator to erased element");
+         DCD_ASSERT(!kv_current.deleted(), kv_bad_iter, "Iterator to erased element");
+         DCD_ASSERT(!r.kv_current.deleted(), kv_bad_iter, "Iterator to erased element");
          try {
             try {
                auto left_status = kv_it_status();
@@ -156,7 +156,7 @@ namespace dcd { namespace chain {
       }
 
       int32_t kv_it_key_compare(const char* key, uint32_t size) override {
-         EOS_ASSERT(!kv_current.deleted(), kv_bad_iter, "Iterator to erased element");
+         DCD_ASSERT(!kv_current.deleted(), kv_bad_iter, "Iterator to erased element");
          try {
             try {
                auto current_key = dcd::session::shared_bytes{};
@@ -184,7 +184,7 @@ namespace dcd { namespace chain {
       }
 
       kv_it_stat kv_it_next(uint32_t* found_key_size, uint32_t* found_value_size) override {
-         EOS_ASSERT(!kv_current.deleted(), kv_bad_iter, "Iterator to erased element");
+         DCD_ASSERT(!kv_current.deleted(), kv_bad_iter, "Iterator to erased element");
          kv_it_stat status;
          try {
             try {
@@ -203,7 +203,7 @@ namespace dcd { namespace chain {
       }
 
       kv_it_stat kv_it_prev(uint32_t* found_key_size, uint32_t* found_value_size) override {
-         EOS_ASSERT(!kv_current.deleted(), kv_bad_iter, "Iterator to erased element");
+         DCD_ASSERT(!kv_current.deleted(), kv_bad_iter, "Iterator to erased element");
          kv_it_stat status;
          try {
             try {
@@ -242,7 +242,7 @@ namespace dcd { namespace chain {
       }
 
       kv_it_stat kv_it_key(uint32_t offset, char* dest, uint32_t size, uint32_t& actual_size) override {
-         EOS_ASSERT(!kv_current.deleted(), kv_bad_iter, "Iterator to erased element");
+         DCD_ASSERT(!kv_current.deleted(), kv_bad_iter, "Iterator to erased element");
 
          auto key = dcd::session::shared_bytes{};
          try {
@@ -268,7 +268,7 @@ namespace dcd { namespace chain {
       }
 
       kv_it_stat kv_it_value(uint32_t offset, char* dest, uint32_t size, uint32_t& actual_size) override {
-         EOS_ASSERT(!kv_current.deleted(), kv_bad_iter, "Iterator to erased element");
+         DCD_ASSERT(!kv_current.deleted(), kv_bad_iter, "Iterator to erased element");
 
          auto kv = std::pair{ dcd::session::shared_bytes{}, std::optional<dcd::session::shared_bytes>{} };
          try {
@@ -295,7 +295,7 @@ namespace dcd { namespace chain {
       }
 
       std::optional<name> kv_it_payer() override {
-         EOS_ASSERT(!kv_current.deleted(), kv_bad_iter, "Iterator to erased element");
+         DCD_ASSERT(!kv_current.deleted(), kv_bad_iter, "Iterator to erased element");
          if (kv_it_status() == kv_it_stat::iterator_ok) {
             const auto& value = (*kv_current).second;
             if (value) {
@@ -341,7 +341,7 @@ namespace dcd { namespace chain {
 
       int64_t kv_erase(uint64_t contract, const char* key, uint32_t key_size) override {
          const name contract_name {contract};
-         EOS_ASSERT(contract_name == receiver, table_operation_not_permitted, "Can not write to this key");
+         DCD_ASSERT(contract_name == receiver, table_operation_not_permitted, "Can not write to this key");
          
          current_value.reset();
          current_key                = dcd::session::shared_bytes{};
@@ -377,9 +377,9 @@ namespace dcd { namespace chain {
       int64_t kv_set(uint64_t contract, const char* key, uint32_t key_size, const char* value, uint32_t value_size,
                      account_name payer) override {
          const name contract_name {contract};
-         EOS_ASSERT(contract_name == receiver, table_operation_not_permitted, "Can not write to this key");
-         EOS_ASSERT(key_size <= limits.max_key_size, kv_limit_exceeded, "Key too large");
-         EOS_ASSERT(value_size <= limits.max_value_size, kv_limit_exceeded, "Value too large");
+         DCD_ASSERT(contract_name == receiver, table_operation_not_permitted, "Can not write to this key");
+         DCD_ASSERT(key_size <= limits.max_key_size, kv_limit_exceeded, "Key too large");
+         DCD_ASSERT(value_size <= limits.max_value_size, kv_limit_exceeded, "Value too large");
 
          current_value.reset();
          current_key                = dcd::session::shared_bytes{};
@@ -466,8 +466,8 @@ namespace dcd { namespace chain {
       }
 
       std::unique_ptr<kv_iterator> kv_it_create(uint64_t contract, const char* prefix, uint32_t size) override {
-         EOS_ASSERT(num_iterators < limits.max_iterators, kv_bad_iter, "Too many iterators");
-         EOS_ASSERT(size <= limits.max_key_size, kv_bad_iter, "Prefix too large");
+         DCD_ASSERT(num_iterators < limits.max_iterators, kv_bad_iter, "Too many iterators");
+         DCD_ASSERT(size <= limits.max_key_size, kv_bad_iter, "Prefix too large");
          try {
             try {
                return std::make_unique<kv_iterator_rocksdb<decltype(session)>>(num_iterators, *session, contract, prefix,

@@ -230,7 +230,7 @@ inline DataStream &operator<<(DataStream &s, const dcd::chain::data_entry<dcd::c
 
    //initial requirements were to skip packing field if it is not activated.
    //this approach allows to spam this function with big buffer so changing this behavior
-   EOS_ASSERT(entry.is_allowed(), unsupported_feature, "config id ${id} is no allowed", ("id", entry.id));
+   DCD_ASSERT(entry.is_allowed(), unsupported_feature, "config id ${id} is no allowed", ("id", entry.id));
    
    switch (entry.id){
       case chain_config_v0::max_block_net_usage_id:
@@ -308,7 +308,7 @@ inline DataStream &operator<<(DataStream &s, const dcd::chain::data_entry<dcd::c
    //When the protocol feature is not activated, the old version of dcdnode that doesn't know about 
    //the entry MUST behave the same as the new version of dcdnode that does.
    //Skipping known but unactivated entries violates this.
-   EOS_ASSERT(entry.is_allowed(), unsupported_feature, "config id ${id} is no allowed", ("id", entry.id));
+   DCD_ASSERT(entry.is_allowed(), unsupported_feature, "config id ${id} is no allowed", ("id", entry.id));
    
    switch (entry.id){
       case chain_config_v1::max_action_return_value_size_id:
@@ -333,7 +333,7 @@ template <typename DataStream>
 inline DataStream &operator>>(DataStream &s, dcd::chain::data_entry<dcd::chain::chain_config_v0, dcd::chain::config_entry_validator> &entry){
    using namespace dcd::chain;
 
-   EOS_ASSERT(entry.is_allowed(), dcd::chain::unsupported_feature, "config id ${id} is no allowed", ("id", entry.id));
+   DCD_ASSERT(entry.is_allowed(), dcd::chain::unsupported_feature, "config id ${id} is no allowed", ("id", entry.id));
 
    switch (entry.id){
       case chain_config_v0::max_block_net_usage_id:
@@ -405,7 +405,7 @@ template <typename DataStream>
 inline DataStream &operator>>(DataStream &s, dcd::chain::data_entry<dcd::chain::chain_config_v1, dcd::chain::config_entry_validator> &entry){
    using namespace dcd::chain;
 
-   EOS_ASSERT(entry.is_allowed(), unsupported_feature, "config id ${id} is no allowed", ("id", entry.id));
+   DCD_ASSERT(entry.is_allowed(), unsupported_feature, "config id ${id} is no allowed", ("id", entry.id));
 
    switch (entry.id){
       case chain_config_v1::max_action_return_value_size_id:
@@ -437,8 +437,8 @@ inline DataStream& operator<<( DataStream& s, const dcd::chain::data_range<T, dc
    std::vector<bool> visited(T::PARAMS_COUNT, false);
    for (auto uid : selection.ids){
       uint32_t id = uid;
-      EOS_ASSERT(id < visited.size(), config_parse_error, "provided id ${id} should be less than ${size}", ("id", id)("size", visited.size()));
-      EOS_ASSERT(!visited[id], config_parse_error, "duplicate id provided: ${id}", ("id", id));
+      DCD_ASSERT(id < visited.size(), config_parse_error, "provided id ${id} should be less than ${size}", ("id", id)("size", visited.size()));
+      DCD_ASSERT(!visited[id], config_parse_error, "duplicate id provided: ${id}", ("id", id));
       visited[id] = true;
 
       fc::raw::pack(s, fc::unsigned_int(id));
@@ -468,8 +468,8 @@ inline DataStream& operator>>( DataStream& s, dcd::chain::data_range<T, dcd::cha
       fc::unsigned_int id;
       fc::raw::unpack(s, id);
       
-      EOS_ASSERT(id.value < visited.size(), config_parse_error, "provided id ${id} should be less than ${size}", ("id", id)("size", visited.size()));
-      EOS_ASSERT(!visited[id], config_parse_error, "duplicate id provided: ${id}", ("id", id));
+      DCD_ASSERT(id.value < visited.size(), config_parse_error, "provided id ${id} should be less than ${size}", ("id", id)("size", visited.size()));
+      DCD_ASSERT(!visited[id], config_parse_error, "duplicate id provided: ${id}", ("id", id));
       visited[id] = true;
 
       data_entry<T, config_entry_validator> cfg_entry(selection.config, id, selection.validator);

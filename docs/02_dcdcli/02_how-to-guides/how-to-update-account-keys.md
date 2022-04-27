@@ -32,7 +32,7 @@ dcdcli create key --to-console
 **Example Output**
 ```shell
 Private key: 5KDNWQvY2seBPVUz7MiiaEDGTwACfuXu78bwZu7w2UDM9A3u3Fs
-Public key: EOS5zG7PsdtzQ9achTdRtXwHieL7yyigBFiJDRAQonqBsfKyL3XhC
+Public key: DCD5zG7PsdtzQ9achTdRtXwHieL7yyigBFiJDRAQonqBsfKyL3XhC
 ```
 
 2. Import the new private key into your wallet
@@ -44,17 +44,17 @@ dcdcli wallet import --private-key 5KDNWQvY2seBPVUz7MiiaEDGTwACfuXu78bwZu7w2UDM9
 
 **Example Output**
 ```shell
-imported private key for: EOS5zG7PsdtzQ9achTdRtXwHieL7yyigBFiJDRAQonqBsfKyL3XhC
+imported private key for: DCD5zG7PsdtzQ9achTdRtXwHieL7yyigBFiJDRAQonqBsfKyL3XhC
 ```
 
 3. Update the `active` permission key
 ```shell
-dcdcli set account permission alice active EOS5zG7PsdtzQ9achTdRtXwHieL7yyigBFiJDRAQonqBsfKyL3XhC -p alice@owner
+dcdcli set account permission alice active DCD5zG7PsdtzQ9achTdRtXwHieL7yyigBFiJDRAQonqBsfKyL3XhC -p alice@owner
 ```
 **Where**
 * `alice` = The name of the account to update the key.
 * `active`= The name of the permission to update the key.
-* `EOS5zG7PsdtzQ9achTdRtXwHieL7yyigBFiJDRAQonqBsfKyL3XhC` = The new public key. 
+* `DCD5zG7PsdtzQ9achTdRtXwHieL7yyigBFiJDRAQonqBsfKyL3XhC` = The new public key. 
 * `-p alice@owner` = The permission used to authorize the transaction.
 
 **Example Output**
@@ -73,8 +73,8 @@ dcdcli get account alice
 **Example Output**
 ```shell
 permissions: 
-     owner     1:    1 EOS6c5UjmyRsZSdikLbpAoMdg4V7FQwvdhep3KMxUifzmpDnoLVPe
-        active     1:    1 EOS5zG7PsdtzQ9achTdRtXwHieL7yyigBFiJDRAQonqBsfKyL3XhC
+     owner     1:    1 DCD6c5UjmyRsZSdikLbpAoMdg4V7FQwvdhep3KMxUifzmpDnoLVPe
+        active     1:    1 DCD5zG7PsdtzQ9achTdRtXwHieL7yyigBFiJDRAQonqBsfKyL3XhC
 memory: 
      quota:       xxx  used:      2.66 KiB  
 

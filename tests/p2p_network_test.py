@@ -106,7 +106,7 @@ exchangeAccount.ownerPublicKey=PUB_KEY2
 print("Stand up walletd")
 if walletMgr.launch() is False:
     cmdError("%s" % (WalletdName))
-    errorExit("Failed to stand up eos walletd.")
+    errorExit("Failed to stand up dcd walletd.")
 
 testWalletName="test"
 Print("Creating wallet \"%s\"." % (testWalletName))
@@ -139,7 +139,7 @@ dcd.name = "dcd"
 Print("Info of each node:")
 for i in range(len(hosts)):
     node = node0
-    cmd="%s %s get info" % (testUtils.Utils.EosClientPath, node.endpointArgs)
+    cmd="%s %s get info" % (testUtils.Utils.DcdClientPath, node.endpointArgs)
     trans = node.runCmdReturnJson(cmd)
     Print("host %s: %s" % (hosts[i], trans))
 

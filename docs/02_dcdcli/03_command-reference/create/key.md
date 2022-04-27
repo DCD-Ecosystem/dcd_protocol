@@ -36,7 +36,7 @@ dcdcli create key --to-console
 **Example Output**
 ```shell
 Private key: 5KDNWQvY2seBPVUz7MiiaEDGTwACfuXu78bwZu7w2UDM9A3u3Fs
-Public key: EOS5zG7PsdtzQ9achTdRtXwHieL7yyigBFiJDRAQonqBsfKyL3XhC
+Public key: DCD5zG7PsdtzQ9achTdRtXwHieL7yyigBFiJDRAQonqBsfKyL3XhC
 ```
 
 2. Create a new key pair and output to a file
@@ -58,5 +58,5 @@ cat my_keys.txt
 **Example Output**
 ```shell
 Private key: 5KWcfnGao5K6WV65Zgjd1xvpugRUeKwb6oxzmwaS1tPE2Ef4qzo
-Public key: EOS7oDiBtzSHtShprGFmXm9JLnwxhcPeDyhww3tXDvVATDYtciLGG
+Public key: DCD7oDiBtzSHtShprGFmXm9JLnwxhcPeDyhww3tXDvVATDYtciLGG
 ```

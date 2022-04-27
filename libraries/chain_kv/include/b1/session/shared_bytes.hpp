@@ -279,7 +279,7 @@ inline shared_bytes shared_bytes::next() const {
       buffer.pop_back();
    }
 
-   EOS_ASSERT(!buffer.empty(), dcd::chain::chain_exception, "shared_bytes::next() result buffer is empty");
+   DCD_ASSERT(!buffer.empty(), dcd::chain::chain_exception, "shared_bytes::next() result buffer is empty");
    return dcd::session::shared_bytes(buffer.data(), buffer.size());
 }
 
@@ -355,7 +355,7 @@ inline shared_bytes::iterator shared_bytes::end() const {
 }
 
 inline shared_bytes shared_bytes::truncate_key(const shared_bytes &key) {
-   EOS_ASSERT(!key.empty(), dcd::chain::chain_exception, "chain_plugin::truncate_key() invalid key parameter: empty");
+   DCD_ASSERT(!key.empty(), dcd::chain::chain_exception, "chain_plugin::truncate_key() invalid key parameter: empty");
 
    return shared_bytes(key.data(), key.size() - 1);
 }

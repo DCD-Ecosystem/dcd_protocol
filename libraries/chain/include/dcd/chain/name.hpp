@@ -33,7 +33,7 @@ namespace dcd::chain {
    bool is_string_valid_name(std::string_view str);
 
    constexpr uint64_t string_to_uint64_t( std::string_view str ) {
-      EOS_ASSERT(str.size() <= 13, name_type_exception, "Name is longer than 13 characters (${name}) ", ("name", std::string(str)));
+      DCD_ASSERT(str.size() <= 13, name_type_exception, "Name is longer than 13 characters (${name}) ", ("name", std::string(str)));
 
       uint64_t n = 0;
       int i = (int) str.size();
@@ -44,7 +44,7 @@ namespace dcd::chain {
          // The 13th character must be in the range [.1-5a-j] because it needs to be encoded
          // using only four bits (64_bits - 5_bits_per_char * 12_chars).
          n = char_to_symbol(str[12]);
-         EOS_ASSERT(n <= 0x0Full, name_type_exception, "invalid 13th character: (${c})", ("c", std::string(1, str[12])));
+         DCD_ASSERT(n <= 0x0Full, name_type_exception, "invalid 13th character: (${c})", ("c", std::string(1, str[12])));
       }
       // Encode full-range characters.
       while (--i >= 0) {

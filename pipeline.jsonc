@@ -5,7 +5,7 @@
             "^/build/",
             "^/coverage/",
             "^/.git/",
-            "^/libraries/eos-vm/",
+            "^/libraries/dcd-vm/",
             "^/libraries/wasm-jit/",
             "^/node_modules/",
             "^/unittests/"
@@ -22,7 +22,7 @@
             "BUILDER_TAG": "v2.0.0"
         }
     },
-    "eos-multiversion-tests":
+    "dcd-multiversion-tests":
     {
         "environment":
         {

@@ -41,8 +41,8 @@ dcdcli get account dcd
 ```console
 privileged: true
 permissions: 
-     owner     1:    1 EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
-        active     1:    1 EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
+     owner     1:    1 DCD6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
+        active     1:    1 DCD6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
 memory: 
      quota:        -1 bytes  used:      1.22 Mb   
 
@@ -91,7 +91,7 @@ dcdcli get account dcd --json
       "required_auth": {
         "threshold": 1,
         "keys": [{
-            "key": "EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
+            "key": "DCD6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
             "weight": 1
           }
         ],
@@ -104,7 +104,7 @@ dcdcli get account dcd --json
       "required_auth": {
         "threshold": 1,
         "keys": [{
-            "key": "EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
+            "key": "DCD6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
             "weight": 1
           }
         ],
@@ -131,4 +131,4 @@ dcdcli get account dcd --json
 ```
 
 ## See Also
-- [Accounts and Permissions](https://developers.eos.io/welcome/v2.1/protocol/accounts_and_permissions) protocol document.
+- [Accounts and Permissions](https://developers.dcd.io/welcome/v2.1/protocol/accounts_and_permissions) protocol document.

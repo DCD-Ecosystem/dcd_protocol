@@ -17,40 +17,40 @@ else()
    endif()
 endif()
 
-if("eos-vm-oc" IN_LIST DCD_WASM_RUNTIMES)
+if("dcd-vm-oc" IN_LIST DCD_WASM_RUNTIMES)
    enable_language(ASM)
-   set(CHAIN_EOSVMOC_SOURCES webassembly/runtimes/eos-vm-oc/code_cache.cpp
-                             webassembly/runtimes/eos-vm-oc/executor.cpp
-                             webassembly/runtimes/eos-vm-oc/memory.cpp
-                             webassembly/runtimes/eos-vm-oc/intrinsic.cpp
-                             webassembly/runtimes/eos-vm-oc/LLVMJIT.cpp
-                             webassembly/runtimes/eos-vm-oc/LLVMEmitIR.cpp
-                             webassembly/runtimes/eos-vm-oc/compile_monitor.cpp
-                             webassembly/runtimes/eos-vm-oc/compile_trampoline.cpp
-                             webassembly/runtimes/eos-vm-oc/ipc_helpers.cpp
-                             webassembly/runtimes/eos-vm-oc/gs_seg_helpers.c
-                             webassembly/runtimes/eos-vm-oc/stack.cpp
-                             webassembly/runtimes/eos-vm-oc/switch_stack_linux.s
-                             webassembly/runtimes/eos-vm-oc.cpp
-                             webassembly/runtimes/eos-vm-oc/default_real_main.cpp)
+   set(CHAIN_DCDVMOC_SOURCES webassembly/runtimes/dcd-vm-oc/code_cache.cpp
+                             webassembly/runtimes/dcd-vm-oc/executor.cpp
+                             webassembly/runtimes/dcd-vm-oc/memory.cpp
+                             webassembly/runtimes/dcd-vm-oc/intrinsic.cpp
+                             webassembly/runtimes/dcd-vm-oc/LLVMJIT.cpp
+                             webassembly/runtimes/dcd-vm-oc/LLVMEmitIR.cpp
+                             webassembly/runtimes/dcd-vm-oc/compile_monitor.cpp
+                             webassembly/runtimes/dcd-vm-oc/compile_trampoline.cpp
+                             webassembly/runtimes/dcd-vm-oc/ipc_helpers.cpp
+                             webassembly/runtimes/dcd-vm-oc/gs_seg_helpers.c
+                             webassembly/runtimes/dcd-vm-oc/stack.cpp
+                             webassembly/runtimes/dcd-vm-oc/switch_stack_linux.s
+                             webassembly/runtimes/dcd-vm-oc.cpp
+                             webassembly/runtimes/dcd-vm-oc/default_real_main.cpp)
 
    if(LLVM_VERSION VERSION_LESS 7.1 AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
       enable_language(ASM-LLVMWAR)
-      list(APPEND CHAIN_EOSVMOC_SOURCES webassembly/runtimes/eos-vm-oc/llvmWARshim.llvmwar)
+      list(APPEND CHAIN_DCDVMOC_SOURCES webassembly/runtimes/dcd-vm-oc/llvmWARshim.llvmwar)
    else()
-      list(APPEND CHAIN_EOSVMOC_SOURCES webassembly/runtimes/eos-vm-oc/llvmWARshim.cpp)
+      list(APPEND CHAIN_DCDVMOC_SOURCES webassembly/runtimes/dcd-vm-oc/llvmWARshim.cpp)
    endif()
 
    llvm_map_components_to_libnames(LLVM_LIBS support core passes mcjit native orcjit)
    include_directories(${LLVM_INCLUDE_DIRS})
    add_definitions(${LLVM_DEFINITIONS})
 
-   option(EOSVMOC_ENABLE_DEVELOPER_OPTIONS "enable developer options for EOS VM OC" OFF)
+   option(DCDVMOC_ENABLE_DEVELOPER_OPTIONS "enable developer options for DCD VM OC" OFF)
 endif()
 
-if("eos-vm" IN_LIST DCD_WASM_RUNTIMES OR "eos-vm-jit" IN_LIST DCD_WASM_RUNTIMES)
-   set(CHAIN_EOSVM_SOURCES "webassembly/runtimes/eos-vm.cpp")
-   set(CHAIN_EOSVM_LIBRARIES eos-vm)
+if("dcd-vm" IN_LIST DCD_WASM_RUNTIMES OR "dcd-vm-jit" IN_LIST DCD_WASM_RUNTIMES)
+   set(CHAIN_DCDVM_SOURCES "webassembly/runtimes/dcd-vm.cpp")
+   set(CHAIN_DCDVM_LIBRARIES dcd-vm)
 endif()
 
 set(CHAIN_WEBASSEMBLY_SOURCES
@@ -108,8 +108,8 @@ add_library( dcd_chain
               asset.cpp
               snapshot.cpp
 
-             ${CHAIN_EOSVMOC_SOURCES}
-             ${CHAIN_EOSVM_SOURCES}
+             ${CHAIN_DCDVMOC_SOURCES}
+             ${CHAIN_DCDVM_SOURCES}
              ${CHAIN_WEBASSEMBLY_SOURCES}
 
              authority.cpp
@@ -134,12 +134,12 @@ add_library( dcd_chain
              )
 
 target_link_libraries( dcd_chain fc chainbase Logging IR WAST WASM Runtime
-                       softfloat builtins rocksdb ${CHAIN_EOSVM_LIBRARIES} ${LLVM_LIBS} ${CHAIN_RT_LINKAGE}
+                       softfloat builtins rocksdb ${CHAIN_DCDVM_LIBRARIES} ${LLVM_LIBS} ${CHAIN_RT_LINKAGE}
                      )
 target_include_directories( dcd_chain
                             PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include" "${CMAKE_CURRENT_BINARY_DIR}/include"
                                    "${CMAKE_CURRENT_SOURCE_DIR}/../wasm-jit/Include"
-                                   "${CMAKE_CURRENT_SOURCE_DIR}/libraries/eos-vm/include"
+                                   "${CMAKE_CURRENT_SOURCE_DIR}/libraries/dcd-vm/include"
                                    "${CMAKE_CURRENT_SOURCE_DIR}/../rocksdb/include"
                                    "${CMAKE_CURRENT_SOURCE_DIR}/../chain_kv/include"
                             )
@@ -147,7 +147,7 @@ target_include_directories( dcd_chain
 add_library(dcd_chain_wrap INTERFACE )
 target_link_libraries(dcd_chain_wrap INTERFACE dcd_chain)
 
-if("eos-vm-oc" IN_LIST DCD_WASM_RUNTIMES)
+if("dcd-vm-oc" IN_LIST DCD_WASM_RUNTIMES)
    target_link_libraries(dcd_chain_wrap INTERFACE "-Wl,-wrap=main")
 endif()
 
@@ -157,9 +157,9 @@ foreach(RUNTIME ${DCD_WASM_RUNTIMES})
    target_compile_definitions(dcd_chain PUBLIC "DCD_${RUNTIMEUC}_RUNTIME_ENABLED")
 endforeach()
 
-if(EOSVMOC_ENABLE_DEVELOPER_OPTIONS)
-   message(WARNING "EOS VM OC Developer Options are enabled; these are NOT supported")
-   target_compile_definitions(dcd_chain PUBLIC DCD_EOS_VM_OC_DEVELOPER)
+if(DCDVMOC_ENABLE_DEVELOPER_OPTIONS)
+   message(WARNING "DCD VM OC Developer Options are enabled; these are NOT supported")
+   target_compile_definitions(dcd_chain PUBLIC DCD_DCD_VM_OC_DEVELOPER)
 endif()
 
 add_subdirectory ( backing_store/tests )

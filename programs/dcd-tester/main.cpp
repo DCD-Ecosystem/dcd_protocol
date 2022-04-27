@@ -13,7 +13,7 @@
 
 #undef N
 
-#include <b1/rodeos/embedded_rodeos.hpp>
+#include <b1/roddcd/embedded_roddcd.hpp>
 #include <dcd/fixed_bytes.hpp>
 #include <dcd/chain_types.hpp>
 #include <dcd/to_bin.hpp>
@@ -141,7 +141,7 @@ protocol_feature_set make_protocol_feature_set() {
          [&pfs, &visited_builtins, &add_builtins](builtin_protocol_feature_t codename) -> digest_type {
       auto res = visited_builtins.emplace(codename, std::optional<digest_type>());
       if (!res.second) {
-         EOS_ASSERT(res.first->second, protocol_feature_exception,
+         DCD_ASSERT(res.first->second, protocol_feature_exception,
                     "invariant failure: cycle found in builtin protocol feature dependencies");
          return *res.first->second;
       }
@@ -197,7 +197,7 @@ struct test_chain {
       cfg->blog.log_dir         = dir.path() / "blocks";
       cfg->state_dir            = dir.path() / "state";
       cfg->contracts_console    = true;
-      cfg->wasm_runtime         = dcd::chain::wasm_interface::vm_type::eos_vm_jit;
+      cfg->wasm_runtime         = dcd::chain::wasm_interface::vm_type::dcd_vm_jit;
 
       std::optional<std::ifstream>                           snapshot_file;
       std::shared_ptr<dcd::chain::istream_snapshot_reader> snapshot_reader;
@@ -330,18 +330,18 @@ test_chain_ref& test_chain_ref::operator=(const test_chain_ref& src) {
    return *this;
 }
 
-struct test_rodeos {
+struct test_roddcd {
    fc::temp_directory                                dir;
-   b1::embedded_rodeos::context                      context;
-   std::optional<b1::embedded_rodeos::partition>     partition;
-   std::optional<b1::embedded_rodeos::snapshot>      write_snapshot;
-   std::list<b1::embedded_rodeos::filter>            filters;
-   std::optional<b1::embedded_rodeos::query_handler> query_handler;
+   b1::embedded_roddcd::context                      context;
+   std::optional<b1::embedded_roddcd::partition>     partition;
+   std::optional<b1::embedded_roddcd::snapshot>      write_snapshot;
+   std::list<b1::embedded_roddcd::filter>            filters;
+   std::optional<b1::embedded_roddcd::query_handler> query_handler;
    test_chain_ref                                    chain;
    uint32_t                                          next_block = 0;
    std::vector<std::vector<char>>                    pushed_data;
 
-   test_rodeos() {
+   test_roddcd() {
       context.open_db(dir.path().string().c_str(), true);
       partition.emplace(context, "", 0);
       write_snapshot.emplace(partition->obj, true);
@@ -482,7 +482,7 @@ struct state {
    std::vector<char>                         args;
    std::vector<file>                         files;
    std::vector<std::unique_ptr<test_chain>>  chains;
-   std::vector<std::unique_ptr<test_rodeos>> rodeoses;
+   std::vector<std::unique_ptr<test_roddcd>> roddcdes;
    std::optional<uint32_t>                   selected_chain_index;
 };
 
@@ -525,7 +525,7 @@ FC_REFLECT(push_trx_args, (transaction)(context_free_data)(signatures)(keys))
    int db_##IDX##_find_secondary(uint64_t code, uint64_t scope, uint64_t table,                                        \
                                  dcd::chain::array_ptr<const ARR_ELEMENT_TYPE> data, uint32_t data_len,              \
                                  uint64_t& primary) {                                                                  \
-      EOS_ASSERT(data_len == ARR_SIZE, dcd::chain::db_api_exception,                                                 \
+      DCD_ASSERT(data_len == ARR_SIZE, dcd::chain::db_api_exception,                                                 \
                  "invalid size of secondary key array for " #IDX                                                       \
                  ": given ${given} bytes but expected ${expected} bytes",                                              \
                  ("given", data_len)("expected", ARR_SIZE));                                                           \
@@ -533,7 +533,7 @@ FC_REFLECT(push_trx_args, (transaction)(context_free_data)(signatures)(keys))
    }                                                                                                                   \
    int db_##IDX##_find_primary(uint64_t code, uint64_t scope, uint64_t table,                                          \
                                dcd::chain::array_ptr<ARR_ELEMENT_TYPE> data, uint32_t data_len, uint64_t primary) {  \
-      EOS_ASSERT(data_len == ARR_SIZE, dcd::chain::db_api_exception,                                                 \
+      DCD_ASSERT(data_len == ARR_SIZE, dcd::chain::db_api_exception,                                                 \
                  "invalid size of secondary key array for " #IDX                                                       \
                  ": given ${given} bytes but expected ${expected} bytes",                                              \
                  ("given", data_len)("expected", ARR_SIZE));                                                           \
@@ -541,7 +541,7 @@ FC_REFLECT(push_trx_args, (transaction)(context_free_data)(signatures)(keys))
    }                                                                                                                   \
    int db_##IDX##_lowerbound(uint64_t code, uint64_t scope, uint64_t table,                                            \
                              dcd::chain::array_ptr<ARR_ELEMENT_TYPE> data, uint32_t data_len, uint64_t& primary) {   \
-      EOS_ASSERT(data_len == ARR_SIZE, dcd::chain::db_api_exception,                                                 \
+      DCD_ASSERT(data_len == ARR_SIZE, dcd::chain::db_api_exception,                                                 \
                  "invalid size of secondary key array for " #IDX                                                       \
                  ": given ${given} bytes but expected ${expected} bytes",                                              \
                  ("given", data_len)("expected", ARR_SIZE));                                                           \
@@ -549,7 +549,7 @@ FC_REFLECT(push_trx_args, (transaction)(context_free_data)(signatures)(keys))
    }                                                                                                                   \
    int db_##IDX##_upperbound(uint64_t code, uint64_t scope, uint64_t table,                                            \
                              dcd::chain::array_ptr<ARR_ELEMENT_TYPE> data, uint32_t data_len, uint64_t& primary) {   \
-      EOS_ASSERT(data_len == ARR_SIZE, dcd::chain::db_api_exception,                                                 \
+      DCD_ASSERT(data_len == ARR_SIZE, dcd::chain::db_api_exception,                                                 \
                  "invalid size of secondary key array for " #IDX                                                       \
                  ": given ${given} bytes but expected ${expected} bytes",                                              \
                  ("given", data_len)("expected", ARR_SIZE));                                                           \
@@ -566,7 +566,7 @@ FC_REFLECT(push_trx_args, (transaction)(context_free_data)(signatures)(keys))
 #define DB_WRAPPERS_FLOAT_SECONDARY(IDX, TYPE)                                                                           \
    int db_##IDX##_find_secondary(uint64_t code, uint64_t scope, uint64_t table, const TYPE& secondary,                   \
                                  uint64_t& primary) {                                                                    \
-      /* EOS_ASSERT(!softfloat_api::is_nan(secondary), transaction_exception, "NaN is not an allowed value for a       \
+      /* DCD_ASSERT(!softfloat_api::is_nan(secondary), transaction_exception, "NaN is not an allowed value for a       \
        * secondary key"); */ \
       return selected().IDX.find_secondary(code, scope, table, secondary, primary);                                      \
    }                                                                                                                     \
@@ -574,12 +574,12 @@ FC_REFLECT(push_trx_args, (transaction)(context_free_data)(signatures)(keys))
       return selected().IDX.find_primary(code, scope, table, secondary, primary);                                        \
    }                                                                                                                     \
    int db_##IDX##_lowerbound(uint64_t code, uint64_t scope, uint64_t table, TYPE& secondary, uint64_t& primary) {        \
-      /* EOS_ASSERT(!softfloat_api::is_nan(secondary), transaction_exception, "NaN is not an allowed value for a       \
+      /* DCD_ASSERT(!softfloat_api::is_nan(secondary), transaction_exception, "NaN is not an allowed value for a       \
        * secondary key"); */ \
       return selected().IDX.lowerbound_secondary(code, scope, table, secondary, primary);                                \
    }                                                                                                                     \
    int db_##IDX##_upperbound(uint64_t code, uint64_t scope, uint64_t table, TYPE& secondary, uint64_t& primary) {        \
-      /* EOS_ASSERT(!softfloat_api::is_nan(secondary), transaction_exception, "NaN is not an allowed value for a       \
+      /* DCD_ASSERT(!softfloat_api::is_nan(secondary), transaction_exception, "NaN is not an allowed value for a       \
        * secondary key"); */ \
       return selected().IDX.upperbound_secondary(code, scope, table, secondary, primary);                                \
    }                                                                                                                     \
@@ -638,7 +638,7 @@ struct callbacks {
       memcpy(alloc(cb_alloc_data, cb_alloc, data.size()), data.data(), data.size());
    }
 
-   void set_data(uint32_t cb_alloc_data, uint32_t cb_alloc, const b1::embedded_rodeos::result& data) {
+   void set_data(uint32_t cb_alloc_data, uint32_t cb_alloc, const b1::embedded_roddcd::result& data) {
       memcpy(alloc(cb_alloc_data, cb_alloc, data.size), data.data, data.size);
    }
 
@@ -849,47 +849,47 @@ struct callbacks {
       return state.chains[*state.selected_chain_index]->get_apply_context();
    }
 
-   test_rodeos& assert_rodeos(uint32_t rodeos) {
-      if (rodeos >= state.rodeoses.size() || !state.rodeoses[rodeos])
-         throw std::runtime_error("rodeos does not exist or was destroyed");
-      return *state.rodeoses[rodeos];
+   test_roddcd& assert_roddcd(uint32_t roddcd) {
+      if (roddcd >= state.roddcdes.size() || !state.roddcdes[roddcd])
+         throw std::runtime_error("roddcd does not exist or was destroyed");
+      return *state.roddcdes[roddcd];
    }
 
-   uint32_t create_rodeos() {
-      state.rodeoses.push_back(std::make_unique<test_rodeos>());
-      return state.rodeoses.size() - 1;
+   uint32_t create_roddcd() {
+      state.roddcdes.push_back(std::make_unique<test_roddcd>());
+      return state.roddcdes.size() - 1;
    }
 
-   void destroy_rodeos(uint32_t rodeos) {
-      assert_rodeos(rodeos);
-      state.rodeoses[rodeos].reset();
-      while (!state.rodeoses.empty() && !state.rodeoses.back()) { state.rodeoses.pop_back(); }
+   void destroy_roddcd(uint32_t roddcd) {
+      assert_roddcd(roddcd);
+      state.roddcdes[roddcd].reset();
+      while (!state.roddcdes.empty() && !state.roddcdes.back()) { state.roddcdes.pop_back(); }
    }
 
-   void rodeos_add_filter(uint32_t rodeos, uint64_t name, span<const char> wasm_filename) {
-      auto& r = assert_rodeos(rodeos);
+   void roddcd_add_filter(uint32_t roddcd, uint64_t name, span<const char> wasm_filename) {
+      auto& r = assert_roddcd(roddcd);
       r.filters.emplace_back(name, span_str(wasm_filename).c_str());
    }
 
-   void rodeos_enable_queries(uint32_t rodeos, uint32_t max_console_size, uint32_t wasm_cache_size,
+   void roddcd_enable_queries(uint32_t roddcd, uint32_t max_console_size, uint32_t wasm_cache_size,
                               uint64_t max_exec_time_ms, span<const char> contract_dir) {
-      auto& r = assert_rodeos(rodeos);
+      auto& r = assert_roddcd(roddcd);
       r.query_handler.emplace(*r.partition, max_console_size, wasm_cache_size, max_exec_time_ms,
                               span_str(contract_dir).c_str());
    }
 
-   void connect_rodeos(uint32_t rodeos, uint32_t chain) {
-      auto& r = assert_rodeos(rodeos);
+   void connect_roddcd(uint32_t roddcd, uint32_t chain) {
+      auto& r = assert_roddcd(roddcd);
       auto& c = assert_chain(chain);
       if (r.chain.chain)
-         throw std::runtime_error("rodeos is already connected");
+         throw std::runtime_error("roddcd is already connected");
       r.chain = test_chain_ref{ c };
    }
 
-   bool rodeos_sync_block(uint32_t rodeos) {
-      auto& r = assert_rodeos(rodeos);
+   bool roddcd_sync_block(uint32_t roddcd) {
+      auto& r = assert_roddcd(roddcd);
       if (!r.chain.chain)
-         throw std::runtime_error("rodeos is not connected to a chain");
+         throw std::runtime_error("roddcd is not connected to a chain");
       auto it = r.chain.chain->history.lower_bound(r.next_block);
       if (it == r.chain.chain->history.end())
          return false;
@@ -909,13 +909,13 @@ struct callbacks {
       return true;
    }
 
-   void rodeos_push_transaction(uint32_t rodeos, span<const char> packed_args, uint32_t cb_alloc_data,
+   void roddcd_push_transaction(uint32_t roddcd, span<const char> packed_args, uint32_t cb_alloc_data,
                                 uint32_t cb_alloc) {
-      auto& r = assert_rodeos(rodeos);
+      auto& r = assert_roddcd(roddcd);
       if (!r.chain.chain)
-         throw std::runtime_error("rodeos is not connected to a chain");
+         throw std::runtime_error("roddcd is not connected to a chain");
       if (!r.query_handler)
-         throw std::runtime_error("call rodeos_enable_queries before rodeos_push_transaction");
+         throw std::runtime_error("call roddcd_enable_queries before roddcd_push_transaction");
       auto& chain = *r.chain.chain;
       chain.start_if_needed();
 
@@ -929,27 +929,27 @@ struct callbacks {
       auto                             start_time = std::chrono::steady_clock::now();
       auto result = r.query_handler->query_transaction(*r.write_snapshot, data.data(), data.size());
       auto us = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - start_time);
-      ilog("rodeos transaction took ${u} us", ("u", us.count()));
+      ilog("roddcd transaction took ${u} us", ("u", us.count()));
       auto tt = dcd::convert_from_bin<dcd::ship_protocol::transaction_trace>(
                                    { result.data, result.data + result.size });
       auto& tt0 = std::get<dcd::ship_protocol::transaction_trace_v0>(tt);
       for (auto& at : tt0.action_traces) {
          auto& at1 = std::get<dcd::ship_protocol::action_trace_v1>(at);
          if (!at1.console.empty())
-            ilog("rodeos query console: <<<\n${c}>>>", ("c", at1.console));
+            ilog("roddcd query console: <<<\n${c}>>>", ("c", at1.console));
       }
       set_data(cb_alloc_data, cb_alloc, result);
    }
 
-   uint32_t rodeos_get_num_pushed_data(uint32_t rodeos) {
-      auto& r = assert_rodeos(rodeos);
+   uint32_t roddcd_get_num_pushed_data(uint32_t roddcd) {
+      auto& r = assert_roddcd(roddcd);
       return r.pushed_data.size(); 
    }
 
-   uint32_t rodeos_get_pushed_data(uint32_t rodeos, uint32_t index, span<char> dest) {
-      auto& r = assert_rodeos(rodeos);
+   uint32_t roddcd_get_pushed_data(uint32_t roddcd, uint32_t index, span<char> dest) {
+      auto& r = assert_roddcd(roddcd);
       if (index >= r.pushed_data.size())
-         throw std::runtime_error("rodeos_get_pushed_data: index is out of range");
+         throw std::runtime_error("roddcd_get_pushed_data: index is out of range");
       memcpy(dest.data(), r.pushed_data[index].data(), std::min(dest.size(), r.pushed_data[index].size()));
       return r.pushed_data[index].size();
    }
@@ -1043,7 +1043,7 @@ struct callbacks {
          selected().kv_destroyed_iterators.pop_back();
       } else {
          // Sanity check in case the per-database limits are set poorly
-         EOS_ASSERT(selected().kv_iterators.size() <= 0xFFFFFFFFu, kv_bad_iter, "Too many iterators");
+         DCD_ASSERT(selected().kv_iterators.size() <= 0xFFFFFFFFu, kv_bad_iter, "Too many iterators");
          itr = selected().kv_iterators.size();
          selected().kv_iterators.emplace_back();
       }
@@ -1112,7 +1112,7 @@ struct callbacks {
    }
 
    void kv_check_iterator(uint32_t itr) {
-      EOS_ASSERT(itr < selected().kv_iterators.size() && selected().kv_iterators[itr], kv_bad_iter,
+      DCD_ASSERT(itr < selected().kv_iterators.size() && selected().kv_iterators[itr], kv_bad_iter,
                  "Bad key-value iterator");
    }
 
@@ -1187,15 +1187,15 @@ void register_callbacks() {
    rhf_t::add<&callbacks::get_history>("env", "get_history");
    rhf_t::add<&callbacks::select_chain_for_db>("env", "select_chain_for_db");
 
-   rhf_t::add<&callbacks::create_rodeos>("env", "create_rodeos");
-   rhf_t::add<&callbacks::destroy_rodeos>("env", "destroy_rodeos");
-   rhf_t::add<&callbacks::rodeos_add_filter>("env", "rodeos_add_filter");
-   rhf_t::add<&callbacks::rodeos_enable_queries>("env", "rodeos_enable_queries");
-   rhf_t::add<&callbacks::connect_rodeos>("env", "connect_rodeos");
-   rhf_t::add<&callbacks::rodeos_sync_block>("env", "rodeos_sync_block");
-   rhf_t::add<&callbacks::rodeos_push_transaction>("env", "rodeos_push_transaction");
-   rhf_t::add<&callbacks::rodeos_get_num_pushed_data>("env", "rodeos_get_num_pushed_data");
-   rhf_t::add<&callbacks::rodeos_get_pushed_data>("env", "rodeos_get_pushed_data");
+   rhf_t::add<&callbacks::create_roddcd>("env", "create_roddcd");
+   rhf_t::add<&callbacks::destroy_roddcd>("env", "destroy_roddcd");
+   rhf_t::add<&callbacks::roddcd_add_filter>("env", "roddcd_add_filter");
+   rhf_t::add<&callbacks::roddcd_enable_queries>("env", "roddcd_enable_queries");
+   rhf_t::add<&callbacks::connect_roddcd>("env", "connect_roddcd");
+   rhf_t::add<&callbacks::roddcd_sync_block>("env", "roddcd_sync_block");
+   rhf_t::add<&callbacks::roddcd_push_transaction>("env", "roddcd_push_transaction");
+   rhf_t::add<&callbacks::roddcd_get_num_pushed_data>("env", "roddcd_get_num_pushed_data");
+   rhf_t::add<&callbacks::roddcd_get_pushed_data>("env", "roddcd_get_pushed_data");
 
    rhf_t::add<&callbacks::db_get_i64>("env", "db_get_i64");
    rhf_t::add<&callbacks::db_next_i64>("env", "db_next_i64");

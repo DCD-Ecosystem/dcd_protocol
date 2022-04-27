@@ -13,7 +13,7 @@ It provides four RPC API endpoints:
 * get_controlled_accounts
 
 [[info | More Info]]
-| See HISTORY section of [RPC API](https://developers.eos.io/dcd-dcdnode/reference).
+| See HISTORY section of [RPC API](https://developers.dcd.io/dcd-dcdnode/reference).
 
 The four actions listed above are used by the following `dcdcli` commands (matching order):
 

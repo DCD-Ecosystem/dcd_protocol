@@ -1,17 +1,17 @@
 # txn\_test\_gen\_plugin
 
-This plugin provides a way to generate a given amount of transactions per second against the currency contract. It runs internally to eosd to reduce overhead.
+This plugin provides a way to generate a given amount of transactions per second against the currency contract. It runs internally to dcdd to reduce overhead.
 
-This general procedure was used when doing Dawn 3.0 performance testing as mentioned in https://github.com/DCD/eos/issues/2078.
+This general procedure was used when doing Dawn 3.0 performance testing as mentioned in https://github.com/DCD/dcd/issues/2078.
 
 ## Performance testing
 
 The following instructions describe how to use the `txn_test_gen_plugin` plugin to generate 1,000 transaction per second load on a simple DCD node.
 
 ### Create config and data directories
-Make an empty directory for our configs and data, `mkdir ~/eos.data`, and define a logging.json that doesn't print debug information (which occurs for each txn) to the console:
+Make an empty directory for our configs and data, `mkdir ~/dcd.data`, and define a logging.json that doesn't print debug information (which occurs for each txn) to the console:
 ```bash
-cat << EOF > ~/eos.data/logging.json
+cat << EOF > ~/dcd.data/logging.json
 {
   "includes": [],
   "appenders": [{
@@ -51,19 +51,19 @@ EOF
 
 ### Launch producer
 ```bash
-$ ./dcdnode -d ~/eos.data/producer_node --config-dir ~/eos.data/producer_node -l ~/eos.data/logging.json --http-server-address "" -p dcd -e
+$ ./dcdnode -d ~/dcd.data/producer_node --config-dir ~/dcd.data/producer_node -l ~/dcd.data/logging.json --http-server-address "" -p dcd -e
 ```
 
 ### Launch non-producer that will generate transactions
 ```bash
-$ ./dcdnode -d ~/eos.data/generator_node --config-dir ~/eos.data/generator_node -l ~/eos.data/logging.json --plugin dcd::txn_test_gen_plugin --plugin dcd::chain_api_plugin --p2p-peer-address localhost:9876 --p2p-listen-endpoint localhost:5555
+$ ./dcdnode -d ~/dcd.data/generator_node --config-dir ~/dcd.data/generator_node -l ~/dcd.data/logging.json --plugin dcd::txn_test_gen_plugin --plugin dcd::chain_api_plugin --p2p-peer-address localhost:9876 --p2p-listen-endpoint localhost:5555
 ```
 
 ### Create a wallet on the non-producer and set bios contract
 ```bash
 $ ./dcdcli wallet create --to-console
 $ ./dcdcli wallet import --private-key 5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3
-$ ./dcdcli set contract dcd ~/eos/build.release/contracts/dcd.bios/ 
+$ ./dcdcli set contract dcd ~/dcd/build.release/contracts/dcd.bios/ 
 ```
 
 ### Initialize the accounts txn_test_gen_plugin uses

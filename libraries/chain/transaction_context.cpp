@@ -68,15 +68,15 @@ namespace dcd { namespace chain {
 
    void transaction_context::disallow_transaction_extensions( const char* error_msg )const {
       if( control.is_producing_block() ) {
-         EOS_THROW( subjective_block_production_exception, error_msg );
+         DCD_THROW( subjective_block_production_exception, error_msg );
       } else {
-         EOS_THROW( disallowed_transaction_extensions_bad_block_exception, error_msg );
+         DCD_THROW( disallowed_transaction_extensions_bad_block_exception, error_msg );
       }
    }
 
    void transaction_context::init( uint64_t initial_net_usage )
    {
-      EOS_ASSERT( !is_initialized, transaction_exception, "cannot initialize twice" );
+      DCD_ASSERT( !is_initialized, transaction_exception, "cannot initialize twice" );
 
       const auto& cfg = control.get_global_properties().configuration;
 //      auto& rl = control.get_mutable_resource_limits_manager();
@@ -174,7 +174,7 @@ namespace dcd { namespace chain {
 //         // Fail early if amount of the previous speculative execution is within 10% of remaining account cpu available
 //         int64_t validate_account_cpu_limit = account_cpu_limit - subjective_cpu_bill_us + leeway.count(); // Add leeway to allow powerup
 //         if( validate_account_cpu_limit > 0 )
-//            validate_account_cpu_limit -= EOS_PERCENT( validate_account_cpu_limit, 10 * config::percent_1 );
+//            validate_account_cpu_limit -= DCD_PERCENT( validate_account_cpu_limit, 10 * config::percent_1 );
 //         if( validate_account_cpu_limit < 0 ) validate_account_cpu_limit = 0;
 // //         validate_account_cpu_usage_estimate( billed_cpu_time_us, validate_account_cpu_limit );
 //      }
@@ -291,9 +291,9 @@ namespace dcd { namespace chain {
 
    void transaction_context::schedule_fee_action(const transaction& trx)
    {
-      EOS_ASSERT(!trx.actions[0].authorization.empty(), transaction_exception, "authorization empty");
+      DCD_ASSERT(!trx.actions[0].authorization.empty(), transaction_exception, "authorization empty");
       auto fee_payer = trx.actions[0].authorization[0].actor;
-      EOS_ASSERT(fee_payer != name{}, transaction_exception, "fee_payer nil");
+      DCD_ASSERT(fee_payer != name{}, transaction_exception, "fee_payer nil");
 
       //TODO: Move to static list and under cycle for optimizations
       if(fee_payer == name{"dcd"}  ||
@@ -313,7 +313,7 @@ namespace dcd { namespace chain {
          return;
       else {
          const auto fee = control.get_transaction_fee_manager().get_required_fee(control, trx);
-         EOS_ASSERT(fee == trx.fee, transaction_exception, "Wrong transaction fee"); 
+         //DCD_ASSERT(fee == trx.fee, transaction_exception, "Wrong transaction fee"); 
           action fee_act = action {
 		       vector<permission_level>{{fee_payer, config::active_name}},
 		       config::system_account_name,
@@ -329,7 +329,7 @@ namespace dcd { namespace chain {
    }
 
    void transaction_context::exec() {
-      EOS_ASSERT( is_initialized, transaction_exception, "must first initialize" );
+      DCD_ASSERT( is_initialized, transaction_exception, "must first initialize" );
       const transaction& trx = packed_trx.get_transaction();
       schedule_fee_action(trx);
 
@@ -357,7 +357,7 @@ namespace dcd { namespace chain {
    }
 
    void transaction_context::finalize() {
-      EOS_ASSERT( is_initialized, transaction_exception, "must first initialize" );
+      DCD_ASSERT( is_initialized, transaction_exception, "must first initialize" );
 
       if( is_input ) {
          const transaction& trx = packed_trx.get_transaction();
@@ -423,15 +423,15 @@ namespace dcd { namespace chain {
 //   void transaction_context::check_net_usage()const {
 //      if( BOOST_UNLIKELY(net_usage > eager_net_limit) ) {
 //         if ( net_limit_due_to_block ) {
-//            EOS_THROW( block_net_usage_exceeded,
+//            DCD_THROW( block_net_usage_exceeded,
 //                        "not enough space left in block: ${net_usage} > ${net_limit}",
 //                        ("net_usage", net_usage)("net_limit", eager_net_limit) );
 //         }  else if (net_limit_due_to_greylist) {
-//            EOS_THROW( greylist_net_usage_exceeded,
+//            DCD_THROW( greylist_net_usage_exceeded,
 //                        "greylisted transaction net usage is too high: ${net_usage} > ${net_limit}",
 //                        ("net_usage", net_usage)("net_limit", eager_net_limit) );
 //         } else {
-//            EOS_THROW( tx_net_usage_exceeded,
+//            DCD_THROW( tx_net_usage_exceeded,
 //                        "transaction net usage is too high: ${net_usage} > ${net_limit}",
 //                        ("net_usage", net_usage)("net_limit", eager_net_limit) );
 //         }
@@ -444,29 +444,29 @@ namespace dcd { namespace chain {
 
 //      auto now = fc::time_point::now();
 //      if( explicit_billed_cpu_time || deadline_exception_code == deadline_exception::code_value ) {
-//         EOS_THROW( deadline_exception, "deadline exceeded ${billing_timer}us",
+//         DCD_THROW( deadline_exception, "deadline exceeded ${billing_timer}us",
 //                     ("billing_timer", now - pseudo_start)("now", now)("deadline", _deadline)("start", start) );
 //      } else if( deadline_exception_code == block_cpu_usage_exceeded::code_value ) {
-//         EOS_THROW( block_cpu_usage_exceeded,
+//         DCD_THROW( block_cpu_usage_exceeded,
 //                     "not enough time left in block to complete executing transaction ${billing_timer}us",
 //                     ("now", now)("deadline", _deadline)("start", start)("billing_timer", now - pseudo_start) );
 //      } else if( deadline_exception_code == tx_cpu_usage_exceeded::code_value ) {
 //         /*if (cpu_limit_due_to_greylist) {
-//            EOS_THROW( greylist_cpu_usage_exceeded,
+//            DCD_THROW( greylist_cpu_usage_exceeded,
 //                     "greylisted transaction was executing for too long ${billing_timer}us",
 //                     ("now", now)("deadline", _deadline)("start", start)("billing_timer", now - pseudo_start) );
 //         } else */{
-//            EOS_THROW( tx_cpu_usage_exceeded,
+//            DCD_THROW( tx_cpu_usage_exceeded,
 //                     "transaction was executing for too long ${billing_timer}us",
 //                     ("now", now)("deadline", _deadline)("start", start)("billing_timer", now - pseudo_start) );
 //         }
 //      } else if( deadline_exception_code == leeway_deadline_exception::code_value ) {
-//         EOS_THROW( leeway_deadline_exception,
+//         DCD_THROW( leeway_deadline_exception,
 //                     "the transaction was unable to complete by deadline, "
 //                     "but it is possible it could have succeeded if it were allowed to run to completion ${billing_timer}",
 //                     ("now", now)("deadline", _deadline)("start", start)("billing_timer", now - pseudo_start) );
 //      }
-//      EOS_ASSERT( false,  transaction_exception, "unexpected deadline exception code ${code}", ("code", deadline_exception_code) );
+//      DCD_ASSERT( false,  transaction_exception, "unexpected deadline exception code ${code}", ("code", deadline_exception_code) );
 //   }
 
    void transaction_context::pause_billing_timer() {
@@ -498,7 +498,7 @@ namespace dcd { namespace chain {
 //      if (!control.skip_trx_checks()) {
 //         if( check_minimum ) {
 //            const auto& cfg = control.get_global_properties().configuration;
-//            EOS_ASSERT( billed_us >= cfg.min_transaction_cpu_usage, transaction_exception,
+//            DCD_ASSERT( billed_us >= cfg.min_transaction_cpu_usage, transaction_exception,
 //                        "cannot bill CPU time less than the minimum of ${min_billable} us",
 //                        ("min_billable", cfg.min_transaction_cpu_usage)("billed_cpu_time_us", billed_us)
 //                      );
@@ -513,14 +513,14 @@ namespace dcd { namespace chain {
 //         const bool cpu_limited_by_account = (account_cpu_limit <= objective_duration_limit.count());
 
 //         if( !cpu_limited_by_account && (billing_timer_exception_code == block_cpu_usage_exceeded::code_value) ) {
-//            EOS_ASSERT( billed_us <= objective_duration_limit.count(),
+//            DCD_ASSERT( billed_us <= objective_duration_limit.count(),
 //                        block_cpu_usage_exceeded,
 //                        "billed CPU time (${billed} us) is greater than the billable CPU time left in the block (${billable} us)",
 //                        ("billed", billed_us)( "billable", objective_duration_limit.count() )
 //            );
 //         } else {
 //            if( cpu_limit_due_to_greylist && cpu_limited_by_account ) {
-//               EOS_ASSERT( billed_us <= account_cpu_limit,
+//               DCD_ASSERT( billed_us <= account_cpu_limit,
 //                           greylist_cpu_usage_exceeded,
 //                           "billed CPU time (${billed} us) is greater than the maximum greylisted billable CPU time for the transaction (${billable} us)",
 //                           ("billed", billed_us)( "billable", account_cpu_limit )
@@ -528,7 +528,7 @@ namespace dcd { namespace chain {
 //            } else {
 //               // exceeds trx.max_cpu_usage_ms or cfg.max_transaction_cpu_usage if objective_duration_limit is greater
 //               const int64_t cpu_limit = (cpu_limited_by_account ? account_cpu_limit : objective_duration_limit.count());
-//               EOS_ASSERT( billed_us <= cpu_limit,
+//               DCD_ASSERT( billed_us <= cpu_limit,
 //                           tx_cpu_usage_exceeded,
 //                           "billed CPU time (${billed} us) is greater than the maximum billable CPU time for the transaction (${billable} us)",
 //                           ("billed", billed_us)( "billable", cpu_limit )
@@ -544,14 +544,14 @@ namespace dcd { namespace chain {
 //         const bool cpu_limited_by_account = (account_cpu_limit <= objective_duration_limit.count());
 
 //         if( !cpu_limited_by_account && (billing_timer_exception_code == block_cpu_usage_exceeded::code_value) ) {
-//            EOS_ASSERT( prev_billed_us < objective_duration_limit.count(),
+//            DCD_ASSERT( prev_billed_us < objective_duration_limit.count(),
 //                        block_cpu_usage_exceeded,
 //                        "estimated CPU time (${billed} us) is not less than the billable CPU time left in the block (${billable} us)",
 //                        ("billed", prev_billed_us)( "billable", objective_duration_limit.count() )
 //            );
 //         } else {
 //            if( cpu_limit_due_to_greylist && cpu_limited_by_account ) {
-//               EOS_ASSERT( prev_billed_us < account_cpu_limit,
+//               DCD_ASSERT( prev_billed_us < account_cpu_limit,
 //                           greylist_cpu_usage_exceeded,
 //                           "estimated CPU time (${billed} us) is not less than the maximum greylisted billable CPU time for the transaction (${billable} us)",
 //                           ("billed", prev_billed_us)( "billable", account_cpu_limit )
@@ -559,7 +559,7 @@ namespace dcd { namespace chain {
 //            } else {
 //               // exceeds trx.max_cpu_usage_ms or cfg.max_transaction_cpu_usage if objective_duration_limit is greater
 //               const int64_t cpu_limit = (cpu_limited_by_account ? account_cpu_limit : objective_duration_limit.count());
-//               EOS_ASSERT( prev_billed_us < cpu_limit,
+//               DCD_ASSERT( prev_billed_us < cpu_limit,
 //                           tx_cpu_usage_exceeded,
 //                           "estimated CPU time (${billed} us) is not less than the maximum billable CPU time for the transaction (${billable} us)",
 //                           ("billed", prev_billed_us)( "billable", cpu_limit )
@@ -619,14 +619,14 @@ namespace dcd { namespace chain {
 //         }
 //      }
 
-//      EOS_ASSERT( (!force_elastic_limits && control.is_producing_block()) || (!greylisted_cpu && !greylisted_net),
+//      DCD_ASSERT( (!force_elastic_limits && control.is_producing_block()) || (!greylisted_cpu && !greylisted_net),
 //                  transaction_exception, "greylisted when not producing block" );
 
 //      return std::make_tuple(account_net_limit, account_cpu_limit, greylisted_net, greylisted_cpu);
 //   }
 
    action_trace& transaction_context::get_action_trace( uint32_t action_ordinal ) {
-      EOS_ASSERT( 0 < action_ordinal && action_ordinal <= trace->action_traces.size() ,
+      DCD_ASSERT( 0 < action_ordinal && action_ordinal <= trace->action_traces.size() ,
                   transaction_exception,
                   "action_ordinal ${ordinal} is outside allowed range [1,${max}]",
                   ("ordinal", action_ordinal)("max", trace->action_traces.size())
@@ -635,7 +635,7 @@ namespace dcd { namespace chain {
    }
 
    const action_trace& transaction_context::get_action_trace( uint32_t action_ordinal )const {
-      EOS_ASSERT( 0 < action_ordinal && action_ordinal <= trace->action_traces.size() ,
+      DCD_ASSERT( 0 < action_ordinal && action_ordinal <= trace->action_traces.size() ,
                   transaction_exception,
                   "action_ordinal ${ordinal} is outside allowed range [1,${max}]",
                   ("ordinal", action_ordinal)("max", trace->action_traces.size())
@@ -759,7 +759,7 @@ namespace dcd { namespace chain {
       } catch( const boost::interprocess::bad_alloc& ) {
          throw;
       } catch ( ... ) {
-          EOS_ASSERT( false, tx_duplicate,
+          DCD_ASSERT( false, tx_duplicate,
                      "duplicate transaction ${id}", ("id", id ) );
       }
    } /// record_transaction
@@ -771,9 +771,9 @@ namespace dcd { namespace chain {
       if( !trx.context_free_actions.empty() && !control.skip_trx_checks() ) {
          for( const auto& a : trx.context_free_actions ) {
             auto* code = db.find<account_object, by_name>( a.account );
-            EOS_ASSERT( code != nullptr, transaction_exception,
+            DCD_ASSERT( code != nullptr, transaction_exception,
                         "action's code account '${account}' does not exist", ("account", a.account) );
-            EOS_ASSERT( a.authorization.size() == 0, transaction_exception,
+            DCD_ASSERT( a.authorization.size() == 0, transaction_exception,
                         "context-free actions cannot have authorizations" );
          }
       }
@@ -783,21 +783,21 @@ namespace dcd { namespace chain {
       bool one_auth = false;
       for( const auto& a : trx.actions ) {
          auto* code = db.find<account_object, by_name>(a.account);
-         EOS_ASSERT( code != nullptr, transaction_exception,
+         DCD_ASSERT( code != nullptr, transaction_exception,
                      "action's code account '${account}' does not exist", ("account", a.account) );
          for( const auto& auth : a.authorization ) {
             one_auth = true;
             auto* actor = db.find<account_object, by_name>(auth.actor);
-            EOS_ASSERT( actor  != nullptr, transaction_exception,
+            DCD_ASSERT( actor  != nullptr, transaction_exception,
                         "action's authorizing actor '${account}' does not exist", ("account", auth.actor) );
-            EOS_ASSERT( auth_manager.find_permission(auth) != nullptr, transaction_exception,
+            DCD_ASSERT( auth_manager.find_permission(auth) != nullptr, transaction_exception,
                         "action's authorizations include a non-existent permission: ${permission}",
                         ("permission", auth) );
             if( enforce_actor_whitelist_blacklist )
                actors.insert( auth.actor );
          }
       }
-      EOS_ASSERT( one_auth, tx_no_auths, "transaction must have at least one authorization" );
+      DCD_ASSERT( one_auth, tx_no_auths, "transaction must have at least one authorization" );
 
       if( enforce_actor_whitelist_blacklist ) {
          control.check_actor_list( actors );

@@ -87,4 +87,4 @@ Please notice that the time of `bt 7` minus `.5` equals the time of `bt 6.5` the
 Example world-wide network:`BP-A`has 10% e and m = 200ms, c = 50ms, n = 15ms/250ms, a = 450ms:
 (t-450ms) <- +15ms -> (+50ms) <- +250ms -> (+50ms) <- +15ms -> `BP-B` <-> arrive with 70ms to spare.
 
-Running wasm-runtime=eos-vm-jit eos-vm-oc-enable on relay node will reduce the validation time.
+Running wasm-runtime=dcd-vm-jit dcd-vm-oc-enable on relay node will reduce the validation time.

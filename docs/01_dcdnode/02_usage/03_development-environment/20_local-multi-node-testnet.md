@@ -75,7 +75,7 @@ dcdcli --wallet-url http://127.0.0.1:8899 wallet import --private-key 5KQwrPbwdL
 ```
 
 ```console
-imported private key for: EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
+imported private key for: DCD6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
 ```
 
 ### 4. Start the First Producer Node
@@ -90,7 +90,7 @@ This creates a special producer, known as the "bios" producer. Assuming everythi
 
 ### 5. Start the Second Producer Node
 
-The following commands assume that you are running this tutorial from the `eos\build` directory, from which you ran `./dcd_build.sh` to build the DCD binaries.
+The following commands assume that you are running this tutorial from the `dcd\build` directory, from which you ran `./dcd_build.sh` to build the DCD binaries.
 
 To start additional nodes, you must first load the `dcd.bios` contract. This contract enables you to have direct control over the resource allocation of other accounts and to access other privileged API calls. Return to the second terminal window and run the following command to load the contract:
 
@@ -113,7 +113,7 @@ This will report newly generated public and private keypairs that will look simi
 
 ```console
 Private key: 5JgbL2ZnoEAhTudReWH1RnMuQS6DBeLZt4ucV6t8aymVEuYg7sr
-Public key: EOS6hMjoWRF2L8x9YpeqtUEcsDKAyxSuM1APicxgRU1E3oyV5sDEg
+Public key: DCD6hMjoWRF2L8x9YpeqtUEcsDKAyxSuM1APicxgRU1E3oyV5sDEg
 ```
 
 Now import the private key portion into your wallet. If successful, the matching public key will be reported. This should match the previously generated public key:
@@ -123,18 +123,18 @@ dcdcli --wallet-url http://127.0.0.1:8899 wallet import 5JgbL2ZnoEAhTudReWH1RnMu
 ```
 
 ```console
-imported private key for: EOS6hMjoWRF2L8x9YpeqtUEcsDKAyxSuM1APicxgRU1E3oyV5sDEg
+imported private key for: DCD6hMjoWRF2L8x9YpeqtUEcsDKAyxSuM1APicxgRU1E3oyV5sDEg
 ```
 
 Create the `inita` account that we will use to become a producer. The `create account` command requires two public keys, one for the account's owner key and one for its active key.  In this example, the newly created public key is used twice, as both the owner key and the active key. Example output from the create command is shown:
 
 ```sh
-dcdcli --wallet-url http://127.0.0.1:8899 create account dcd inita EOS6hMjoWRF2L8x9YpeqtUEcsDKAyxSuM1APicxgRU1E3oyV5sDEg EOS6hMjoWRF2L8x9YpeqtUEcsDKAyxSuM1APicxgRU1E3oyV5sDEg
+dcdcli --wallet-url http://127.0.0.1:8899 create account dcd inita DCD6hMjoWRF2L8x9YpeqtUEcsDKAyxSuM1APicxgRU1E3oyV5sDEg DCD6hMjoWRF2L8x9YpeqtUEcsDKAyxSuM1APicxgRU1E3oyV5sDEg
 ```
 
 ```console
 executed transaction: d1ea511977803d2d88f46deb554f5b6cce355b9cc3174bec0da45fc16fe9d5f3  352 bytes  102400 cycles
-#         dcd <= dcd::newaccount            {"creator":"dcd","name":"inita","owner":{"threshold":1,"keys":[{"key":"EOS6hMjoWRF2L8x9YpeqtUEcsDK...
+#         dcd <= dcd::newaccount            {"creator":"dcd","name":"inita","owner":{"threshold":1,"keys":[{"key":"DCD6hMjoWRF2L8x9YpeqtUEcsDK...
 ```
 
 We now have an account that is available to have a contract assigned to it, enabling it to do meaningful work. In other tutorials, the account has been used to establish simple contracts. In this case, the account will be designated as a block producer.
@@ -142,7 +142,7 @@ We now have an account that is available to have a contract assigned to it, enab
 In the fourth terminal window, start a second `dcdnode` instance. Notice that this command line is substantially longer than the one we used above to create the first producer. This is necessary to avoid collisions with the first `dcdnode` instance. Fortunately, you can just cut and paste this command line and adjust the keys:
 
 ```sh
-dcdnode --producer-name inita --plugin dcd::chain_api_plugin --plugin dcd::net_api_plugin --http-server-address 127.0.0.1:8889 --p2p-listen-endpoint 127.0.0.1:9877 --p2p-peer-address 127.0.0.1:9876 --config-dir node2 --data-dir node2 --private-key [\"EOS6hMjoWRF2L8x9YpeqtUEcsDKAyxSuM1APicxgRU1E3oyV5sDEg\",\"5JgbL2ZnoEAhTudReWH1RnMuQS6DBeLZt4ucV6t8aymVEuYg7sr\"]
+dcdnode --producer-name inita --plugin dcd::chain_api_plugin --plugin dcd::net_api_plugin --http-server-address 127.0.0.1:8889 --p2p-listen-endpoint 127.0.0.1:9877 --p2p-peer-address 127.0.0.1:9876 --config-dir node2 --data-dir node2 --private-key [\"DCD6hMjoWRF2L8x9YpeqtUEcsDKAyxSuM1APicxgRU1E3oyV5sDEg\",\"5JgbL2ZnoEAhTudReWH1RnMuQS6DBeLZt4ucV6t8aymVEuYg7sr\"]
 ```
 
 The output from this new node will show a little activity but will stop reporting until the last step in this tutorial, when the `inita` account is registered as a producer account and activated. Here is some example output from a newly started node. Your output might look a little different, depending on how much time you took entering each of these commands. Furthermore, this example is only the last few lines of output:
@@ -162,12 +162,12 @@ The output from this new node will show a little activity but will stop reportin
 At this point, the second `dcdnode` is an idle producer. To turn it into an active producer, `inita` needs to be registered as a producer with the bios node, and the bios node needs to perform an action to update the producer schedule.
 
 ```sh
-dcdcli --wallet-url http://127.0.0.1:8899 push action dcd setprods "{ \"schedule\": [{\"producer_name\": \"inita\",\"block_signing_key\": \"EOS6hMjoWRF2L8x9YpeqtUEcsDKAyxSuM1APicxgRU1E3oyV5sDEg\"}]}" -p dcd@active
+dcdcli --wallet-url http://127.0.0.1:8899 push action dcd setprods "{ \"schedule\": [{\"producer_name\": \"inita\",\"block_signing_key\": \"DCD6hMjoWRF2L8x9YpeqtUEcsDKAyxSuM1APicxgRU1E3oyV5sDEg\"}]}" -p dcd@active
 ```
 
 ```console
 executed transaction: 2cff4d96814752aefaf9908a7650e867dab74af02253ae7d34672abb9c58235a  272 bytes  105472 cycles
-#         dcd <= dcd::setprods              {"version":1,"producers":[{"producer_name":"inita","block_signing_key":"EOS6hMjoWRF2L8x9YpeqtUEcsDKA...
+#         dcd <= dcd::setprods              {"version":1,"producers":[{"producer_name":"inita","block_signing_key":"DCD6hMjoWRF2L8x9YpeqtUEcsDKA...
 ```
 
 Congratulations, you have now configured a two-node testnet! You can see that the original node is no longer producing blocks but it is receiving them. You can verify this by running the `get info` commmand against each node.

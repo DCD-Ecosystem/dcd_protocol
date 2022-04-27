@@ -8,7 +8,7 @@ There are various ways to install and use the DCD software:
 * [Build DCD from Source](01_build-from-source/index.md)
 
 [[info]]
-| If you are new to DCD, it is recommended that you install the [DCD Prebuilt Binaries](00_install-prebuilt-binaries.md), then proceed to the [Getting Started](https://developers.eos.io/dcd-home/docs/) section of the [DCD Developer Portal](https://developers.eos.io/). If you are an advanced developer, a block producer, or no binaries are available for your platform, you may need to [Build DCD from source](01_build-from-source/index.md) instead.
+| If you are new to DCD, it is recommended that you install the [DCD Prebuilt Binaries](00_install-prebuilt-binaries.md), then proceed to the [Getting Started](https://developers.dcd.io/dcd-home/docs/) section of the [DCD Developer Portal](https://developers.dcd.io/). If you are an advanced developer, a block producer, or no binaries are available for your platform, you may need to [Build DCD from source](01_build-from-source/index.md) instead.
 
 ## Supported Operating Systems
 

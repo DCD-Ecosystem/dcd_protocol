@@ -240,7 +240,7 @@ TEST(HashTest, Hash64LargeValueSchema) {
   // Note that "c" is common for the zero-length string.
   EXPECT_EQ(
       Hash64TestDescriptor("foo", 430),
-      "cRhyWsY67B6klRA1udmOuiYuX7IthyGBKqbeosz2hzVglWCmQx8nEdnpkvPfYX56Up2OWOTV"
+      "cRhyWsY67B6klRA1udmOuiYuX7IthyGBKqbdcdz2hzVglWCmQx8nEdnpkvPfYX56Up2OWOTV"
       "lTzfAoYwvtqKzjD8E9xttR2unelbXbIV67NUe6bOO23BxaSFRcA3njGu5cUWfgwOqNoTsszp"
       "uPvKRP6qaUR5VdoBkJUCFIefd7edlNK5mv6JYWaGdwxehg65hTkTmjZoPKxTZo4PLyzbL9U4"
       "xt12ITSfeP2MfBHuLI2z2pDlBb44UQKVMx27LEoAHsdLp3WfWfgH3sdRBRCHm33UxCM4QmE2"

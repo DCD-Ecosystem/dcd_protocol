@@ -20,7 +20,7 @@ struct chain_snapshot_header {
     *         - forwards compatible with versions 2 and 3
     *         - kv database
     *         - Configurable wasm limits
-    *   5: Updated for v3.0.0 eos features:
+    *   5: Updated for v3.0.0 dcd features:
     *         - chain_config update
     */
 
@@ -32,7 +32,7 @@ struct chain_snapshot_header {
    void validate() const {
       auto min = minimum_compatible_version;
       auto max = current_version;
-      EOS_ASSERT(version >= min && version <= max,
+      DCD_ASSERT(version >= min && version <= max,
               snapshot_validation_exception,
               "Unsupported version of chain snapshot: ${version}. Supported version must be between ${min} and ${max} inclusive.",
               ("version",version)("min",min)("max",max));

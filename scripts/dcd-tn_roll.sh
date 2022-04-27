@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# dcd-tn_roll is used to have all of the instances of the EOS daemon on a host brought down
+# dcd-tn_roll is used to have all of the instances of the DCD daemon on a host brought down
 # so that the underlying executable image file (the "text file") can be replaced. Then
 # all instances are restarted.
 # usage: dcd-tn_roll.sh [arglist]
@@ -39,7 +39,7 @@ fi
 
 prog=""
 RD=""
-for p in eosd dcdd dcdnode; do
+for p in dcdd dcdd dcdnode; do
     prog=$p
     RD=bin
     if [ -f $RD/$prog ]; then
@@ -55,11 +55,11 @@ for p in eosd dcdd dcdnode; do
 done
 
 if [ \( -z "$prog" \) -o \( -z "$RD" \) ]; then
-    echo unable to locate binary for eosd or dcdd or dcdnode
+    echo unable to locate binary for dcdd or dcdd or dcdnode
     exit 1
 fi
 
-SDIR=staging/eos
+SDIR=staging/dcd
 if [ ! -e $SDIR/$RD/$prog ]; then
     echo $SDIR/$RD/$prog does not exist
     exit 1

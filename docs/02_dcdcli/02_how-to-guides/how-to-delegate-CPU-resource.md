@@ -13,9 +13,9 @@ Make sure you meet the following requirements:
 | `dcdcli` is bundled with the DCD software. [Installing DCD](../../00_install/index.md) will also install `dcdcli`.
 
 * Ensure the reference system contracts from [`dcd.contracts`](https://github.com/DCD/dcd.contracts) repository is deployed and used to manage system resources.
-* Understand what an [account](https://developers.eos.io/welcome/v2.1/glossary/index/#account) is and its role in the blockchain.
-* Understand [CPU bandwidth](https://developers.eos.io/welcome/v2.1/glossary/index/#cpu) in an DCD blockchain.
-* Understand [NET bandwidth](https://developers.eos.io/welcome/v2.1/glossary/index/#net) in an DCD blockchain.
+* Understand what an [account](https://developers.dcd.io/welcome/v2.1/glossary/index/#account) is and its role in the blockchain.
+* Understand [CPU bandwidth](https://developers.dcd.io/welcome/v2.1/glossary/index/#cpu) in an DCD blockchain.
+* Understand [NET bandwidth](https://developers.dcd.io/welcome/v2.1/glossary/index/#net) in an DCD blockchain.
 
 ## Steps
 

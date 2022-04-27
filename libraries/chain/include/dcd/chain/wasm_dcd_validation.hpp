@@ -113,7 +113,7 @@ namespace dcd { namespace chain { namespace wasm_validations {
                return;
             }
             depth++;
-            EOS_ASSERT(depth < 1024, wasm_execution_error, "Nested depth exceeded");
+            DCD_ASSERT(depth < 1024, wasm_execution_error, "Nested depth exceeded");
          }
       }
    };

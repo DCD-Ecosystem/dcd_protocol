@@ -2,7 +2,7 @@
 
 #include <dcd/chain/types.hpp>
 #include <dcd/chain/webassembly/common.hpp>
-#include <dcd/chain/webassembly/eos-vm.hpp>
+#include <dcd/chain/webassembly/dcd-vm.hpp>
 
 #include <dcd/vm/backend.hpp>
 #include <dcd/vm/host_function.hpp>
@@ -47,7 +47,7 @@ namespace dcd { namespace chain { namespace webassembly {
       template <typename T>
       struct is_whitelisted_type<vm::span<T>> {
          // Currently only a span of [const] char is allowed so there are no alignment concerns.
-         // If we wish to expand to general span<T> in the future, changes are needed in EOS VM
+         // If we wish to expand to general span<T> in the future, changes are needed in DCD VM
          // to check proper alignment of the void* within from_wasm before constructing the span.
          static constexpr bool value = std::is_same_v<std::remove_const_t<T>, char>;
       };
@@ -102,19 +102,19 @@ namespace dcd { namespace chain { namespace webassembly {
       return f128_is_nan( f );
    }
 
-   EOS_VM_PRECONDITION(context_free_check,
-         EOS_VM_INVOKE_ONCE([&](auto&&...) {
-            EOS_ASSERT(ctx.get_host().get_context().is_context_free(), unaccessible_api, "this API may only be called from context_free apply");
+   DCD_VM_PRECONDITION(context_free_check,
+         DCD_VM_INVOKE_ONCE([&](auto&&...) {
+            DCD_ASSERT(ctx.get_host().get_context().is_context_free(), unaccessible_api, "this API may only be called from context_free apply");
          }));
 
-   EOS_VM_PRECONDITION(context_aware_check,
-         EOS_VM_INVOKE_ONCE([&](auto&&...) {
-            EOS_ASSERT(!ctx.get_host().get_context().is_context_free(), unaccessible_api, "only context free api's can be used in this context");
+   DCD_VM_PRECONDITION(context_aware_check,
+         DCD_VM_INVOKE_ONCE([&](auto&&...) {
+            DCD_ASSERT(!ctx.get_host().get_context().is_context_free(), unaccessible_api, "only context free api's can be used in this context");
          }));
 
-   EOS_VM_PRECONDITION(privileged_check,
-         EOS_VM_INVOKE_ONCE([&](auto&&...) {
-            EOS_ASSERT(ctx.get_host().get_context().is_privileged(), unaccessible_api,
+   DCD_VM_PRECONDITION(privileged_check,
+         DCD_VM_INVOKE_ONCE([&](auto&&...) {
+            DCD_ASSERT(ctx.get_host().get_context().is_privileged(), unaccessible_api,
                        "${code} does not have permission to call this API", ("code", ctx.get_host().get_context().get_receiver()));
          }));
 
@@ -128,8 +128,8 @@ namespace dcd { namespace chain { namespace webassembly {
       vm::span<T> to_span(const vm::span<T>& val) { return val; }
    }
 
-   EOS_VM_PRECONDITION(core_precondition,
-         EOS_VM_INVOKE_ON_ALL(([&](auto&& arg, auto&&... rest) {
+   DCD_VM_PRECONDITION(core_precondition,
+         DCD_VM_INVOKE_ON_ALL(([&](auto&& arg, auto&&... rest) {
             using namespace dcd::vm;
             using arg_t = std::decay_t<decltype(arg)>;
             static_assert( is_whitelisted_type_v<arg_t>, "whitelisted type violation");
@@ -137,7 +137,7 @@ namespace dcd { namespace chain { namespace webassembly {
                dcd::vm::invoke_on<false, dcd::vm::invoke_on_all_t>([&arg](auto&& narg, auto&&... nrest) {
                   using nested_arg_t = std::decay_t<decltype(narg)>;
                   if constexpr (dcd::vm::is_span_type_v<nested_arg_t> || vm::is_argument_proxy_type_v<nested_arg_t>)
-                      EOS_ASSERT(!is_aliasing(detail::to_span(arg), detail::to_span(narg)), wasm_exception, "pointers not allowed to alias");
+                      DCD_ASSERT(!is_aliasing(detail::to_span(arg), detail::to_span(narg)), wasm_exception, "pointers not allowed to alias");
                }, rest...);
             }
          })));
@@ -155,15 +155,15 @@ namespace dcd { namespace chain { namespace webassembly {
       using type = T;
    };
 
-   EOS_VM_PRECONDITION(is_nan_check,
-         EOS_VM_INVOKE_ON_ALL([&](auto&& arg, auto&&... rest) {
+   DCD_VM_PRECONDITION(is_nan_check,
+         DCD_VM_INVOKE_ON_ALL([&](auto&& arg, auto&&... rest) {
             if constexpr (should_check_nan_v<std::remove_cv_t<typename remove_argument_proxy<std::decay_t<decltype(arg)>>::type>>) {
-               EOS_ASSERT(!webassembly::is_nan(*arg), transaction_exception, "NaN is not an allowed value for a secondary key");
+               DCD_ASSERT(!webassembly::is_nan(*arg), transaction_exception, "NaN is not an allowed value for a secondary key");
             }
          }));
 
-   EOS_VM_PRECONDITION(legacy_static_check_wl_args,
-         EOS_VM_INVOKE_ONCE([&](auto&&... args) {
+   DCD_VM_PRECONDITION(legacy_static_check_wl_args,
+         DCD_VM_INVOKE_ONCE([&](auto&&... args) {
             static_assert( are_whitelisted_legacy_types_v<std::decay_t<decltype(args)>...>, "legacy whitelisted type violation");
          }));
 

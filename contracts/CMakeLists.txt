@@ -9,7 +9,7 @@ if( DCD_COMPILE_TEST_CONTRACTS )
    if( USE_DCD_CDT_1_7_X)
       list(APPEND CMAKE_ARGS_VAL -DUSE_DCD_CDT_1_7_X=${USE_DCD_CDT_1_7_X})
    endif()
-   message( STATUS "Building contracts in directory `eos/contracts/`" )
+   message( STATUS "Building contracts in directory `dcd/contracts/`" )
    ExternalProject_Add(
       bios_boot_contracts_project
       SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/contracts
@@ -22,6 +22,6 @@ if( DCD_COMPILE_TEST_CONTRACTS )
       BUILD_ALWAYS 1
    )
 else()
-  message( STATUS "Not building contracts in directory `eos/contracts/`" )
+  message( STATUS "Not building contracts in directory `dcd/contracts/`" )
   add_subdirectory(contracts)
 endif()

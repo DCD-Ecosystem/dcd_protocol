@@ -8,7 +8,7 @@ content_title: dcdnode
 
 ## Installation
 
-`dcdnode` is distributed as part of the [DCD software suite](https://github.com/DCD/eos/blob/master/README.md). To install `dcdnode`, visit the [DCD Software Installation](../00_install/index.md) section.
+`dcdnode` is distributed as part of the [DCD software suite](https://github.com/DCD/dcd/blob/master/README.md). To install `dcdnode`, visit the [DCD Software Installation](../00_install/index.md) section.
 
 ## Explore
 
@@ -21,7 +21,7 @@ Navigate the sections below to configure and use `dcdnode`.
 * [Logging](06_logging/index.md) - Logging config/usage, loggers, appenders, logging levels.
 * [Concepts](07_concepts/index.md) - `dcdnode` concepts, explainers, implementation aspects.
 * [Troubleshooting](08_troubleshooting/index.md) - Common `dcdnode` troubleshooting questions.
-* [Deprecation Notices](https://github.com/DCD/eos/issues/7597) - Lists `dcdnode` deprecated functionality.
+* [Deprecation Notices](https://github.com/DCD/dcd/issues/7597) - Lists `dcdnode` deprecated functionality.
 
 [[info | Access Node]]
 | A local or remote DCD access node running `dcdnode` is required for a client application or smart contract to interact with the blockchain.

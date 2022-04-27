@@ -86,9 +86,9 @@ class Cluster(object):
         """Cluster container.
         walletd [True|False] Is wallet dcdksd running. If not load the wallet plugin
         localCluster [True|False] Is cluster local to host.
-        host: eos server host
-        port: eos server port
-        walletHost: eos wallet host
+        host: dcd server host
+        port: dcd server port
+        walletHost: dcd wallet host
         walletPort: wos wallet port
         defproduceraPrvtKey: Defproducera account private key
         defproducerbPrvtKey: Defproducerb account private key
@@ -203,7 +203,7 @@ class Cluster(object):
         Utils.Print("alternateVersionLabelsFile=%s" % (alternateVersionLabelsFile))
 
         if not self.localCluster:
-            Utils.Print("WARNING: Cluster not local, not launching %s." % (Utils.EosServerName))
+            Utils.Print("WARNING: Cluster not local, not launching %s." % (Utils.DcdServerName))
             return True
 
         if len(self.nodes) > 0:
@@ -236,7 +236,7 @@ class Cluster(object):
             time.sleep(2)
 
         cmd="%s -p %s -n %s -d %s -i %s -f %s --unstarted-nodes %s" % (
-            Utils.EosLauncherPath, pnodes, totalNodes, delay, datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3],
+            Utils.DcdLauncherPath, pnodes, totalNodes, delay, datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3],
             producerFlag, unstartedNodes)
         cmdArr=cmd.split()
         if self.staging:
@@ -440,7 +440,7 @@ class Cluster(object):
         nodes=self.discoverLocalNodes(startedNodes, timeout=Utils.systemWaitTimeout)
         if nodes is None or startedNodes != len(nodes):
             Utils.Print("ERROR: Unable to validate %s instances, expected: %d, actual: %d" %
-                          (Utils.EosServerName, startedNodes, len(nodes)))
+                          (Utils.DcdServerName, startedNodes, len(nodes)))
             return False
 
         self.nodes=nodes
@@ -621,7 +621,7 @@ class Cluster(object):
         """Returns client version (string)"""
         p = re.compile(r'^Build version:\s(\w+)\n$')
         try:
-            cmd="%s version client" % (Utils.EosClientPath)
+            cmd="%s version client" % (Utils.DcdClientPath)
             if verbose: Utils.Print("cmd: %s" % (cmd))
             response=Utils.checkOutput(cmd.split())
             assert(response)
@@ -645,7 +645,7 @@ class Cluster(object):
         p = re.compile('Private key: (.+)\nPublic key: (.+)\n', re.MULTILINE)
         for _ in range(0, count):
             try:
-                cmd="%s create key --to-console" % (Utils.EosClientPath)
+                cmd="%s create key --to-console" % (Utils.DcdClientPath)
                 if Utils.Debug: Utils.Print("cmd: %s" % (cmd))
                 keyStr=Utils.checkOutput(cmd.split())
                 m=p.search(keyStr)
@@ -656,7 +656,7 @@ class Cluster(object):
                 ownerPrivate=m.group(1)
                 ownerPublic=m.group(2)
 
-                cmd="%s create key --to-console" % (Utils.EosClientPath)
+                cmd="%s create key --to-console" % (Utils.DcdClientPath)
                 if Utils.Debug: Utils.Print("cmd: %s" % (cmd))
                 keyStr=Utils.checkOutput(cmd.split())
                 m=p.match(keyStr)
@@ -766,7 +766,7 @@ class Cluster(object):
         node=self.nodes[0]
         fromm=source
         to=accounts[0]
-        Utils.Print("Transfer %s units from account %s to %s on eos server port %d" % (
+        Utils.Print("Transfer %s units from account %s to %s on dcd server port %d" % (
             transferAmountStr, fromm.name, to.name, node.port))
         trans=node.transferFunds(fromm, to, transferAmountStr)
         transId=Node.getTransId(trans)
@@ -775,15 +775,15 @@ class Cluster(object):
 
         if Utils.Debug: Utils.Print("Funds transfered on transaction id %s." % (transId))
 
-        nextEosIdx=-1
+        nextDcdIdx=-1
         for i in range(0, count):
             account=accounts[i]
             nextInstanceFound=False
             for _ in range(0, count):
-                #Utils.Print("nextEosIdx: %d, n: %d" % (nextEosIdx, n))
-                nextEosIdx=(nextEosIdx + 1)%count
-                if not self.nodes[nextEosIdx].killed:
-                    #Utils.Print("nextEosIdx: %d" % (nextEosIdx))
+                #Utils.Print("nextDcdIdx: %d, n: %d" % (nextDcdIdx, n))
+                nextDcdIdx=(nextDcdIdx + 1)%count
+                if not self.nodes[nextDcdIdx].killed:
+                    #Utils.Print("nextDcdIdx: %d" % (nextDcdIdx))
                     nextInstanceFound=True
                     break
 
@@ -791,8 +791,8 @@ class Cluster(object):
                 Utils.Print("ERROR: No active nodes found.")
                 return False
 
-            #Utils.Print("nextEosIdx: %d, count: %d" % (nextEosIdx, count))
-            node=self.nodes[nextEosIdx]
+            #Utils.Print("nextDcdIdx: %d, count: %d" % (nextDcdIdx, count))
+            node=self.nodes[nextDcdIdx]
             if Utils.Debug: Utils.Print("Wait for transaction id %s on node port %d" % (transId, node.port))
             if node.waitForTransInBlock(transId) is False:
                 Utils.Print("ERROR: Failed to validate transaction %s got rolled into a block on server port %d." % (transId, node.port))
@@ -802,7 +802,7 @@ class Cluster(object):
             transferAmountStr=Node.currencyIntToStr(transferAmount, CORE_SYMBOL)
             fromm=account
             to=accounts[i+1] if i < (count-1) else source
-            Utils.Print("Transfer %s units from account %s to %s on eos server port %d." %
+            Utils.Print("Transfer %s units from account %s to %s on dcd server port %d." %
                     (transferAmountStr, fromm.name, to.name, node.port))
 
             trans=node.transferFunds(fromm, to, transferAmountStr)
@@ -838,10 +838,10 @@ class Cluster(object):
                 continue
 
             if Utils.Debug: Utils.Print("Validate funds on %s server port %d." %
-                                        (Utils.EosServerName, node.port))
+                                        (Utils.DcdServerName, node.port))
 
             if node.validateFunds(initialBalances, transferAmount, source, accounts) is False:
-                Utils.Print("ERROR: Failed to validate funds on eos node port: %d" % (node.port))
+                Utils.Print("ERROR: Failed to validate funds on dcd node port: %d" % (node.port))
                 return False
 
         return True
@@ -851,7 +851,7 @@ class Cluster(object):
         receiving transferAmount*n SYS and forwarding x-transferAmount funds. Transfer actions are spread round-robin across the cluster to vaidate system cohesiveness."""
 
         if Utils.Debug: Utils.Print("Get initial system balances.")
-        initialBalances=self.nodes[0].getEosBalances([self.defproduceraAccount] + self.accounts)
+        initialBalances=self.nodes[0].getDcdBalances([self.defproduceraAccount] + self.accounts)
         assert(initialBalances)
         assert(isinstance(initialBalances, dict))
 
@@ -1013,7 +1013,7 @@ class Cluster(object):
             Utils.Print("Set FEATURE_DIGESTS to: %s" % env["FEATURE_DIGESTS"])
 
         if 0 != subprocess.call(cmd.split(), stdout=Utils.FNull, env=env):
-            if not silent: Utils.Print("Launcher failed to shut down eos cluster.")
+            if not silent: Utils.Print("Launcher failed to shut down dcd cluster.")
             return None
 
         p = re.compile(r"\berror\b", re.IGNORECASE)
@@ -1315,7 +1315,7 @@ class Cluster(object):
 
         expectedAmount="1000000000.0000 {0}".format(CORE_SYMBOL)
         Utils.Print("Verify dcd issue, Expected: %s" % (expectedAmount))
-        actualAmount=biosNode.getAccountEosBalanceStr(dcdAccount.name)
+        actualAmount=biosNode.getAccountDcdBalanceStr(dcdAccount.name)
         if expectedAmount != actualAmount:
             Utils.Print("ERROR: Issue verification failed. Excepted %s, actual: %s" %
                         (expectedAmount, actualAmount))
@@ -1367,8 +1367,8 @@ class Cluster(object):
         return biosNode
 
     @staticmethod
-    def pgrepEosServers(timeout=None):
-        cmd=Utils.pgrepCmd(Utils.EosServerName)
+    def pgrepDcdServers(timeout=None):
+        cmd=Utils.pgrepCmd(Utils.DcdServerName)
 
         def myFunc():
             psOut=None
@@ -1385,15 +1385,15 @@ class Cluster(object):
         return Utils.waitForTruth(myFunc, timeout)
 
     @staticmethod
-    def pgrepEosServerPattern(nodeInstance):
+    def pgrepDcdServerPattern(nodeInstance):
         dataLocation=Utils.getNodeDataDir(nodeInstance)
         return r"[\n]?(\d+) (.* --data-dir %s .*)\n" % (dataLocation)
 
-    # Populates list of EosInstanceInfo objects, matched to actual running instances
+    # Populates list of DcdInstanceInfo objects, matched to actual running instances
     def discoverLocalNodes(self, totalNodes, timeout=None):
         nodes=[]
 
-        psOut=Cluster.pgrepEosServers(timeout)
+        psOut=Cluster.pgrepDcdServers(timeout)
         if psOut is None:
             Utils.Print("ERROR: No nodes discovered.")
             return nodes
@@ -1415,36 +1415,36 @@ class Cluster(object):
     # Populate a node matched to actual running instance
     def discoverLocalNode(self, nodeNum, psOut=None, timeout=None):
         if psOut is None:
-            psOut=Cluster.pgrepEosServers(timeout)
+            psOut=Cluster.pgrepDcdServers(timeout)
         if psOut is None:
             Utils.Print("ERROR: No nodes discovered.")
             return None
-        pattern=Cluster.pgrepEosServerPattern(nodeNum)
+        pattern=Cluster.pgrepDcdServerPattern(nodeNum)
         m=re.search(pattern, psOut, re.MULTILINE)
         if m is None:
-            Utils.Print("ERROR: Failed to find %s pid. Pattern %s" % (Utils.EosServerName, pattern))
+            Utils.Print("ERROR: Failed to find %s pid. Pattern %s" % (Utils.DcdServerName, pattern))
             return None
         instance=Node(self.host, self.port + nodeNum, nodeNum, pid=int(m.group(1)), cmd=m.group(2), walletMgr=self.walletMgr)
         if Utils.Debug: Utils.Print("Node>", instance)
         return instance
 
     def discoverBiosNode(self, timeout=None):
-        psOut=Cluster.pgrepEosServers(timeout=timeout)
-        pattern=Cluster.pgrepEosServerPattern("bios")
+        psOut=Cluster.pgrepDcdServers(timeout=timeout)
+        pattern=Cluster.pgrepDcdServerPattern("bios")
         Utils.Print("pattern={\n%s\n}, psOut=\n%s\n" % (pattern,psOut))
         m=re.search(pattern, psOut, re.MULTILINE)
         if m is None:
-            Utils.Print("ERROR: Failed to find %s pid. Pattern %s" % (Utils.EosServerName, pattern))
+            Utils.Print("ERROR: Failed to find %s pid. Pattern %s" % (Utils.DcdServerName, pattern))
             return None
         else:
             return Node(Cluster.__BiosHost, Cluster.__BiosPort, "bios", pid=int(m.group(1)), cmd=m.group(2), walletMgr=self.walletMgr)
 
-    # Kills a percentange of Eos instances starting from the tail and update eosInstanceInfos state
-    def killSomeEosInstances(self, killCount, killSignalStr=Utils.SigKillTag):
+    # Kills a percentange of Dcd instances starting from the tail and update dcdInstanceInfos state
+    def killSomeDcdInstances(self, killCount, killSignalStr=Utils.SigKillTag):
         killSignal=signal.SIGKILL
         if killSignalStr == Utils.SigTermTag:
             killSignal=signal.SIGTERM
-        Utils.Print("Kill %d %s instances with signal %s." % (killCount, Utils.EosServerName, killSignal))
+        Utils.Print("Kill %d %s instances with signal %s." % (killCount, Utils.DcdServerName, killSignal))
 
         killedCount=0
         for node in reversed(self.nodes):
@@ -1458,7 +1458,7 @@ class Cluster(object):
         time.sleep(1) # Give processes time to stand down
         return True
 
-    def relaunchEosInstances(self, cachePopen=False, nodeArgs=""):
+    def relaunchDcdInstances(self, cachePopen=False, nodeArgs=""):
 
         chainArg=self.__chainSyncStrategy.arg + " " + nodeArgs
 
@@ -1505,17 +1505,17 @@ class Cluster(object):
     def killall(self, kill=True, silent=True, allInstances=False):
         """Kill cluster dcdnode instances. allInstances will kill all dcdnode instances running on the system."""
         signalNum=9 if kill else 15
-        cmd="%s -k %d" % (Utils.EosLauncherPath, signalNum)
+        cmd="%s -k %d" % (Utils.DcdLauncherPath, signalNum)
         if Utils.Debug: Utils.Print("cmd: %s" % (cmd))
         if 0 != subprocess.call(cmd.split(), stdout=Utils.FNull):
-            if not silent: Utils.Print("Launcher failed to shut down eos cluster.")
+            if not silent: Utils.Print("Launcher failed to shut down dcd cluster.")
 
         if allInstances:
-            # ocassionally the launcher cannot kill the eos server
-            cmd="pkill -9 %s" % (Utils.EosServerName)
+            # ocassionally the launcher cannot kill the dcd server
+            cmd="pkill -9 %s" % (Utils.DcdServerName)
             if Utils.Debug: Utils.Print("cmd: %s" % (cmd))
             if 0 != subprocess.call(cmd.split(), stdout=Utils.FNull):
-                if not silent: Utils.Print("Failed to shut down eos cluster.")
+                if not silent: Utils.Print("Failed to shut down dcd cluster.")
 
         # another explicit nodes shutdown
         for node in self.nodes:

@@ -45,7 +45,7 @@ bool read_rocksdb_entry(const dcd::session::shared_bytes& actual_db_kv_key,
    uint64_t    contract;
    constexpr std::size_t type_size = 1;
    std::size_t key_prefix_size = type_size + sizeof(contract);
-   EOS_ASSERT(actual_db_kv_key.size() >= key_prefix_size, database_exception, "Unexpected key in rocksdb");
+   DCD_ASSERT(actual_db_kv_key.size() >= key_prefix_size, database_exception, "Unexpected key in rocksdb");
 
    auto key_buffer = std::vector<char>{ actual_db_kv_key.data(), actual_db_kv_key.data() + actual_db_kv_key.size() };
    auto begin = std::begin(key_buffer) + type_size;
@@ -225,7 +225,7 @@ public:
                               std::size_t value_size) {
       if (!is_table_only()) {
          uint64_t primary_key;
-         EOS_ASSERT(b1::chain_kv::extract_key(remaining, key_end, primary_key), bad_composite_key_exception,
+         DCD_ASSERT(b1::chain_kv::extract_key(remaining, key_end, primary_key), bad_composite_key_exception,
                     "DB intrinsic key-value store composite key is malformed");
          receiver_.add_row(primary_index_view::create(primary_key, value, value_size));
       }
@@ -239,9 +239,9 @@ public:
       if (!is_table_only()) {
          IndexType secondary_key;
          uint64_t primary_key;
-         EOS_ASSERT(b1::chain_kv::extract_key(remaining, key_end, secondary_key), bad_composite_key_exception,
+         DCD_ASSERT(b1::chain_kv::extract_key(remaining, key_end, secondary_key), bad_composite_key_exception,
                     "DB intrinsic key-value store composite key is malformed");
-         EOS_ASSERT(b1::chain_kv::extract_key(remaining, key_end, primary_key), bad_composite_key_exception,
+         DCD_ASSERT(b1::chain_kv::extract_key(remaining, key_end, primary_key), bad_composite_key_exception,
                     "DB intrinsic key-value store composite key is malformed");
          backing_store::payer_payload pp(value, value_size);
          receiver_.add_row(secondary_index_view<IndexType>{primary_key, pp.payer, secondary_key});
@@ -454,7 +454,7 @@ namespace detail {
                     const dcd::session::shared_bytes& end_key,
                     bool is_reverse,
                     kv_undo_stack_ptr::element_type::variant_type& session) : is_reverse_(is_reverse) {
-         EOS_ASSERT(begin_key < end_key, database_exception, "Invalid iterator_pair request: begin_key was greater than or equal to end_key.");
+         DCD_ASSERT(begin_key < end_key, database_exception, "Invalid iterator_pair request: begin_key was greater than or equal to end_key.");
          if (is_reverse_) {
             current_ = session.lower_bound(end_key);
             end_ = session.lower_bound(begin_key);
@@ -462,7 +462,7 @@ namespace detail {
             // to get a greater-than-or-equal reverse iterator
             if (current_ == session.end() || (*current_).first > end_key) {
                --current_;
-               EOS_ASSERT(current_ != session.end(), database_exception, "iterator_pair: failed to find lower bound of end_key");
+               DCD_ASSERT(current_ != session.end(), database_exception, "iterator_pair: failed to find lower bound of end_key");
             }
             // since this is reverse iterating, then need to iterate backward to get a less-than iterator
             --end_;

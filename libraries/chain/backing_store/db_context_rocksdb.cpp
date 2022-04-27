@@ -171,12 +171,12 @@ namespace dcd { namespace chain { namespace backing_store {
    }
 
    int32_t db_context_rocksdb::db_store_i64(uint64_t scope, uint64_t table, account_name payer, uint64_t id, const char* value , size_t value_size) {
-      EOS_ASSERT( payer != account_name(), invalid_table_payer, "must specify a valid account to pay for new record" );
+      DCD_ASSERT( payer != account_name(), invalid_table_payer, "must specify a valid account to pay for new record" );
       const name scope_name{scope};
       const name table_name{table};
       const auto old_key_value = get_primary_key_value(receiver, scope_name, table_name, id);
 
-      EOS_ASSERT( !old_key_value.value, db_rocksdb_invalid_operation_exception, "db_store_i64 called with pre-existing key");
+      DCD_ASSERT( !old_key_value.value, db_rocksdb_invalid_operation_exception, "db_store_i64 called with pre-existing key");
 
       primary_lookup.add_table_if_needed(old_key_value.full_key, payer);
 
@@ -206,10 +206,10 @@ namespace dcd { namespace chain { namespace backing_store {
    void db_context_rocksdb::db_update_i64(int32_t itr, account_name payer, const char* value , size_t value_size) {
       const auto& key_store = primary_iter_store.get(itr);
       const auto& table_store = primary_iter_store.get_table(key_store);
-      EOS_ASSERT( table_store.contract == receiver, table_access_violation, "db access violation" );
+      DCD_ASSERT( table_store.contract == receiver, table_access_violation, "db access violation" );
       const auto old_key_value = get_primary_key_value(receiver, table_store.scope, table_store.table, key_store.primary);
 
-      EOS_ASSERT( old_key_value.value, db_rocksdb_invalid_operation_exception,
+      DCD_ASSERT( old_key_value.value, db_rocksdb_invalid_operation_exception,
                   "invariant failure in db_update_i64, iter store found to update but nothing in database");
 
       // copy locally, since below the key_store memory will be changed
@@ -257,10 +257,10 @@ namespace dcd { namespace chain { namespace backing_store {
    void db_context_rocksdb::db_remove_i64(int32_t itr) {
       const auto& key_store = primary_iter_store.get(itr);
       const auto& table_store = primary_iter_store.get_table(key_store);
-      EOS_ASSERT( table_store.contract == receiver, table_access_violation, "db access violation" );
+      DCD_ASSERT( table_store.contract == receiver, table_access_violation, "db access violation" );
       const auto old_key_value = get_primary_key_value(receiver, table_store.scope, table_store.table, key_store.primary);
 
-      EOS_ASSERT( old_key_value.value, db_rocksdb_invalid_operation_exception,
+      DCD_ASSERT( old_key_value.value, db_rocksdb_invalid_operation_exception,
       "invariant failure in db_remove_i64, iter store found to update but nothing in database");
 
       const auto old_payer = key_store.payer;
@@ -291,7 +291,7 @@ namespace dcd { namespace chain { namespace backing_store {
       const auto& table_store = primary_iter_store.get_table(key_store);
       const auto old_key_value = get_primary_key_value(table_store.contract, table_store.scope, table_store.table, key_store.primary);
 
-      EOS_ASSERT( old_key_value.value, db_rocksdb_invalid_operation_exception,
+      DCD_ASSERT( old_key_value.value, db_rocksdb_invalid_operation_exception,
                   "invariant failure in db_get_i64, iter store found to update but nothing in database");
       payer_payload pp {*old_key_value.value};
       const char* const actual_value = pp.value;
@@ -311,7 +311,7 @@ namespace dcd { namespace chain { namespace backing_store {
       const auto& table_store = primary_iter_store.get_table(key_store);
       auto exact =
             get_exact_iterator(table_store.contract, table_store.scope, table_store.table, key_store.primary);
-      EOS_ASSERT( exact.valid, db_rocksdb_invalid_operation_exception,
+      DCD_ASSERT( exact.valid, db_rocksdb_invalid_operation_exception,
                   "invariant failure in db_next_i64, iter store found to update but it does not exist in the database");
       auto& session_iter = exact.itr;
       auto& type_prefix = exact.type_prefix;
@@ -323,7 +323,7 @@ namespace dcd { namespace chain { namespace backing_store {
    int32_t db_context_rocksdb::db_previous_i64(int32_t itr, uint64_t& primary) {
       if( itr < primary_iter_store.invalid_iterator() ) { // is end iterator
          const backing_store::unique_table* table_store = primary_iter_store.find_table_by_end_iterator(itr);
-         EOS_ASSERT( table_store, invalid_table_iterator, "not a valid end iterator" );
+         DCD_ASSERT( table_store, invalid_table_iterator, "not a valid end iterator" );
          if (current_session.begin() == current_session.end()) {
             // NOTE: matching chainbase functionality, if iterator store found, but no keys in db
             return primary_iter_store.invalid_iterator();
@@ -678,7 +678,7 @@ namespace dcd { namespace chain { namespace backing_store {
       if (session_iter == current_session.end() || !primary_lookup.match_prefix(type_prefix, (*session_iter).first)) {
          return not_found_return;
       }
-      EOS_ASSERT( db_key_value_format::get_primary_key((*session_iter).first, type_prefix, found_key), db_rocksdb_invalid_operation_exception,
+      DCD_ASSERT( db_key_value_format::get_primary_key((*session_iter).first, type_prefix, found_key), db_rocksdb_invalid_operation_exception,
                   "invariant failure in ${func}, iter store found to update but no primary keys in database",
                   ("func", calling_func));
 
@@ -730,7 +730,7 @@ namespace dcd { namespace chain { namespace backing_store {
       else if (comparison == comp::gt) {
          ++session_iter;
          // if we don't have a match, we need to identify if we went past the primary types, and thus are at the end
-         EOS_ASSERT( is_in_table(session_iter), db_rocksdb_invalid_operation_exception,
+         DCD_ASSERT( is_in_table(session_iter), db_rocksdb_invalid_operation_exception,
                      "invariant failure in find_i64, primary key found but was not followed by a table key");
          if (!primary_lookup.match_prefix(desired_type_prefix, session_iter)) {
             return table_ei;
@@ -745,7 +745,7 @@ namespace dcd { namespace chain { namespace backing_store {
       if (!primary_key) {
          uint64_t key = 0;
          const auto valid = db_key_value_format::get_primary_key((*session_iter).first, desired_type_prefix, key);
-         EOS_ASSERT( valid, db_rocksdb_invalid_operation_exception,
+         DCD_ASSERT( valid, db_rocksdb_invalid_operation_exception,
                      "invariant failure in find_i64, primary key already verified but method indicates it is not a primary key");
          primary_key = key;
       }

@@ -2,21 +2,21 @@
 set -eo pipefail
 
 NAME="$1"
-EOS_PREFIX="${PREFIX}/${SUBPREFIX}"
+DCD_PREFIX="${PREFIX}/${SUBPREFIX}"
 mkdir -p "${PREFIX}/bin/"
-mkdir -p "${EOS_PREFIX}/bin"
-mkdir -p "${EOS_PREFIX}/licenses/dcd"
-mkdir -p "${EOS_PREFIX}/etc/dcd/contracts"
+mkdir -p "${DCD_PREFIX}/bin"
+mkdir -p "${DCD_PREFIX}/licenses/dcd"
+mkdir -p "${DCD_PREFIX}/etc/dcd/contracts"
 
 # install binaries 
-cp -R "${BUILD_DIR}"/bin/* ${EOS_PREFIX}/bin
+cp -R "${BUILD_DIR}"/bin/* ${DCD_PREFIX}/bin
 
 # install licenses
-cp -R "${BUILD_DIR}"/licenses/dcd/* ${EOS_PREFIX}/licenses
+cp -R "${BUILD_DIR}"/licenses/dcd/* ${DCD_PREFIX}/licenses
 
 # install bios and boot contracts
-cp -R "${BUILD_DIR}"/contracts/contracts/dcd.bios/dcd.bios.* ${EOS_PREFIX}/etc/dcd/contracts
-cp -R "${BUILD_DIR}"/contracts/contracts/dcd.boot/dcd.boot.* ${EOS_PREFIX}/etc/dcd/contracts
+cp -R "${BUILD_DIR}"/contracts/contracts/dcd.bios/dcd.bios.* ${DCD_PREFIX}/etc/dcd/contracts
+cp -R "${BUILD_DIR}"/contracts/contracts/dcd.boot/dcd.boot.* ${DCD_PREFIX}/etc/dcd/contracts
 
 for f in $(ls "${BUILD_DIR}/bin/"); do
     bn=$(basename "$f")

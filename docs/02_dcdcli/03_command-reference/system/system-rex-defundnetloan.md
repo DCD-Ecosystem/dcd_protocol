@@ -25,5 +25,5 @@ Withdraw from a Network loan fund
 
 
 ```sh
-dcdcli system rex defundnetloan accountname1 abc123 "1 EOS"
+dcdcli system rex defundnetloan accountname1 abc123 "1 DCD"
 ```

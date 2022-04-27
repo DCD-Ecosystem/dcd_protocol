@@ -6,11 +6,11 @@ This how-to guide provides instructions on how to vote for block producers.
 
 * Install the latest version of `dcdcli`.
 
-* Ensure the [reference system contracts](https://developers.eos.io/manuals/dcd.contracts/v1.9/build-and-deploy) are deployed and used to manage system resources.
+* Ensure the [reference system contracts](https://developers.dcd.io/manuals/dcd.contracts/v1.9/build-and-deploy) are deployed and used to manage system resources.
 
 * Understand the following:
-  * What a [block producer](https://developers.eos.io/welcome/v2.1/protocol-guides/consensus_protocol/#11-block-producers) is.
-  * How [voting](https://developers.eos.io/manuals/dcd.contracts/v1.9/key-concepts/vote) works.
+  * What a [block producer](https://developers.dcd.io/welcome/v2.1/protocol-guides/consensus_protocol/#11-block-producers) is.
+  * How [voting](https://developers.dcd.io/manuals/dcd.contracts/v1.9/key-concepts/vote) works.
 
 * Unlock your wallet.
 
@@ -18,7 +18,7 @@ This how-to guide provides instructions on how to vote for block producers.
 
 See the following reference guides for command line usage and related options for the `dcdcli` command:
 
-* The [dcdcli system voteproducer prods](https://developers.eos.io/manuals/eos/v2.1/dcdcli/command-reference/system/system-voteproducer-prods) reference.
+* The [dcdcli system voteproducer prods](https://developers.dcd.io/manuals/dcd/v2.1/dcdcli/command-reference/system/system-voteproducer-prods) reference.
 
 ## Procedure
 

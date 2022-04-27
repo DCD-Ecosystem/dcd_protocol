@@ -4,7 +4,7 @@ if( UNIX AND NOT APPLE )
 endif()
 
 target_link_libraries( ${TESTER_EXECUTABLE_NAME}
-  PRIVATE rodeos_lib state_history dcd_chain ${CMAKE_DL_LIBS} ${PLATFORM_SPECIFIC_LIBS} )
+  PRIVATE roddcd_lib state_history dcd_chain ${CMAKE_DL_LIBS} ${PLATFORM_SPECIFIC_LIBS} )
 target_include_directories(${TESTER_EXECUTABLE_NAME} PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 
 copy_bin( ${TESTER_EXECUTABLE_NAME} )

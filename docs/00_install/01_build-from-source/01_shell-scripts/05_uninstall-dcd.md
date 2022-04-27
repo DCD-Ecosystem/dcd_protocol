@@ -2,10 +2,10 @@
 content_title: Uninstall DCD
 ---
 
-If you have previously built DCD from source and now wish to install the prebuilt binaries, or to build from source again, it is recommended to run the `dcd_uninstall.sh` script within the `eos/scripts` folder:
+If you have previously built DCD from source and now wish to install the prebuilt binaries, or to build from source again, it is recommended to run the `dcd_uninstall.sh` script within the `dcd/scripts` folder:
 
 ```sh
-cd ~/dcd/eos
+cd ~/dcd/dcd
 ./scripts/dcd_uninstall.sh
 ```
 

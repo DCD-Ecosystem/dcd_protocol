@@ -1,3 +1,3 @@
 ---
-link: https://github.com/DCD/eos/issues/7597
+link: https://github.com/DCD/dcd/issues/7597
 ---

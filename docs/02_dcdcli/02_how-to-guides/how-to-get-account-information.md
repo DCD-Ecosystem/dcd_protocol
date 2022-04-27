@@ -9,7 +9,7 @@ Query infomation of an DCD account
 [[info | Note]]
 | The dcdcli tool is bundled with the DCD software. [Installing DCD](../../00_install/index.md) will also install the dcdcli tool. 
 
-* Acquire functional understanding of [DCD Accounts and Permissions](https://developers.eos.io/welcome/v2.1/protocol/accounts_and_permissions)
+* Acquire functional understanding of [DCD Accounts and Permissions](https://developers.dcd.io/welcome/v2.1/protocol/accounts_and_permissions)
 
 
 ## Steps
@@ -27,8 +27,8 @@ Where ACCOUNT_NAME = name of the existing account in the DCD blockchain.
 created: 2018-06-01T12:00:00.000
 privileged: true
 permissions:
-     owner     1:    1 EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
-        active     1:    1 EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
+     owner     1:    1 DCD6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
+        active     1:    1 DCD6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
 memory:
      quota:       unlimited  used:     3.004 KiB
 

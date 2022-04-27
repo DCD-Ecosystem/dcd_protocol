@@ -1,6 +1,6 @@
 /**
  *  @file
- *  @copyright defined in eos/LICENSE
+ *  @copyright defined in dcd/LICENSE
  */
 #include "get_table_seckey_test.hpp"
 

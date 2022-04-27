@@ -112,19 +112,19 @@ class Utils:
     Debug=False
     FNull = open(os.devnull, 'w')
 
-    EosClientPath="programs/dcdcli/dcdcli"
-    MiscEosClientArgs="--no-auto-dcdksd"
+    DcdClientPath="programs/dcdcli/dcdcli"
+    MiscDcdClientArgs="--no-auto-dcdksd"
 
-    EosWalletName="dcdksd"
-    EosWalletPath="programs/dcdksd/"+ EosWalletName
+    DcdWalletName="dcdksd"
+    DcdWalletPath="programs/dcdksd/"+ DcdWalletName
 
-    EosServerName="dcdnode"
-    EosServerPath="programs/dcdnode/"+ EosServerName
+    DcdServerName="dcdnode"
+    DcdServerPath="programs/dcdnode/"+ DcdServerName
 
-    EosLauncherPath="programs/dcd-launcher/dcd-launcher"
+    DcdLauncherPath="programs/dcd-launcher/dcd-launcher"
     ShuttingDown=False
 
-    EosBlockLogPath="programs/dcd-blocklog/dcd-blocklog"
+    DcdBlockLogPath="programs/dcd-blocklog/dcd-blocklog"
 
     FileDivider="================================================================="
     DataRoot="var"
@@ -434,7 +434,7 @@ class Utils:
         else:
             unhandledEnumType(blockLogAction)
 
-        cmd="%s --blocks-dir %s --as-json-array %s%s%s%s %s" % (Utils.EosBlockLogPath, blockLogLocation, outputFileStr, firstStr, lastStr, blockLogActionStr, extraArgs)
+        cmd="%s --blocks-dir %s --as-json-array %s%s%s%s %s" % (Utils.DcdBlockLogPath, blockLogLocation, outputFileStr, firstStr, lastStr, blockLogActionStr, extraArgs)
         if Utils.Debug: Utils.Print("cmd: %s" % (cmd))
         rtn=None
         try:

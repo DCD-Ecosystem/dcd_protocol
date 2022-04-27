@@ -551,7 +551,7 @@ BOOST_AUTO_TEST_CASE(test_state_result_abi) {
          BOOST_CHECK_NO_THROW( serializer.deserialize(deltas_bin, "table_delta[]"));
       }
       {
-         // check the validity of abieos ship_protocol type definitions
+         // check the validity of abidcd ship_protocol type definitions
          dcd::input_stream          bin{value.data(), value.data() + value.size()};
          dcd::ship_protocol::result result;
          BOOST_CHECK_NO_THROW(from_bin(result, bin));

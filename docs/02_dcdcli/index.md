@@ -8,7 +8,7 @@ content_title: dcdcli
 
 ## Installation
 
-`dcdcli` is distributed as part of the [DCD software suite](https://github.com/DCD/eos/blob/master/README.md). To install `dcdcli` just visit the [DCD Software Installation](../00_install/index.md) section.
+`dcdcli` is distributed as part of the [DCD software suite](https://github.com/DCD/dcd/blob/master/README.md). To install `dcdcli` just visit the [DCD Software Installation](../00_install/index.md) section.
 
 ## Using dcdcli
 

@@ -7,7 +7,7 @@ Optionally, a set of tests can be run against your build to perform some basic v
 To run the test suite after building, run:
 
 ```sh
-cd ~/dcd/eos/build
+cd ~/dcd/dcd/build
 make test
 ```
 

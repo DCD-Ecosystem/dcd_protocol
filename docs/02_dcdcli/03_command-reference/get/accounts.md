@@ -12,7 +12,7 @@ Retrieves all accounts associated with a defined public key
 
 
 ```sh
-dcdcli get accounts EOS8mUftJXepGzdQ2TaCduNuSPAfXJHf22uex4u41ab1EVv9EAhWt
+dcdcli get accounts DCD8mUftJXepGzdQ2TaCduNuSPAfXJHf22uex4u41ab1EVv9EAhWt
 {
   "account_names": [
     "testaccount"

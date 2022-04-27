@@ -30,7 +30,7 @@ debug=args.v
 total_nodes = pnodes
 killCount=args.kill_count if args.kill_count > 0 else 1
 killSignal=args.kill_sig
-killEosInstances= not args.leave_running
+killDcdInstances= not args.leave_running
 dumpErrorDetails=args.dump_error_details
 keepLogs=args.keep_logs
 killAll=args.clean_run
@@ -60,14 +60,14 @@ try:
 
     Print("Stand up cluster")
     if cluster.launch(pnodes=pnodes, totalNodes=total_nodes, topo=topo, delay=delay) is False:
-        errorExit("Failed to stand up eos cluster.")
+        errorExit("Failed to stand up dcd cluster.")
 
     Print ("Wait for Cluster stabilization")
     # wait for cluster to start producing blocks
     if not cluster.waitOnClusterBlockNumSync(3):
         errorExit("Cluster never stabilized")
 
-    Print("Stand up EOS wallet dcdksd")
+    Print("Stand up DCD wallet dcdksd")
     accountsCount=total_nodes
     walletName="MyWallet"
     Print("Creating wallet %s if one doesn't already exist." % walletName)
@@ -93,8 +93,8 @@ try:
         errorExit("Cluster sync wait failed.")
 
     Print("Kill %d cluster node instances." % (killCount))
-    if cluster.killSomeEosInstances(killCount, killSignal) is False:
-        errorExit("Failed to kill Eos instances")
+    if cluster.killSomeDcdInstances(killCount, killSignal) is False:
+        errorExit("Failed to kill Dcd instances")
     Print("dcdnode instances killed.")
 
     Print("Spread funds and validate")
@@ -106,8 +106,8 @@ try:
         errorExit("Cluster sync wait failed.")
 
     Print ("Relaunch dead cluster nodes instances.")
-    if cluster.relaunchEosInstances(cachePopen=True) is False:
-        errorExit("Failed to relaunch Eos instances")
+    if cluster.relaunchDcdInstances(cachePopen=True) is False:
+        errorExit("Failed to relaunch Dcd instances")
     Print("dcdnode instances relaunched.")
 
     Print ("Resyncing cluster nodes.")
@@ -123,7 +123,7 @@ try:
     if not cluster.waitOnClusterSync():
         errorExit("Cluster sync wait failed.")
 
-    if killEosInstances:
+    if killDcdInstances:
         atLeastOne=False
         for node in cluster.getNodes():
             if node.popenProc is not None:
@@ -133,6 +133,6 @@ try:
 
     testSuccessful=True
 finally:
-    TestHelper.shutdown(cluster, walletMgr, testSuccessful=testSuccessful, killEosInstances=killEosInstances, killWallet=killEosInstances, keepLogs=keepLogs, cleanRun=killAll, dumpErrorDetails=dumpErrorDetails)
+    TestHelper.shutdown(cluster, walletMgr, testSuccessful=testSuccessful, killDcdInstances=killDcdInstances, killWallet=killDcdInstances, keepLogs=keepLogs, cleanRun=killAll, dumpErrorDetails=dumpErrorDetails)
 
 exit(0)

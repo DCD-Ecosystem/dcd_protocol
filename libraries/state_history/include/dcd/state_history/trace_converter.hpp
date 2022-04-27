@@ -68,7 +68,7 @@ void pack(OSTREAM&& strm, const T& obj, compression_type compression) {
       fc::raw::pack(strm, obj);
       break;
    default:
-      EOS_ASSERT(false, state_history_exception, "unsupported compression type");
+      DCD_ASSERT(false, state_history_exception, "unsupported compression type");
    }
 }
 
@@ -82,7 +82,7 @@ void unpack(ISTREAM&& strm, T& obj, compression_type compression) {
       fc::raw::unpack(strm, obj);
       break;
    default:
-      EOS_ASSERT(false, state_history_exception, "unsupported compression type");
+      DCD_ASSERT(false, state_history_exception, "unsupported compression type");
    }
 }
 

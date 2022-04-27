@@ -320,9 +320,9 @@ namespace dcd {
                }
                std::vector<std::string> v;
                boost::split( v, s, boost::is_any_of( ":" ));
-               EOS_ASSERT( v.size() == 3, fc::invalid_arg_exception, "Invalid value ${s} for --filter-on", ("s", s));
+               DCD_ASSERT( v.size() == 3, fc::invalid_arg_exception, "Invalid value ${s} for --filter-on", ("s", s));
                filter_entry fe{dcd::chain::name(v[0]), dcd::chain::name(v[1]), dcd::chain::name(v[2])};
-               EOS_ASSERT( fe.receiver.to_uint64_t(), fc::invalid_arg_exception,
+               DCD_ASSERT( fe.receiver.to_uint64_t(), fc::invalid_arg_exception,
                            "Invalid value ${s} for --filter-on", ("s", s));
                my->filter_on.insert( fe );
             }
@@ -332,16 +332,16 @@ namespace dcd {
             for( auto& s : fo ) {
                std::vector<std::string> v;
                boost::split( v, s, boost::is_any_of( ":" ));
-               EOS_ASSERT( v.size() == 3, fc::invalid_arg_exception, "Invalid value ${s} for --filter-out", ("s", s));
+               DCD_ASSERT( v.size() == 3, fc::invalid_arg_exception, "Invalid value ${s} for --filter-out", ("s", s));
                filter_entry fe{dcd::chain::name(v[0]), dcd::chain::name(v[1]), dcd::chain::name(v[2])};
-               EOS_ASSERT( fe.receiver.to_uint64_t(), fc::invalid_arg_exception,
+               DCD_ASSERT( fe.receiver.to_uint64_t(), fc::invalid_arg_exception,
                            "Invalid value ${s} for --filter-out", ("s", s));
                my->filter_out.insert( fe );
             }
          }
 
          my->chain_plug = app().find_plugin<chain_plugin>();
-         EOS_ASSERT( my->chain_plug, chain::missing_chain_plugin_exception, ""  );
+         DCD_ASSERT( my->chain_plug, chain::missing_chain_plugin_exception, ""  );
          auto& chain = my->chain_plug->chain();
 
          chainbase::database& db = const_cast<chainbase::database&>( chain.db() ); // Override read-only access to state DB (highly unrecommended practice!)
@@ -404,7 +404,7 @@ namespace dcd {
            if( start > pos ) start = 0;
            end   = pos;
         }
-        EOS_ASSERT( end >= start, chain::plugin_exception, "end position is earlier than start position" );
+        DCD_ASSERT( end >= start, chain::plugin_exception, "end position is earlier than start position" );
 
         idump((start)(end));
 
@@ -449,7 +449,7 @@ namespace dcd {
             FC_ASSERT( input_id_length <= 64, "hex string is too long to represent an actual transaction id" );
             FC_ASSERT( input_id_length >= 8,  "hex string representing transaction id should be at least 8 characters long to avoid excessive collisions" );
             input_id = transaction_id_type(p.id);
-         } EOS_RETHROW_EXCEPTIONS(transaction_id_type_exception, "Invalid transaction ID: ${transaction_id}", ("transaction_id", p.id))
+         } DCD_RETHROW_EXCEPTIONS(transaction_id_type_exception, "Invalid transaction ID: ${transaction_id}", ("transaction_id", p.id))
 
          auto txn_id_matched = [&input_id, input_id_size = input_id_length/2, no_half_byte_at_end = (input_id_length % 2 == 0)]
                                ( const transaction_id_type &id ) -> bool // hex prefix comparison
@@ -469,7 +469,7 @@ namespace dcd {
          bool in_history = (itr != idx.end() && txn_id_matched(itr->trx_id) );
 
          if( !in_history && !p.block_num_hint ) {
-            EOS_THROW(tx_not_found, "Transaction ${id} not found in history and no block hint was given", ("id",p.id));
+            DCD_THROW(tx_not_found, "Transaction ${id} not found in history and no block hint was given", ("id",p.id));
          }
 
          get_transaction_result result;
@@ -560,7 +560,7 @@ namespace dcd {
             }
 
             if (!found) {
-               EOS_THROW(tx_not_found, "Transaction ${id} not found in history or in block number ${n}", ("id",p.id)("n", *p.block_num_hint));
+               DCD_THROW(tx_not_found, "Transaction ${id} not found in history or in block number ${n}", ("id",p.id)("n", *p.block_num_hint));
             }
          }
 

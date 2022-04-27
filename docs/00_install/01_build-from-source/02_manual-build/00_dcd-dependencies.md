@@ -31,7 +31,7 @@ Regular users or application developers may prefer installing unpinned versions 
 DCD dependencies can be built or installed automatically from the [Build Script](../01_shell-scripts/02_build-dcd-binaries.md) when building DCD from source. To build the pinned dependencies, the optional `-P` parameter can be specified when invoking the script. Otherwise, the unpinned dependencies will be installed instead, with the exception of `boost` and `cmake` which are always pinned:
 
 ```sh
-cd ~/dcd/eos
+cd ~/dcd/dcd
 ./scripts/dcd_build.sh [-P]
 ```
 
@@ -40,6 +40,6 @@ cd ~/dcd/eos
 DCD dependencies can also be built and installed manually by reproducing the same commands invoked by the [Build Script](../01_shell-scripts/02_build-dcd-binaries.md). The actual commands can be generated from the script directly by exporting specific environment variables and CLI parameters to the script when invoked:
 
 ```sh
-cd ~/dcd/eos
+cd ~/dcd/dcd
 export VERBOSE=true && export DRYRUN=true && ./scripts/dcd_build.sh -y [-P]
 ```

@@ -22,5 +22,5 @@ excerpt: "Withdraw from a CPU loan fund"
 ## Examples
 
 ```sh
-dcdcli system rex defundcpuloan accountname1 abc123 "1 EOS"
+dcdcli system rex defundcpuloan accountname1 abc123 "1 DCD"
 ```

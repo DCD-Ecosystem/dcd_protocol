@@ -1,6 +1,6 @@
 /**
  *  @file
- *  @copyright defined in eos/LICENSE.txt
+ *  @copyright defined in dcd/LICENSE.txt
  */
 #pragma once
 
@@ -12,6 +12,8 @@
 #include <dcd/chain/types.hpp>
 #include <dcd/chain/asset.hpp>
 #include <dcd/chain/multi_index_includes.hpp>
+#include <dcd/chain/contract_types.hpp>
+
 
 namespace dcd { namespace chain {
 
@@ -42,17 +44,17 @@ namespace dcd { namespace chain {
       double cur_rate;
    };
 
-    struct action_fee_prop {
-         name account;
-         name action;
-         asset fee;     
-   };
+   //  struct action_fee_prop {
+   //       name account;
+   //       name action;
+   //       asset fee;     
+   // };
 
     struct actions_fee_proposals {
       name                                                     owner;
       std::vector <action_fee_prop>                            fee_prop_list;
-      bool                                                     is_active;
-      time_point                                               propose_time;
+      time_point                                               proposed_at;
+      time_point                                               expires_at;
    }; 
 
    class transaction_fee_manager {
@@ -67,7 +69,7 @@ namespace dcd { namespace chain {
 
          action_fee_info get_action_fee(const controller& ctl, const account_name& account, const action_name& act )const;
          fee_rate_info get_fee_rate(const controller& ctl) const;
-         actions_fee_proposals get_fee_proposals (const controller& ctl) const;
+         std::vector <actions_fee_proposals> get_fee_proposals (const controller& ctl) const;
          asset get_base_rate_asset(const controller& ctl) const;
          
       private: 
@@ -132,25 +134,28 @@ namespace dcd { namespace chain {
       >
    >;
 
-   struct by_timepoint;
+   struct by_owner;
 
    
    // ongoing votes database
    class action_fee_vote_object : public chainbase::object<action_fee_vote_object_type, action_fee_vote_object> {
       OBJECT_CTOR(action_fee_vote_object);
-      id_type                                                     id;
+      id_type                                                  id;
       name                                                     owner;
       std::vector <action_fee_prop>                            fee_prop_list;
-      bool                                                     is_active;
-      time_point                                               propose_time;
+      time_point                                               proposed_at;
+      time_point                                               expires_at;
    };
 
    using action_fee_vote_object_index = chainbase::shared_multi_index_container<
       action_fee_vote_object,
       indexed_by<
-         ordered_unique<
-            tag<by_id>, member<action_fee_vote_object, action_fee_vote_object::id_type, &action_fee_vote_object::id>
-            >
+         ordered_unique<tag<by_id>,
+                  member<action_fee_vote_object, action_fee_vote_object::id_type, &action_fee_vote_object::id>
+         >,
+         ordered_unique<tag<by_owner>,
+                  member<action_fee_vote_object, name, &action_fee_vote_object::owner>
+         >
       >
    >;
 
@@ -159,8 +164,7 @@ namespace dcd { namespace chain {
 
 FC_REFLECT(dcd::chain::fee_parameter, (name)(fee))
 FC_REFLECT(dcd::chain::action_fee_object, (id)(account)(message_type)(fee))
-FC_REFLECT(dcd::chain::action_fee_prop, (account)(fee)(fee))
-FC_REFLECT(dcd::chain::action_fee_vote_object,(id)(owner)(fee_prop_list)(is_active)(propose_time))
+FC_REFLECT(dcd::chain::action_fee_vote_object,(id)(owner)(fee_prop_list)(proposed_at)(expires_at))
 FC_REFLECT(dcd::chain::producers_rate_info, (name)(rate)(rate_time))
 CHAINBASE_SET_INDEX_TYPE(dcd::chain::action_fee_object, dcd::chain::action_fee_object_index)
 CHAINBASE_SET_INDEX_TYPE(dcd::chain::action_fee_vote_object, dcd::chain::action_fee_vote_object_index)

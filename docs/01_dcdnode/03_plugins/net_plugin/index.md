@@ -36,9 +36,9 @@ Config Options for dcd::net_plugin:
                                         indicates to node that only 
                                         transactions 'trx' or blocks 'blk' 
                                         should be sent.  Examples:
-                                            p2p.eos.io:9876
-                                            p2p.trx.eos.io:9876:trx
-                                            p2p.blk.eos.io:9876:blk
+                                            p2p.dcd.io:9876
+                                            p2p.trx.dcd.io:9876:trx
+                                            p2p.blk.dcd.io:9876:blk
                                         
   --p2p-max-nodes-per-host arg (=1)     Maximum number of client nodes from any
                                         single IP address
@@ -48,7 +48,7 @@ Config Options for dcd::net_plugin:
   --p2p-reject-incomplete-blocks arg (=1)
                                         Reject pruned signed_blocks even in 
                                         light validation
-  --agent-name arg (=EOS Test Agent)    The name supplied to identify this node
+  --agent-name arg (=DCD Test Agent)    The name supplied to identify this node
                                         amongst the peers.
   --allowed-connection arg (=any)       Can be 'any' or 'producers' or 
                                         'specified' or 'none'. If 'specified', 

@@ -33,7 +33,7 @@ endif()
 set( CLI_CLIENT_EXECUTABLE_NAME dcdcli )
 set( NODE_EXECUTABLE_NAME dcdnode )
 set( KEY_STORE_EXECUTABLE_NAME dcdksd )
-set( RODEOS_EXECUTABLE_NAME rodeos )
+set( RODDCD_EXECUTABLE_NAME roddcd )
 set( TESTER_EXECUTABLE_NAME dcd-tester )
 
 # http://stackoverflow.com/a/18369825
@@ -70,8 +70,8 @@ endif()
 # TODO reenable later
 if(CMAKE_SIZEOF_VOID_P EQUAL 8 AND NOT WIN32)
    if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux" AND "${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86_64")
-      list(APPEND DCD_WASM_RUNTIMES eos-vm-oc)
-      # EOS VM OC requires LLVM, but move the check up here to a central location so that the DcdTester.cmakes
+      list(APPEND DCD_WASM_RUNTIMES dcd-vm-oc)
+      # DCD VM OC requires LLVM, but move the check up here to a central location so that the DcdTester.cmakes
       # can be created with the exact version found
       find_package(LLVM REQUIRED CONFIG)
      if(LLVM_VERSION_MAJOR VERSION_LESS 7 OR LLVM_VERSION_MAJOR VERSION_GREATER_EQUAL 12)
@@ -82,7 +82,7 @@ endif()
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8 AND NOT WIN32)
    if(CMAKE_SYSTEM_PROCESSOR STREQUAL x86_64)
-      list(APPEND DCD_WASM_RUNTIMES eos-vm eos-vm-jit)
+      list(APPEND DCD_WASM_RUNTIMES dcd-vm dcd-vm-jit)
    endif()
 endif()
 
@@ -157,7 +157,7 @@ endif()
 message( STATUS "Using '${CORE_SYMBOL_NAME}' as CORE symbol name" )
 
 if ("${DCD_ROOT_KEY}" STREQUAL "")
-   set(DCD_ROOT_KEY "EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV")
+   set(DCD_ROOT_KEY "DCD6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV")
 endif()
 
 message( STATUS "Using '${DCD_ROOT_KEY}' as public key for 'dcd' account" )
@@ -206,11 +206,11 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/contracts/contracts/dcd.boot/dcd.boot.
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/version.in ${CMAKE_CURRENT_BINARY_DIR}/version.hpp)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/version.hpp DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR}/dcd)
 
-set(EOS_ROOT_DIR ${CMAKE_BINARY_DIR})
+set(DCD_ROOT_DIR ${CMAKE_BINARY_DIR})
 configure_file(${CMAKE_SOURCE_DIR}/CMakeModules/dcd-config.cmake.in ${CMAKE_BINARY_DIR}/lib/cmake/dcd/dcd-config.cmake @ONLY)
 configure_file(${CMAKE_SOURCE_DIR}/CMakeModules/DcdTesterBuild.cmake.in ${CMAKE_BINARY_DIR}/lib/cmake/dcd/DcdTester.cmake @ONLY)
 
-set(EOS_ROOT_DIR ${CMAKE_INSTALL_PREFIX})
+set(DCD_ROOT_DIR ${CMAKE_INSTALL_PREFIX})
 configure_file(${CMAKE_SOURCE_DIR}/CMakeModules/dcd-config.cmake.in ${CMAKE_BINARY_DIR}/modules/dcd-config.cmake @ONLY)
 install(FILES ${CMAKE_BINARY_DIR}/modules/dcd-config.cmake DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}/cmake/dcd)
 configure_file(${CMAKE_SOURCE_DIR}/CMakeModules/DcdTester.cmake.in ${CMAKE_BINARY_DIR}/modules/DcdTester.cmake @ONLY)
@@ -230,8 +230,8 @@ configure_file(${CMAKE_SOURCE_DIR}/libraries/fc/src/network/LICENSE.go
                ${CMAKE_BINARY_DIR}/licenses/dcd/LICENSE.go COPYONLY)
 configure_file(${CMAKE_SOURCE_DIR}/libraries/yubihsm/LICENSE
                ${CMAKE_BINARY_DIR}/licenses/dcd/LICENSE.yubihsm COPYONLY)
-configure_file(${CMAKE_SOURCE_DIR}/libraries/eos-vm/LICENSE
-               ${CMAKE_BINARY_DIR}/licenses/dcd/LICENSE.eos-vm COPYONLY)
+configure_file(${CMAKE_SOURCE_DIR}/libraries/dcd-vm/LICENSE
+               ${CMAKE_BINARY_DIR}/licenses/dcd/LICENSE.dcd-vm COPYONLY)
 configure_file(${CMAKE_SOURCE_DIR}/libraries/rocksdb/LICENSE.Apache
                ${CMAKE_BINARY_DIR}/licenses/dcd/LICENSE.rocksdb COPYONLY)
 configure_file(${CMAKE_SOURCE_DIR}/libraries/rocksdb/LICENSE.leveldb
@@ -248,7 +248,7 @@ install(FILES libraries/fc/secp256k1/upstream/COPYING DESTINATION ${CMAKE_INSTAL
 install(FILES libraries/fc/include/fc/crypto/webauthn_json/license.txt DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/licenses/dcd/ RENAME LICENSE.rapidjson COMPONENT base)
 install(FILES libraries/fc/src/network/LICENSE.go DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/licenses/dcd/ COMPONENT base)
 install(FILES libraries/yubihsm/LICENSE DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/licenses/dcd/ RENAME LICENSE.yubihsm COMPONENT base)
-install(FILES libraries/eos-vm/LICENSE DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/licenses/dcd/ RENAME LICENSE.eos-vm COMPONENT base)
+install(FILES libraries/dcd-vm/LICENSE DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/licenses/dcd/ RENAME LICENSE.dcd-vm COMPONENT base)
 install(FILES libraries/rocksdb/LICENSE.Apache DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/licenses/dcd/ RENAME LICENSE.rocksdb COMPONENT base)
 install(FILES libraries/rocksdb/LICENSE.leveldb DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/licenses/dcd/ RENAME LICENSE.leveldb COMPONENT base)
 install(FILES libraries/amqp-cpp/LICENSE DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/licenses/dcd/ RENAME LICENSE.amqpcpp COMPONENT base)

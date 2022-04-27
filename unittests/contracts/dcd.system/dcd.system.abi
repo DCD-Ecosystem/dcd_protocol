@@ -1,6 +1,12 @@
 {
-    "____comment": "This file was generated with dcd-abigen. DO NOT EDIT Thu Dec 13 12:22:07 2018",
-    "version": "eosio::abi/1.0",
+    "____comment": "This file was generated with dcd-abigen. DO NOT EDIT ",
+    "version": "eosio::abi/1.2",
+    "types": [
+        {
+            "new_type_name": "block_signing_authority",
+            "type": "variant_block_signing_authority_v0"
+        }
+    ],
     "structs": [
         {
             "name": "abi_hash",
@@ -12,6 +18,16 @@
                 },
                 {
                     "name": "hash",
+                    "type": "checksum256"
+                }
+            ]
+        },
+        {
+            "name": "activate",
+            "base": "",
+            "fields": [
+                {
+                    "name": "feature_digest",
                     "type": "checksum256"
                 }
             ]
@@ -119,6 +135,20 @@
                 {
                     "name": "new_producers",
                     "type": "producer_schedule?"
+                }
+            ]
+        },
+        {
+            "name": "block_signing_authority_v0",
+            "base": "",
+            "fields": [
+                {
+                    "name": "threshold",
+                    "type": "uint32"
+                },
+                {
+                    "name": "keys",
+                    "type": "key_weight[]"
                 }
             ]
         },
@@ -261,6 +291,16 @@
             ]
         },
         {
+            "name": "cfgpowerup",
+            "base": "",
+            "fields": [
+                {
+                    "name": "args",
+                    "type": "powerup_config"
+                }
+            ]
+        },
+        {
             "name": "claimrewards",
             "base": "",
             "fields": [
@@ -291,6 +331,16 @@
             ]
         },
         {
+            "name": "confirmprod",
+            "base": "",
+            "fields": [
+                {
+                    "name": "producer",
+                    "type": "name"
+                }
+            ]
+        },
+        {
             "name": "connector",
             "base": "",
             "fields": [
@@ -311,6 +361,158 @@
                 {
                     "name": "owner",
                     "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "dcd_global_state",
+            "base": "blockchain_parameters",
+            "fields": [
+                {
+                    "name": "max_ram_size",
+                    "type": "uint64"
+                },
+                {
+                    "name": "total_ram_bytes_reserved",
+                    "type": "uint64"
+                },
+                {
+                    "name": "total_ram_stake",
+                    "type": "int64"
+                },
+                {
+                    "name": "last_producer_schedule_update",
+                    "type": "block_timestamp_type"
+                },
+                {
+                    "name": "last_pervote_bucket_fill",
+                    "type": "time_point"
+                },
+                {
+                    "name": "pervote_bucket",
+                    "type": "int64"
+                },
+                {
+                    "name": "perblock_bucket",
+                    "type": "int64"
+                },
+                {
+                    "name": "total_unpaid_blocks",
+                    "type": "uint32"
+                },
+                {
+                    "name": "total_activated_stake",
+                    "type": "int64"
+                },
+                {
+                    "name": "thresh_activated_stake_time",
+                    "type": "time_point"
+                },
+                {
+                    "name": "cur_producers_confirmed",
+                    "type": "uint16"
+                },
+                {
+                    "name": "top_producers_count",
+                    "type": "uint16"
+                },
+                {
+                    "name": "base_rate_asset",
+                    "type": "asset"
+                },
+                {
+                    "name": "new_rate_period",
+                    "type": "uint64"
+                },
+                {
+                    "name": "out_of_date_time",
+                    "type": "uint64"
+                },
+                {
+                    "name": "prev_rate",
+                    "type": "float64"
+                },
+                {
+                    "name": "cur_rate",
+                    "type": "float64"
+                },
+                {
+                    "name": "cur_rate_time",
+                    "type": "block_timestamp_type"
+                },
+                {
+                    "name": "cur_rate_producers",
+                    "type": "producers_rate_info[]"
+                },
+                {
+                    "name": "last_producer_schedule_size",
+                    "type": "uint16"
+                },
+                {
+                    "name": "total_producer_vote_weight",
+                    "type": "float64"
+                },
+                {
+                    "name": "last_name_close",
+                    "type": "block_timestamp_type"
+                }
+            ]
+        },
+        {
+            "name": "dcd_global_state2",
+            "base": "",
+            "fields": [
+                {
+                    "name": "new_ram_per_block",
+                    "type": "uint16"
+                },
+                {
+                    "name": "last_ram_increase",
+                    "type": "block_timestamp_type"
+                },
+                {
+                    "name": "last_block_num",
+                    "type": "block_timestamp_type"
+                },
+                {
+                    "name": "total_producer_votepay_share",
+                    "type": "float64"
+                },
+                {
+                    "name": "revision",
+                    "type": "uint8"
+                }
+            ]
+        },
+        {
+            "name": "dcd_global_state3",
+            "base": "",
+            "fields": [
+                {
+                    "name": "last_vpay_state_update",
+                    "type": "time_point"
+                },
+                {
+                    "name": "total_vpay_share_change_rate",
+                    "type": "float64"
+                }
+            ]
+        },
+        {
+            "name": "dcd_global_state4",
+            "base": "",
+            "fields": [
+                {
+                    "name": "continuous_rate",
+                    "type": "float64"
+                },
+                {
+                    "name": "inflation_pay_factor",
+                    "type": "int64"
+                },
+                {
+                    "name": "votepay_factor",
+                    "type": "int64"
                 }
             ]
         },
@@ -413,6 +615,30 @@
             ]
         },
         {
+            "name": "delproducer",
+            "base": "",
+            "fields": [
+                {
+                    "name": "to_delete",
+                    "type": "name"
+                },
+                {
+                    "name": "to_replace",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "delvoting",
+            "base": "",
+            "fields": [
+                {
+                    "name": "to_delete",
+                    "type": "name"
+                }
+            ]
+        },
+        {
             "name": "deposit",
             "base": "",
             "fields": [
@@ -423,104 +649,6 @@
                 {
                     "name": "amount",
                     "type": "asset"
-                }
-            ]
-        },
-        {
-            "name": "dcd_global_state",
-            "base": "blockchain_parameters",
-            "fields": [
-                {
-                    "name": "max_ram_size",
-                    "type": "uint64"
-                },
-                {
-                    "name": "total_ram_bytes_reserved",
-                    "type": "uint64"
-                },
-                {
-                    "name": "total_ram_stake",
-                    "type": "int64"
-                },
-                {
-                    "name": "last_producer_schedule_update",
-                    "type": "block_timestamp_type"
-                },
-                {
-                    "name": "last_pervote_bucket_fill",
-                    "type": "time_point"
-                },
-                {
-                    "name": "pervote_bucket",
-                    "type": "int64"
-                },
-                {
-                    "name": "perblock_bucket",
-                    "type": "int64"
-                },
-                {
-                    "name": "total_unpaid_blocks",
-                    "type": "uint32"
-                },
-                {
-                    "name": "total_activated_stake",
-                    "type": "int64"
-                },
-                {
-                    "name": "thresh_activated_stake_time",
-                    "type": "time_point"
-                },
-                {
-                    "name": "last_producer_schedule_size",
-                    "type": "uint16"
-                },
-                {
-                    "name": "total_producer_vote_weight",
-                    "type": "float64"
-                },
-                {
-                    "name": "last_name_close",
-                    "type": "block_timestamp_type"
-                }
-            ]
-        },
-        {
-            "name": "dcd_global_state2",
-            "base": "",
-            "fields": [
-                {
-                    "name": "new_ram_per_block",
-                    "type": "uint16"
-                },
-                {
-                    "name": "last_ram_increase",
-                    "type": "block_timestamp_type"
-                },
-                {
-                    "name": "last_block_num",
-                    "type": "block_timestamp_type"
-                },
-                {
-                    "name": "total_producer_votepay_share",
-                    "type": "float64"
-                },
-                {
-                    "name": "revision",
-                    "type": "uint8"
-                }
-            ]
-        },
-        {
-            "name": "dcd_global_state3",
-            "base": "",
-            "fields": [
-                {
-                    "name": "last_vpay_state_update",
-                    "type": "time_point"
-                },
-                {
-                    "name": "total_vpay_share_change_rate",
-                    "type": "float64"
                 }
             ]
         },
@@ -539,6 +667,24 @@
                 {
                     "name": "quote",
                     "type": "connector"
+                }
+            ]
+        },
+        {
+            "name": "feeproperty",
+            "base": "",
+            "fields": [
+                {
+                    "name": "base_rate_asset",
+                    "type": "asset"
+                },
+                {
+                    "name": "new_rate_period",
+                    "type": "uint64"
+                },
+                {
+                    "name": "out_of_date_time",
+                    "type": "uint64"
                 }
             ]
         },
@@ -629,6 +775,34 @@
             ]
         },
         {
+            "name": "mvfrsavings",
+            "base": "",
+            "fields": [
+                {
+                    "name": "owner",
+                    "type": "name"
+                },
+                {
+                    "name": "rex",
+                    "type": "asset"
+                }
+            ]
+        },
+        {
+            "name": "mvtosavings",
+            "base": "",
+            "fields": [
+                {
+                    "name": "owner",
+                    "type": "name"
+                },
+                {
+                    "name": "rex",
+                    "type": "asset"
+                }
+            ]
+        },
+        {
             "name": "name_bid",
             "base": "",
             "fields": [
@@ -697,15 +871,29 @@
             ]
         },
         {
+            "name": "onfee",
+            "base": "",
+            "fields": [
+                {
+                    "name": "actor",
+                    "type": "name"
+                },
+                {
+                    "name": "fee",
+                    "type": "asset"
+                }
+            ]
+        },
+        {
             "name": "pair_time_point_sec_int64",
             "base": "",
             "fields": [
                 {
-                    "name": "first",
+                    "name": "key",
                     "type": "time_point_sec"
                 },
                 {
-                    "name": "second",
+                    "name": "value",
                     "type": "int64"
                 }
             ]
@@ -734,6 +922,232 @@
                 },
                 {
                     "name": "weight",
+                    "type": "uint16"
+                }
+            ]
+        },
+        {
+            "name": "powerup",
+            "base": "",
+            "fields": [
+                {
+                    "name": "payer",
+                    "type": "name"
+                },
+                {
+                    "name": "receiver",
+                    "type": "name"
+                },
+                {
+                    "name": "days",
+                    "type": "uint32"
+                },
+                {
+                    "name": "net_frac",
+                    "type": "int64"
+                },
+                {
+                    "name": "cpu_frac",
+                    "type": "int64"
+                },
+                {
+                    "name": "max_payment",
+                    "type": "asset"
+                }
+            ]
+        },
+        {
+            "name": "powerup_config",
+            "base": "",
+            "fields": [
+                {
+                    "name": "net",
+                    "type": "powerup_config_resource"
+                },
+                {
+                    "name": "cpu",
+                    "type": "powerup_config_resource"
+                },
+                {
+                    "name": "powerup_days",
+                    "type": "uint32?"
+                },
+                {
+                    "name": "min_powerup_fee",
+                    "type": "asset?"
+                }
+            ]
+        },
+        {
+            "name": "powerup_config_resource",
+            "base": "",
+            "fields": [
+                {
+                    "name": "current_weight_ratio",
+                    "type": "int64?"
+                },
+                {
+                    "name": "target_weight_ratio",
+                    "type": "int64?"
+                },
+                {
+                    "name": "assumed_stake_weight",
+                    "type": "int64?"
+                },
+                {
+                    "name": "target_timestamp",
+                    "type": "time_point_sec?"
+                },
+                {
+                    "name": "exponent",
+                    "type": "float64?"
+                },
+                {
+                    "name": "decay_secs",
+                    "type": "uint32?"
+                },
+                {
+                    "name": "min_price",
+                    "type": "asset?"
+                },
+                {
+                    "name": "max_price",
+                    "type": "asset?"
+                }
+            ]
+        },
+        {
+            "name": "powerup_order",
+            "base": "",
+            "fields": [
+                {
+                    "name": "version",
+                    "type": "uint8"
+                },
+                {
+                    "name": "id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "owner",
+                    "type": "name"
+                },
+                {
+                    "name": "net_weight",
+                    "type": "int64"
+                },
+                {
+                    "name": "cpu_weight",
+                    "type": "int64"
+                },
+                {
+                    "name": "expires",
+                    "type": "time_point_sec"
+                }
+            ]
+        },
+        {
+            "name": "powerup_state",
+            "base": "",
+            "fields": [
+                {
+                    "name": "version",
+                    "type": "uint8"
+                },
+                {
+                    "name": "net",
+                    "type": "powerup_state_resource"
+                },
+                {
+                    "name": "cpu",
+                    "type": "powerup_state_resource"
+                },
+                {
+                    "name": "powerup_days",
+                    "type": "uint32"
+                },
+                {
+                    "name": "min_powerup_fee",
+                    "type": "asset"
+                }
+            ]
+        },
+        {
+            "name": "powerup_state_resource",
+            "base": "",
+            "fields": [
+                {
+                    "name": "version",
+                    "type": "uint8"
+                },
+                {
+                    "name": "weight",
+                    "type": "int64"
+                },
+                {
+                    "name": "weight_ratio",
+                    "type": "int64"
+                },
+                {
+                    "name": "assumed_stake_weight",
+                    "type": "int64"
+                },
+                {
+                    "name": "initial_weight_ratio",
+                    "type": "int64"
+                },
+                {
+                    "name": "target_weight_ratio",
+                    "type": "int64"
+                },
+                {
+                    "name": "initial_timestamp",
+                    "type": "time_point_sec"
+                },
+                {
+                    "name": "target_timestamp",
+                    "type": "time_point_sec"
+                },
+                {
+                    "name": "exponent",
+                    "type": "float64"
+                },
+                {
+                    "name": "decay_secs",
+                    "type": "uint32"
+                },
+                {
+                    "name": "min_price",
+                    "type": "asset"
+                },
+                {
+                    "name": "max_price",
+                    "type": "asset"
+                },
+                {
+                    "name": "utilization",
+                    "type": "int64"
+                },
+                {
+                    "name": "adjusted_utilization",
+                    "type": "int64"
+                },
+                {
+                    "name": "utilization_timestamp",
+                    "type": "time_point_sec"
+                }
+            ]
+        },
+        {
+            "name": "powerupexec",
+            "base": "",
+            "fields": [
+                {
+                    "name": "user",
+                    "type": "name"
+                },
+                {
+                    "name": "max",
                     "type": "uint16"
                 }
             ]
@@ -773,6 +1187,26 @@
                 {
                     "name": "location",
                     "type": "uint16"
+                },
+                {
+                    "name": "fee_rate_time",
+                    "type": "time_point"
+                },
+                {
+                    "name": "fee_rate",
+                    "type": "float64"
+                },
+                {
+                    "name": "confirmed",
+                    "type": "uint8"
+                },
+                {
+                    "name": "confirmed_time",
+                    "type": "time_point"
+                },
+                {
+                    "name": "producer_authority",
+                    "type": "block_signing_authority$"
                 }
             ]
         },
@@ -823,6 +1257,24 @@
             ]
         },
         {
+            "name": "producers_rate_info",
+            "base": "",
+            "fields": [
+                {
+                    "name": "name",
+                    "type": "name"
+                },
+                {
+                    "name": "rate",
+                    "type": "float64"
+                },
+                {
+                    "name": "rate_time",
+                    "type": "time_point"
+                }
+            ]
+        },
+        {
             "name": "refund",
             "base": "",
             "fields": [
@@ -865,6 +1317,28 @@
                 {
                     "name": "producer_key",
                     "type": "public_key"
+                },
+                {
+                    "name": "url",
+                    "type": "string"
+                },
+                {
+                    "name": "location",
+                    "type": "uint16"
+                }
+            ]
+        },
+        {
+            "name": "regproducer2",
+            "base": "",
+            "fields": [
+                {
+                    "name": "producer",
+                    "type": "name"
+                },
+                {
+                    "name": "producer_authority",
+                    "type": "block_signing_authority"
                 },
                 {
                     "name": "url",
@@ -939,6 +1413,10 @@
             "base": "",
             "fields": [
                 {
+                    "name": "version",
+                    "type": "uint8"
+                },
+                {
                     "name": "owner",
                     "type": "name"
                 },
@@ -965,6 +1443,10 @@
             "base": "",
             "fields": [
                 {
+                    "name": "version",
+                    "type": "uint8"
+                },
+                {
                     "name": "owner",
                     "type": "name"
                 },
@@ -978,6 +1460,10 @@
             "name": "rex_loan",
             "base": "",
             "fields": [
+                {
+                    "name": "version",
+                    "type": "uint8"
+                },
                 {
                     "name": "from",
                     "type": "name"
@@ -1013,6 +1499,10 @@
             "base": "",
             "fields": [
                 {
+                    "name": "version",
+                    "type": "uint8"
+                },
+                {
                     "name": "owner",
                     "type": "name"
                 },
@@ -1043,6 +1533,10 @@
             "base": "",
             "fields": [
                 {
+                    "name": "version",
+                    "type": "uint8"
+                },
+                {
                     "name": "total_lent",
                     "type": "asset"
                 },
@@ -1069,6 +1563,54 @@
                 {
                     "name": "loan_num",
                     "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "rex_return_buckets",
+            "base": "",
+            "fields": [
+                {
+                    "name": "version",
+                    "type": "uint8"
+                },
+                {
+                    "name": "return_buckets",
+                    "type": "pair_time_point_sec_int64[]"
+                }
+            ]
+        },
+        {
+            "name": "rex_return_pool",
+            "base": "",
+            "fields": [
+                {
+                    "name": "version",
+                    "type": "uint8"
+                },
+                {
+                    "name": "last_dist_time",
+                    "type": "time_point_sec"
+                },
+                {
+                    "name": "pending_bucket_time",
+                    "type": "time_point_sec"
+                },
+                {
+                    "name": "oldest_bucket_time",
+                    "type": "time_point_sec"
+                },
+                {
+                    "name": "pending_bucket_proceeds",
+                    "type": "int64"
+                },
+                {
+                    "name": "current_rate_of_increase",
+                    "type": "int64"
+                },
+                {
+                    "name": "proceeds",
+                    "type": "int64"
                 }
             ]
         },
@@ -1139,28 +1681,6 @@
             ]
         },
         {
-            "name": "setalimits",
-            "base": "",
-            "fields": [
-                {
-                    "name": "account",
-                    "type": "name"
-                },
-                {
-                    "name": "ram_bytes",
-                    "type": "int64"
-                },
-                {
-                    "name": "net_weight",
-                    "type": "int64"
-                },
-                {
-                    "name": "cpu_weight",
-                    "type": "int64"
-                }
-            ]
-        },
-        {
             "name": "setcode",
             "base": "",
             "fields": [
@@ -1179,6 +1699,66 @@
                 {
                     "name": "code",
                     "type": "bytes"
+                }
+            ]
+        },
+        {
+            "name": "setfee",
+            "base": "",
+            "fields": [
+                {
+                    "name": "account",
+                    "type": "name"
+                },
+                {
+                    "name": "action",
+                    "type": "name"
+                },
+                {
+                    "name": "fee",
+                    "type": "asset"
+                }
+            ]
+        },
+        {
+            "name": "setfeeforce",
+            "base": "",
+            "fields": [
+                {
+                    "name": "new_rate",
+                    "type": "float64"
+                }
+            ]
+        },
+        {
+            "name": "setfeeprop",
+            "base": "",
+            "fields": [
+                {
+                    "name": "account",
+                    "type": "name"
+                },
+                {
+                    "name": "fee_property",
+                    "type": "feeproperty"
+                }
+            ]
+        },
+        {
+            "name": "setinflation",
+            "base": "",
+            "fields": [
+                {
+                    "name": "annual_rate",
+                    "type": "int64"
+                },
+                {
+                    "name": "inflation_pay_factor",
+                    "type": "int64"
+                },
+                {
+                    "name": "votepay_factor",
+                    "type": "int64"
                 }
             ]
         },
@@ -1207,6 +1787,16 @@
             ]
         },
         {
+            "name": "setprodscnt",
+            "base": "",
+            "fields": [
+                {
+                    "name": "count",
+                    "type": "uint16"
+                }
+            ]
+        },
+        {
             "name": "setram",
             "base": "",
             "fields": [
@@ -1223,6 +1813,30 @@
                 {
                     "name": "bytes_per_block",
                     "type": "uint16"
+                }
+            ]
+        },
+        {
+            "name": "setrateprod",
+            "base": "",
+            "fields": [
+                {
+                    "name": "producer",
+                    "type": "name"
+                },
+                {
+                    "name": "fee_rate",
+                    "type": "float64"
+                }
+            ]
+        },
+        {
+            "name": "setrex",
+            "base": "",
+            "fields": [
+                {
+                    "name": "balance",
+                    "type": "asset"
                 }
             ]
         },
@@ -1363,6 +1977,24 @@
             ]
         },
         {
+            "name": "voteprod",
+            "base": "",
+            "fields": [
+                {
+                    "name": "producer",
+                    "type": "name"
+                },
+                {
+                    "name": "prod_to_delete",
+                    "type": "name"
+                },
+                {
+                    "name": "vote",
+                    "type": "bool"
+                }
+            ]
+        },
+        {
             "name": "voteproducer",
             "base": "",
             "fields": [
@@ -1413,7 +2045,7 @@
                     "type": "bool"
                 },
                 {
-                    "name": "reserved1",
+                    "name": "flags1",
                     "type": "uint32"
                 },
                 {
@@ -1455,8 +2087,12 @@
             ]
         }
     ],
-    "types": [],
     "actions": [
+        {
+            "name": "activate",
+            "type": "activate",
+            "ricardian_contract": ""
+        },
         {
             "name": "bidname",
             "type": "bidname",
@@ -1488,6 +2124,11 @@
             "ricardian_contract": ""
         },
         {
+            "name": "cfgpowerup",
+            "type": "cfgpowerup",
+            "ricardian_contract": ""
+        },
+        {
             "name": "claimrewards",
             "type": "claimrewards",
             "ricardian_contract": ""
@@ -1500,6 +2141,11 @@
         {
             "name": "cnclrexorder",
             "type": "cnclrexorder",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "confirmprod",
+            "type": "confirmprod",
             "ricardian_contract": ""
         },
         {
@@ -1528,6 +2174,16 @@
             "ricardian_contract": ""
         },
         {
+            "name": "delproducer",
+            "type": "delproducer",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "delvoting",
+            "type": "delvoting",
+            "ricardian_contract": ""
+        },
+        {
             "name": "deposit",
             "type": "deposit",
             "ricardian_contract": ""
@@ -1553,6 +2209,16 @@
             "ricardian_contract": ""
         },
         {
+            "name": "mvfrsavings",
+            "type": "mvfrsavings",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "mvtosavings",
+            "type": "mvtosavings",
+            "ricardian_contract": ""
+        },
+        {
             "name": "newaccount",
             "type": "newaccount",
             "ricardian_contract": ""
@@ -1568,6 +2234,21 @@
             "ricardian_contract": ""
         },
         {
+            "name": "onfee",
+            "type": "onfee",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "powerup",
+            "type": "powerup",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "powerupexec",
+            "type": "powerupexec",
+            "ricardian_contract": ""
+        },
+        {
             "name": "refund",
             "type": "refund",
             "ricardian_contract": ""
@@ -1575,6 +2256,11 @@
         {
             "name": "regproducer",
             "type": "regproducer",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "regproducer2",
+            "type": "regproducer2",
             "ricardian_contract": ""
         },
         {
@@ -1618,13 +2304,28 @@
             "ricardian_contract": ""
         },
         {
-            "name": "setalimits",
-            "type": "setalimits",
+            "name": "setcode",
+            "type": "setcode",
             "ricardian_contract": ""
         },
         {
-            "name": "setcode",
-            "type": "setcode",
+            "name": "setfee",
+            "type": "setfee",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "setfeeforce",
+            "type": "setfeeforce",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "setfeeprop",
+            "type": "setfeeprop",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "setinflation",
+            "type": "setinflation",
             "ricardian_contract": ""
         },
         {
@@ -1638,6 +2339,11 @@
             "ricardian_contract": ""
         },
         {
+            "name": "setprodscnt",
+            "type": "setprodscnt",
+            "ricardian_contract": ""
+        },
+        {
             "name": "setram",
             "type": "setram",
             "ricardian_contract": ""
@@ -1645,6 +2351,16 @@
         {
             "name": "setramrate",
             "type": "setramrate",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "setrateprod",
+            "type": "setrateprod",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "setrex",
+            "type": "setrex",
             "ricardian_contract": ""
         },
         {
@@ -1680,6 +2396,11 @@
         {
             "name": "updtrevision",
             "type": "updtrevision",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "voteprod",
+            "type": "voteprod",
             "ricardian_contract": ""
         },
         {
@@ -1744,6 +2465,13 @@
             "key_types": []
         },
         {
+            "name": "global4",
+            "type": "dcd_global_state4",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
             "name": "namebids",
             "type": "name_bid",
             "index_type": "i64",
@@ -1753,6 +2481,20 @@
         {
             "name": "netloan",
             "type": "rex_loan",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "powup.order",
+            "type": "powerup_order",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "powup.state",
+            "type": "powerup_state",
             "index_type": "i64",
             "key_names": [],
             "key_types": []
@@ -1786,6 +2528,13 @@
             "key_types": []
         },
         {
+            "name": "retbuckets",
+            "type": "rex_return_buckets",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
             "name": "rexbal",
             "type": "rex_balance",
             "index_type": "i64",
@@ -1814,6 +2563,13 @@
             "key_types": []
         },
         {
+            "name": "rexretpool",
+            "type": "rex_return_pool",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
             "name": "userres",
             "type": "user_resources",
             "index_type": "i64",
@@ -1828,6 +2584,13 @@
             "key_types": []
         }
     ],
+    "kv_tables": {},
     "ricardian_clauses": [],
-    "abi_extensions": []
+    "variants": [
+        {
+            "name": "variant_block_signing_authority_v0",
+            "types": ["block_signing_authority_v0"]
+        }
+    ],
+    "action_results": []
 }
