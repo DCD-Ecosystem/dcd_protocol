@@ -959,20 +959,20 @@ void check_types() {
                 [&] { return abidcd_json_to_bin(context, 0, "signature", R"("foo")"); });
     check_type(context, 0, "symbol_code", R"("A")");
     check_type(context, 0, "symbol_code", R"("B")");
-    check_type(context, 0, "symbol_code", R"("SYS")");
+    check_type(context, 0, "symbol_code", R"("DCD")");
     check_error(context, "expected string containing symbol_code",
                 [&] { return abidcd_json_to_bin(context, 0, "symbol_code", "true"); });
     check_type(context, 0, "symbol", R"("0,A")");
     check_type(context, 0, "symbol", R"("1,Z")");
-    check_type(context, 0, "symbol", R"("4,SYS")");
+    check_type(context, 0, "symbol", R"("4,DCD")");
     check_error(context, "expected string containing symbol",
                 [&] { return abidcd_json_to_bin(context, 0, "symbol", "null"); });
     check_type(context, 0, "asset", R"("0 FOO")");
     check_type(context, 0, "asset", R"("0.0 FOO")");
     check_type(context, 0, "asset", R"("0.00 FOO")");
     check_type(context, 0, "asset", R"("0.000 FOO")");
-    check_type(context, 0, "asset", R"("1.2345 SYS")");
-    check_type(context, 0, "asset", R"("-1.2345 SYS")");
+    check_type(context, 0, "asset", R"("1.2345 DCD")");
+    check_type(context, 0, "asset", R"("-1.2345 DCD")");
     check_error(context, "expected string containing asset",
                 [&] { return abidcd_json_to_bin(context, 0, "asset", "null"); });
     check_type(context, 0, "asset[]", R"([])");
@@ -984,15 +984,15 @@ void check_types() {
     check_type(context, 0, "extended_asset", R"({"quantity":"0.123456 SIX","contract":"seven"})");
 
     check_type(context, token, "transfer",
-               R"({"from":"useraaaaaaaa","to":"useraaaaaaab","quantity":"0.0001 SYS","memo":"test memo"})");
+               R"({"from":"useraaaaaaaa","to":"useraaaaaaab","quantity":"0.0001 DCD","memo":"test memo"})");
     check_type(
         context, 0, "transaction",
         R"({"expiration":"2009-02-13T23:31:31.000","ref_block_num":1234,"ref_block_prefix":5678,"max_net_usage_words":0,"max_cpu_usage_ms":0,"delay_sec":0,"context_free_actions":[],"actions":[{"account":"dcd.token","name":"transfer","authorization":[{"actor":"useraaaaaaaa","permission":"active"}],"data":"608C31C6187315D6708C31C6187315D60100000000000000045359530000000000"}],"transaction_extensions":[]})");
 
     check_type( //
         context, token, "transfer",
-        R"({"to":"useraaaaaaab","memo":"test memo","from":"useraaaaaaaa","quantity":"0.0001 SYS"})",
-        R"({"from":"useraaaaaaaa","to":"useraaaaaaab","quantity":"0.0001 SYS","memo":"test memo"})", false);
+        R"({"to":"useraaaaaaab","memo":"test memo","from":"useraaaaaaaa","quantity":"0.0001 DCD"})",
+        R"({"from":"useraaaaaaaa","to":"useraaaaaaab","quantity":"0.0001 DCD","memo":"test memo"})", false);
     check_type(
         context, 0, "transaction",
         R"({"ref_block_num":1234,"ref_block_prefix":5678,"expiration":"2009-02-13T23:31:31.000","max_net_usage_words":0,"max_cpu_usage_ms":0,"delay_sec":0,"context_free_actions":[],"actions":[{"account":"dcd.token","name":"transfer","authorization":[{"actor":"useraaaaaaaa","permission":"active"}],"data":"608C31C6187315D6708C31C6187315D60100000000000000045359530000000000"}],"transaction_extensions":[]})",

@@ -112,7 +112,7 @@ namespace dcdsystem {
       checksum256                               transaction_mroot;
       checksum256                               action_mroot;
       uint32_t                                  schedule_version = 0;
-      std::optional<dcd::producer_schedule>     new_producers;
+      std::optional<dcd::time_point>            new_producers;
 
       // explicit serialization macro is not necessary, used here only to improve compilation time
       DCDLIB_SERIALIZE(block_header, (timestamp)(producer)(confirmed)(previous)(transaction_mroot)(action_mroot)
@@ -268,24 +268,8 @@ namespace dcdsystem {
                       const ignore<name> action, 
                       const ignore<asset> fee ) {}
 
-      [[dcd::action]]
-      void setrate( const ignore<double> new_rate) {}
-
-
-      struct action_fee_prop {
-         name account;
-         name action;
-         asset fee;     
-         DCDLIB_SERIALIZE(action_fee_prop, (account)(action)(fee))
-      };
-
-      [[dcd::action]]
-      void procfeeprop( name owner,std::vector <name> accounts, std::vector <name> actions, std::vector <asset> fees, dcd::time_point proposed_at, dcd::time_point expires_at ) {}
-
-      [[dcd::action]]
-      void rmfeeprop( name owner) {}
-      
-
+         [[dcd::action]]
+         void setrate( const ignore<double> new_rate, dcd::time_point rate_time) {}
 
          using newaccount_action = dcd::action_wrapper<"newaccount"_n, &native::newaccount>;
          using updateauth_action = dcd::action_wrapper<"updateauth"_n, &native::updateauth>;
@@ -297,8 +281,6 @@ namespace dcdsystem {
          using setabi_action = dcd::action_wrapper<"setabi"_n, &native::setabi>;
          using setfee_action = dcd::action_wrapper<"setfee"_n, &native::setfee>;
          using setrate_action = dcd::action_wrapper<"setrate"_n, &native::setrate>;
-         using procfeeprop_action = dcd::action_wrapper<"procfeeprop"_n, &native::procfeeprop>;
-         using rmfeeprop_action = dcd::action_wrapper<"rmfeeprop"_n, &native::rmfeeprop>;
 
    };
 }

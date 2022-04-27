@@ -85,10 +85,12 @@ namespace dcdsystem {
    static constexpr uint16_t min_top_producers_count = 3; // for check in top_prodecers set
    static constexpr uint16_t max_top_producers_count = 101; // for check in top_prodecers set
    static constexpr uint32_t time_to_vote_for_del_producer = 24 * 3600 * 5; // 5 days
-   static constexpr uint32_t oracles_update_period_seconds =  5 * 60  ; // 5 minutes
-   static constexpr uint32_t proposed_fee_update_period_seconds =  1 * 60  ; // 1 minutes
-   static constexpr uint32_t fee_approved_application_delay = 5 * 60; // 5 minutes
-   static constexpr uint32_t fee_vote_expiration_limit = 2 * 24 * 60 * 60; // 2 days
+   static constexpr uint32_t oracles_update_period_seconds =  10 * 60  ; // 10 minutes
+   static constexpr int64_t  proposed_fee_update_period_seconds = 5 * 60; // 5 minutes
+   static constexpr int64_t  applied_fees_update_period_seconds = 1 * 60; // 1 minute
+
+   static constexpr int64_t  fee_approved_application_delay =  10 * 60; // 10 minutes
+   static constexpr int64_t  fee_vote_expiration_limit = 2 * 24 * 60 * 60; // 2 days
    static constexpr double vote_percent_to_succeed = 0.75;
    static constexpr double vote_percent_to_fail = 0.2;
 
@@ -237,11 +239,14 @@ namespace dcdsystem {
       dcd_global_state3() { }
       time_point        last_vpay_state_update;
       double            total_vpay_share_change_rate = 0;
-      time_point        oracles_last_updated;
-      time_point        commision_last_update;
+      time_point        oracles_last_updated = dcd::current_time_point();
+      time_point        commision_last_update = dcd::current_time_point();
+      time_point        fee_changes_last_update = dcd::current_time_point();
       double            last_oracle_rate = 1.0;
       uint32_t          producers_count = 0;
-      DCDLIB_SERIALIZE( dcd_global_state3, (last_vpay_state_update)(total_vpay_share_change_rate)(oracles_last_updated)(commision_last_update)(last_oracle_rate)(producers_count))
+      
+      DCDLIB_SERIALIZE( dcd_global_state3, (last_vpay_state_update)(total_vpay_share_change_rate)(oracles_last_updated)
+                        (commision_last_update)(fee_changes_last_update)(last_oracle_rate)(producers_count))
    };
 
    // Defines new global state parameters to store inflation rate and distribution
@@ -270,16 +275,11 @@ namespace dcdsystem {
       time_point                                               last_claim_time;
       uint16_t                                                 location = 0;
 
-      time_point                                               fee_rate_time;
-      double                                                   fee_rate = 1.0;
-      uint8_t                                                  confirmed = 0;
-      time_point                                               confirmed_time;
 
       dcd::binary_extension<dcd::block_signing_authority>  producer_authority; // added in version 1.9.0
 
       uint64_t primary_key()const { return owner.value;                             }
       double   by_votes()const    { return is_active ? -total_votes : total_votes;  }
-      uint64_t by_confirmed()const { return confirmed == 0 ? 2 : static_cast<uint64_t>(confirmed); }
       bool     active()const      { return is_active;                               }
       void     deactivate()       { producer_key = public_key(); producer_authority.reset(); is_active = false; }
 
@@ -315,10 +315,6 @@ namespace dcdsystem {
             << t.unpaid_blocks
             << t.last_claim_time
             << t.location
-            << t.fee_rate_time
-            << t.fee_rate
-            << t.confirmed
-            << t.confirmed_time
             ;
 
          if( !t.producer_authority.has_value() ) return ds;
@@ -336,10 +332,6 @@ namespace dcdsystem {
                    >> t.unpaid_blocks
                    >> t.last_claim_time
                    >> t.location
-                   >> t.fee_rate_time
-                   >> t.fee_rate
-                   >> t.confirmed
-                   >> t.confirmed_time
                    >> t.producer_authority;
       }
    };
@@ -398,8 +390,7 @@ namespace dcdsystem {
 
 
    typedef dcd::multi_index< "producers"_n, producer_info,
-                               indexed_by<"prototalvote"_n, const_mem_fun<producer_info, double, &producer_info::by_votes>  >,
-                               indexed_by<"confirmed"_n, const_mem_fun<producer_info, uint64_t, &producer_info::by_confirmed>  >
+                               indexed_by<"prototalvote"_n, const_mem_fun<producer_info, double, &producer_info::by_votes>  >
                              > producers_table;
 
    typedef dcd::multi_index< "producers2"_n, producer_info2 > producers_table2;
@@ -560,8 +551,8 @@ namespace dcdsystem {
    // - `version` defaulted to zero,
    // - `from` account creating and paying for loan,
    // - `receiver` account receiving rented resources,
-   // - `payment` SYS tokens paid for the loan,
-   // - `balance` is the amount of SYS tokens available to be used for loan auto-renewal,
+   // - `payment` DCD tokens paid for the loan,
+   // - `balance` is the amount of DCD tokens available to be used for loan auto-renewal,
    // - `total_staked` total amount staked,
    // - `loan_num` loan number/id,
    // - `expiration` the expiration time when loan will be either closed or renewed
@@ -681,7 +672,7 @@ namespace dcdsystem {
       uint8_t        version                 = 0;
       int64_t        weight                  = 0;                  // resource market weight. calculated; varies over time.
                                                                    //    1 represents the same amount of resources as 1
-                                                                   //    satoshi of SYS staked.
+                                                                   //    satoshi of DCD staked.
       int64_t        weight_ratio            = 0;                  // resource market weight ratio:
                                                                    //    assumed_stake_weight / (assumed_stake_weight + weight).
                                                                    //    calculated; varies over time. 1x = 10^15. 0.01x = 10^13.
@@ -776,6 +767,7 @@ namespace dcdsystem {
          rex_order_table                   _rexorders;
          actions_fee_proposals_table       _fee_proposals;
          fee_proposals_finalized_table     _fee_proposals_fin;
+         fee_changes_table                 _fee_changes;
          oracle_table             _oracles;
 
 
@@ -888,7 +880,7 @@ namespace dcdsystem {
          // functions defined in delegate_bandwidth.cpp
 
          /**
-          * Delegate bandwidth and/or cpu action. Stakes SYS from the balance of `from` for the benefit of `receiver`.
+          * Delegate bandwidth and/or cpu action. Stakes DCD from the balance of `from` for the benefit of `receiver`.
           *
           * @param from - the account to delegate bandwidth from, that is, the account holding
           *    tokens to be staked,
@@ -997,7 +989,7 @@ namespace dcdsystem {
          void cnclrexorder( const name& owner );
 
          /**
-          * Rentcpu action, uses payment to rent as many SYS tokens as possible as determined by market price and
+          * Rentcpu action, uses payment to rent as many DCD tokens as possible as determined by market price and
           * stake them for CPU for the benefit of receiver, after 30 days the rented core delegation of CPU
           * will expire. At expiration, if balance is greater than or equal to `loan_payment`, `loan_payment`
           * is taken out of loan balance and used to renew the loan. Otherwise, the loan is closed and user
@@ -1017,7 +1009,7 @@ namespace dcdsystem {
          void rentcpu( const name& from, const name& receiver, const asset& loan_payment, const asset& loan_fund );
 
          /**
-          * Rentnet action, uses payment to rent as many SYS tokens as possible as determined by market price and
+          * Rentnet action, uses payment to rent as many DCD tokens as possible as determined by market price and
           * stake them for NET for the benefit of receiver, after 30 days the rented core delegation of NET
           * will expire. At expiration, if balance is greater than or equal to `loan_payment`, `loan_payment`
           * is taken out of loan balance and used to renew the loan. Otherwise, the loan is closed and user
@@ -1267,8 +1259,6 @@ namespace dcdsystem {
           * @param producer
           * @param fee_rate 
           */
-         [[dcd::action]]
-         void setrateprod( const name& producer , const double fee_rate);
 
          [[dcd::action]]
          void voteprod( const name& producer, const name& prod_to_delete, bool vote);
@@ -1523,7 +1513,6 @@ namespace dcdsystem {
          using regproducer_action = dcd::action_wrapper<"regproducer"_n, &system_contract::regproducer>;
          using regproducer2_action = dcd::action_wrapper<"regproducer2"_n, &system_contract::regproducer2>;
          using unregprod_action = dcd::action_wrapper<"unregprod"_n, &system_contract::unregprod>;
-         using setrateprod_action = dcd::action_wrapper<"setrateprod"_n, &system_contract::setrateprod>;
          using setram_action = dcd::action_wrapper<"setram"_n, &system_contract::setram>;
          using setramrate_action = dcd::action_wrapper<"setramrate"_n, &system_contract::setramrate>;
          using confirmprod_action = dcd::action_wrapper<"confirmprod"_n, &system_contract::confirmprod>;
@@ -1600,21 +1589,19 @@ namespace dcdsystem {
          void remove_loan_from_rex_pool( const rex_loan& loan );
          template <typename Index, typename Iterator>
          int64_t update_renewed_loan( Index& idx, const Iterator& itr, int64_t rented_tokens );
-         void update_action_fees(std::vector <native::action_fee_prop> prop_list);
-         void check_action_proposal_table();
+         void check_action_proposal_table(time_point ct);
          // defined in delegate_bandwidth.cpp
          void changebw( name from, const name& receiver,
                         const asset& stake_net_quantity, const asset& stake_cpu_quantity, bool transfer );
          void update_voting_power( const name& voter, const asset& total_update );
-
+         void on_block_updates();
          // defined in voting.cpp
          void register_producer( const name& producer, const dcd::block_signing_authority& producer_authority, const std::string& url, uint16_t location );
          void update_elected_producers( const block_timestamp& timestamp );
-         void calculate_new_rate( const block_timestamp& block_time );
-         void update_current_rate( const block_timestamp& block_time );
          void calculate_new_oracle_rate();
-         void update_oracles_rate_state();
-         void update_fee_vote_state();
+         void update_oracles_rate_state(time_point ct);
+         void apply_pending_fee_changes(time_point ct);
+         void update_fee_vote_state(time_point ct);
          void update_votes( const name& voter, const name& proxy, const std::vector<name>& producers, bool voting );
          void update_producers_count();
          bool all_voted(const name& producer, const del_producer_vote& vote_info);

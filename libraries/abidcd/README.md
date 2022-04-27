@@ -25,7 +25,7 @@ Example action data for `abidcd_json_to_bin`:
 {
     "from": "useraaaaaaaa",
     "to": "useraaaaaaab",
-    "quantity": "0.0001 SYS",
+    "quantity": "0.0001 DCD",
     "memo": ""
 }
 ```

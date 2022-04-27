@@ -44,18 +44,21 @@ namespace dcd { namespace chain {
       double cur_rate;
    };
 
-   //  struct action_fee_prop {
-   //       name account;
-   //       name action;
-   //       asset fee;     
-   // };
 
-    struct actions_fee_proposals {
-      name                                                     owner;
-      std::vector <action_fee_prop>                            fee_prop_list;
-      time_point                                               proposed_at;
-      time_point                                               expires_at;
-   }; 
+   struct action_fee_info_out {
+      name        account;
+      name        action;
+      asset       usd_fee;
+      asset       core_fee;
+      double      current_rate;
+   };
+
+   struct action_fee_prop {
+         name account;
+         name action;
+         asset fee;     
+   };
+
 
    class transaction_fee_manager {
       public:
@@ -66,10 +69,10 @@ namespace dcd { namespace chain {
          asset get_required_fee( const controller& ctl, const action& act )const;
          asset get_required_fee( const controller& ctl, const account_name& account, const action_name& act )const;
          void  get_new_rate_params( const controller& ctl );
-
+         
          action_fee_info get_action_fee(const controller& ctl, const account_name& account, const action_name& act )const;
          fee_rate_info get_fee_rate(const controller& ctl) const;
-         std::vector <actions_fee_proposals> get_fee_proposals (const controller& ctl) const;
+         std::vector<action_fee_info_out> get_all_fees(const controller& ctl)const;
          asset get_base_rate_asset(const controller& ctl) const;
          
       private: 
@@ -88,7 +91,7 @@ namespace dcd { namespace chain {
 
          std::map<std::pair<account_name, action_name>, asset> fee_map;
 
-         asset           base_rate_asset = asset::from_string("1.0000 USD");
+         asset           base_rate_asset = asset::from_string("1.00000 USD");
 
          uint64_t        contract_new_rate_period = 10*60; // in seconds
          uint64_t        contract_out_of_date_time = 3*24*60*60; // in seconds
@@ -166,6 +169,7 @@ FC_REFLECT(dcd::chain::fee_parameter, (name)(fee))
 FC_REFLECT(dcd::chain::action_fee_object, (id)(account)(message_type)(fee))
 FC_REFLECT(dcd::chain::action_fee_vote_object,(id)(owner)(fee_prop_list)(proposed_at)(expires_at))
 FC_REFLECT(dcd::chain::producers_rate_info, (name)(rate)(rate_time))
+FC_REFLECT(dcd::chain::action_fee_prop, (account)(action)(fee))
 CHAINBASE_SET_INDEX_TYPE(dcd::chain::action_fee_object, dcd::chain::action_fee_object_index)
 CHAINBASE_SET_INDEX_TYPE(dcd::chain::action_fee_vote_object, dcd::chain::action_fee_vote_object_index)
 

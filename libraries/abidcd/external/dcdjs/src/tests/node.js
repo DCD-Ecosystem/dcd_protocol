@@ -26,7 +26,7 @@ const transactWithConfig = async () => await api.transact({
         data: {
             from: 'bob',
             to: 'alice',
-            quantity: '0.0001 SYS',
+            quantity: '0.0001 DCD',
             memo: '',
         },
     }]
@@ -57,7 +57,7 @@ const transactWithoutConfig = async () => {
             data: {
                 from: 'bob',
                 to: 'alice',
-                quantity: '0.0001 SYS',
+                quantity: '0.0001 DCD',
                 memo: '',
             },
         }]
@@ -76,7 +76,7 @@ const transactWithoutBroadcast = async () => await api.transact({
         data: {
             from: 'bob',
             to: 'alice',
-            quantity: '0.0001 SYS',
+            quantity: '0.0001 DCD',
             memo: '',
         },
     }]
@@ -99,7 +99,7 @@ const transactShouldFail = async () => await api.transact({
         data: {
             from: 'bob',
             to: 'alice',
-            quantity: '0.0001 SYS',
+            quantity: '0.0001 DCD',
             memo: '',
         },
     }]

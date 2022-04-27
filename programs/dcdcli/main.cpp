@@ -3223,8 +3223,7 @@ int main( int argc, char** argv ) {
    getProposedFees->add_flag("--json,-j", print_json, localized("Output in JSON format"));
    getProposedFees->callback([&] {
       
-      auto rawResult = call(get_fee_proposals, fc::mutable_variant_object
-            ("json", true)("lower_bound", lower)("limit", limit));
+      auto rawResult = call(get_fee_proposals, fc::mutable_variant_object("json", true));
          if ( print_json ) {
             std::cout << fc::json::to_pretty_string(rawResult) << std::endl;
             return;
@@ -3257,6 +3256,55 @@ int main( int argc, char** argv ) {
          }
          std::cout << "No proposals found " << endl;
 
+   });
+
+   auto getFeesApproved = get->add_subcommand("fee_approved",localized("Get all apporoved fee lists"));
+   getFeesApproved->add_flag("--json,-j", print_json, localized("Output in JSON format"));
+   getFeesApproved->callback([&] {
+      
+      auto rawResult = call(get_fees_approved, fc::mutable_variant_object("json", true));
+         if ( print_json ) {
+            std::cout << fc::json::to_pretty_string(rawResult) << std::endl;
+            return;
+         }
+         std::cout << fc::json::to_pretty_string(rawResult) << std::endl;
+   });
+
+
+   auto getAllOracles = get->add_subcommand("all_oracles",localized("Get all oracles rates"));
+   getAllOracles->add_flag("--json,-j", print_json, localized("Output in JSON format"));
+   getAllOracles->callback([&] {
+      
+      auto rawResult = call(get_oracles_all, fc::mutable_variant_object("json", true));
+         if ( print_json ) {
+            std::cout << fc::json::to_pretty_string(rawResult) << std::endl;
+            return;
+         }
+         std::cout << fc::json::to_pretty_string(rawResult) << std::endl;
+   });
+
+   auto getAllFees = get->add_subcommand("all_fees",localized("Get all explicitly listed fees"));
+   getAllFees->add_flag("--json,-j", print_json, localized("Output in JSON format"));
+   getAllFees->callback([&] {
+      
+      auto rawResult = call(get_fee_all, fc::mutable_variant_object("json", true));
+         if ( print_json ) {
+            std::cout << fc::json::to_pretty_string(rawResult) << std::endl;
+            return;
+         }
+         auto result = rawResult.as<dcd::chain_apis::read_only::get_fee_all_result>();
+         if (result.fee_info.size() > 0)
+         {
+            std::cout << "Active rate:" << result.current_rate << std::endl;
+
+            for (auto r : result.fee_info)
+            {
+               std::cout << "-------------------------------------------------------------------" << std::endl;
+               std::cout << "Account: " << r.account  << " Action: " << r.action << " USD fee: " << r.usd_fee << " DCD Fee: " << r.core_fee <<  std::endl;
+               std::cout << "-------------------------------------------------------------------" << std::endl;
+
+            }
+         }   
    });
 
    // get actions

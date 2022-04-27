@@ -146,7 +146,6 @@ namespace dcdsystem {
       check(producer != prod_to_delete, "can`t vote for self");
 
       const auto& prod = _producers.get( producer.value, "producer not found" );
-      check( prod.confirmed == 1, "producer is not confirmed" );
 
       auto pitr = _prodstodelete.find( prod_to_delete.value );
       check(pitr != _prodstodelete.end(), "no such to_delete producer");
@@ -359,11 +358,10 @@ namespace dcdsystem {
 
       auto pitr = _producers.find( to_delete.value );
       check( pitr != _producers.end(), "to_delete account is not registered as producer" );
-      check( pitr->confirmed == true, "to_delete account is not confirmed");
+      
 
       pitr = _producers.find( to_replace.value );
       check( pitr != _producers.end(), "to_replace account is not registered as producer" );
-      check( pitr->confirmed != true, "to_replace account is already confirmed");      
 
       if(dcd::get_active_producers().size() == 1) {
          replace_confirmed(to_delete, to_replace);
@@ -589,11 +587,5 @@ namespace dcdsystem {
       );
    }
 
-   void system_contract::update_producers_count() {
-      uint32_t count = 0;
-      for (const auto prod : _producers)
-         ++count;
-      _gstate3.producers_count = count;
-   }
 
 } /// namespace dcdsystem

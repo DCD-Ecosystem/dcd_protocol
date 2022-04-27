@@ -464,12 +464,11 @@ void apply_dcd_canceldelay(apply_context& context) {
 void apply_dcd_setfee(apply_context& context) {
    auto &db = context.db;
    auto act = context.get_action().data_as<setfee>();
-
    context.require_authorization(config::system_account_name);
 
    asset base_rate_asset = context.control.get_transaction_fee_manager().get_base_rate_asset(context.control);
 
-   DCD_ASSERT( act.fee.get_symbol() == base_rate_asset.get_symbol(), account_query_exception, "Wrong base rate asset symbol");
+   //DCD_ASSERT( act.fee.get_symbol() == base_rate_asset.get_symbol(), account_query_exception, "Wrong base rate asset symbol");
 
    const auto key = boost::make_tuple(act.account, act.action); 
    
@@ -493,46 +492,6 @@ void apply_dcd_setrate(apply_context& context) {
    auto act = context.get_action().data_as<setrate>();
    context.require_authorization(config::system_account_name);
    context.control.set_proposed_rate(act.new_rate);
-}
-
-void apply_dcd_procfeeprop(apply_context& context) {
-   auto &db = context.db;
-   auto act = context.get_action().data_as<procfeeprop>();
-   std::vector <action_fee_prop> fee_comb;  
-    for(int i = 0; i < act.accounts.size(); i++)
-    {
-      action_fee_prop tmp {act.accounts[i], act.actions[i], act.fees[i] };
-      fee_comb.push_back(tmp);
-    }
-   
-
-   auto old_prop = db.find<chain::action_fee_vote_object, chain::by_owner>(act.owner);
-   if(old_prop == nullptr){
-      db.create<chain::action_fee_vote_object>([&]( auto& fee_vote_obj ) {
-         fee_vote_obj.owner = act.owner;
-         fee_vote_obj.fee_prop_list = fee_comb;
-         fee_vote_obj.proposed_at = act.proposed_at;
-         fee_vote_obj.expires_at = act.expires_at;
-      });
-   } else {      
-      db.modify<chain::action_fee_vote_object>( *old_prop, [&]( auto& fee_vote_obj ) {
-         fee_vote_obj.owner = act.owner;
-         fee_vote_obj.fee_prop_list.clear();
-         fee_vote_obj.fee_prop_list = fee_comb;
-         fee_vote_obj.proposed_at = act.proposed_at;
-         fee_vote_obj.expires_at = act.expires_at;
-   });
-   }
-}
-
-void apply_dcd_rmfeeprop(apply_context& context) {
-   auto &db = context.db;
-   auto act = context.get_action().data_as<rmfeeprop>();
-   context.require_authorization(config::system_account_name);
-   auto& prop_idx = db.get_mutable_index<action_fee_vote_object_index>();
-   const auto* prop_del = db.find<action_fee_vote_object,by_owner>(act.owner);
-   if ( prop_del != nullptr )
-   prop_idx.remove(*prop_del); 
 }
 
 
