@@ -31,17 +31,17 @@ Where `from` is the account to delegate bandwidth from, `receiver` is the accoun
 
 Some examples are provided below:
 
-* Delegate 0.01 SYS network bandwidth from `bob` to `alice`:
+* Delegate 0.01 DCD network bandwidth from `bob` to `alice`:
 
 **Example Output**
 
 ```sh
-dcdcli system delegatebw bob alice "0.01 SYS" "0 SYS"
+dcdcli system delegatebw bob alice "0.01 DCD" "0 DCD"
 ```
 ```json
 executed transaction: 5487afafd67bf459a20fcc2dbc5d0c2f0d1f10e33123eaaa07088046fd18e3ae  192 bytes  503 us
-#         dcd <= dcd::delegatebw            {"from":"bob","receiver":"alice","stake_net_quantity":"0.0100 SYS","stake_cpu_quantity":"0.0000 SYS"...
-#   dcd.token <= dcd.token::transfer        {"from":"bob","to":"dcd.stake","quantity":"0.0010 SYS","memo":"stake bandwidth"}
-#  bob <= dcd.token::transfer        {"from":"bob","to":"dcd.stake","quantity":"0.0010 SYS","memo":"stake bandwidth"}
-#   dcd.stake <= dcd.token::transfer        {"from":"bob","to":"dcd.stake","quantity":"0.0010 SYS","memo":"stake bandwidth"}
+#         dcd <= dcd::delegatebw            {"from":"bob","receiver":"alice","stake_net_quantity":"0.0100 DCD","stake_cpu_quantity":"0.0000 DCD"...
+#   dcd.token <= dcd.token::transfer        {"from":"bob","to":"dcd.stake","quantity":"0.0010 DCD","memo":"stake bandwidth"}
+#  bob <= dcd.token::transfer        {"from":"bob","to":"dcd.stake","quantity":"0.0010 DCD","memo":"stake bandwidth"}
+#   dcd.stake <= dcd.token::transfer        {"from":"bob","to":"dcd.stake","quantity":"0.0010 DCD","memo":"stake bandwidth"}
 ```

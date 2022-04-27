@@ -215,11 +215,11 @@ BOOST_FIXTURE_TEST_CASE( bootseq_test, bootseq_tester ) {
         BOOST_TEST(dcd_token_acc.is_privileged() == true);
 
 
-        // Create SYS tokens in dcd.token, set its manager as dcd
+        // Create DCD tokens in dcd.token, set its manager as dcd
         auto max_supply = core_from_string("10000000000.0000"); /// 1x larger than 1B initial tokens
         auto initial_supply = core_from_string("1000000000.0000"); /// 1x larger than 1B initial tokens
         create_currency("dcd.token"_n, config::system_account_name, max_supply);
-        // Issue the genesis supply of 1 billion SYS tokens to dcd.system
+        // Issue the genesis supply of 1 billion DCD tokens to dcd.system
         issue("dcd.token"_n, config::system_account_name, config::system_account_name, initial_supply);
 
         auto actual = get_balance(config::system_account_name);

@@ -19,5 +19,5 @@
 
 
 ```sh
-dcdcli system rex withdraw accountname1 "1 SYS"
+dcdcli system rex withdraw accountname1 "1 DCD"
 ```

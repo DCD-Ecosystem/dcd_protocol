@@ -17,10 +17,10 @@ Beware that only the account which originally delegated resource can undelegate
 
 ## Steps
 
-Undelegate 0.01 SYS CPU bandwidth form from account `alice` back to account `bob`:
+Undelegate 0.01 DCD CPU bandwidth form from account `alice` back to account `bob`:
 
 ```sh
-dcdcli system undelegatebw bob alice "0 SYS" "0.01 SYS"
+dcdcli system undelegatebw bob alice "0 DCD" "0.01 DCD"
 ```
 
 You should see something below:
