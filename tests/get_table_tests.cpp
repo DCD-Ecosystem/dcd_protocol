@@ -78,12 +78,12 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( get_scope_test, TESTER_T, backing_store_ts) { try
    // create currency
    auto act = mutable_variant_object()
          ("issuer",       "dcd")
-         ("maximum_supply", dcd::chain::asset::from_string("1000000000.0000 SYS"));
+         ("maximum_supply", dcd::chain::asset::from_string("1000000000.0000 DCD"));
    t.push_action("dcd.token"_n, "create"_n, "dcd.token"_n, act );
 
    // issue
    for (account_name a: accs) {
-      issue_tokens( t, config::system_account_name, a, dcd::chain::asset::from_string("999.0000 SYS") );
+      issue_tokens( t, config::system_account_name, a, dcd::chain::asset::from_string("999.0000 DCD") );
    }
    t.produce_blocks(1);
 
@@ -167,12 +167,12 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( get_table_test, TESTER_T, backing_store_ts) { try
    // create currency
    auto act = mutable_variant_object()
          ("issuer",       "dcd")
-         ("maximum_supply", dcd::chain::asset::from_string("1000000000.0000 SYS"));
+         ("maximum_supply", dcd::chain::asset::from_string("1000000000.0000 DCD"));
    t.push_action("dcd.token"_n, "create"_n, "dcd.token"_n, act );
 
    // issue
    for (account_name a: accs) {
-      issue_tokens( t, config::system_account_name, a, dcd::chain::asset::from_string("10000.0000 SYS") );
+      issue_tokens( t, config::system_account_name, a, dcd::chain::asset::from_string("10000.0000 DCD") );
    }
    t.produce_blocks(1);
 
@@ -224,7 +224,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( get_table_test, TESTER_T, backing_store_ts) { try
       BOOST_REQUIRE_EQUAL("9999.0000 AAA", result.rows[0]["balance"].as_string());
       BOOST_REQUIRE_EQUAL("8888.0000 BBB", result.rows[1]["balance"].as_string());
       BOOST_REQUIRE_EQUAL("7777.0000 CCC", result.rows[2]["balance"].as_string());
-      BOOST_REQUIRE_EQUAL("10000.0000 SYS", result.rows[3]["balance"].as_string());
+      BOOST_REQUIRE_EQUAL("10000.0000 DCD", result.rows[3]["balance"].as_string());
    }
 
    // get table: reverse ordered
@@ -236,7 +236,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( get_table_test, TESTER_T, backing_store_ts) { try
       BOOST_REQUIRE_EQUAL("9999.0000 AAA", result.rows[3]["balance"].as_string());
       BOOST_REQUIRE_EQUAL("8888.0000 BBB", result.rows[2]["balance"].as_string());
       BOOST_REQUIRE_EQUAL("7777.0000 CCC", result.rows[1]["balance"].as_string());
-      BOOST_REQUIRE_EQUAL("10000.0000 SYS", result.rows[0]["balance"].as_string());
+      BOOST_REQUIRE_EQUAL("10000.0000 DCD", result.rows[0]["balance"].as_string());
    }
 
    // get table: reverse ordered, with ram payer
@@ -249,7 +249,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( get_table_test, TESTER_T, backing_store_ts) { try
       BOOST_REQUIRE_EQUAL("9999.0000 AAA", result.rows[3]["data"]["balance"].as_string());
       BOOST_REQUIRE_EQUAL("8888.0000 BBB", result.rows[2]["data"]["balance"].as_string());
       BOOST_REQUIRE_EQUAL("7777.0000 CCC", result.rows[1]["data"]["balance"].as_string());
-      BOOST_REQUIRE_EQUAL("10000.0000 SYS", result.rows[0]["data"]["balance"].as_string());
+      BOOST_REQUIRE_EQUAL("10000.0000 DCD", result.rows[0]["data"]["balance"].as_string());
       BOOST_REQUIRE_EQUAL("dcd", result.rows[0]["payer"].as_string());
       BOOST_REQUIRE_EQUAL("dcd", result.rows[1]["payer"].as_string());
       BOOST_REQUIRE_EQUAL("dcd", result.rows[2]["payer"].as_string());
@@ -300,7 +300,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( get_table_test, TESTER_T, backing_store_ts) { try
    BOOST_REQUIRE_EQUAL(1u, result.rows.size());
    BOOST_REQUIRE_EQUAL(true, result.more);
    if (result.rows.size() >= 1) {
-      BOOST_REQUIRE_EQUAL("10000.0000 SYS", result.rows[0]["balance"].as_string());
+      BOOST_REQUIRE_EQUAL("10000.0000 DCD", result.rows[0]["balance"].as_string());
    }
 
    // get table: normal case, with bound & limit
@@ -347,12 +347,12 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( get_table_by_seckey_test, TESTER_T, backing_store
    // create currency
    auto act = mutable_variant_object()
          ("issuer",       "dcd")
-         ("maximum_supply", dcd::chain::asset::from_string("1000000000.0000 SYS"));
+         ("maximum_supply", dcd::chain::asset::from_string("1000000000.0000 DCD"));
    t.push_action("dcd.token"_n, "create"_n, "dcd.token"_n, act );
 
    // issue
    for (account_name a: accs) {
-      issue_tokens( t, config::system_account_name, a, dcd::chain::asset::from_string("10000.0000 SYS") );
+      issue_tokens( t, config::system_account_name, a, dcd::chain::asset::from_string("10000.0000 DCD") );
    }
    t.produce_blocks(1);
 
@@ -362,7 +362,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( get_table_by_seckey_test, TESTER_T, backing_store
    t.push_action(config::system_account_name, "init"_n,
                  config::system_account_name,  mutable_variant_object()
                  ("version", 0)
-                 ("core", "4,SYS"));
+                 ("core", "4,DCD"));
 
    // bidname
    auto bidname = [&t]( const account_name& bidder, const account_name& newname, const asset& bid ) {
@@ -373,10 +373,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( get_table_by_seckey_test, TESTER_T, backing_store
                             );
    };
 
-   bidname("inita"_n, "com"_n, dcd::chain::asset::from_string("10.0000 SYS"));
-   bidname("initb"_n, "org"_n, dcd::chain::asset::from_string("11.0000 SYS"));
-   bidname("initc"_n, "io"_n, dcd::chain::asset::from_string("12.0000 SYS"));
-   bidname("initd"_n, "html"_n, dcd::chain::asset::from_string("14.0000 SYS"));
+   bidname("inita"_n, "com"_n, dcd::chain::asset::from_string("10.0000 DCD"));
+   bidname("initb"_n, "org"_n, dcd::chain::asset::from_string("11.0000 DCD"));
+   bidname("initc"_n, "io"_n, dcd::chain::asset::from_string("12.0000 DCD"));
+   bidname("initd"_n, "html"_n, dcd::chain::asset::from_string("14.0000 DCD"));
    t.produce_blocks(1);
 
    // get table: normal case
@@ -466,8 +466,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( get_table_by_seckey_test, TESTER_T, backing_store
    // all digits name search
    const std::string all_digits_name_1 = "1234";
    const std::string all_digits_name_2 = "2345";
-   bidname("inita"_n, name(all_digits_name_1), dcd::chain::asset::from_string("1.0000 SYS"));
-   bidname("inita"_n, name(all_digits_name_2), dcd::chain::asset::from_string("1.0000 SYS"));
+   bidname("inita"_n, name(all_digits_name_1), dcd::chain::asset::from_string("1.0000 DCD"));
+   bidname("inita"_n, name(all_digits_name_2), dcd::chain::asset::from_string("1.0000 DCD"));
    t.produce_blocks(1);
    p.lower_bound = all_digits_name_1;
    p.upper_bound = all_digits_name_1;

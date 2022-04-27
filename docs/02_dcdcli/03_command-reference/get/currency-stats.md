@@ -8,16 +8,16 @@ Retrieve the stats of for a given currency
 ## Options
 There are no options for this subcommand
 ## Example
-Get stats of the SYS token from the dcd.token contract. 
+Get stats of the DCD token from the dcd.token contract. 
 
 ```sh
 dcdcli get currency stats dcd.token SYS
 ```
 ```json
 {
-  "SYS": {
-    "supply": "1000000000.0000 SYS",
-    "max_supply": "10000000000.0000 SYS",
+  "DCD": {
+    "supply": "1000000000.0000 DCD",
+    "max_supply": "10000000000.0000 DCD",
     "issuer": "dcd"
   }
 }

@@ -13,7 +13,7 @@ Retrieve the balance of an account for a given currency
 There are no options for this subcommand
 
 ## Example
-Get balance of dcd from dcd.token contract for SYS symbol. 
+Get balance of dcd from dcd.token contract for DCD symbol. 
 
 ```sh
 dcdcli get currency balance dcd.token dcd SYS

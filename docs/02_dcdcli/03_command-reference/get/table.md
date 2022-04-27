@@ -39,7 +39,7 @@ dcdcli get table dcd.token dcd accounts
 ```json
 {
   "rows": [{
-      "balance": "999999920.0000 SYS"
+      "balance": "999999920.0000 DCD"
     }
   ],
   "more": false

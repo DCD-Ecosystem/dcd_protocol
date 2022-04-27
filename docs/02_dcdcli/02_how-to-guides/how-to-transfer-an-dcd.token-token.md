@@ -20,26 +20,26 @@ See the following reference guides for command line usage and related options fo
 
 ## Procedure
 
-The following steps show how to transfer `0.0001 SYS` tokens to an account called `bob` from an account called `alice`:
+The following steps show how to transfer `0.0001 DCD` tokens to an account called `bob` from an account called `alice`:
 
 ```sh
-dcdcli transfer alice bob "0.0001 SYS" "Hodl!" -p alice@active
+dcdcli transfer alice bob "0.0001 DCD" "Hodl!" -p alice@active
 ```
 
 Where:
 
 * `alice` = the account that transfers the tokens.
 * `bob` = the account that receives the tokens.
-* `0.0001 SYS` = the amount of `SYS` tokens sent.
+* `0.0001 DCD` = the amount of `DCD` tokens sent.
 * `Hodl!` = the message, or memo, that is accompanying the transaction.
 
 Example output:
 
 ```console
 executed transaction: 800835f28659d405748f4ac0ec9e327335eae579a0d8e8ef6330e78c9ee1b67c  128 bytes  1073 us
-#   dcd.token <= dcd.token::transfer        {"from":"alice","to":"bob","quantity":"25.0000 SYS","memo":"m"}
-#         alice <= dcd.token::transfer        {"from":"alice","to":"bob","quantity":"25.0000 SYS","memo":"m"}
-#           bob <= dcd.token::transfer        {"from":"alice","to":"bob","quantity":"25.0000 SYS","memo":"m"}
+#   dcd.token <= dcd.token::transfer        {"from":"alice","to":"bob","quantity":"25.0000 DCD","memo":"m"}
+#         alice <= dcd.token::transfer        {"from":"alice","to":"bob","quantity":"25.0000 DCD","memo":"m"}
+#           bob <= dcd.token::transfer        {"from":"alice","to":"bob","quantity":"25.0000 DCD","memo":"m"}
 ```
 
 ## Summary

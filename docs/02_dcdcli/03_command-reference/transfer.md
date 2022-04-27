@@ -25,7 +25,7 @@ Transfer tokens from account to account
 - `--delay-sec` _UINT_ - set the delay_sec seconds, defaults to 0s
 
 ## Example
-Transfer 1000 SYS from **inita** to **tester**
+Transfer 1000 DCD from **inita** to **tester**
 
 ```sh
 dcdcli transfer inita tester 1000

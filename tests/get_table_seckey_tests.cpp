@@ -140,12 +140,12 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( get_table_next_key_reverse_test, TESTER_T, backin
    // create currency
    auto act = mutable_variant_object()
          ("issuer",       "dcd")
-         ("maximum_supply", dcd::chain::asset::from_string("1000000000.0000 SYS"));
+         ("maximum_supply", dcd::chain::asset::from_string("1000000000.0000 DCD"));
    t.push_action("dcd"_n, "create"_n, "dcd"_n, act );
 
    // issue
    for (account_name a: accs) {
-      issue_tokens( t, config::system_account_name, a, dcd::chain::asset::from_string("999.0000 SYS") );
+      issue_tokens( t, config::system_account_name, a, dcd::chain::asset::from_string("999.0000 DCD") );
    }
    t.produce_blocks(1);
 

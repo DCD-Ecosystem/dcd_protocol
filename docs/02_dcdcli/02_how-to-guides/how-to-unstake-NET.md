@@ -17,10 +17,10 @@ Beware that only the account which originally delegated resource can undelegate
 
 ## Steps
 
-Unstake 0.01 SYS network bandwidth from account `alice`:
+Unstake 0.01 DCD network bandwidth from account `alice`:
 
 ```sh
-dcdcli system undelegatebw alice alice "0 SYS" "0.01 SYS"
+dcdcli system undelegatebw alice alice "0 DCD" "0.01 DCD"
 ```
 
 You should see something below:

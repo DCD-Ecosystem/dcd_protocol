@@ -125,7 +125,7 @@ dcdcli get account dcd --json
     "is_proxy": 0,
     "deferred_trx_id": 0,
     "last_unstake_time": "1970-01-01T00:00:00",
-    "unstaking": "0.0000 SYS"
+    "unstaking": "0.0000 DCD"
   }
 }
 ```

@@ -17,10 +17,10 @@ Beware that only the account which originally delegated resource can undelegate
 
 ## Steps
 
-Unstake 0.01 SYS CPU bandwidth form account `alice`:
+Unstake 0.01 DCD CPU bandwidth form account `alice`:
 
 ```sh
-dcdcli system undelegatebw alice alice "0.01 SYS" "0 SYS"
+dcdcli system undelegatebw alice alice "0.01 DCD" "0 DCD"
 ```
 
 You should see something below:

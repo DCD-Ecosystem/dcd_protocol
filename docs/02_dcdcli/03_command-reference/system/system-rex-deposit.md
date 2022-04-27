@@ -21,5 +21,5 @@ excerpt: "Deposit into owner's REX fund by transfering from owner's liquid token
 
 
 ```sh
-dcdcli system rex deposit accountname1 "1 SYS"
+dcdcli system rex deposit accountname1 "1 DCD"
 ```

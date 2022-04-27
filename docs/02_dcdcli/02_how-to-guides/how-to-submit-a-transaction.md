@@ -81,7 +81,7 @@ You can create the JSON snippet defining the transaction in two ways:
       "data": {
         "from": "han",
         "to": "dcd",
-        "quantity": "0.0001 SYS",
+        "quantity": "0.0001 DCD",
         "memo": "m"
       }
     }
@@ -104,7 +104,7 @@ dcdcli push transaction TRX_FILE.json
 * Alternatively, you can send the transaction using the JSON content directly:
 
 ```sh
-dcdcli push transaction '{"expiration": "2019-08-01T07:15:49", "ref_block_num": 34881,"ref_block_prefix": 2972818865,"max_net_usage_words": 0,"max_cpu_usage_ms": 0,"delay_sec": 0,"context_free_actions": [],"actions": [{"account": "dcd.token","name": "transfer","authorization": [{"actor": "han","permission": "active"}],"data": {"from": "han","to": "dcd","quantity": "0.0001 SYS","memo": "m"}}],"transaction_extensions": [],"context_free_data": []}'
+dcdcli push transaction '{"expiration": "2019-08-01T07:15:49", "ref_block_num": 34881,"ref_block_prefix": 2972818865,"max_net_usage_words": 0,"max_cpu_usage_ms": 0,"delay_sec": 0,"context_free_actions": [],"actions": [{"account": "dcd.token","name": "transfer","authorization": [{"actor": "han","permission": "active"}],"data": {"from": "han","to": "dcd","quantity": "0.0001 DCD","memo": "m"}}],"transaction_extensions": [],"context_free_data": []}'
 ```
 
 ## Summary
