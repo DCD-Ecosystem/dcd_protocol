@@ -258,20 +258,20 @@ public:
                                       });
 
             trx.actions.emplace_back( get_action( config::system_account_name, "buyram"_n, vector<permission_level>{ {creator, config::active_name} },
-                                                  mvo()
-                                                          ("payer", creator)
-                                                          ("receiver", a)
-                                                          ("quant", ram) )
+                                                 mvo()
+                                                         ("payer", creator)
+                                                         ("receiver", a)
+                                                         ("quant", ram) )
             );
 
             trx.actions.emplace_back( get_action( config::system_account_name, "delegatebw"_n, vector<permission_level>{ {creator, config::active_name} },
-                                                  mvo()
-                                                          ("from", creator)
-                                                          ("receiver", a)
-                                                          ("stake_net_quantity", net)
-                                                          ("stake_cpu_quantity", cpu )
-                                                          ("transfer", 0 )
-                                      )
+                                                 mvo()
+                                                         ("from", creator)
+                                                         ("receiver", a)
+                                                         ("stake_net_quantity", net)
+                                                         ("stake_cpu_quantity", cpu )
+                                                         ("transfer", 0 )
+                                     )
             );
         }
 
@@ -300,12 +300,12 @@ public:
        );
     }
 
-    action_result buyram( const account_name& payer, account_name receiver, const asset& eosin ) {
-        return push_action( payer, "buyram"_n, mvo()( "payer",payer)("receiver",receiver)("quant",eosin) );
+    action_result buyram( const account_name& payer, account_name receiver, const asset& dcdin ) {
+        return push_action( payer, "buyram"_n, mvo()( "payer",payer)("receiver",receiver)("quant",dcdin) );
     }
 
     vector<name> active_and_vote_producers() {
-        //stake more than 15% of total EOS supply to activate chain
+        //stake more than 15% of total DCD supply to activate chain
         transfer( name("dcd"), name("alice1111111"), core_from_string("650000000.0000"), name("dcd") );
         BOOST_CHECK_EQUAL( success(), stake( name("alice1111111"), name("alice1111111"), core_from_string("300000000.0000"), core_from_string("300000000.0000") ) );
 
@@ -377,7 +377,7 @@ BOOST_FIXTURE_TEST_CASE(account_results_total_resources_test, chain_plugin_teste
     setup_system_accounts();
     produce_blocks();
     create_account_with_resources("alice1111111"_n, config::system_account_name);
-    //stake more than 15% of total EOS supply to activate chain
+    //stake more than 15% of total DCD supply to activate chain
     transfer( name("dcd"), name("alice1111111"), core_from_string("650000000.0000"), name("dcd") );
 
     read_only::get_account_results results = get_account_info(name("alice1111111"));
@@ -428,8 +428,8 @@ BOOST_FIXTURE_TEST_CASE(account_results_refund_request_test, chain_plugin_tester
     regproducer("producer1111"_n);
 
     read_only::get_account_results results = get_account_info(name("producer1111"));
-//    BOOST_CHECK(results.total_resources.get_type() != fc::variant::type_id::null_type);
-//    BOOST_CHECK_EQUAL(core_from_string("80.0000"), results.total_resources["net_weight"].as<asset>());
+    BOOST_CHECK(results.total_resources.get_type() != fc::variant::type_id::null_type);
+    BOOST_CHECK_EQUAL(core_from_string("80.0000"), results.total_resources["net_weight"].as<asset>());
 
     //cross 15 percent threshold
     {
@@ -441,11 +441,12 @@ BOOST_FIXTURE_TEST_CASE(account_results_refund_request_test, chain_plugin_tester
                                               mvo()
                                                       ("from", name{config::system_account_name})
                                                       ("receiver", "producer1111")
-                                                      ("stake_net_quantity", core_from_string("150000000.0000") )
-                                                      ("stake_cpu_quantity", core_from_string("0.0000") )
+                                                       ("stake_net_quantity", core_from_string("150000000.0000") )
+                                                       ("stake_cpu_quantity", core_from_string("0.0000") )
                                                       ("transfer", 1 )
                                   )
         );
+        
         trx.actions.emplace_back( get_action( config::system_account_name, "voteproducer"_n,
                                               vector<permission_level>{{"producer1111"_n, config::active_name}},
                                               mvo()
@@ -462,14 +463,14 @@ BOOST_FIXTURE_TEST_CASE(account_results_refund_request_test, chain_plugin_tester
     }
 
     results = get_account_info(name("producer1111"));
-//    BOOST_CHECK_EQUAL(core_from_string("150000080.0000"), results.total_resources["net_weight"].as<asset>());
+    BOOST_CHECK_EQUAL(core_from_string("150000080.0000"), results.total_resources["net_weight"].as<asset>());
 
     BOOST_CHECK_EQUAL(success(), unstake(name("producer1111"),name("producer1111"), core_from_string("150000000.0000"), core_from_string("0.0000")));
     results = get_account_info(name("producer1111"));
-//    BOOST_CHECK(results.total_resources.get_type() != fc::variant::type_id::null_type);
+    BOOST_CHECK(results.total_resources.get_type() != fc::variant::type_id::null_type);
     BOOST_CHECK(results.refund_request.get_type() != fc::variant::type_id::null_type);
     BOOST_CHECK_EQUAL(core_from_string("150000000.0000"), results.refund_request["net_amount"].as<asset>());
-//    BOOST_CHECK_EQUAL(core_from_string("80.0000"), results.total_resources["net_weight"].as<asset>());
+    BOOST_CHECK_EQUAL(core_from_string("80.0000"), results.total_resources["net_weight"].as<asset>());
 
 
 } FC_LOG_AND_RETHROW() }
@@ -496,7 +497,7 @@ BOOST_FIXTURE_TEST_CASE(account_results_rex_info_test, chain_plugin_tester) { tr
 
     create_account_with_resources("alice1111111"_n, config::system_account_name, core_from_string("1.0000"), false);
 
-    //stake more than 15% of total EOS supply to activate chain
+    //stake more than 15% of total DCD supply to activate chain
     transfer( name("dcd"), name("alice1111111"), core_from_string("650000000.0000"), name("dcd") );
     deposit(name("alice1111111"), core_from_string("1000.0000"));
     BOOST_CHECK_EQUAL( success(), buyrex(name("alice1111111"), core_from_string("100.0000")) );

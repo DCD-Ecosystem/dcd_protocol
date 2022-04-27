@@ -1,6 +1,7 @@
 #pragma once
 #include <dcd/chain_plugin/chain_plugin.hpp>
 #include <dcd/http_plugin/http_plugin.hpp>
+#include <dcd/ws_plugin/ws_plugin.hpp>
 
 #include <appbase/application.hpp>
 #include <dcd/chain/controller.hpp>
@@ -12,7 +13,7 @@ namespace dcd {
 
    class chain_api_plugin : public plugin<chain_api_plugin> {
       public:
-        APPBASE_PLUGIN_REQUIRES((chain_plugin)(http_plugin))
+        APPBASE_PLUGIN_REQUIRES((chain_plugin)(http_plugin)(ws_plugin))
 
         chain_api_plugin();
         virtual ~chain_api_plugin();
