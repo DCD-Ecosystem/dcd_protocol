@@ -98,7 +98,7 @@ const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), te
       data: {
         from: 'useraaaaaaaa',
         to: 'useraaaaaaab',
-        quantity: '0.0001 SYS',
+        quantity: '0.0001 DCD',
         memo: '',
       },
     }]

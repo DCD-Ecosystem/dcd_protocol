@@ -33,6 +33,7 @@ namespace dcdsystem {
     _rexbalance(get_self(), get_self().value),
     _rexorders(get_self(), get_self().value),
     _oracles(get_self(), get_self().value),
+    _fee_changes(get_self(), get_self().value), 
     _fee_proposals(get_self(), get_self().value),
     _fee_proposals_fin(get_self(), get_self().value)
    {

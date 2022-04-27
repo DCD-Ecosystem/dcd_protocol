@@ -67,6 +67,7 @@ struct setfee{
 
 struct setrate{
    double        new_rate;
+   time_point    rate_time;
 
    static account_name get_account() {
       return config::system_account_name;
@@ -183,43 +184,7 @@ struct onerror {
 
 };
 
-struct rmfeeprop{
-   name        owner;
 
-   static account_name get_account() {
-      return config::system_account_name;
-   }
-
-   static action_name get_name() {
-      return "rmfeeprop"_n;
-   }
-};
-
-struct action_fee_prop {
-         name account;
-         name action;
-         asset fee;     
-};
-
-
-struct procfeeprop{
-   name        owner;
-
-   std::vector<name> accounts;
-   std::vector<name> actions;
-   std::vector<asset> fees;
-
-   time_point proposed_at;
-   time_point expires_at;
-
-   static account_name get_account() {
-      return config::system_account_name;
-   }
-
-   static action_name get_name() {
-      return "procfeeprop"_n;
-   }
-};
 
 
 } } /// namespace dcd::chain
@@ -234,7 +199,4 @@ FC_REFLECT( dcd::chain::unlinkauth                       , (account)(code)(type)
 FC_REFLECT( dcd::chain::canceldelay                      , (canceling_auth)(trx_id) )
 FC_REFLECT( dcd::chain::onerror                          , (sender_id)(sent_trx) )
 FC_REFLECT( dcd::chain::setfee                           , (account)(action)(fee) )
-FC_REFLECT( dcd::chain::setrate                          , (new_rate) )
-FC_REFLECT( dcd::chain::procfeeprop                      , (owner)(accounts)(actions)(fees)(proposed_at)(expires_at))
-FC_REFLECT( dcd::chain::rmfeeprop                        , (owner) )
-FC_REFLECT(dcd::chain::action_fee_prop                   , (account)(action)(fee))
+FC_REFLECT( dcd::chain::setrate                          , (new_rate)(rate_time) )

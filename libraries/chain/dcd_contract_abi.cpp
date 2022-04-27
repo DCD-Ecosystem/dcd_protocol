@@ -231,8 +231,9 @@ abi_def dcd_contract_abi(const abi_def& dcd_system_abi)
    });
 
    dcd_abi.structs.emplace_back( struct_def {
-         "setfeeforce", "", {
-               {"new_rate", "double"}
+         "setrate", "", {
+               {"new_rate", "double"},
+               {"rate_time", "time_point"}
          }
    });
 
@@ -253,22 +254,6 @@ abi_def dcd_contract_abi(const abi_def& dcd_system_abi)
          }
    });
 
-   dcd_abi.structs.emplace_back( struct_def {
-         "procfeeprop", "", {
-               {"owner", "account_name"},
-               {"accounts", "name[]"},
-               {"actions", "name[]"},
-               {"fees", "asset[]"},
-               {"proposed_at","time_point"},
-               {"expires_at","time_point"}
-         }
-   });
-
-   dcd_abi.structs.emplace_back( struct_def {
-         "rmfeeprop", "", {
-               {"owner", "name"}
-         }
-   });
 
    // TODO add ricardian contracts
    dcd_abi.actions.push_back( action_def{name("newaccount"), "newaccount",""} );
@@ -276,7 +261,7 @@ abi_def dcd_contract_abi(const abi_def& dcd_system_abi)
    dcd_abi.actions.push_back( action_def{name("setabi"), "setabi",""} );
    dcd_abi.actions.push_back( action_def{name("onfee"), "onfee",""} );
    dcd_abi.actions.push_back( action_def{name("setfee"), "setfee",""} );
-   dcd_abi.actions.push_back( action_def{name("setfeeforce"), "setfeeforce",""} );
+   dcd_abi.actions.push_back( action_def{name("setrate"), "setrate",""} );
    dcd_abi.actions.push_back( action_def{name("updateauth"), "updateauth",""} );
    dcd_abi.actions.push_back( action_def{name("deleteauth"), "deleteauth",""} );
    dcd_abi.actions.push_back( action_def{name("linkauth"), "linkauth",""} );
@@ -284,8 +269,6 @@ abi_def dcd_contract_abi(const abi_def& dcd_system_abi)
    dcd_abi.actions.push_back( action_def{name("canceldelay"), "canceldelay",""} );
    dcd_abi.actions.push_back( action_def{name("onerror"), "onerror",""} );
    dcd_abi.actions.push_back( action_def{name("onblock"), "onblock",""} );
-   dcd_abi.actions.push_back( action_def{name("procfeeprop"), "procfeeprop",""} );
-   dcd_abi.actions.push_back( action_def{name("rmfeeprop"), "rmfeeprop",""} );
    return dcd_abi;
 }
 

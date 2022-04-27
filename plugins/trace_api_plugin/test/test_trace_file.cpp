@@ -103,19 +103,19 @@ namespace {
                         0,
                         "dcd.token"_n, "dcd.token"_n, "transfer"_n,
                         {{ "alice"_n, "active"_n }},
-                        make_transfer_data( "alice"_n, "bob"_n, "0.0001 SYS"_t, "Memo!" )
+                        make_transfer_data( "alice"_n, "bob"_n, "0.0001 DCD"_t, "Memo!" )
                      },
                      {
                         1,
                         "alice"_n, "dcd.token"_n, "transfer"_n,
                         {{ "alice"_n, "active"_n }},
-                        make_transfer_data( "alice"_n, "bob"_n, "0.0001 SYS"_t, "Memo!" )
+                        make_transfer_data( "alice"_n, "bob"_n, "0.0001 DCD"_t, "Memo!" )
                      },
                      {
                         2,
                         "bob"_n, "dcd.token"_n, "transfer"_n,
                         {{ "alice"_n, "active"_n }},
-                        make_transfer_data( "alice"_n, "bob"_n, "0.0001 SYS"_t, "Memo!" )
+                        make_transfer_data( "alice"_n, "bob"_n, "0.0001 DCD"_t, "Memo!" )
                      }
                   }
                },
@@ -168,19 +168,19 @@ namespace {
                      0,
                      "dcd.token"_n, "dcd.token"_n, "transfer"_n,
                      {{ "alice"_n, "active"_n }},
-                     make_transfer_data( "alice"_n, "bob"_n, "0.0001 SYS"_t, "Memo!" )
+                     make_transfer_data( "alice"_n, "bob"_n, "0.0001 DCD"_t, "Memo!" )
                   },
                   {
                      1,
                      "alice"_n, "dcd.token"_n, "transfer"_n,
                      {{ "alice"_n, "active"_n }},
-                     make_transfer_data( "alice"_n, "bob"_n, "0.0001 SYS"_t, "Memo!" )
+                     make_transfer_data( "alice"_n, "bob"_n, "0.0001 DCD"_t, "Memo!" )
                   },
                   {
                      2,
                      "bob"_n, "dcd.token"_n, "transfer"_n,
                      {{ "alice"_n, "active"_n }},
-                     make_transfer_data( "alice"_n, "bob"_n, "0.0001 SYS"_t, "Memo!" )
+                     make_transfer_data( "alice"_n, "bob"_n, "0.0001 DCD"_t, "Memo!" )
                   }
                }
             }

@@ -306,10 +306,13 @@ public:
       flat_set<public_key_type> required_keys;
    };
 
-      struct get_action_fee_params {
+   get_required_keys_result get_required_keys( const get_required_keys_params& params)const;
+
+   struct get_action_fee_params {
       account_name account;
       action_name  action;
    };
+
    struct get_action_fee_result {
       asset core_fee;
       asset usd_fee;
@@ -321,30 +324,29 @@ public:
    struct get_required_fee_params {
       fc::variant transaction;
    };   
+
    struct get_required_fee_result {
       asset required_fee;
    };
 
+   get_required_fee_result get_required_fee( const get_required_fee_params& params)const;
+
    struct get_fee_rate_params {
    };
 
-
    struct get_fee_rate_result {
-      asset           base_rate_asset;
-      uint64_t        new_rate_period;
-      uint64_t        out_of_date_time;
-      double          prev_rate;
       double          cur_rate;
-      fc::time_point  cur_rate_time;
-      std::vector<chain::producers_rate_info>    cur_rate_producers;   
+      asset           base_rate_asset;
+      asset           core_token_value;
    };
+
+   get_fee_rate_result get_fee_rate(const get_fee_rate_params& params)const;
 
    struct action_fee_prop {
          name account;
          name action;
          asset fee;     
-      };
-
+   };
 
    struct get_fee_proposals_params {
       bool        json = false;
@@ -361,10 +363,27 @@ public:
       std::vector<fee_proposal>                    proposals;
    };
 
-   get_required_fee_result get_required_fee( const get_required_fee_params& params)const;
-   get_fee_rate_result get_fee_rate(const get_fee_rate_params& params)const;
    get_fee_proposals_result get_fee_proposals(const get_fee_proposals_params& params)const;
-   
+
+   struct get_fees_approved_params {
+   };
+
+   struct approved_fee_info {
+      name                                                     account_action;
+      name                                                     account;
+      name                                                     action;
+      asset                                                    fee;
+      time_point                                               proposed_at;
+      time_point                                               to_be_applied_at;
+   };
+
+   struct get_fees_approved_result {
+      std::vector<approved_fee_info> approved_fees;
+   };
+
+   get_fees_approved_result get_fees_approved(const get_fees_approved_params& params)const;
+
+
    struct get_rate_schedule_params {
    };
 
@@ -376,7 +395,41 @@ public:
 
    get_rate_schedule_result get_rate_schedule( const get_rate_schedule_params& params )const;
 
-   get_required_keys_result get_required_keys( const get_required_keys_params& params)const;
+   struct get_fee_all_params {
+
+   };
+
+   struct action_fee_params {
+      name        account;
+      name        action;
+      asset       usd_fee;
+      asset       core_fee;
+   };
+
+   struct get_fee_all_result {
+      double      current_rate;
+      std::vector <action_fee_params> fee_info;
+   };
+
+   get_fee_all_result get_fee_all(const get_fee_all_params& params)const;
+
+   struct get_oracles_all_params{
+
+   };
+
+   struct oracle_rate
+   {
+      name                                                     owner;
+      time_point                                               fee_rate_time;
+      double                                                   fee_rate = 0.0;
+   };
+
+   struct get_oracles_all_result {
+      std::vector <oracle_rate> oracles_list;
+   };
+
+   get_oracles_all_result get_oracles_all(const get_oracles_all_params& params)const;
+
 
    using get_transaction_id_params = transaction;
    using get_transaction_id_result = transaction_id_type;
@@ -1212,9 +1265,8 @@ FC_REFLECT( dcd::chain_apis::read_only::abi_bin_to_json_params, (code)(action)(b
 FC_REFLECT( dcd::chain_apis::read_only::abi_bin_to_json_result, (args) )
 FC_REFLECT( dcd::chain_apis::read_only::get_required_keys_params, (transaction)(available_keys) )
 FC_REFLECT( dcd::chain_apis::read_only::get_required_keys_result, (required_keys) )
-FC_REFLECT( dcd::chain_apis::read_only::action_fee_prop, (account)(action)(fee) )
 
-//Fee rate reflects 
+//Fee related api additions
 FC_REFLECT( dcd::chain_apis::read_only::get_action_fee_params, (account)(action) )
 FC_REFLECT( dcd::chain_apis::read_only::get_action_fee_result, (core_fee)(usd_fee)(rate) )
 FC_REFLECT( dcd::chain_apis::read_only::get_required_fee_params, (transaction) )
@@ -1223,4 +1275,14 @@ FC_REFLECT( dcd::chain_apis::read_only::fee_proposal, (owner)(fee_prop_list)(pro
 FC_REFLECT( dcd::chain_apis::read_only::get_fee_proposals_result, (proposals) )
 FC_REFLECT_EMPTY( dcd::chain_apis::read_only::get_fee_rate_params )
 FC_REFLECT_EMPTY( dcd::chain_apis::read_only::get_fee_proposals_params )
-FC_REFLECT( dcd::chain_apis::read_only::get_fee_rate_result, (base_rate_asset)(new_rate_period)(out_of_date_time)(prev_rate)(cur_rate)(cur_rate_time)(cur_rate_producers) )
+FC_REFLECT( dcd::chain_apis::read_only::get_fee_rate_result, (cur_rate)(base_rate_asset)(core_token_value))
+FC_REFLECT( dcd::chain_apis::read_only::action_fee_prop, (account)(action)(fee) )
+FC_REFLECT( dcd::chain_apis::read_only::oracle_rate, (owner)(fee_rate_time)(fee_rate) )
+FC_REFLECT_EMPTY( dcd::chain_apis::read_only::get_oracles_all_params )
+FC_REFLECT( dcd::chain_apis::read_only::get_oracles_all_result, (oracles_list))
+FC_REFLECT_EMPTY( dcd::chain_apis::read_only::get_fee_all_params )
+FC_REFLECT( dcd::chain_apis::read_only::action_fee_params, (account)(action)(usd_fee)(core_fee))
+FC_REFLECT( dcd::chain_apis::read_only::get_fee_all_result, (fee_info)(current_rate))
+FC_REFLECT_EMPTY( dcd::chain_apis::read_only::get_fees_approved_params)
+FC_REFLECT( dcd::chain_apis::read_only::get_fees_approved_result, (approved_fees))
+FC_REFLECT( dcd::chain_apis::read_only::approved_fee_info, (account_action)(account)(action)(fee)(proposed_at)(to_be_applied_at))

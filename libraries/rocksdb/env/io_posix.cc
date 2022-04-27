@@ -211,7 +211,7 @@ bool IsSyncFileRangeSupported(int fd) {
     // `sync_file_range` is not implemented on all platforms even if
     // compile-time checks pass and a supported filesystem is in-use. For
     // example, using ext4 on WSL (Windows Subsystem for Linux),
-    // `sync_file_range()` returns `ENOSYS`
+    // `sync_file_range()` returns `ENODCD`
     // ("Function not implemented").
     return false;
   }

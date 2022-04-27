@@ -282,9 +282,6 @@ struct controller_impl {
    SET_APP_HANDLER( dcd, dcd, unlinkauth );
    SET_APP_HANDLER( dcd, dcd, setfee );
    SET_APP_HANDLER( dcd, dcd, setrate );
-   SET_APP_HANDLER( dcd, dcd, procfeeprop );
-   SET_APP_HANDLER( dcd, dcd, rmfeeprop );
-
 /*
    SET_APP_HANDLER( dcd, dcd, postrecovery );
    SET_APP_HANDLER( dcd, dcd, passrecovery );
@@ -3051,12 +3048,6 @@ int64_t controller::set_proposed_rate( double new_rate ) {
     });
    return version;
 }
-
-int64_t controller::update_proposed_fee( actions_fee_proposals prop ) {
-
-}
-
-
 
 //Transaction fees get proposed rate from the chain
 std::optional<producer_rate_info> controller::proposed_rate()const {

@@ -127,21 +127,40 @@ namespace dcd { namespace chain {
       return info;
    }
 
-   std::vector <actions_fee_proposals> transaction_fee_manager::get_fee_proposals(const controller& ctl) const {
-      std::vector <actions_fee_proposals> result;
+   std::vector<action_fee_info_out> transaction_fee_manager::get_all_fees(const controller& ctl) const {
+      std::vector<action_fee_info_out> results;
       const auto &db = ctl.db();
-      const auto& prop_idx = db.get_index<action_fee_vote_object_index>();
+      const auto& prop_idx = db.get_index<action_fee_object_index>();
+      bool default_fee_added = false;
+
       auto objitr = prop_idx.begin();
       while( objitr != prop_idx.end()) {
-         actions_fee_proposals info;
-         info.owner = objitr->owner;
-         info.fee_prop_list = objitr->fee_prop_list;
-         info.proposed_at = objitr->proposed_at;
-         info.expires_at = objitr->expires_at;
-         result.push_back(info);
+         action_fee_info_out info;
+         
+         info.account = objitr->account;
+         info.action = objitr->message_type;
+         action_fee_info tmp = get_action_fee(ctl, info.account, info.action);        
+         info.usd_fee = tmp.usd_fee;
+         info.core_fee = tmp.core_fee;
+         info.current_rate = tmp.cur_rate;
+         if ( ( info.account == name{"dcd"} ) && ( info.action == name{"defaultfee"} ))
+            default_fee_added = true;
+         results.push_back(info);
          objitr++;
       }
+      
+      if(!default_fee_added)
+      {
+         action_fee_info_out info;
+         info.account = name{"dcd"};
+         info.action = name{"defaultfee"};
+         action_fee_info tmp = get_action_fee(ctl, info.account, info.action);        
+         info.usd_fee = tmp.usd_fee;
+         info.core_fee = tmp.core_fee;
+         info.current_rate = tmp.cur_rate;
+         results.push_back(info);
+      }
 
-      return result;
-   }
+      return results;
+    }
 }}

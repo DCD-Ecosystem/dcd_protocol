@@ -2844,40 +2844,116 @@ read_only::get_fee_rate_result read_only::get_fee_rate(const get_fee_rate_params
    auto res = db.get_transaction_fee_manager().get_fee_rate(db);
    get_fee_rate_result result;
    result.base_rate_asset = res.base_rate_asset;
-   result.new_rate_period = res.new_rate_period;
-   result.out_of_date_time = res.out_of_date_time;
-   result.prev_rate = res.prev_rate;
    result.cur_rate = res.cur_rate;
-   result.cur_rate_time = res.cur_rate_time;
-   result.cur_rate_producers = res.cur_rate_producers;
+   result.core_token_value = asset(res.base_rate_asset.get_amount() * res.cur_rate, extract_core_symbol());
    return result;
 }
 
-read_only::get_fee_proposals_result read_only::get_fee_proposals(const read_only::get_fee_proposals_params& p)const {
+read_only::get_fee_proposals_result read_only::get_fee_proposals(const read_only::get_fee_proposals_params& params)const {
 
    read_only::get_fee_proposals_result result; 
-   auto res = db.get_transaction_fee_manager().get_fee_proposals(db);
+   const auto code = config::system_account_name;
+   const auto scope = config::system_account_name;
+   const auto table = "feeproposals"_n;
+   const auto& d = db.db();
+   const auto* t_id = d.find<chain::table_id_object, chain::by_code_scope_table>(boost::make_tuple(code, scope, table));
+   if (t_id != nullptr) {
+      const auto &idx = d.get_index<chain::key_value_index, chain::by_scope_primary>();
+      decltype(t_id->id) next_tid(t_id->id._id + 1);
+      auto lower = idx.lower_bound(boost::make_tuple(t_id->id));
+      auto upper = idx.lower_bound(boost::make_tuple(next_tid));
 
-   for (auto r : res)
-   {
-      fee_proposal tmp_res; 
-      tmp_res.owner = r.owner;
-      
-      for ( auto pr : r.fee_prop_list)
-      {
-         action_fee_prop tmp;
-         tmp.action = pr.action;
-         tmp.account = pr.account;
-         tmp.fee = pr.fee;
-         tmp_res.fee_prop_list.push_back(tmp);
+      for (auto itr = lower; itr != upper; ++itr) {
+         fc::datastream<const char *> ds(itr->value.data(), itr->value.size());
+         fee_proposal tmp;
+         fc::raw::unpack(ds, tmp.owner);
+         fc::raw::unpack(ds, tmp.proposed_at);
+         fc::raw::unpack(ds, tmp.expires_at);
+         fc::raw::unpack(ds, tmp.fee_prop_list);
+         result.proposals.push_back(tmp);
       }
-      tmp_res.proposed_at = r.proposed_at;
-      tmp_res.expires_at = r.expires_at;
-      result.proposals.push_back(tmp_res);
    }
 
    return result;
 } 
+
+read_only::get_fees_approved_result read_only::get_fees_approved(const read_only::get_fees_approved_params& params)const
+{
+   get_fees_approved_result result;
+
+   const auto code = config::system_account_name;
+   const auto scope = config::system_account_name;
+   const auto table = name{"feechanges"};
+   const auto& d = db.db();
+   const auto* t_id = d.find<chain::table_id_object, chain::by_code_scope_table>(boost::make_tuple(code, scope, table));
+   if (t_id != nullptr) {
+      const auto &idx = d.get_index<chain::key_value_index, chain::by_scope_primary>();
+      decltype(t_id->id) next_tid(t_id->id._id + 1);
+      auto lower = idx.lower_bound(boost::make_tuple(t_id->id));
+      auto upper = idx.lower_bound(boost::make_tuple(next_tid));
+
+      for (auto itr = lower; itr != upper; ++itr) {
+         fc::datastream<const char *> ds(itr->value.data(), itr->value.size());
+         approved_fee_info tmp;
+         fc::raw::unpack(ds, tmp.account_action);
+         fc::raw::unpack(ds, tmp.account);
+         fc::raw::unpack(ds, tmp.action);
+         fc::raw::unpack(ds, tmp.fee);
+         fc::raw::unpack(ds, tmp.proposed_at);
+         fc::raw::unpack(ds, tmp.to_be_applied_at);
+         result.approved_fees.push_back(tmp);
+      }
+   }
+   return result;
+}
+
+read_only::get_fee_all_result read_only::get_fee_all(const read_only::get_fee_all_params& params)const {
+   
+   read_only::get_fee_all_result result; 
+   auto res = db.get_transaction_fee_manager().get_all_fees(db);
+   for (auto r  : res ) {
+         action_fee_params pr;
+         pr.account = r.account;
+         pr.action = r.action;
+         pr.usd_fee = r.usd_fee;
+         pr.core_fee = r.core_fee;
+         result.current_rate = r.current_rate;
+         result.fee_info.push_back (pr);
+      }
+   return result;
+}
+
+read_only::get_oracles_all_result read_only::get_oracles_all(const read_only::get_oracles_all_params& params)const {
+
+   read_only::get_oracles_all_result result; 
+   const auto code = config::system_account_name;
+   const auto scope = config::system_account_name;
+
+
+   // const abi_def abi = dcd::chain_apis::get_abi( db, code );
+   const auto table = "oracles"_n;
+
+   const auto& d = db.db();
+   const auto* t_id = d.find<chain::table_id_object, chain::by_code_scope_table>(boost::make_tuple(code, scope, table));
+   if (t_id != nullptr) {
+      const auto &idx = d.get_index<chain::key_value_index, chain::by_scope_primary>();
+      decltype(t_id->id) next_tid(t_id->id._id + 1);
+      auto lower = idx.lower_bound(boost::make_tuple(t_id->id));
+      auto upper = idx.lower_bound(boost::make_tuple(next_tid));
+
+      for (auto itr = lower; itr != upper; ++itr) {
+         fc::datastream<const char *> ds(itr->value.data(), itr->value.size());
+         oracle_rate tmp;
+         fc::raw::unpack(ds, tmp.owner);
+         fc::raw::unpack(ds, tmp.fee_rate_time);
+         fc::raw::unpack(ds, tmp.fee_rate);
+         result.oracles_list.push_back(tmp);
+      }
+   }
+   return result;
+
+}
+
 
 template<typename Api>
 struct resolver_factory {

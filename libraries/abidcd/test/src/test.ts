@@ -446,18 +446,18 @@ function check_types() {
     check_throw('Error: unrecognized signature format', () => dcdjs_json_to_hex(js2Types, 'signature', 'foo'));
     check_type(0, js2Types, 'symbol_code', '"A"');
     check_type(0, js2Types, 'symbol_code', '"B"');
-    check_type(0, js2Types, 'symbol_code', '"SYS"');
+    check_type(0, js2Types, 'symbol_code', '"DCD"');
     check_throw('Error: Expected string containing symbol_code', () => dcdjs_json_to_hex(js2Types, 'symbol_code', true));
     check_type(0, js2Types, 'symbol', '"0,A"');
     check_type(0, js2Types, 'symbol', '"1,Z"');
-    check_type(0, js2Types, 'symbol', '"4,SYS"');
+    check_type(0, js2Types, 'symbol', '"4,DCD"');
     check_throw('Error: Expected string containing symbol', () => dcdjs_json_to_hex(js2Types, 'symbol', null));
     check_type(0, js2Types, 'asset', '"0 FOO"');
     check_type(0, js2Types, 'asset', '"0.0 FOO"');
     check_type(0, js2Types, 'asset', '"0.00 FOO"');
     check_type(0, js2Types, 'asset', '"0.000 FOO"');
-    check_type(0, js2Types, 'asset', '"1.2345 SYS"');
-    check_type(0, js2Types, 'asset', '"-1.2345 SYS"');
+    check_type(0, js2Types, 'asset', '"1.2345 DCD"');
+    check_type(0, js2Types, 'asset', '"-1.2345 DCD"');
     check_throw('Error: Expected string containing asset', () => dcdjs_json_to_hex(js2Types, 'asset', null));
     check_type(0, js2Types, 'asset[]', '[]');
     check_type(0, js2Types, 'asset[]', '["0 FOO"]');
@@ -467,7 +467,7 @@ function check_types() {
     check_type(0, js2Types, 'extended_asset', '{"quantity":"0 FOO","contract":"bar"}');
     check_type(0, js2Types, 'extended_asset', '{"quantity":"0.123456 SIX","contract":"seven"}');
 
-    check_type(token, tokenTypes, "transfer", '{"from":"useraaaaaaaa","to":"useraaaaaaab","quantity":"0.0001 SYS","memo":"test memo"}');
+    check_type(token, tokenTypes, "transfer", '{"from":"useraaaaaaaa","to":"useraaaaaaab","quantity":"0.0001 DCD","memo":"test memo"}');
     check_type(0, js2Types, "transaction", '{"expiration":"2009-02-13T23:31:31.000","ref_block_num":1234,"ref_block_prefix":5678,"max_net_usage_words":0,"max_cpu_usage_ms":0,"delay_sec":0,"context_free_actions":[],"actions":[{"account":"dcd.token","name":"transfer","authorization":[{"actor":"useraaaaaaaa","permission":"active"}],"data":"608C31C6187315D6708C31C6187315D60100000000000000045359530000000000"}],"transaction_extensions":[]}');
 
     check_type(test, testTypes, "v1", '["int8",7]');
@@ -497,7 +497,7 @@ async function push_transfer() {
     check(l.abidcd_json_to_bin(context, name('dcd.token'), type, jsonStr({
         from: 'useraaaaaaaa',
         to: 'useraaaaaaab',
-        quantity: '0.0001 SYS',
+        quantity: '0.0001 DCD',
         memo: '',
     })));
     const actionDataHex = l.abidcd_get_bin_hex(context).readCString();
