@@ -1,5 +1,5 @@
 {
-    "____comment": "This file was generated with dcd-abigen. DO NOT EDIT Mon Mar 11 20:20:06 2019",
+    "____comment": "This file was generated with dcd-abigen. DO NOT EDIT Tue Mar 29 10:37:37 2022",
     "version": "eosio::abi/1.1",
     "structs": [
         {
@@ -279,28 +279,6 @@
             ]
         },
         {
-            "name": "setalimits",
-            "base": "",
-            "fields": [
-                {
-                    "name": "account",
-                    "type": "name"
-                },
-                {
-                    "name": "ram_bytes",
-                    "type": "int64"
-                },
-                {
-                    "name": "net_weight",
-                    "type": "int64"
-                },
-                {
-                    "name": "cpu_weight",
-                    "type": "int64"
-                }
-            ]
-        },
-        {
             "name": "setcode",
             "base": "",
             "fields": [
@@ -319,24 +297,6 @@
                 {
                     "name": "code",
                     "type": "bytes"
-                }
-            ]
-        },
-        {
-            "name": "setglimits",
-            "base": "",
-            "fields": [
-                {
-                    "name": "ram",
-                    "type": "uint64"
-                },
-                {
-                    "name": "net",
-                    "type": "uint64"
-                },
-                {
-                    "name": "cpu",
-                    "type": "uint64"
                 }
             ]
         },
@@ -467,18 +427,8 @@
             "ricardian_contract": ""
         },
         {
-            "name": "setalimits",
-            "type": "setalimits",
-            "ricardian_contract": ""
-        },
-        {
             "name": "setcode",
             "type": "setcode",
-            "ricardian_contract": ""
-        },
-        {
-            "name": "setglimits",
-            "type": "setglimits",
             "ricardian_contract": ""
         },
         {

@@ -116,8 +116,8 @@ try {
    BOOST_TEST( name{""}.to_string() == "" );
    BOOST_TEST( name{"e"}.to_string() == "e" );
    BOOST_TEST( name{"eo"}.to_string() == "eo" );
-   BOOST_TEST( name{"eos"}.to_string() == "eos" );
-   BOOST_TEST( name{"eosi"}.to_string() == "eosi" );
+   BOOST_TEST( name{"dcd"}.to_string() == "dcd" );
+   BOOST_TEST( name{"dcdi"}.to_string() == "dcdi" );
    BOOST_TEST( name{"dcd"}.to_string() == "dcd" );
    BOOST_TEST( name{"dcda"}.to_string() == "dcda" );
    BOOST_TEST( name{"dcdac"}.to_string() == "dcdac" );

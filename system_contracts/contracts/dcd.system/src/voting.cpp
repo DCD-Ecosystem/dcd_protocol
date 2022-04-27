@@ -85,38 +85,6 @@ namespace dcdsystem {
       require_auth( producer );
       check( url.size() < 512, "url too long" );
 
-//      vote_stake_updater( producer );
-//      update_voting_power( producer, asset( 200000000.0000, system_contract::get_core_symbol() ));
-
-//      buyrambytes( producer, producer, 8192 );
-//      delegatebw( producer, producer,
-//                                           asset( 100000000.0000, system_contract::get_core_symbol() ),
-//                                           asset( 100000000.0000, system_contract::get_core_symbol() ), true );
-
-//      auto vitr = _voters.find( producer.value );
-//      if ( vitr != _voters.end() ) {
-//          _voters.modify( vitr, same_payer, [&]( auto& v ) {
-//              v.flags1 = set_field( v.flags1, voter_info::flags1_fields::cpu_managed, true );
-//              v.flags1 = set_field( v.flags1, voter_info::flags1_fields::ram_managed, true );
-//              v.flags1 = set_field( v.flags1, voter_info::flags1_fields::net_managed, true );
-//          });
-//      } else {
-//          _voters.emplace( producer, [&]( auto& v ) {
-//              v.owner  = producer;
-//              v.flags1 = set_field( v.flags1, voter_info::flags1_fields::cpu_managed, true );
-//              v.flags1 = set_field( v.flags1, voter_info::flags1_fields::ram_managed, true );
-//              v.flags1 = set_field( v.flags1, voter_info::flags1_fields::net_managed, true );
-//          });
-//      }
-
-//      user_resources_table  userres( get_self(), producer.value );
-
-//            userres.emplace( producer, [&]( auto& res ) {
-//              res.owner = producer;
-//              res.net_weight = asset( 10000, system_contract::get_core_symbol() );
-//              res.cpu_weight = asset( 10000, system_contract::get_core_symbol() );
-//            });
-
       register_producer( producer, convert_to_block_signing_authority( producer_key ), url, location );
    }
 
@@ -155,6 +123,7 @@ namespace dcdsystem {
       
       return true;
       */
+      return false;
    }
 
    void system_contract::replace_confirmed(const name& prod_to_delete,const name& prod_to_replace) {
@@ -618,6 +587,13 @@ namespace dcdsystem {
             v.last_vote_weight = new_weight;
          }
       );
+   }
+
+   void system_contract::update_producers_count() {
+      uint32_t count = 0;
+      for (const auto prod : _producers)
+         ++count;
+      _gstate3.producers_count = count;
    }
 
 } /// namespace dcdsystem

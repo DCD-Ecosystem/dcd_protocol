@@ -74,8 +74,8 @@ void blocklog::read_log() {
    
    block_log block_logger({ .log_dir = blocks_dir });
    const auto end = block_logger.head();
-   EOS_ASSERT( end, block_log_exception, "No blocks found in block log" );
-   EOS_ASSERT( end->block_num() > 1, block_log_exception, "Only one block found in block log" );
+   DCD_ASSERT( end, block_log_exception, "No blocks found in block log" );
+   DCD_ASSERT( end->block_num() > 1, block_log_exception, "Only one block found in block log" );
 
    //fix message below, first block might not be 1, first_block_num is not set yet
    ilog( "existing block log contains block num ${first} through block num ${n}",

@@ -204,7 +204,7 @@ total_nodes = pnodes
 killCount=1
 killSignal=Utils.SigKillTag
 
-killEosInstances= not args.leave_running
+killDcdInstances= not args.leave_running
 dumpErrorDetails=args.dump_error_details
 keepLogs=args.keep_logs
 killAll=args.clean_run
@@ -224,7 +224,7 @@ try:
     cluster.cleanup()
 
     if cluster.launch(pnodes=pnodes, totalNodes=total_nodes, topo=topo,delay=delay, dontBootstrap=True) is False:
-        errorExit("Failed to stand up eos cluster.")
+        errorExit("Failed to stand up dcd cluster.")
     cluster.killall(allInstances=killAll)
 
     testAll()
@@ -233,7 +233,7 @@ try:
 finally:
     if debug: Print("Cleanup in finally block.")
     cleanDirectories()
-    TestHelper.shutdown(cluster, None, testSuccessful, killEosInstances, False, keepLogs, killAll, dumpErrorDetails)
+    TestHelper.shutdown(cluster, None, testSuccessful, killDcdInstances, False, keepLogs, killAll, dumpErrorDetails)
 
 if debug: Print("Exiting test, exit value 0.")
 exit(0)

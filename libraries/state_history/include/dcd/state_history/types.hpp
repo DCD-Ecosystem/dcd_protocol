@@ -66,7 +66,7 @@ class opaque {
    template <typename ST>
    void pack_to(ST& ds) const {
       // we need to pack as big vector because it can be used to hold the state delta object
-      // which would be as large as the eos snapshot when the dcdnode restarted from a snapshot.
+      // which would be as large as the dcd snapshot when the dcdnode restarted from a snapshot.
       pack_big_bytes(ds, this->data);
    }
 

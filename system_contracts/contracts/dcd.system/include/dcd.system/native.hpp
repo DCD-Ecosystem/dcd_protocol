@@ -10,7 +10,6 @@
 #include <dcd/producer_schedule.hpp>
 #include <dcd/asset.hpp>
 
-
 namespace dcdsystem {
 
    using dcd::checksum256;
@@ -31,7 +30,7 @@ namespace dcdsystem {
       uint16_t          weight;
 
       // explicit serialization macro is not necessary, used here only to improve compilation time
-      EOSLIB_SERIALIZE( permission_level_weight, (permission)(weight) )
+      DCDLIB_SERIALIZE( permission_level_weight, (permission)(weight) )
    };
 
    /**
@@ -44,7 +43,7 @@ namespace dcdsystem {
       uint16_t           weight;
 
       // explicit serialization macro is not necessary, used here only to improve compilation time
-      EOSLIB_SERIALIZE( key_weight, (key)(weight) )
+      DCDLIB_SERIALIZE( key_weight, (key)(weight) )
    };
 
    /**
@@ -57,7 +56,7 @@ namespace dcdsystem {
       uint16_t           weight;
 
       // explicit serialization macro is not necessary, used here only to improve compilation time
-      EOSLIB_SERIALIZE( wait_weight, (wait_sec)(weight) )
+      DCDLIB_SERIALIZE( wait_weight, (wait_sec)(weight) )
    };
 
    /**
@@ -76,7 +75,7 @@ namespace dcdsystem {
       std::vector<wait_weight>              waits;
 
       // explicit serialization macro is not necessary, used here only to improve compilation time
-      EOSLIB_SERIALIZE( authority, (threshold)(keys)(accounts)(waits) )
+      DCDLIB_SERIALIZE( authority, (threshold)(keys)(accounts)(waits) )
    };
 
    struct rate_schedule {
@@ -113,13 +112,11 @@ namespace dcdsystem {
       checksum256                               transaction_mroot;
       checksum256                               action_mroot;
       uint32_t                                  schedule_version = 0;
-      uint32_t                                  rate_version = 0;
-      std::optional<rate_schedule>              new_rate;
       std::optional<dcd::producer_schedule>     new_producers;
 
       // explicit serialization macro is not necessary, used here only to improve compilation time
-      EOSLIB_SERIALIZE(block_header, (timestamp)(producer)(confirmed)(previous)(transaction_mroot)(action_mroot)
-                                     (schedule_version)(new_producers)(rate_version)(new_rate))
+      DCDLIB_SERIALIZE(block_header, (timestamp)(producer)(confirmed)(previous)(transaction_mroot)(action_mroot)
+                                     (schedule_version)(new_producers))
    };
 
    /**
@@ -132,7 +129,7 @@ namespace dcdsystem {
       checksum256       hash;
       uint64_t primary_key()const { return owner.value; }
 
-      EOSLIB_SERIALIZE( abi_hash, (owner)(hash) )
+      DCDLIB_SERIALIZE( abi_hash, (owner)(hash) )
    };
 
    // Method parameters commented out to prevent generation of code that parses input data.
@@ -271,9 +268,23 @@ namespace dcdsystem {
                       const ignore<name> action, 
                       const ignore<asset> fee ) {}
 
-         [[dcd::action]]
-         void setfeeforce( const ignore<double> new_rate) {}
+      [[dcd::action]]
+      void setrate( const ignore<double> new_rate) {}
 
+
+      struct action_fee_prop {
+         name account;
+         name action;
+         asset fee;     
+         DCDLIB_SERIALIZE(action_fee_prop, (account)(action)(fee))
+      };
+
+      [[dcd::action]]
+      void procfeeprop( name owner,std::vector <name> accounts, std::vector <name> actions, std::vector <asset> fees, dcd::time_point proposed_at, dcd::time_point expires_at ) {}
+
+      [[dcd::action]]
+      void rmfeeprop( name owner) {}
+      
 
 
          using newaccount_action = dcd::action_wrapper<"newaccount"_n, &native::newaccount>;
@@ -285,6 +296,9 @@ namespace dcdsystem {
          using setcode_action = dcd::action_wrapper<"setcode"_n, &native::setcode>;
          using setabi_action = dcd::action_wrapper<"setabi"_n, &native::setabi>;
          using setfee_action = dcd::action_wrapper<"setfee"_n, &native::setfee>;
-         using setfeeforce_action = dcd::action_wrapper<"setfeeforce"_n, &native::setfeeforce>;
+         using setrate_action = dcd::action_wrapper<"setrate"_n, &native::setrate>;
+         using procfeeprop_action = dcd::action_wrapper<"procfeeprop"_n, &native::procfeeprop>;
+         using rmfeeprop_action = dcd::action_wrapper<"rmfeeprop"_n, &native::rmfeeprop>;
+
    };
 }

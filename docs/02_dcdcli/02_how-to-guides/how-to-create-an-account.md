@@ -9,7 +9,7 @@ Create a new DCD blockchain account
 | The dcdcli tool is bundled with the DCD software. [Installing DCD](../../00_install/index.md) will also install the dcdcli tool. 
 
 * Acquire functional understanding of the following:
-  * [DCD Accounts and Permissions](https://developers.eos.io/welcome/v2.1/protocol/accounts_and_permissions)
+  * [DCD Accounts and Permissions](https://developers.dcd.io/welcome/v2.1/protocol/accounts_and_permissions)
   * Asymmetric cryptography (public and private keypair) 
 
 * Created an Owner and an Active key pair
@@ -40,8 +40,8 @@ Where:
 
 **Example Output**
 ```sh
-dcdcli create account dcd bob EOS87TQktA5RVse2EguhztfQVEh6XXxBmgkU8b4Y5YnGvtYAoLGNN
+dcdcli create account dcd bob DCD87TQktA5RVse2EguhztfQVEh6XXxBmgkU8b4Y5YnGvtYAoLGNN
 executed transaction: 4d65a274de9f809f9926b74c3c54aadc0947020bcfb6dd96043d1bcd9c46604c  200 bytes  166 us
-#         dcd <= dcd::newaccount            {"creator":"dcd","name":"bob","owner":{"threshold":1,"keys":[{"key":"EOS87TQktA5RVse2EguhztfQVEh6X...
+#         dcd <= dcd::newaccount            {"creator":"dcd","name":"bob","owner":{"threshold":1,"keys":[{"key":"DCD87TQktA5RVse2EguhztfQVEh6X...
 warning: transaction executed locally, but may not be confirmed by the network yet         ]
 ```

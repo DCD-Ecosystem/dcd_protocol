@@ -27,7 +27,7 @@ Utils.Debug=args.v
 killAll=args.clean_run
 dumpErrorDetails=args.dump_error_details
 dontKill=args.leave_running
-killEosInstances=not dontKill
+killDcdInstances=not dontKill
 killWallet=not dontKill
 keepLogs=args.keep_logs
 alternateVersionLabelsFile=args.alternate_version_labels_file
@@ -240,7 +240,7 @@ try:
 
     testSuccessful = True
 finally:
-    TestHelper.shutdown(cluster, walletMgr, testSuccessful, killEosInstances, killWallet, keepLogs, killAll, dumpErrorDetails)
+    TestHelper.shutdown(cluster, walletMgr, testSuccessful, killDcdInstances, killWallet, keepLogs, killAll, dumpErrorDetails)
 
 exitCode = 0 if testSuccessful else 1
 exit(exitCode)

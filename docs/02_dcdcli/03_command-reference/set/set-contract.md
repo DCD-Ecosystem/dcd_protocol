@@ -56,11 +56,11 @@ Publishing contract...
     "expiration": "2017-08-24T18:29:52",
     "scope": [
       "currency",
-      "eos"
+      "dcd"
     ],
     "signatures": [],
     "messages": [{
-        "code": "eos",
+        "code": "dcd",
         "type": "setcode",
         "authorization": [{
             "account": "currency",

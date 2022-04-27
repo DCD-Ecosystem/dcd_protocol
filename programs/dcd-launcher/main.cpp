@@ -110,7 +110,7 @@ struct local_identity {
 
 } local_id;
 
-class eosd_def;
+class dcdd_def;
 
 class host_def {
 public:
@@ -141,7 +141,7 @@ public:
   uint16_t         base_p2p_port;
   uint16_t         base_http_port;
   uint16_t         def_file_size;
-  vector<eosd_def> instances;
+  vector<dcdd_def> instances;
 
   uint16_t p2p_port() {
     return base_p2p_port + p2p_count++;
@@ -191,9 +191,9 @@ protected:
 
 class tn_node_def;
 
-class eosd_def {
+class dcdd_def {
 public:
-  eosd_def()
+  dcdd_def()
     : config_dir_name (),
       data_dir_name (),
       p2p_port(),
@@ -238,13 +238,13 @@ public:
   vector<private_key_type> keys;
   vector<string>  peers;
   vector<string>  producers;
-  eosd_def*       instance;
+  dcdd_def*       instance;
   string          gelf_endpoint;
   bool            dont_start = false;
 };
 
 void
-eosd_def::mk_dot_label () {
+dcdd_def::mk_dot_label () {
   dot_label_str = name + "\\nprod=";
   if (node == 0 || node->producers.empty()) {
     dot_label_str += "<none>";
@@ -262,7 +262,7 @@ eosd_def::mk_dot_label () {
 }
 
 void
-eosd_def::set_host( host_def* h, bool is_bios ) {
+dcdd_def::set_host( host_def* h, bool is_bios ) {
   host = h->host_name;
   p2p_port = is_bios ? h->p2p_bios_port() : h->p2p_port();
   http_port = is_bios ? h->http_bios_port() : h->http_port();
@@ -402,7 +402,7 @@ struct launcher_def {
    bfs::path config_dir_base;
    bfs::path data_dir_base;
    bool skip_transaction_signatures = false;
-   string eosd_extra_args;
+   string dcdd_extra_args;
    std::map<uint,string> specific_dcdnode_args;
    std::map<uint,string> specific_dcdnode_installation_paths;
    testnet_def network;
@@ -426,7 +426,7 @@ struct launcher_def {
    std::optional<uint32_t> max_transaction_cpu_usage;
    dcd::chain::genesis_state genesis_from_file;
 
-   void assign_name (eosd_def &node, bool is_bios);
+   void assign_name (dcdd_def &node, bool is_bios);
 
    void set_options (bpo::options_description &cli);
    void initialize (const variables_map &vmap);
@@ -459,12 +459,12 @@ struct launcher_def {
    void format_ssh (const string &cmd, const string &host_name, string &ssh_cmd_line);
    void do_command(const host_def& host, const string& name, vector<pair<string, string>> env_pairs, const string& cmd);
    bool do_ssh (const string &cmd, const string &host_name);
-   void prep_remote_config_dir (eosd_def &node, host_def *host);
-   void launch (eosd_def &node, string &gts);
+   void prep_remote_config_dir (dcdd_def &node, host_def *host);
+   void launch (dcdd_def &node, string &gts);
    void kill (launch_modes mode, string sig_opt);
    static string get_node_num(uint16_t node_num);
-   pair<host_def, eosd_def> find_node(uint16_t node_num);
-   vector<pair<host_def, eosd_def>> get_nodes(const string& node_number_list);
+   pair<host_def, dcdd_def> find_node(uint16_t node_num);
+   vector<pair<host_def, dcdd_def>> get_nodes(const string& node_number_list);
    void bounce (const string& node_numbers);
    void down (const string& node_numbers);
    void roll (const string& host_names);
@@ -485,7 +485,7 @@ launcher_def::set_options (bpo::options_description &cfg) {
     ("shape,s",bpo::value<string>(&shape)->default_value("star"),"network topology, use \"star\" \"mesh\" or give a filename for custom")
     ("genesis,g",bpo::value<string>()->default_value("./genesis.json"),"set the path to genesis.json")
     ("skip-signature", bpo::bool_switch(&skip_transaction_signatures)->default_value(false), (string(node_executable_name) + " does not require transaction signatures.").c_str())
-    (node_executable_name, bpo::value<string>(&eosd_extra_args), ("forward " + string(node_executable_name) + " command line argument(s) to each instance of " + string(node_executable_name) + ", enclose arg(s) in quotes").c_str())
+    (node_executable_name, bpo::value<string>(&dcdd_extra_args), ("forward " + string(node_executable_name) + " command line argument(s) to each instance of " + string(node_executable_name) + ", enclose arg(s) in quotes").c_str())
     ("specific-num", bpo::value<vector<uint>>()->composing(), ("forward " + string(node_executable_name) + " command line argument(s) (using \"--specific-" + string(node_executable_name) + "\" flag) to this specific instance of " + string(node_executable_name) + ". This parameter can be entered multiple times and requires a paired \"--specific-" + string(node_executable_name) +"\" flag each time it is used").c_str())
     (("specific-" + string(node_executable_name)).c_str(), bpo::value<vector<string>>()->composing(), ("forward " + string(node_executable_name) + " command line argument(s) to its paired specific instance of " + string(node_executable_name) + "(using \"--specific-num\"), enclose arg(s) in quotes").c_str())
     ("spcfc-inst-num", bpo::value<vector<uint>>()->composing(), ("Specify a specific version installation path (using \"--spcfc-inst-"+ string(node_executable_name) + "\" flag) for launching this specific instance of " + string(node_executable_name) + ". This parameter can be entered multiple times and requires a paired \"--spcfc-inst-" + string(node_executable_name) + "\" flag each time it is used").c_str())
@@ -595,11 +595,11 @@ launcher_def::initialize (const variables_map &vmap) {
     try {
       fc::json::from_file(host_map_file).as<vector<host_def>>(bindings);
       for (auto &binding : bindings) {
-        for (auto &eosd : binding.instances) {
-          eosd.host = binding.host_name;
-          eosd.p2p_endpoint = binding.public_name + ":" + boost::lexical_cast<string,uint16_t>(eosd.p2p_port);
+        for (auto &dcdd : binding.instances) {
+          dcdd.host = binding.host_name;
+          dcdd.p2p_endpoint = binding.public_name + ":" + boost::lexical_cast<string,uint16_t>(dcdd.p2p_port);
 
-          aliases.push_back (eosd.name);
+          aliases.push_back (dcdd.name);
         }
       }
     } catch (...) { // this is an optional feature, so an exception is OK
@@ -694,7 +694,7 @@ launcher_def::load_servers () {
 
 
 void
-launcher_def::assign_name (eosd_def &node, bool is_bios) {
+launcher_def::assign_name (dcdd_def &node, bool is_bios) {
    string node_cfg_name;
 
    if (is_bios) {
@@ -788,11 +788,11 @@ launcher_def::define_network () {
     local_host.dcd_home = erd;
     local_host.genesis = genesis.string();
     for (size_t i = 0; i < (total_nodes); i++) {
-      eosd_def eosd;
-      assign_name(eosd, i == 0);
-      aliases.push_back(eosd.name);
-      eosd.set_host (&local_host, i == 0);
-      local_host.instances.emplace_back(move(eosd));
+      dcdd_def dcdd;
+      assign_name(dcdd, i == 0);
+      aliases.push_back(dcdd.name);
+      dcdd.set_host (&local_host, i == 0);
+      local_host.instances.emplace_back(move(dcdd));
     }
     bindings.emplace_back(move(local_host));
   }
@@ -836,13 +836,13 @@ launcher_def::define_network () {
         host_ndx++;
       } // ph_count == 0
 
-      eosd_def eosd;
-      assign_name(eosd, do_bios);
+      dcdd_def dcdd;
+      assign_name(dcdd, do_bios);
 
-      aliases.push_back(eosd.name);
-      eosd.set_host (lhost.get(), do_bios);
+      aliases.push_back(dcdd.name);
+      dcdd.set_host (lhost.get(), do_bios);
       do_bios = false;
-      lhost->instances.emplace_back(move(eosd));
+      lhost->instances.emplace_back(move(dcdd));
       --ph_count;
     } // for i
     bindings.emplace_back( move(*lhost) );
@@ -944,7 +944,7 @@ launcher_def::find_host_by_name_or_address (const string &host_id)
 host_def *
 launcher_def::deploy_config_files (tn_node_def &node) {
   boost::system::error_code ec;
-  eosd_def &instance = *node.instance;
+  dcdd_def &instance = *node.instance;
   host_def *host = find_host (instance.host);
 
   bfs::path source = stage / instance.config_dir_name / "config.ini";
@@ -1057,7 +1057,7 @@ void
 launcher_def::write_config_file (tn_node_def &node) {
    bool is_bios = (node.name == "bios");
    bfs::path filename;
-   eosd_def &instance = *node.instance;
+   dcdd_def &instance = *node.instance;
    host_def *host = find_host (instance.host);
 
    bfs::path dd = stage / instance.config_dir_name;
@@ -1133,7 +1133,7 @@ launcher_def::write_config_file (tn_node_def &node) {
 void
 launcher_def::write_logging_config_file(tn_node_def &node) {
   bfs::path filename;
-  eosd_def &instance = *node.instance;
+  dcdd_def &instance = *node.instance;
 
   bfs::path dd = stage / instance.config_dir_name;
   if (!bfs::exists(dd)) {
@@ -1203,7 +1203,7 @@ launcher_def::init_genesis () {
 void
 launcher_def::write_genesis_file(tn_node_def &node) {
   bfs::path filename;
-  eosd_def &instance = *node.instance;
+  dcdd_def &instance = *node.instance;
 
   bfs::path dd = stage / instance.config_dir_name;
   if (!bfs::exists(dd)) {
@@ -1449,7 +1449,7 @@ launcher_def::do_ssh (const string &cmd, const string &host_name) {
 }
 
 void
-launcher_def::prep_remote_config_dir (eosd_def &node, host_def *host) {
+launcher_def::prep_remote_config_dir (dcdd_def &node, host_def *host) {
   bfs::path abs_config_dir = bfs::path(host->dcd_home) / node.config_dir_name;
   bfs::path abs_data_dir = bfs::path(host->dcd_home) / node.data_dir_name;
 
@@ -1499,7 +1499,7 @@ launcher_def::prep_remote_config_dir (eosd_def &node, host_def *host) {
 }
 
 void
-launcher_def::launch (eosd_def &instance, string &gts) {
+launcher_def::launch (dcdd_def &instance, string &gts) {
   bfs::path dd = instance.data_dir_name;
   bfs::path reout = dd / "stdout.txt";
   bfs::path reerr_sl = dd / "stderr.txt";
@@ -1524,29 +1524,29 @@ launcher_def::launch (eosd_def &instance, string &gts) {
         install_path = specific_dcdnode_installation_paths[node_num] + "/";
      }
   }
-  string eosdcmd = install_path + "programs/dcdnode/" + string(node_executable_name) + " ";
+  string dcddcmd = install_path + "programs/dcdnode/" + string(node_executable_name) + " ";
   if (skip_transaction_signatures) {
-    eosdcmd += "--skip-transaction-signatures ";
+    dcddcmd += "--skip-transaction-signatures ";
   }
-  if (!eosd_extra_args.empty()) {
-    eosdcmd += eosd_extra_args + " ";
+  if (!dcdd_extra_args.empty()) {
+    dcddcmd += dcdd_extra_args + " ";
   }
   if (instance.name != "bios" && !specific_dcdnode_args.empty()) {
      const auto node_num = boost::lexical_cast<uint16_t,string>(instance.get_node_num());
      if (specific_dcdnode_args.count(node_num)) {
-        eosdcmd += specific_dcdnode_args[node_num] + " ";
+        dcddcmd += specific_dcdnode_args[node_num] + " ";
      }
   }
 
   if( add_enable_stale_production ) {
-    eosdcmd += "--enable-stale-production true ";
+    dcddcmd += "--enable-stale-production true ";
     add_enable_stale_production = false;
   }
 
-  eosdcmd += " --config-dir " + instance.config_dir_name + " --data-dir " + instance.data_dir_name;
-  eosdcmd += " --genesis-json " + instance.config_dir_name + "/genesis.json";
+  dcddcmd += " --config-dir " + instance.config_dir_name + " --data-dir " + instance.data_dir_name;
+  dcddcmd += " --genesis-json " + instance.config_dir_name + "/genesis.json";
   if (gts.length()) {
-    eosdcmd += " --genesis-timestamp " + gts;
+    dcddcmd += " --genesis-timestamp " + gts;
   }
 
   if (!host->is_local()) {
@@ -1555,7 +1555,7 @@ launcher_def::launch (eosd_def &instance, string &gts) {
       exit (-1);
     }
     string cmdl ("cd ");
-    cmdl += host->dcd_home + "; nohup " + eosdcmd + " > "
+    cmdl += host->dcd_home + "; nohup " + dcddcmd + " > "
       + reout.string() + " 2> " + reerr.string() + "& echo $! > " + pidf.string()
       + "; rm -f " + reerr_sl.string()
       + "; ln -s " + reerr_base.string() + " " + reerr_sl.string();
@@ -1569,9 +1569,9 @@ launcher_def::launch (eosd_def &instance, string &gts) {
     format_ssh (cmd, host->host_name, info.kill_cmd);
   }
   else if (!instance.node->dont_start) {
-    cerr << "spawning child, " << eosdcmd << endl;
+    cerr << "spawning child, " << dcddcmd << endl;
 
-    bp::child c(eosdcmd, bp::std_out > reout, bp::std_err > reerr );
+    bp::child c(dcddcmd, bp::std_out > reout, bp::std_err > reerr );
     bfs::remove(reerr_sl);
     bfs::create_symlink (reerr_base, reerr_sl);
 
@@ -1583,7 +1583,7 @@ launcher_def::launch (eosd_def &instance, string &gts) {
     info.kill_cmd = "";
 
     if(!c.running()) {
-      cerr << "child not running after spawn " << eosdcmd << endl;
+      cerr << "child not running after spawn " << dcddcmd << endl;
       for (int i = 0; i > 0; i++) {
         if (c.running () ) break;
       }
@@ -1591,13 +1591,13 @@ launcher_def::launch (eosd_def &instance, string &gts) {
     c.detach();
   }
   else {
-    cerr << "not spawning child, " << eosdcmd << endl;
+    cerr << "not spawning child, " << dcddcmd << endl;
 
     const bfs::path dd = instance.data_dir_name;
     const bfs::path start_file  = dd / "start.cmd";
     bfs::ofstream sf (start_file);
 
-    sf << eosdcmd << endl;
+    sf << dcddcmd << endl;
     sf.close();
   }
   last_run.running_nodes.emplace_back (move(info));
@@ -1605,7 +1605,7 @@ launcher_def::launch (eosd_def &instance, string &gts) {
 
 #if 0
 void
-launcher_def::kill_instance(eosd_def, string sig_opt) {
+launcher_def::kill_instance(dcdd_def, string sig_opt) {
 }
 #endif
 
@@ -1670,7 +1670,7 @@ launcher_def::get_node_num(uint16_t node_num) {
    return node_num_str;
 }
 
-pair<host_def, eosd_def>
+pair<host_def, dcdd_def>
 launcher_def::find_node(uint16_t node_num) {
    const string node_name = network.name + get_node_num(node_num);
    for (const auto& host: bindings) {
@@ -1684,9 +1684,9 @@ launcher_def::find_node(uint16_t node_num) {
    exit (-1);
 }
 
-vector<pair<host_def, eosd_def>>
+vector<pair<host_def, dcdd_def>>
 launcher_def::get_nodes(const string& node_number_list) {
-   vector<pair<host_def, eosd_def>> node_list;
+   vector<pair<host_def, dcdd_def>> node_list;
    if (fc::to_lower(node_number_list) == "all") {
       for (auto host: bindings) {
          for (auto node: host.instances) {
@@ -1745,10 +1745,10 @@ launcher_def::bounce (const string& node_numbers) {
    auto node_list = get_nodes(node_numbers);
    for (auto node_pair: node_list) {
       const host_def& host = node_pair.first;
-      const eosd_def& node = node_pair.second;
+      const dcdd_def& node = node_pair.second;
       const string node_num = node.get_node_num();
       cout << "Bouncing " << node.name << endl;
-      string cmd = "./scripts/dcd-tn_bounce.sh " + eosd_extra_args;
+      string cmd = "./scripts/dcd-tn_bounce.sh " + dcdd_extra_args;
       if (node_num != "bios" && !specific_dcdnode_args.empty()) {
          const auto node_num_i = boost::lexical_cast<uint16_t,string>(node_num);
          if (specific_dcdnode_args.count(node_num_i)) {
@@ -1765,7 +1765,7 @@ launcher_def::down (const string& node_numbers) {
    auto node_list = get_nodes(node_numbers);
    for (auto node_pair: node_list) {
       const host_def& host = node_pair.first;
-      const eosd_def& node = node_pair.second;
+      const dcdd_def& node = node_pair.second;
       const string node_num = node.get_node_num();
       cout << "Taking down " << node.name << endl;
       string cmd = "./scripts/dcd-tn_down.sh ";
@@ -2055,7 +2055,7 @@ FC_REFLECT( host_def,
             (instances) )
 
 // @ignore node, dot_label_str
-FC_REFLECT( eosd_def,
+FC_REFLECT( dcdd_def,
             (config_dir_name)(data_dir_name)(p2p_port)
             (http_port)(file_size)(name)(host)
             (p2p_endpoint) )

@@ -1102,7 +1102,7 @@ BOOST_FIXTURE_TEST_CASE(noop, TESTER) try {
  } FC_LOG_AND_RETHROW()
 
 // abi_serializer::to_variant failed because dcd_system_abi modified via set_abi.
-// This test also verifies that chain_initializer::eos_contract_abi() does not conflict
+// This test also verifies that chain_initializer::dcd_contract_abi() does not conflict
 // with dcd_system_abi as they are not allowed to contain duplicates.
 BOOST_FIXTURE_TEST_CASE(dcd_abi, TESTER) try {
    produce_blocks(2);
@@ -1127,7 +1127,7 @@ BOOST_FIXTURE_TEST_CASE(dcd_abi, TESTER) try {
    auto result = push_transaction( trx );
 
    fc::variant pretty_output;
-   // verify to_variant works on eos native contract type: newaccount
+   // verify to_variant works on dcd native contract type: newaccount
    // see abi_serializer::to_abi()
    abi_serializer::to_variant(*result, pretty_output, get_resolver(), abi_serializer::create_yield_function( abi_serializer_max_time ));
 
@@ -1806,7 +1806,7 @@ static char reset_memory_fail1_wast[] = R"======(
 )
 )======";
 
-// In a previous version of eos-vm, this would leave
+// In a previous version of dcd-vm, this would leave
 // memory incorrectly accessible to the next action.
 static char reset_memory_fail2_wast[] = R"======(
 (module
@@ -1849,7 +1849,7 @@ BOOST_FIXTURE_TEST_CASE( reset_memory_fail, TESTER ) try {
    produce_block();
 } FC_LOG_AND_RETHROW()
 
-// TODO: Update to use eos-vm once merged
+// TODO: Update to use dcd-vm once merged
 BOOST_AUTO_TEST_CASE( code_size )  try {
    using namespace IR;
    using namespace Runtime;
@@ -1990,7 +1990,7 @@ BOOST_AUTO_TEST_CASE( billed_cpu_test ) try {
    chain.produce_block( fc::days(1) ); // produce for one day to reset account cpu
 
 //   cpu_limit = mgr.get_account_cpu_limit_ex(acc).first.max;
-//   cpu_limit -= EOS_PERCENT( cpu_limit, 10 * config::percent_1 ); // transaction_context verifies within 10%, so subtract 10% out
+//   cpu_limit -= DCD_PERCENT( cpu_limit, 10 * config::percent_1 ); // transaction_context verifies within 10%, so subtract 10% out
 
    ptrx = create_trx(0);
 //   BOOST_CHECK_LT( cpu_limit, max_cpu_time_us );
@@ -2018,7 +2018,7 @@ BOOST_AUTO_TEST_CASE( billed_cpu_test ) try {
    ptrx = create_trx(0);
 //   uint32_t combined_cpu_limit = mgr.get_account_cpu_limit_ex(acc).first.max + leeway.count();
    uint32_t subjective_cpu_bill_us = leeway.count();
-//   uint32_t billed_cpu_time_us = EOS_PERCENT( (combined_cpu_limit - subjective_cpu_bill_us), 89 *config::percent_1 );
+//   uint32_t billed_cpu_time_us = DCD_PERCENT( (combined_cpu_limit - subjective_cpu_bill_us), 89 *config::percent_1 );
 //   push_trx( ptrx, fc::time_point::maximum(), billed_cpu_time_us, false, subjective_cpu_bill_us );
 
    // Allow transaction with billed cpu less than 90% of (account cpu limit + leeway) if subject bill is 0
@@ -2028,7 +2028,7 @@ BOOST_AUTO_TEST_CASE( billed_cpu_test ) try {
    ptrx = create_trx(0);
 //   combined_cpu_limit = mgr.get_account_cpu_limit_ex(acc).first.max + leeway.count();
    subjective_cpu_bill_us = 0;
-//   billed_cpu_time_us = EOS_PERCENT( combined_cpu_limit - subjective_cpu_bill_us, 89 *config::percent_1 );
+//   billed_cpu_time_us = DCD_PERCENT( combined_cpu_limit - subjective_cpu_bill_us, 89 *config::percent_1 );
 //   push_trx( ptrx, fc::time_point::maximum(), billed_cpu_time_us, false, subjective_cpu_bill_us );
 
    // Disallow transaction with billed cpu equal to 90% of (account cpu limit + leeway - subjective bill)
@@ -2038,13 +2038,13 @@ BOOST_AUTO_TEST_CASE( billed_cpu_test ) try {
 //   cpu_limit = mgr.get_account_cpu_limit_ex(acc).first.max;
 //   combined_cpu_limit = cpu_limit + leeway.count();
 //   subjective_cpu_bill_us = cpu_limit;
-//   billed_cpu_time_us = EOS_PERCENT( combined_cpu_limit - subjective_cpu_bill_us, 90 * config::percent_1 );
+//   billed_cpu_time_us = DCD_PERCENT( combined_cpu_limit - subjective_cpu_bill_us, 90 * config::percent_1 );
 //   BOOST_CHECK_EXCEPTION(push_trx( ptrx, fc::time_point::maximum(), billed_cpu_time_us, false, subjective_cpu_bill_us ), tx_cpu_usage_exceeded,
 //                         fc_exception_message_starts_with("estimated") );
 
    // Disallow transaction with billed cpu greater 90% of (account cpu limit + leeway - subjective bill)
    subjective_cpu_bill_us = 0;
-//   billed_cpu_time_us = EOS_PERCENT( combined_cpu_limit - subjective_cpu_bill_us, 91 * config::percent_1 );
+//   billed_cpu_time_us = DCD_PERCENT( combined_cpu_limit - subjective_cpu_bill_us, 91 * config::percent_1 );
 //   BOOST_CHECK_EXCEPTION(push_trx( ptrx, fc::time_point::maximum(), billed_cpu_time_us, false, subjective_cpu_bill_us ), tx_cpu_usage_exceeded,
 //                         fc_exception_message_starts_with("estimated") );
 
@@ -2062,7 +2062,7 @@ BOOST_AUTO_TEST_CASE( billed_cpu_test ) try {
    // Allow transaction with billed cpu less than 90% of leeway subjective bill being 0 to run but fail it if no cpu is staked afterwards
    ptrx = create_trx(0);
    subjective_cpu_bill_us = 0;
-//   billed_cpu_time_us = EOS_PERCENT( leeway.count(), 89 *config::percent_1 );
+//   billed_cpu_time_us = DCD_PERCENT( leeway.count(), 89 *config::percent_1 );
 //   BOOST_CHECK_EXCEPTION(push_trx( ptrx, fc::time_point::maximum(), billed_cpu_time_us, false, subjective_cpu_bill_us ), tx_cpu_usage_exceeded,
 //                         fc_exception_message_starts_with("billed") );
 

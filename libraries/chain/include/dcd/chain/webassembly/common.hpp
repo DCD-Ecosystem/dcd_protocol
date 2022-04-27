@@ -68,20 +68,20 @@ namespace dcd { namespace chain {
       using base_type::elem_type;
       using base_type::get_host;
 
-      EOS_VM_FROM_WASM(memcpy_params, (void* dst, const void* src, vm::wasm_size_t size)) {
+      DCD_VM_FROM_WASM(memcpy_params, (void* dst, const void* src, vm::wasm_size_t size)) {
          validate_pointer<char>(dst, size);
          validate_pointer<char>(src, size);
          validate_pointer<char>(dst, 1);
          return { dst, src, size };
       }
 
-      EOS_VM_FROM_WASM(memcmp_params, (const void* lhs, const void* rhs, vm::wasm_size_t size)) {
+      DCD_VM_FROM_WASM(memcmp_params, (const void* lhs, const void* rhs, vm::wasm_size_t size)) {
          validate_pointer<char>(lhs, size);
          validate_pointer<char>(rhs, size);
          return { lhs, rhs, size };
       }
 
-      EOS_VM_FROM_WASM(memset_params, (void* dst, int32_t val, vm::wasm_size_t size)) {
+      DCD_VM_FROM_WASM(memset_params, (void* dst, int32_t val, vm::wasm_size_t size)) {
          validate_pointer<char>(dst, size);
          validate_pointer<char>(dst, 1);
          return { dst, val, size };
@@ -100,23 +100,23 @@ namespace dcd { namespace chain {
          -> std::enable_if_t< vm::is_argument_proxy_type_v<T> &&
                               std::is_pointer_v<typename T::proxy_type>, T> {
          if constexpr(T::is_legacy()) {
-            EOS_ASSERT(ptr != this->get_interface().get_memory(), wasm_execution_error, "references cannot be created for null pointers");
+            DCD_ASSERT(ptr != this->get_interface().get_memory(), wasm_execution_error, "references cannot be created for null pointers");
          }
          this->template validate_pointer<typename T::pointee_type>(ptr, 1);
          return {ptr};
       }
 
-      EOS_VM_FROM_WASM(null_terminated_ptr, (const void* ptr)) {
+      DCD_VM_FROM_WASM(null_terminated_ptr, (const void* ptr)) {
          validate_null_terminated_pointer(ptr);
          return {static_cast<const char*>(ptr)};
       }
-      EOS_VM_FROM_WASM(name, (uint64_t e)) { return name{e}; }
+      DCD_VM_FROM_WASM(name, (uint64_t e)) { return name{e}; }
       uint64_t to_wasm(name&& n) { return n.to_uint64_t(); }
-      EOS_VM_FROM_WASM(float32_t, (float f)) { return ::to_softfloat32(f); }
-      EOS_VM_FROM_WASM(float64_t, (double f)) { return ::to_softfloat64(f); }
+      DCD_VM_FROM_WASM(float32_t, (float f)) { return ::to_softfloat32(f); }
+      DCD_VM_FROM_WASM(float64_t, (double f)) { return ::to_softfloat64(f); }
    };
 
-   using eos_vm_host_functions_t = dcd::vm::registered_host_functions<webassembly::interface,
+   using dcd_vm_host_functions_t = dcd::vm::registered_host_functions<webassembly::interface,
                                                                         dcd::vm::execution_interface,
                                                                         dcd::chain::type_converter>;
    using wasm_size_t = dcd::vm::wasm_size_t;

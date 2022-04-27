@@ -70,7 +70,7 @@ std::vector<table_delta> create_deltas(const chainbase::database& db, bool full_
       if (obj)
          return *obj;
       auto it = removed_table_id.find(tid);
-      EOS_ASSERT(it != removed_table_id.end(), chain::plugin_exception, "can not found table id ${tid}", ("tid", tid));
+      DCD_ASSERT(it != removed_table_id.end(), chain::plugin_exception, "can not found table id ${tid}", ("tid", tid));
       return *it->second;
    };
 
@@ -169,7 +169,7 @@ std::vector<table_delta> create_deltas_rocksdb(const chainbase::database& db, co
         [](dcd::chain::kv_undo_stack_ptr::element_type::session_type* session){
           return session;
         }, [](auto*){
-          EOS_ASSERT(false, dcd::chain::chain_exception, "undo_stack is empty");
+          DCD_ASSERT(false, dcd::chain::chain_exception, "undo_stack is empty");
           static dcd::chain::kv_undo_stack_ptr::element_type::session_type* invalid = nullptr;
           return invalid;
         }}, kv_undo_stack->top().holder());

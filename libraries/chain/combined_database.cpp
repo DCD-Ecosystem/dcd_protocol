@@ -237,7 +237,7 @@ namespace dcd { namespace chain {
 
    void combined_database::check_backing_store_setting(bool clean_startup) {
       if (backing_store != db.get<kv_db_config_object>().backing_store) {   
-         EOS_ASSERT(clean_startup, database_move_kv_disk_exception,
+         DCD_ASSERT(clean_startup, database_move_kv_disk_exception,
                    "Existing state indicates a different backing store is in use; use resync, replay, or restore from snapshot to switch backing store");
          db.modify(db.get<kv_db_config_object>(), [this](auto& cfg) { cfg.backing_store = backing_store; });
       }
@@ -337,7 +337,7 @@ namespace dcd { namespace chain {
          case backing_store_type::CHAINBASE:
             return create_kv_chainbase_context<kv_resource_manager>(db, receiver, resource_manager, limits);
       }
-      EOS_ASSERT(false, action_validate_exception, "Unknown backing store.");
+      DCD_ASSERT(false, action_validate_exception, "Unknown backing store.");
    }
 
    std::unique_ptr<db_context> combined_database::create_db_context(apply_context& context, name receiver) {
@@ -347,7 +347,7 @@ namespace dcd { namespace chain {
          case backing_store_type::CHAINBASE:
             return backing_store::create_db_chainbase_context(context, receiver);
          default:
-            EOS_ASSERT(false, action_validate_exception, "Unknown backing store.");
+            DCD_ASSERT(false, action_validate_exception, "Unknown backing store.");
       }
    }
 
@@ -406,7 +406,7 @@ namespace dcd { namespace chain {
          }
 
          snapshot_head_block = head_header_state.block_num;
-         EOS_ASSERT(blog_start <= (snapshot_head_block + 1) && snapshot_head_block <= blog_end, block_log_exception,
+         DCD_ASSERT(blog_start <= (snapshot_head_block + 1) && snapshot_head_block <= blog_end, block_log_exception,
                     "Block log is provided with snapshot but does not contain the head block from the snapshot nor a "
                     "block right after it",
                     ("snapshot_head_block", snapshot_head_block)("block_log_first_num",
@@ -443,7 +443,7 @@ namespace dcd { namespace chain {
 
             if (std::clamp(header.version, v2::minimum_version, v2::maximum_version) == header.version) {
                std::optional<genesis_state> genesis = extract_legacy_genesis_state(*snapshot, header.version);
-               EOS_ASSERT(genesis, snapshot_exception,
+               DCD_ASSERT(genesis, snapshot_exception,
                           "Snapshot indicates chain_snapshot_header version 2, but does not contain a genesis_state. "
                           "It must be corrupted.");
                snapshot->read_section<global_property_object>(
@@ -505,7 +505,7 @@ namespace dcd { namespace chain {
       });
 
       const auto& gpo = db.get<global_property_object>();
-      EOS_ASSERT(gpo.chain_id == chain_id, chain_id_type_exception,
+      DCD_ASSERT(gpo.chain_id == chain_id, chain_id_type_exception,
                  "chain ID in snapshot (${snapshot_chain_id}) does not match the chain ID that controller was "
                  "constructed with (${controller_chain_id})",
                  ("snapshot_chain_id", gpo.chain_id)("controller_chain_id", chain_id));

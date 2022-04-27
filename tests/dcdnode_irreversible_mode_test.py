@@ -35,7 +35,7 @@ Utils.Debug = args.v
 killAll=args.clean_run
 dumpErrorDetails=args.dump_error_details
 dontKill=args.leave_running
-killEosInstances=not dontKill
+killDcdInstances=not dontKill
 killWallet=not dontKill
 keepLogs=args.keep_logs
 
@@ -395,7 +395,7 @@ try:
    testSuccessful = testSuccessful and executeTest(9, switchToSpecModeWithIrrModeSnapshot)
 
 finally:
-   TestHelper.shutdown(cluster, walletMgr, testSuccessful, killEosInstances, killWallet, keepLogs, killAll, dumpErrorDetails)
+   TestHelper.shutdown(cluster, walletMgr, testSuccessful, killDcdInstances, killWallet, keepLogs, killAll, dumpErrorDetails)
    # Print test result
    for msg in testResultMsgs:
       Print(msg)

@@ -45,11 +45,11 @@ localTest=True
 cluster=Cluster(host=server, port=port, walletd=True, defproduceraPrvtKey=defproduceraPrvtKey, defproducerbPrvtKey=defproducerbPrvtKey)
 walletMgr=WalletMgr(True, port=walletPort)
 testSuccessful=False
-killEosInstances=not dontKill
+killDcdInstances=not dontKill
 killWallet=not dontKill
 dontBootstrap=sanityTest
 
-WalletdName=Utils.EosWalletName
+WalletdName=Utils.DcdWalletName
 ClientName="dcdcli"
 
 try:
@@ -66,7 +66,7 @@ try:
                          dontBootstrap=dontBootstrap, useBiosBootFile=False,
                          pfSetupPolicy=PFSetupPolicy.NONE, extradcdnodeArgs=" --plugin dcd::producer_api_plugin  --http-max-response-time-ms 990000 ") is False:
             cmdError("launcher")
-            errorExit("Failed to stand up eos cluster.")
+            errorExit("Failed to stand up dcd cluster.")
 
     Print("Validating system accounts after bootstrap")
     cluster.validateAccounts(None)
@@ -171,6 +171,6 @@ try:
 
     testSuccessful=True
 finally:
-    TestHelper.shutdown(cluster, walletMgr, testSuccessful, killEosInstances, killWallet, keepLogs, killAll, dumpErrorDetails)
+    TestHelper.shutdown(cluster, walletMgr, testSuccessful, killDcdInstances, killWallet, keepLogs, killAll, dumpErrorDetails)
 
 exit(0)

@@ -4,14 +4,14 @@
 namespace dcd { namespace chain { namespace webassembly {
    inline static constexpr size_t max_assert_message = 1024;
    void interface::abort() const {
-      EOS_ASSERT( false, abort_called, "abort() called" );
+      DCD_ASSERT( false, abort_called, "abort() called" );
    }
 
    void interface::dcd_assert( bool condition, null_terminated_ptr msg ) const {
       if( BOOST_UNLIKELY( !condition ) ) {
          const size_t sz = strnlen( msg.data(), max_assert_message );
          std::string message( msg.data(), sz );
-         EOS_THROW( dcd_assert_message_exception, "assertion failure with message: ${s}", ("s",message) );
+         DCD_THROW( dcd_assert_message_exception, "assertion failure with message: ${s}", ("s",message) );
       }
    }
 
@@ -19,7 +19,7 @@ namespace dcd { namespace chain { namespace webassembly {
       if( BOOST_UNLIKELY( !condition ) ) {
          const size_t sz = msg.size() > max_assert_message ? max_assert_message : msg.size();
          std::string message( msg.data(), sz );
-         EOS_THROW( dcd_assert_message_exception, "assertion failure with message: ${s}", ("s",message) );
+         DCD_THROW( dcd_assert_message_exception, "assertion failure with message: ${s}", ("s",message) );
       }
    }
 

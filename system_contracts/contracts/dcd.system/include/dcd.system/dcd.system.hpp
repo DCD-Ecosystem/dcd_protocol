@@ -85,6 +85,14 @@ namespace dcdsystem {
    static constexpr uint16_t min_top_producers_count = 3; // for check in top_prodecers set
    static constexpr uint16_t max_top_producers_count = 101; // for check in top_prodecers set
    static constexpr uint32_t time_to_vote_for_del_producer = 24 * 3600 * 5; // 5 days
+   static constexpr uint32_t oracles_update_period_seconds =  5 * 60  ; // 5 minutes
+   static constexpr uint32_t proposed_fee_update_period_seconds =  1 * 60  ; // 1 minutes
+   static constexpr uint32_t fee_approved_application_delay = 5 * 60; // 5 minutes
+   static constexpr uint32_t fee_vote_expiration_limit = 2 * 24 * 60 * 60; // 2 days
+   static constexpr double vote_percent_to_succeed = 0.75;
+   static constexpr double vote_percent_to_fail = 0.2;
+
+   
   /**
    * The `dcd.system` smart contract is provided by `block.one` as a sample system contract, and it defines the structures and actions needed for blockchain's core functionality.
    * 
@@ -114,9 +122,6 @@ namespace dcdsystem {
      uint64_t by_high_bid()const { return static_cast<uint64_t>(-high_bid); }
    };
 
-
-
-
    // A bid refund, which is defined by:
    // - the `bidder` account name owning the refund
    // - the `amount` to be refunded
@@ -143,7 +148,7 @@ namespace dcdsystem {
       uint64_t by_time()const { return start_time.elapsed.count(); }
 
       // explicit serialization macro is not necessary, used here only to improve compilation time
-      EOSLIB_SERIALIZE( del_producer_vote, (to_delete)(to_replace)(start_time)(voted) )
+      DCDLIB_SERIALIZE( del_producer_vote, (to_delete)(to_replace)(start_time)(voted) )
    };
 
    typedef dcd::multi_index< "delprodvote"_n, del_producer_vote,
@@ -160,7 +165,7 @@ namespace dcdsystem {
       uint64_t primary_key()const { return start_time.elapsed.count(); }
 
       // explicit serialization macro is not necessary, used here only to improve compilation time
-      EOSLIB_SERIALIZE( del_producer_result, (to_delete)(to_replace)(start_time)(voting_result) )
+      DCDLIB_SERIALIZE( del_producer_result, (to_delete)(to_replace)(start_time)(voting_result) )
    };
 
    typedef dcd::multi_index< "delprodinfo"_n, del_producer_result > del_producer_result_table;
@@ -204,7 +209,7 @@ namespace dcdsystem {
       block_timestamp      last_name_close;
 
       // explicit serialization macro is not necessary, used here only to improve compilation time
-      EOSLIB_SERIALIZE_DERIVED( dcd_global_state, dcd::blockchain_parameters,
+      DCDLIB_SERIALIZE_DERIVED( dcd_global_state, dcd::blockchain_parameters,
                                 (max_ram_size)(total_ram_bytes_reserved)(total_ram_stake)
                                 (last_producer_schedule_update)(last_pervote_bucket_fill)
                                 (pervote_bucket)(perblock_bucket)(total_unpaid_blocks)(total_activated_stake)(thresh_activated_stake_time)
@@ -223,7 +228,7 @@ namespace dcdsystem {
       double            total_producer_votepay_share = 0;
       uint8_t           revision = 0; ///< used to track version updates in the future.
 
-      EOSLIB_SERIALIZE( dcd_global_state2, (new_ram_per_block)(last_ram_increase)(last_block_num)
+      DCDLIB_SERIALIZE( dcd_global_state2, (new_ram_per_block)(last_ram_increase)(last_block_num)
                         (total_producer_votepay_share)(revision) )
    };
 
@@ -232,8 +237,11 @@ namespace dcdsystem {
       dcd_global_state3() { }
       time_point        last_vpay_state_update;
       double            total_vpay_share_change_rate = 0;
-
-      EOSLIB_SERIALIZE( dcd_global_state3, (last_vpay_state_update)(total_vpay_share_change_rate) )
+      time_point        oracles_last_updated;
+      time_point        commision_last_update;
+      double            last_oracle_rate = 1.0;
+      uint32_t          producers_count = 0;
+      DCDLIB_SERIALIZE( dcd_global_state3, (last_vpay_state_update)(total_vpay_share_change_rate)(oracles_last_updated)(commision_last_update)(last_oracle_rate)(producers_count))
    };
 
    // Defines new global state parameters to store inflation rate and distribution
@@ -243,8 +251,9 @@ namespace dcdsystem {
       int64_t  inflation_pay_factor;
       int64_t  votepay_factor;
 
-      EOSLIB_SERIALIZE( dcd_global_state4, (continuous_rate)(inflation_pay_factor)(votepay_factor) )
+      DCDLIB_SERIALIZE( dcd_global_state4, (continuous_rate)(inflation_pay_factor)(votepay_factor) )
    };
+ 
 
    inline dcd::block_signing_authority convert_to_block_signing_authority( const dcd::public_key& producer_key ) {
       return dcd::block_signing_authority_v0{ .threshold = 1, .keys = {{producer_key, 1}} };
@@ -344,7 +353,7 @@ namespace dcdsystem {
       uint64_t primary_key()const { return owner.value; }
 
       // explicit serialization macro is not necessary, used here only to improve compilation time
-      EOSLIB_SERIALIZE( producer_info2, (owner)(votepay_share)(last_votepay_share_update) )
+      DCDLIB_SERIALIZE( producer_info2, (owner)(votepay_share)(last_votepay_share_update) )
    };
 
    // Voter info. Voter info stores information about the voter:
@@ -381,7 +390,7 @@ namespace dcdsystem {
       };
 
       // explicit serialization macro is not necessary, used here only to improve compilation time
-      EOSLIB_SERIALIZE( voter_info, (owner)(proxy)(producers)(staked)(last_vote_weight)(proxied_vote_weight)(is_proxy)(flags1)(reserved2)(reserved3) )
+      DCDLIB_SERIALIZE( voter_info, (owner)(proxy)(producers)(staked)(last_vote_weight)(proxied_vote_weight)(is_proxy)(flags1)(reserved2)(reserved3) )
    };
 
 
@@ -404,6 +413,7 @@ namespace dcdsystem {
 
    typedef dcd::singleton< "global4"_n, dcd_global_state4 > global_state4_singleton;
 
+
    struct [[dcd::table, dcd::contract("dcd.system")]] user_resources {
       name          owner;
       asset         net_weight;
@@ -414,7 +424,7 @@ namespace dcdsystem {
       uint64_t primary_key()const { return owner.value; }
 
       // explicit serialization macro is not necessary, used here only to improve compilation time
-      EOSLIB_SERIALIZE( user_resources, (owner)(net_weight)(cpu_weight)(ram_bytes) )
+      DCDLIB_SERIALIZE( user_resources, (owner)(net_weight)(cpu_weight)(ram_bytes) )
    };
 
    // Every user 'from' has a scope/table that uses every receipient 'to' as the primary key.
@@ -428,7 +438,7 @@ namespace dcdsystem {
       uint64_t  primary_key()const { return to.value; }
 
       // explicit serialization macro is not necessary, used here only to improve compilation time
-      EOSLIB_SERIALIZE( delegated_bandwidth, (from)(to)(net_weight)(cpu_weight) )
+      DCDLIB_SERIALIZE( delegated_bandwidth, (from)(to)(net_weight)(cpu_weight) )
 
    };
 
@@ -442,7 +452,7 @@ namespace dcdsystem {
       uint64_t  primary_key()const { return owner.value; }
 
       // explicit serialization macro is not necessary, used here only to improve compilation time
-      EOSLIB_SERIALIZE( refund_request, (owner)(request_time)(net_amount)(cpu_amount) )
+      DCDLIB_SERIALIZE( refund_request, (owner)(request_time)(net_amount)(cpu_amount) )
    };
 
 
@@ -643,7 +653,7 @@ namespace dcdsystem {
                                                             //    token supply. Do not specify to preserve the existing
                                                             //    setting (no default exists).
 
-      EOSLIB_SERIALIZE( powerup_config_resource, (current_weight_ratio)(target_weight_ratio)(assumed_stake_weight)
+      DCDLIB_SERIALIZE( powerup_config_resource, (current_weight_ratio)(target_weight_ratio)(assumed_stake_weight)
                                                 (target_timestamp)(exponent)(decay_secs)(min_price)(max_price)    )
    };
 
@@ -655,7 +665,7 @@ namespace dcdsystem {
       std::optional<asset>    min_powerup_fee;  // Fees below this amount are rejected. Do not specify to preserve the
                                                 //    existing setting (no default exists).
 
-      EOSLIB_SERIALIZE( powerup_config, (net)(cpu)(powerup_days)(min_powerup_fee) )
+      DCDLIB_SERIALIZE( powerup_config, (net)(cpu)(powerup_days)(min_powerup_fee) )
    };
 
    struct powerup_state_resource {
@@ -749,7 +759,6 @@ namespace dcdsystem {
          producers_table2         _producers2;
          del_producer_vote_table  _prodstodelete;
          del_producer_result_table _prodsdelinfo;
-         oracle_table             _oracles;
          global_state_singleton   _global;
          global_state2_singleton  _global2;
          global_state3_singleton  _global3;
@@ -764,8 +773,11 @@ namespace dcdsystem {
          rex_return_buckets_table _rexretbuckets;
          rex_fund_table           _rexfunds;
          rex_balance_table        _rexbalance;
-         rex_order_table          _rexorders;
+         rex_order_table                   _rexorders;
          actions_fee_proposals_table       _fee_proposals;
+         fee_proposals_finalized_table     _fee_proposals_fin;
+         oracle_table             _oracles;
+
 
       public:
          static constexpr dcd::name active_permission{"active"_n};
@@ -1318,7 +1330,7 @@ namespace dcdsystem {
           * @pre If proxy is set then proxy account must exist and be registered as a proxy
           * @pre Every listed producer or proxy must have been previously registered
           * @pre Voter must authorize this action
-          * @pre Voter must have previously staked some EOS for voting
+          * @pre Voter must have previously staked some DCD for voting
           * @pre Voter->staked must be up to date
           *
           * @post Every producer previously voted for will have vote reduced by previous vote weight
@@ -1461,24 +1473,21 @@ namespace dcdsystem {
           */
          [[dcd::action]]
          void powerup( const name& payer, const name& receiver, uint32_t days, int64_t net_frac, int64_t cpu_frac, const asset& max_payment );
+          
+         [[dcd::action]]
+         void regoracle( const name& oracle );
 
          [[dcd::action]]
-         void listfeeprop();
+         void unregoracle( const name& oracle );
+         
+         [[dcd::action]]
+         void setrateorcl( const name& oracle, const double fee_rate );
+ 
+         [[dcd::action]]
+         void votefeeprop(const name& producer, const name& prod_suggestion , unsigned int accept);
 
          [[dcd::action]]
          void propactfee( const name& producer, std::vector <action_fee_prop> prop_fees );
-          
-         [[dcd::action]]
-         void setrate( const name& oracle, const double fee_rate ) ;
-         
-         [[dcd::action]]
-         void unregoracle( const name& oracle );
-
-         [[dcd::action]]
-         void regoracle( const name& oracle ) ;
-
-         [[dcd::action]]
-         void votefeeprop(const name& producer, unsigned int accept);
 
 
          using init_action = dcd::action_wrapper<"init"_n, &system_contract::init>;
@@ -1536,8 +1545,7 @@ namespace dcdsystem {
          using onfee_action = dcd::action_wrapper<"onfee"_n, &system_contract::onfee>;
          using unregoracle_action = dcd::action_wrapper<"unregoracle"_n, &system_contract::unregoracle>;
          using regoracle_action = dcd::action_wrapper<"regoracle"_n, &system_contract::regoracle>;
-         using setrate_action = dcd::action_wrapper<"setrate"_n, &system_contract::setrate>;
-         using listfeeprop_action = dcd::action_wrapper<"listfeeprop"_n, &system_contract::listfeeprop>;
+         using setrateorcl_action = dcd::action_wrapper<"setrateorcl"_n, &system_contract::setrateorcl>;
          using propactfee_action = dcd::action_wrapper<"propactfee"_n, &system_contract::propactfee>;
          using votefeeprop_action = dcd::action_wrapper<"votefeeprop"_n, &system_contract::votefeeprop>;
 
@@ -1592,7 +1600,8 @@ namespace dcdsystem {
          void remove_loan_from_rex_pool( const rex_loan& loan );
          template <typename Index, typename Iterator>
          int64_t update_renewed_loan( Index& idx, const Iterator& itr, int64_t rented_tokens );
-
+         void update_action_fees(std::vector <native::action_fee_prop> prop_list);
+         void check_action_proposal_table();
          // defined in delegate_bandwidth.cpp
          void changebw( name from, const name& receiver,
                         const asset& stake_net_quantity, const asset& stake_cpu_quantity, bool transfer );
@@ -1604,9 +1613,11 @@ namespace dcdsystem {
          void calculate_new_rate( const block_timestamp& block_time );
          void update_current_rate( const block_timestamp& block_time );
          void calculate_new_oracle_rate();
+         void update_oracles_rate_state();
+         void update_fee_vote_state();
          void update_votes( const name& voter, const name& proxy, const std::vector<name>& producers, bool voting );
+         void update_producers_count();
          bool all_voted(const name& producer, const del_producer_vote& vote_info);
-         bool has_voted_for_act_fee(const name& producer, const actions_fee_proposals& actions_fee_prop);
          void deloldvotes();
          void replace_confirmed(const name& prod_to_delete,const name& prod_to_replace);
          void propagate_weight_change( const voter_info& voter );

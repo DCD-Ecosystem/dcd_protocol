@@ -1,5 +1,5 @@
 cmake_minimum_required( VERSION 3.5 )
-message(STATUS "Setting up Dcd Tester @VERSION_FULL@ at @EOS_ROOT_DIR@")
+message(STATUS "Setting up Dcd Tester @VERSION_FULL@ at @DCD_ROOT_DIR@")
 
 SET(CMAKE_INSTALL_RPATH "${HOME}/lib;${HOME}/lib64")
 
@@ -82,7 +82,7 @@ if(UNIX AND NOT APPLE)
 endif()
 
 set(DCD_WASM_RUNTIMES @DCD_WASM_RUNTIMES@)
-if("eos-vm-oc" IN_LIST DCD_WASM_RUNTIMES)
+if("dcd-vm-oc" IN_LIST DCD_WASM_RUNTIMES)
    set(WRAP_MAIN "-Wl,-wrap=main")
 endif()
 

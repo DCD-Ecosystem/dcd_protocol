@@ -12,8 +12,8 @@ Make sure to meet the following requirements:
 [[info | Note]]
 | `dcdcli` is bundled with the DCD software. [Installing DCD](../../00_install/index.md) will also install `dcdcli`.
 
-* Understand what a [block](https://developers.eos.io/welcome/v2.1/glossary/index/#block) is and its role in the blockchain.
-* Understand the [block lifecycle](https://developers.eos.io/welcome/v2.1/protocol-guides/consensus_protocol/#5-block-lifecycle) in the DCD consensus protocol.
+* Understand what a [block](https://developers.dcd.io/welcome/v2.1/glossary/index/#block) is and its role in the blockchain.
+* Understand the [block lifecycle](https://developers.dcd.io/welcome/v2.1/protocol-guides/consensus_protocol/#5-block-lifecycle) in the DCD consensus protocol.
 
 ## Steps
 
@@ -34,7 +34,7 @@ Some examples are provided below:
 **Example Output**
 
 ```sh
-dcdcli -u https://api.testnet.eos.io get block 48351112
+dcdcli -u https://api.testnet.dcd.io get block 48351112
 ```
 ```json
 {
@@ -59,7 +59,7 @@ dcdcli -u https://api.testnet.eos.io get block 48351112
 **Example Output**
 
 ```sh
-dcdcli -u https://api.testnet.eos.io get block 02e1c7888a92206573ae38d00e09366c7ba7bc54cd8b7996506f7d2a619c43ba
+dcdcli -u https://api.testnet.dcd.io get block 02e1c7888a92206573ae38d00e09366c7ba7bc54cd8b7996506f7d2a619c43ba
 ```
 ```json
 {

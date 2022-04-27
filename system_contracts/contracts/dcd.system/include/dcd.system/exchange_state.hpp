@@ -21,7 +21,7 @@ namespace dcdsystem {
          asset balance;
          double weight = .5;
 
-         EOSLIB_SERIALIZE( connector, (balance)(weight) )
+         DCDLIB_SERIALIZE( connector, (balance)(weight) )
       };
 
       connector base;
@@ -41,7 +41,7 @@ namespace dcdsystem {
                                        int64_t inp_reserve,
                                        int64_t out );
 
-      EOSLIB_SERIALIZE( exchange_state, (supply)(base)(quote) )
+      DCDLIB_SERIALIZE( exchange_state, (supply)(base)(quote) )
    };
 
    typedef dcd::multi_index< "rammarket"_n, exchange_state > rammarket;

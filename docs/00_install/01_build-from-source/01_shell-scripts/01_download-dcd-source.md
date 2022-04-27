@@ -2,11 +2,11 @@
 content_title: Download DCD Source
 ---
 
-To download the DCD source code, clone the `eos` repo and its submodules. It is adviced to create a home `dcd` folder first and download all the DCD related software there:
+To download the DCD source code, clone the `dcd` repo and its submodules. It is adviced to create a home `dcd` folder first and download all the DCD related software there:
 
 ```sh
 mkdir -p ~/dcd && cd ~/dcd
-git clone --recursive https://github.com/DCD/eos
+git clone --recursive https://github.com/DCD/dcd
 ```
 
 ## Update Submodules
@@ -14,7 +14,7 @@ git clone --recursive https://github.com/DCD/eos
 If a repository is cloned without the `--recursive` flag, the submodules *must* be updated before starting the build process:
 
 ```sh
-cd ~/dcd/eos
+cd ~/dcd/dcd
 git submodule update --init --recursive
 ```
 

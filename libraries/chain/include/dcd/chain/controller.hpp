@@ -8,7 +8,7 @@
 #include <dcd/chain/abi_serializer.hpp>
 #include <dcd/chain/account_object.hpp>
 #include <dcd/chain/protocol_feature_manager.hpp>
-#include <dcd/chain/webassembly/eos-vm-oc/config.hpp>
+#include <dcd/chain/webassembly/dcd-vm-oc/config.hpp>
 #include <dcd/chain/block_log_config.hpp>
 #include <dcd/chain/backing_store.hpp>
 #include <dcd/chain/transaction_fee_manager.hpp>
@@ -104,8 +104,8 @@ namespace dcd { namespace chain {
             uint32_t                 terminate_at_block     = 0; //< primarily for testing purposes
 
             wasm_interface::vm_type  wasm_runtime = chain::config::default_wasm_runtime;
-            eosvmoc::config          eosvmoc_config;
-            bool                     eosvmoc_tierup         = false;
+            dcdvmoc::config          dcdvmoc_config;
+            bool                     dcdvmoc_tierup         = false;
 
             db_read_mode             read_mode              = db_read_mode::SPECULATIVE;
             validation_mode          block_validation_mode  = validation_mode::FULL;
@@ -340,7 +340,7 @@ namespace dcd { namespace chain {
          fc::logger* get_deep_mind_logger() const;
          void enable_deep_mind( fc::logger* logger );
 
-#if defined(DCD_EOS_VM_RUNTIME_ENABLED) || defined(DCD_EOS_VM_JIT_RUNTIME_ENABLED)
+#if defined(DCD_DCD_VM_RUNTIME_ENABLED) || defined(DCD_DCD_VM_JIT_RUNTIME_ENABLED)
          vm::wasm_allocator&  get_wasm_allocator();
 #endif
 

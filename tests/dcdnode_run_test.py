@@ -48,11 +48,11 @@ localTest=True if server == TestHelper.LOCAL_HOST else False
 cluster=Cluster(host=server, port=port, walletd=True, defproduceraPrvtKey=defproduceraPrvtKey, defproducerbPrvtKey=defproducerbPrvtKey)
 walletMgr=WalletMgr(True, port=walletPort)
 testSuccessful=False
-killEosInstances=not dontKill
+killDcdInstances=not dontKill
 killWallet=not dontKill
 dontBootstrap=sanityTest # intent is to limit the scope of the sanity test to just verifying that nodes can be started
 
-WalletdName=Utils.EosWalletName
+WalletdName=Utils.DcdWalletName
 ClientName="dcdcli"
 timeout = .5 * 12 * 2 + 60 # time for finalization with 1 producer + 60 seconds padding
 Utils.setIrreversibleTimeout(timeout)
@@ -71,18 +71,18 @@ try:
                                   1 : " --backing-store=rocksdb" }
         if cluster.launch(totalNodes=3, prodCount=prodCount, onlyBios=onlyBios, dontBootstrap=dontBootstrap, specificExtradcdnodeArgs=specificExtradcdnodeArgs) is False:
             cmdError("launcher")
-            errorExit("Failed to stand up eos cluster.")
+            errorExit("Failed to stand up dcd cluster.")
     else:
         Print("Collecting cluster info.")
         cluster.initializeNodes(defproduceraPrvtKey=defproduceraPrvtKey, defproducerbPrvtKey=defproducerbPrvtKey)
-        killEosInstances=False
+        killDcdInstances=False
         Print("Stand up %s" % (WalletdName))
         walletMgr.killall(allInstances=killAll)
         walletMgr.cleanup()
         print("Stand up walletd")
         if walletMgr.launch() is False:
             cmdError("%s" % (WalletdName))
-            errorExit("Failed to stand up eos walletd.")
+            errorExit("Failed to stand up dcd walletd.")
 
     if sanityTest:
         testSuccessful=True
@@ -237,7 +237,7 @@ try:
 
     expectedAmount=transferAmount
     Print("Verify transfer, Expected: %s" % (expectedAmount))
-    actualAmount=node.getAccountEosBalanceStr(testeraAccount.name)
+    actualAmount=node.getAccountDcdBalanceStr(testeraAccount.name)
     if expectedAmount != actualAmount:
         cmdError("FAILURE - transfer failed")
         errorExit("Transfer verification failed. Excepted %s, actual: %s" % (expectedAmount, actualAmount))
@@ -249,7 +249,7 @@ try:
 
     expectedAmount="97.5421 {0}".format(CORE_SYMBOL)
     Print("Verify transfer, Expected: %s" % (expectedAmount))
-    actualAmount=node.getAccountEosBalanceStr(testeraAccount.name)
+    actualAmount=node.getAccountDcdBalanceStr(testeraAccount.name)
     if expectedAmount != actualAmount:
         cmdError("FAILURE - transfer failed")
         errorExit("Transfer verification failed. Excepted %s, actual: %s" % (expectedAmount, actualAmount))
@@ -276,7 +276,7 @@ try:
 
     expectedAmount="98.0311 {0}".format(CORE_SYMBOL) # 5000 initial deposit
     Print("Verify transfer, Expected: %s" % (expectedAmount))
-    actualAmount=node.getAccountEosBalanceStr(currencyAccount.name)
+    actualAmount=node.getAccountDcdBalanceStr(currencyAccount.name)
     if expectedAmount != actualAmount:
         cmdError("FAILURE - transfer failed")
         errorExit("Transfer verification failed. Excepted %s, actual: %s" % (expectedAmount, actualAmount))
@@ -616,16 +616,16 @@ try:
         errorExit("FAILURE - Wrong currency1111 balance (expectedgma=%s, actual=%s)" % (str(expected), str(actual)), raw=True)
 
     Print("---- Test for signing transaction ----")
-    testeraAccountAmountBeforeTrx=node.getAccountEosBalanceStr(testeraAccount.name)
-    currencyAccountAmountBeforeTrx=node.getAccountEosBalanceStr(currencyAccount.name)
+    testeraAccountAmountBeforeTrx=node.getAccountDcdBalanceStr(testeraAccount.name)
+    currencyAccountAmountBeforeTrx=node.getAccountDcdBalanceStr(currencyAccount.name)
 
     xferAmount="1.2345 {0}".format(CORE_SYMBOL)
     unsignedTrxRet = node.transferFunds(currencyAccount, testeraAccount, xferAmount, "unsigned trx", False, False, True, False, False, True, None, True)
     unsignedTrxJsonFile = "unsigned_trx_file"
     with open(unsignedTrxJsonFile, 'w') as outfile:
         json.dump(unsignedTrxRet, outfile)
-    testeraAccountAmountAftrTrx=node.getAccountEosBalanceStr(testeraAccount.name)
-    currencyAccountAmountAftrTrx=node.getAccountEosBalanceStr(currencyAccount.name)
+    testeraAccountAmountAftrTrx=node.getAccountDcdBalanceStr(testeraAccount.name)
+    currencyAccountAmountAftrTrx=node.getAccountDcdBalanceStr(currencyAccount.name)
     try:
         assert(testeraAccountAmountBeforeTrx == testeraAccountAmountAftrTrx)
         assert(currencyAccountAmountBeforeTrx == currencyAccountAmountAftrTrx)
@@ -637,8 +637,8 @@ try:
     node.processdcdcliCmd(signCmd, "Sign and push a transaction", False, True)
     os.remove(unsignedTrxJsonFile)
 
-    testeraAccountAmountAfterSign=node.getAccountEosBalanceStr(testeraAccount.name)
-    currencyAccountAmountAfterSign=node.getAccountEosBalanceStr(currencyAccount.name)
+    testeraAccountAmountAfterSign=node.getAccountDcdBalanceStr(testeraAccount.name)
+    currencyAccountAmountAfterSign=node.getAccountDcdBalanceStr(currencyAccount.name)
     try:
         assert(Utils.addAmount(testeraAccountAmountAftrTrx, xferAmount) == testeraAccountAmountAfterSign)
         assert(Utils.deduceAmount(currencyAccountAmountAftrTrx, xferAmount) == currencyAccountAmountAfterSign)
@@ -686,7 +686,7 @@ try:
         errorExit("Failed to unlock wallet %s" % (defproduceraWallet.name))
 
     Print("Get account defproducera")
-    account=node.getEosAccount(defproduceraAccount.name, exitOnError=True)
+    account=node.getDcdAccount(defproduceraAccount.name, exitOnError=True)
 
     Print("Unlocking wallet \"%s\"." % (defproduceraWallet.name))
     if not walletMgr.unlockWallet(testWallet):
@@ -694,7 +694,7 @@ try:
         errorExit("Failed to unlock wallet %s" % (testWallet.name))
 
     Print("Verify non-JSON call works")
-    rawAccount=node.getEosAccount(defproduceraAccount.name, exitOnError=True, returnType=ReturnType.raw)
+    rawAccount=node.getDcdAccount(defproduceraAccount.name, exitOnError=True, returnType=ReturnType.raw)
     coreLiquidBalance=account['core_liquid_balance']
     match=re.search(r'\bliquid:\s*%s\s' % (coreLiquidBalance), rawAccount, re.MULTILINE | re.DOTALL)
     assert match is not None, "did not find the core liquid balance (\"liquid:\") of {} in \"{}\"".format(coreLiquidBalance, rawAccount)
@@ -736,6 +736,6 @@ try:
 
     testSuccessful=True
 finally:
-    TestHelper.shutdown(cluster, walletMgr, testSuccessful, killEosInstances, killWallet, keepLogs, killAll, dumpErrorDetails)
+    TestHelper.shutdown(cluster, walletMgr, testSuccessful, killDcdInstances, killWallet, keepLogs, killAll, dumpErrorDetails)
 
 exit(0)

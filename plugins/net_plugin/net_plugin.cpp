@@ -495,7 +495,7 @@ namespace dcd {
             fill_out_buffer( bufs, _sync_write_queue );
          } else { // postpone real_time write_queue if sync queue is not empty
             fill_out_buffer( bufs, _write_queue );
-            EOS_ASSERT( _write_queue_size == 0, plugin_exception, "write queue size expected to be zero" );
+            DCD_ASSERT( _write_queue_size == 0, plugin_exception, "write queue size expected to be zero" );
          }
       }
 
@@ -801,7 +801,7 @@ namespace dcd {
 
       template<typename T>
       void operator()( const T& ) const {
-         EOS_ASSERT( false, plugin_config_exception, "Not implemented, call handle_message directly instead" );
+         DCD_ASSERT( false, plugin_config_exception, "Not implemented, call handle_message directly instead" );
       }
 
       void operator()( const handshake_message& msg ) const {
@@ -1936,7 +1936,7 @@ namespace dcd {
 
    void sync_manager::sync_recv_notice( const connection_ptr& c, const notice_message& msg) {
       fc_dlog( logger, "sync_manager got ${m} block notice", ("m", modes_str( msg.known_blocks.mode )) );
-      EOS_ASSERT( msg.known_blocks.mode == catch_up || msg.known_blocks.mode == last_irr_catch_up, plugin_exception,
+      DCD_ASSERT( msg.known_blocks.mode == catch_up || msg.known_blocks.mode == last_irr_catch_up, plugin_exception,
                   "sync_recv_notice only called on catch_up" );
       if (msg.known_blocks.mode == catch_up) {
          if (msg.known_blocks.ids.size() == 0) {
@@ -2539,7 +2539,7 @@ namespace dcd {
                         fc_elog( logger,"async_read_some callback: bytes_transfered = ${bt}, buffer.bytes_to_write = ${btw}",
                                  ("bt",bytes_transferred)("btw",conn->pending_message_buffer.bytes_to_write()) );
                      }
-                     EOS_ASSERT(bytes_transferred <= conn->pending_message_buffer.bytes_to_write(), plugin_exception, "");
+                     DCD_ASSERT(bytes_transferred <= conn->pending_message_buffer.bytes_to_write(), plugin_exception, "");
                      conn->pending_message_buffer.advance_write_ptr(bytes_transferred);
                      while (conn->pending_message_buffer.bytes_to_read() > 0) {
                         uint32_t bytes_in_buffer = conn->pending_message_buffer.bytes_to_read();
@@ -2773,7 +2773,7 @@ namespace dcd {
 
             if (ptr && trx_id && *trx_id != ptr->id()) {
                my_impl->producer_plug->log_failed_transaction(*trx_id, "Provided trx_id does not match provided packed_transaction");
-               EOS_ASSERT(false, transaction_id_type_exception,
+               DCD_ASSERT(false, transaction_id_type_exception,
                         "Provided trx_id does not match provided packed_transaction" );
             }
             
@@ -3633,13 +3633,13 @@ namespace dcd {
            "  Syntax: host:port[:<trx>|<blk>]\n"
            "  The optional 'trx' and 'blk' indicates to node that only transactions 'trx' or blocks 'blk' should be sent."
            "  Examples:\n"
-           "    p2p.eos.io:9876\n"
-           "    p2p.trx.eos.io:9876:trx\n"
-           "    p2p.blk.eos.io:9876:blk\n")
+           "    p2p.dcd.io:9876\n"
+           "    p2p.trx.dcd.io:9876:trx\n"
+           "    p2p.blk.dcd.io:9876:blk\n")
          ( "p2p-max-nodes-per-host", bpo::value<int>()->default_value(def_max_nodes_per_host), "Maximum number of client nodes from any single IP address")
          ( "p2p-accept-transactions", bpo::value<bool>()->default_value(true), "Allow transactions received over p2p network to be evaluated and relayed if valid.")
          ( "p2p-reject-incomplete-blocks", bpo::value<bool>()->default_value(true), "Reject pruned signed_blocks even in light validation")
-         ( "agent-name", bpo::value<string>()->default_value("EOS Test Agent"), "The name supplied to identify this node amongst the peers.")
+         ( "agent-name", bpo::value<string>()->default_value("DCD Test Agent"), "The name supplied to identify this node amongst the peers.")
          ( "allowed-connection", bpo::value<vector<string>>()->multitoken()->default_value({"any"}, "any"), "Can be 'any' or 'producers' or 'specified' or 'none'. If 'specified', peer-key must be specified at least once. If only 'producers', peer-key is not required. 'producers' and 'specified' may be combined.")
          ( "peer-key", bpo::value<vector<string>>()->composing()->multitoken(), "Optional public key of peer allowed to connect.  May be used multiple times.")
          ( "peer-private-key", boost::program_options::value<vector<string>>()->composing()->multitoken(),
@@ -3689,7 +3689,7 @@ namespace dcd {
 
          my->use_socket_read_watermark = options.at( "use-socket-read-watermark" ).as<bool>();
          my->keepalive_interval = std::chrono::milliseconds( options.at( "p2p-keepalive-interval-ms" ).as<int>() );
-         EOS_ASSERT( my->keepalive_interval.count() > 0, chain::plugin_config_exception,
+         DCD_ASSERT( my->keepalive_interval.count() > 0, chain::plugin_config_exception,
                      "p2p-keepalive_interval-ms must be greater than 0" );
 
          if( options.count( "p2p-keepalive-interval-ms" )) {
@@ -3698,17 +3698,17 @@ namespace dcd {
 
          if( options.count( "p2p-listen-endpoint" ) && options.at("p2p-listen-endpoint").as<string>().length()) {
             my->p2p_address = options.at( "p2p-listen-endpoint" ).as<string>();
-            EOS_ASSERT( my->p2p_address.length() <= max_p2p_address_length, chain::plugin_config_exception,
+            DCD_ASSERT( my->p2p_address.length() <= max_p2p_address_length, chain::plugin_config_exception,
                         "p2p-listen-endpoint to long, must be less than ${m}", ("m", max_p2p_address_length) );
          }
          if( options.count( "p2p-server-address" ) ) {
             my->p2p_server_address = options.at( "p2p-server-address" ).as<string>();
-            EOS_ASSERT( my->p2p_server_address.length() <= max_p2p_address_length, chain::plugin_config_exception,
+            DCD_ASSERT( my->p2p_server_address.length() <= max_p2p_address_length, chain::plugin_config_exception,
                         "p2p_server_address to long, must be less than ${m}", ("m", max_p2p_address_length) );
          }
 
          my->thread_pool_size = options.at( "net-threads" ).as<uint16_t>();
-         EOS_ASSERT( my->thread_pool_size > 0, chain::plugin_config_exception,
+         DCD_ASSERT( my->thread_pool_size > 0, chain::plugin_config_exception,
                      "net-threads ${num} must be greater than 0", ("num", my->thread_pool_size) );
 
          if( options.count( "p2p-peer-address" )) {
@@ -3716,7 +3716,7 @@ namespace dcd {
          }
          if( options.count( "agent-name" )) {
             my->user_agent_name = options.at( "agent-name" ).as<string>();
-            EOS_ASSERT( my->user_agent_name.length() <= max_handshake_str_length, chain::plugin_config_exception,
+            DCD_ASSERT( my->user_agent_name.length() <= max_handshake_str_length, chain::plugin_config_exception,
                         "agent-name to long, must be less than ${m}", ("m", max_handshake_str_length) );
          }
 
@@ -3735,7 +3735,7 @@ namespace dcd {
          }
 
          if( my->allowed_connections & net_plugin_impl::Specified )
-            EOS_ASSERT( options.count( "peer-key" ),
+            DCD_ASSERT( options.count( "peer-key" ),
                         plugin_config_exception,
                        "At least one peer-key must accompany 'allowed-connection=specified'" );
 
@@ -3756,7 +3756,7 @@ namespace dcd {
          }
 
          my->chain_plug = app().find_plugin<chain_plugin>();
-         EOS_ASSERT( my->chain_plug, chain::missing_chain_plugin_exception, ""  );
+         DCD_ASSERT( my->chain_plug, chain::missing_chain_plugin_exception, ""  );
          my->chain_id = my->chain_plug->get_chain_id();
          fc::rand_pseudo_bytes( my->node_id.data(), my->node_id.data_size());
          const controller& cc = my->chain_plug->chain();

@@ -9,7 +9,7 @@ if( DCD_COMPILE_TEST_CONTRACTS )
    if( USE_DCD_CDT_1_7_X)
       list(APPEND CMAKE_ARGS_VAL -DUSE_DCD_CDT_1_7_X=${USE_DCD_CDT_1_7_X})
    endif()
-   message( STATUS "Building contracts in directory `eos/unittests/test-contracts/`" )
+   message( STATUS "Building contracts in directory `dcd/unittests/test-contracts/`" )
    ExternalProject_Add(
       test_contracts_project
       SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/test-contracts
@@ -22,7 +22,7 @@ if( DCD_COMPILE_TEST_CONTRACTS )
       BUILD_ALWAYS 1
    )
 else()
-  message( STATUS "Not building contracts in directory `eos/unittests/test-contracts/`" )
+  message( STATUS "Not building contracts in directory `dcd/unittests/test-contracts/`" )
   add_subdirectory(test-contracts)
 endif()
 
@@ -44,10 +44,10 @@ add_custom_command(
 file(GLOB UNIT_TESTS "*.cpp") # find all unit test suites
 add_executable( unit_test ${UNIT_TESTS} protocol_feature_digest_tests.cpp) # build unit tests as one executable
 
-target_link_libraries( unit_test dcd_chain_wrap chainbase dcd_testing fc appbase state_history abieos ${PLATFORM_SPECIFIC_LIBS} )
+target_link_libraries( unit_test dcd_chain_wrap chainbase dcd_testing fc appbase state_history abidcd ${PLATFORM_SPECIFIC_LIBS} )
 
 
-target_compile_options(unit_test PUBLIC -DDISABLE_EOSLIB_SERIALIZE)
+target_compile_options(unit_test PUBLIC -DDISABLE_DCDLIB_SERIALIZE)
 target_include_directories( unit_test PUBLIC
                             ${CMAKE_SOURCE_DIR}/libraries/testing/include
                             ${CMAKE_SOURCE_DIR}/test-contracts

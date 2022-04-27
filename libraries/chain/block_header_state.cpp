@@ -41,7 +41,7 @@ namespace dcd { namespace chain {
       pending_block_header_state result;
 
       if( when != block_timestamp_type() ) {
-        EOS_ASSERT( when > header.timestamp, block_validate_exception, "next block must be in the future" );
+        DCD_ASSERT( when > header.timestamp, block_validate_exception, "next block must be in the future" );
       } else {
         (when = header.timestamp).slot++;
       }
@@ -50,7 +50,7 @@ namespace dcd { namespace chain {
 
       auto itr = producer_to_last_produced.find( proauth.producer_name );
       if( itr != producer_to_last_produced.end() ) {
-        EOS_ASSERT( itr->second < (block_num+1) - num_prev_blocks_to_confirm, producer_double_confirm,
+        DCD_ASSERT( itr->second < (block_num+1) - num_prev_blocks_to_confirm, producer_double_confirm,
                     "producer ${prod} double-confirming known range",
                     ("prod", proauth.producer_name)("num", block_num+1)
                     ("confirmed", num_prev_blocks_to_confirm)("last_produced", itr->second) );
@@ -223,7 +223,7 @@ namespace dcd { namespace chain {
             for (const auto &p : new_producers->producers) {
                std::visit([&downgraded_producers, &p](const auto& auth)
                {
-                  EOS_ASSERT(auth.keys.size() == 1 && auth.keys.front().weight == auth.threshold, producer_schedule_exception, "multisig block signing present before enabled!");
+                  DCD_ASSERT(auth.keys.size() == 1 && auth.keys.front().weight == auth.threshold, producer_schedule_exception, "multisig block signing present before enabled!");
                   downgraded_producers.producers.emplace_back(legacy::producer_key{p.producer_name, auth.keys.front().key});
                }, p.authority);
             }
@@ -250,12 +250,12 @@ namespace dcd { namespace chain {
 
    )&&
    {
-      EOS_ASSERT( h.timestamp == timestamp, block_validate_exception, "timestamp mismatch" );
-      EOS_ASSERT( h.previous == previous, unlinkable_block_exception, "previous mismatch" );
-      EOS_ASSERT( h.confirmed == confirmed, block_validate_exception, "confirmed mismatch" );
-      EOS_ASSERT( h.producer == producer, wrong_producer, "wrong producer specified" );
-      EOS_ASSERT( h.schedule_version == active_schedule_version, producer_schedule_exception, "schedule_version in signed block is corrupted" );
-      EOS_ASSERT( h.rate_version == active_rate_version, producer_schedule_exception, "rate_version in signed block is corrupted" );
+      DCD_ASSERT( h.timestamp == timestamp, block_validate_exception, "timestamp mismatch" );
+      DCD_ASSERT( h.previous == previous, unlinkable_block_exception, "previous mismatch" );
+      DCD_ASSERT( h.confirmed == confirmed, block_validate_exception, "confirmed mismatch" );
+      DCD_ASSERT( h.producer == producer, wrong_producer, "wrong producer specified" );
+      DCD_ASSERT( h.schedule_version == active_schedule_version, producer_schedule_exception, "schedule_version in signed block is corrupted" );
+      DCD_ASSERT( h.rate_version == active_rate_version, producer_schedule_exception, "rate_version in signed block is corrupted" );
 
 
       auto exts = h.validate_and_extract_header_extensions();
@@ -271,13 +271,13 @@ namespace dcd { namespace chain {
       }
 
       if( h.new_producers ) {
-         EOS_ASSERT(!wtmsig_enabled, producer_schedule_exception, "Block header contains legacy producer schedule outdated by activation of WTMsig Block Signatures" );
+         DCD_ASSERT(!wtmsig_enabled, producer_schedule_exception, "Block header contains legacy producer schedule outdated by activation of WTMsig Block Signatures" );
 
-         EOS_ASSERT( !was_pending_promoted, producer_schedule_exception, "cannot set pending producer schedule in the same block in which pending was promoted to active" );
+         DCD_ASSERT( !was_pending_promoted, producer_schedule_exception, "cannot set pending producer schedule in the same block in which pending was promoted to active" );
 
          const auto& new_producers = *h.new_producers;
-         EOS_ASSERT( new_producers.version == active_schedule.version + 1, producer_schedule_exception, "wrong producer schedule version specified" );
-         EOS_ASSERT( prev_pending_schedule.schedule.producers.empty(), producer_schedule_exception,
+         DCD_ASSERT( new_producers.version == active_schedule.version + 1, producer_schedule_exception, "wrong producer schedule version specified" );
+         DCD_ASSERT( prev_pending_schedule.schedule.producers.empty(), producer_schedule_exception,
                     "cannot set new pending producers until last pending is confirmed" );
 
          maybe_new_producer_schedule_hash.emplace(digest_type::hash(new_producers));
@@ -285,11 +285,11 @@ namespace dcd { namespace chain {
       }
 
       if( h.new_rate ) {
-         EOS_ASSERT( !was_pending_rate_promoted, producer_schedule_exception, "cannot set pending producer rate in the same block in which pending was promoted to active" );
+         DCD_ASSERT( !was_pending_rate_promoted, producer_schedule_exception, "cannot set pending producer rate in the same block in which pending was promoted to active" );
 
          const auto& new_rate = h.new_rate;
-         EOS_ASSERT( new_rate->version == active_rate.version + 1, producer_schedule_exception, "wrong producer rate version specified" );
-         EOS_ASSERT( prev_pending_rate.rate_info.rate == 0, producer_schedule_exception,
+         DCD_ASSERT( new_rate->version == active_rate.version + 1, producer_schedule_exception, "wrong producer rate version specified" );
+         DCD_ASSERT( prev_pending_rate.rate_info.rate == 0, producer_schedule_exception,
                     "cannot set new pending rate until last pending is confirmed" );
 
          maybe_new_producer_rate_hash.emplace(digest_type::hash(new_rate));
@@ -300,13 +300,13 @@ namespace dcd { namespace chain {
       }
 
       if ( exts.count(producer_schedule_change_extension::extension_id()) > 0 ) {
-         EOS_ASSERT(wtmsig_enabled, producer_schedule_exception, "Block header producer_schedule_change_extension before activation of WTMsig Block Signatures" );
-         EOS_ASSERT( !was_pending_promoted, producer_schedule_exception, "cannot set pending producer schedule in the same block in which pending was promoted to active" );
+         DCD_ASSERT(wtmsig_enabled, producer_schedule_exception, "Block header producer_schedule_change_extension before activation of WTMsig Block Signatures" );
+         DCD_ASSERT( !was_pending_promoted, producer_schedule_exception, "cannot set pending producer schedule in the same block in which pending was promoted to active" );
 
          const auto& new_producer_schedule = std::get<producer_schedule_change_extension>(exts.lower_bound(producer_schedule_change_extension::extension_id())->second);
 
-         EOS_ASSERT( new_producer_schedule.version == active_schedule.version + 1, producer_schedule_exception, "wrong producer schedule version specified" );
-         EOS_ASSERT( prev_pending_schedule.schedule.producers.empty(), producer_schedule_exception,
+         DCD_ASSERT( new_producer_schedule.version == active_schedule.version + 1, producer_schedule_exception, "wrong producer schedule version specified" );
+         DCD_ASSERT( prev_pending_schedule.schedule.producers.empty(), producer_schedule_exception,
                      "cannot set new pending producers until last pending is confirmed" );
 
          maybe_new_producer_schedule_hash.emplace(digest_type::hash(new_producer_schedule));
@@ -383,7 +383,7 @@ namespace dcd { namespace chain {
       if( !additional_signatures.empty() ) {
          bool wtmsig_enabled = detail::is_builtin_activated(prev_activated_protocol_features, pfs, builtin_protocol_feature_t::wtmsig_block_signatures);
 
-         EOS_ASSERT(wtmsig_enabled, producer_schedule_exception, "Block contains multiple signatures before WTMsig block signatures are enabled" );
+         DCD_ASSERT(wtmsig_enabled, producer_schedule_exception, "Block contains multiple signatures before WTMsig block signatures are enabled" );
       }
 
       auto result = std::move(*this)._finish_next( h, pfs, validator );
@@ -417,7 +417,7 @@ namespace dcd { namespace chain {
 
       if( !result.additional_signatures.empty() ) {
          bool wtmsig_enabled = detail::is_builtin_activated(pfa, pfs, builtin_protocol_feature_t::wtmsig_block_signatures);
-         EOS_ASSERT(wtmsig_enabled, producer_schedule_exception, "Block was signed with multiple signatures before WTMsig block signatures are enabled" );
+         DCD_ASSERT(wtmsig_enabled, producer_schedule_exception, "Block was signed with multiple signatures before WTMsig block signatures are enabled" );
       }
 
       return result;
@@ -452,7 +452,7 @@ namespace dcd { namespace chain {
       auto d = sig_digest();
       auto sigs = signer( d );
 
-      EOS_ASSERT(!sigs.empty(), no_block_signatures, "Signer returned no signatures");
+      DCD_ASSERT(!sigs.empty(), no_block_signatures, "Signer returned no signatures");
       header.producer_signature = sigs.back();
       sigs.pop_back();
 
@@ -464,7 +464,7 @@ namespace dcd { namespace chain {
    void block_header_state::verify_signee( )const {
 
       auto num_keys_in_authority = std::visit([](const auto &a){ return a.keys.size(); }, valid_block_signing_authority);
-      EOS_ASSERT(1 + additional_signatures.size() <= num_keys_in_authority, wrong_signing_key,
+      DCD_ASSERT(1 + additional_signatures.size() <= num_keys_in_authority, wrong_signing_key,
                  "number of block signatures (${num_block_signatures}) exceeds number of keys in block signing authority (${num_keys})",
                  ("num_block_signatures", 1 + additional_signatures.size())
                  ("num_keys", num_keys_in_authority)
@@ -477,7 +477,7 @@ namespace dcd { namespace chain {
 
       for (const auto& s: additional_signatures) {
          auto res = keys.emplace(s, digest, true);
-         EOS_ASSERT(res.second, wrong_signing_key, "block signed by same key twice", ("key", *res.first));
+         DCD_ASSERT(res.second, wrong_signing_key, "block signed by same key twice", ("key", *res.first));
       }
 
       bool is_satisfied = false;
@@ -485,11 +485,11 @@ namespace dcd { namespace chain {
 
       std::tie(is_satisfied, relevant_sig_count) = producer_authority::keys_satisfy_and_relevant(keys, valid_block_signing_authority);
 
-      EOS_ASSERT(relevant_sig_count == keys.size(), wrong_signing_key,
+      DCD_ASSERT(relevant_sig_count == keys.size(), wrong_signing_key,
                  "block signed by unexpected key",
                  ("signing_keys", keys)("authority", valid_block_signing_authority));
 
-      EOS_ASSERT(is_satisfied, wrong_signing_key,
+      DCD_ASSERT(is_satisfied, wrong_signing_key,
                  "block signatures do not satisfy the block signing authority",
                  ("signing_keys", keys)("authority", valid_block_signing_authority));
    }

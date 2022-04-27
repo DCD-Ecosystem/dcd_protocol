@@ -51,14 +51,14 @@ dcdcli validate signatures --chain-id cf057bbfb72640471fd910bcb67639c22df9f92470
 ```
 or
 ```sh
-dcdcli -u https://api.testnet.eos.io validate signatures '{ "expiration": "2020-04-23T04:47:23", "ref_block_num": 20, "ref_block_prefix": 3872940040, 
+dcdcli -u https://api.testnet.dcd.io validate signatures '{ "expiration": "2020-04-23T04:47:23", "ref_block_num": 20, "ref_block_prefix": 3872940040, 
 "max_net_usage_words": 0, "max_cpu_usage_ms": 0, "delay_sec": 0, "context_free_actions": [], "actions": [ { "account": "dcd", "name": "voteproducer", "authorization": [ { "actor": "initb", "permission": "active" } ], "data": "000000008093dd74000000000000000001000000008093dd74" } ], "transaction_extensions": [], "signatures": [ "SIG_K1_Jy81u5yWSE4vGET1cm9TChKrzhAz4QE2hB2pWnUsHQExGafqhVwXtg7a7mbLZwXcon8bVQJ3J5jtZuecJQADTiz2kwcm7c" ], "context_free_data": [] }'
 ```
 
 ## Output
 ```console
 [
-  "EOS7pCywBCz5zw2bc7teCVcT7MEWUr9s749qnYDNPEsBoH32vGqqN"
+  "DCD7pCywBCz5zw2bc7teCVcT7MEWUr9s749qnYDNPEsBoH32vGqqN"
 ]
 ```
 

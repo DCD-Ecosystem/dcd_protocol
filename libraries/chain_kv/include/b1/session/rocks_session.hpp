@@ -190,7 +190,7 @@ inline session<rocksdb_t> make_session(std::shared_ptr<rocksdb::DB> db, size_t m
 
 inline session<rocksdb_t>::session(std::shared_ptr<rocksdb::DB> db, size_t max_iterators)
     : m_db{ [&]() {
-         EOS_ASSERT(db, dcd::chain::database_exception, "db parameter cannot be null");
+         DCD_ASSERT(db, dcd::chain::database_exception, "db parameter cannot be null");
          return std::move(db);
       }() },
       m_iterator_read_options{ [&]() {

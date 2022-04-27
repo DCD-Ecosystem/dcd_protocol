@@ -3,7 +3,7 @@ set -eo pipefail
 SCRIPT_VERSION=3.1 # Build script version (change this to re-build the CICD image)
 ##########################################################################
 # This is the DCD automated install script for Linux and Mac OS.
-# This file was downloaded from https://github.com/DCD/eos
+# This file was downloaded from https://github.com/DCD/dcd
 #
 # Copyright (c) 2017, Respective Authors all rights reserved.
 #
@@ -29,7 +29,7 @@ SCRIPT_VERSION=3.1 # Build script version (change this to re-build the CICD imag
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #
-# https://github.com/DCD/eos/blob/master/LICENSE
+# https://github.com/DCD/dcd/blob/master/LICENSE
 ##########################################################################
 
 function usage() {

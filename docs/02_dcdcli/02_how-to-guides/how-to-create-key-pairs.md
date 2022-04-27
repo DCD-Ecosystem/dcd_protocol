@@ -25,7 +25,7 @@ dcdcli create key --to-console
 ```sh
 dcdcli create key --to-console
 Private key: 5KPzrqNMJdr6AX6abKg*******************************cH
-Public key: EOS4wSiQ2jbYGrqiiKCm8oWR88NYoqnmK4nNL1RCtSQeSFkGtqsNc
+Public key: DCD4wSiQ2jbYGrqiiKCm8oWR88NYoqnmK4nNL1RCtSQeSFkGtqsNc
 ```
 
 
@@ -46,5 +46,5 @@ To view the saved keypair in the file:
 ```sh
 cat pw.txt
 Private key: 5K7************************************************
-Public key: EOS71k3WdpLDeqeyqVRAAxwpz6TqXwDo9Brik5dQhdvvpeTKdNT59
+Public key: DCD71k3WdpLDeqeyqVRAAxwpz6TqXwDo9Brik5dQhdvvpeTKdNT59
 ```

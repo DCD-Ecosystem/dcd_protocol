@@ -6,15 +6,15 @@ index a3749f965..ab81fcff4 100644
  
  #include <contracts.hpp>
  
-+#include <eosio/chain/global_property_object.hpp>
-+#include <eosio/chain/block_log.hpp>
++#include <dcdio/chain/global_property_object.hpp>
++#include <dcdio/chain/block_log.hpp>
 +#include <boost/iostreams/filtering_stream.hpp>
 +#include <boost/iostreams/copy.hpp>
 +#include <boost/iostreams/filter/gzip.hpp>
 +#include <fstream>
 +#include <sstream>
 +
- using namespace eosio;
+ using namespace dcdio;
  using namespace testing;
  using namespace chain;
 @@ -252,4 +260,88 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_replay_over_snapshot, SNAPSHOT_SUITE, snapsho

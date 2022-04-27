@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # dcd-tn_down.sh is used by the dcd-tn_bounce.sh and dcd-tn_roll.sh scripts.
-# It is intended to terminate specific EOS.IO daemon processes.
+# It is intended to terminate specific DCD.IO daemon processes.
 #
 
 

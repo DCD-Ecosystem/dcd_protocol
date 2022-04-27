@@ -9,14 +9,14 @@ This how-to guide provides instructions on how to transfer tokens created by `dc
 * `dcd.token` contract is deployed on the network you are connected to.
 
 * Understand the following:
-  * What a [transaction](https://developers.eos.io/welcome/v2.1/glossary/index/#transaction) is.
+  * What a [transaction](https://developers.dcd.io/welcome/v2.1/glossary/index/#transaction) is.
   * Token transfers are irreversible.
 
 ## Command Reference
 
 See the following reference guides for command line usage and related options for the `dcdcli` command:
 
-* The [dcdcli transfer](https://developers.eos.io/manuals/eos/latest/dcdcli/command-reference/transfer) reference.
+* The [dcdcli transfer](https://developers.dcd.io/manuals/dcd/latest/dcdcli/command-reference/transfer) reference.
 
 ## Procedure
 

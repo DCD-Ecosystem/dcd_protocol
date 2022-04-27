@@ -10,13 +10,13 @@ producer_plugin::snapshot_information pending_snapshot::finalize( const chain::c
 
     if (!in_chain) {
        bfs::remove(bfs::path(pending_path), ec);
-       EOS_THROW(chain::snapshot_finalization_exception,
+       DCD_THROW(chain::snapshot_finalization_exception,
                  "Snapshotted block was forked out of the chain.  ID: ${block_id}",
                  ("block_id", block_id));
     }
 
     bfs::rename(bfs::path(pending_path), bfs::path(final_path), ec);
-    EOS_ASSERT(!ec, chain::snapshot_finalization_exception,
+    DCD_ASSERT(!ec, chain::snapshot_finalization_exception,
                "Unable to finalize valid snapshot of block number ${bn}: [code: ${ec}] ${message}",
                ("bn", get_height())
                ("ec", ec.value())

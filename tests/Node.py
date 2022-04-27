@@ -50,9 +50,9 @@ class Node(object):
         self.missingTransaction=False
         self.popenProc=None           # initial process is started by launcher, this will only be set on relaunch
 
-    def eosClientArgs(self):
+    def dcdClientArgs(self):
         walletArgs=" " + self.walletMgr.getWalletEndpointArgs() if self.walletMgr is not None else ""
-        return self.endpointArgs + walletArgs + " " + Utils.MiscEosClientArgs
+        return self.endpointArgs + walletArgs + " " + Utils.MiscDcdClientArgs
 
     def __str__(self):
         return "Host: %s, Port:%d, NodeNum:%s, Pid:%s" % (self.host, self.port, self.nodeId, self.pid)
@@ -213,7 +213,7 @@ class Node(object):
             assert(account)
             assert(isinstance(account, Account))
             if Utils.Debug: Utils.Print("Validating account %s" % (account.name))
-            accountInfo=self.getEosAccount(account.name, exitOnError=True)
+            accountInfo=self.getDcdAccount(account.name, exitOnError=True)
             try:
                 assert(accountInfo["account_name"] == account.name)
             except (AssertionError, TypeError, KeyError) as _:
@@ -402,12 +402,12 @@ class Node(object):
 
         return self.waitForTransBlockIfNeeded(trans, waitForTransBlock, exitOnError=exitOnError)
 
-    def getEosAccount(self, name, exitOnError=False, returnType=ReturnType.json):
+    def getDcdAccount(self, name, exitOnError=False, returnType=ReturnType.json):
         assert(isinstance(name, str))
         cmdDesc="get account"
         jsonFlag="-j" if returnType==ReturnType.json else ""
         cmd="%s %s %s" % (cmdDesc, jsonFlag, name)
-        msg="( getEosAccount(name=%s) )" % (name);
+        msg="( getDcdAccount(name=%s) )" % (name);
         return self.processdcdcliCmd(cmd, cmdDesc, silentErrors=False, exitOnError=exitOnError, exitMsg=msg, returnType=returnType)
 
     def getTable(self, contract, scope, table, exitOnError=False):
@@ -454,7 +454,7 @@ class Node(object):
     # Verifies account. Returns "get account" json return object
     def verifyAccount(self, account):
         assert(account)
-        ret = self.getEosAccount(account.name)
+        ret = self.getDcdAccount(account.name)
         if ret is not None:
             account_name = ret["account_name"]
             if account_name is None:
@@ -464,7 +464,7 @@ class Node(object):
 
     def verifyAccountMdb(self, account):
         assert(account)
-        ret=self.getEosAccountFromDb(account.name)
+        ret=self.getDcdAccountFromDb(account.name)
         if ret is not None:
             account_name=ret["name"]
             if account_name is None:
@@ -577,7 +577,7 @@ class Node(object):
         if expiration is not None:
             expirationStr = "--expiration %d " % (expiration)
         cmd="%s %s -v transfer -j %s %s" % (
-            Utils.EosClientPath, self.eosClientArgs(), dontSendStr, expirationStr)
+            Utils.DcdClientPath, self.dcdClientArgs(), dontSendStr, expirationStr)
         cmdArr=cmd.split()
         # not using __sign_str, since cmdArr messes up the string
         if sign:
@@ -649,7 +649,7 @@ class Node(object):
         assert(isinstance(initialBalances, dict))
         assert(isinstance(transferAmount, int))
 
-        currentBalances=self.getEosBalances([source] + accounts)
+        currentBalances=self.getDcdBalances([source] + accounts)
         assert(currentBalances)
         assert(isinstance(currentBalances, dict))
         assert(len(initialBalances) == len(currentBalances))
@@ -670,14 +670,14 @@ class Node(object):
                             (expectedInitialBalance, initialBalance, key.name))
                 return False
 
-    def getEosBalances(self, accounts):
+    def getDcdBalances(self, accounts):
         """Returns a dictionary with account balances keyed by accounts"""
         assert(accounts)
         assert(isinstance(accounts, list))
 
         balances={}
         for account in accounts:
-            balance = self.getAccountEosBalance(account.name)
+            balance = self.getAccountDcdBalance(account.name)
             balances[account]=balance
 
         return balances
@@ -719,22 +719,22 @@ class Node(object):
         servants=trans["controlled_accounts"]
         return servants
 
-    def getAccountEosBalanceStr(self, scope):
+    def getAccountDcdBalanceStr(self, scope):
         """Returns SYS currency0000 account balance from dcdcli get table command. Returned balance is string following syntax "98.0311 SYS". """
         assert isinstance(scope, str)
         amount=self.getTableAccountBalance("dcd.token", scope)
-        if Utils.Debug: Utils.Print("getNodeAccountEosBalance %s %s" % (scope, amount))
+        if Utils.Debug: Utils.Print("getNodeAccountDcdBalance %s %s" % (scope, amount))
         assert isinstance(amount, str)
         return amount
 
-    def getAccountEosBalance(self, scope):
+    def getAccountDcdBalance(self, scope):
         """Returns SYS currency0000 account balance from dcdcli get table command. Returned balance is an integer e.g. 980311. """
-        balanceStr=self.getAccountEosBalanceStr(scope)
+        balanceStr=self.getAccountDcdBalanceStr(scope)
         balance=Node.currencyStrToInt(balanceStr)
         return balance
 
     def getAccountCodeHash(self, account):
-        cmd="%s %s get code %s" % (Utils.EosClientPath, self.eosClientArgs(), account)
+        cmd="%s %s get code %s" % (Utils.DcdClientPath, self.dcdClientArgs(), account)
         if Utils.Debug: Utils.Print("cmd: %s" % (cmd))
         start=time.perf_counter()
         try:
@@ -760,7 +760,7 @@ class Node(object):
     # publish contract and return transaction as json object
     def publishContract(self, account, contractDir, wasmFile, abiFile, waitForTransBlock=False, shouldFail=False, sign=False):
         signStr = Node.__sign_str(sign, [ account.activePublicKey ])
-        cmd="%s %s -v set contract -j %s %s %s" % (Utils.EosClientPath, self.eosClientArgs(), signStr, account.name, contractDir)
+        cmd="%s %s -v set contract -j %s %s %s" % (Utils.DcdClientPath, self.dcdClientArgs(), signStr, account.name, contractDir)
         cmd += "" if wasmFile is None else (" "+ wasmFile)
         cmd += "" if abiFile is None else (" " + abiFile)
         if Utils.Debug: Utils.Print("cmd: %s" % (cmd))
@@ -820,7 +820,7 @@ class Node(object):
 
     # returns tuple with indication if transaction was successfully sent and either the transaction or else the exception output
     def pushMessage(self, account, action, data, opts, silentErrors=False, signatures=None):
-        cmd="%s %s push action -j %s %s" % (Utils.EosClientPath, self.eosClientArgs(), account, action)
+        cmd="%s %s push action -j %s %s" % (Utils.DcdClientPath, self.dcdClientArgs(), account, action)
         cmdArr=cmd.split()
         # not using __sign_str, since cmdArr messes up the string
         if signatures is not None:
@@ -851,7 +851,7 @@ class Node(object):
         assert(isinstance(trans, dict))
         if isinstance(permissions, str):
             permissions=[permissions]
-        cmd="%s %s push transaction -j" % (Utils.EosClientPath, self.eosClientArgs())
+        cmd="%s %s push transaction -j" % (Utils.DcdClientPath, self.dcdClientArgs())
         cmdArr=cmd.split()
         transStr = json.dumps(trans, separators=(',', ':'))
         transStr = transStr.replace("'", '"')
@@ -953,7 +953,7 @@ class Node(object):
 
     def processdcdcliCmd(self, cmd, cmdDesc, silentErrors=True, exitOnError=False, exitMsg=None, returnType=ReturnType.json):
         assert(isinstance(returnType, ReturnType))
-        cmd="%s %s %s" % (Utils.EosClientPath, self.eosClientArgs(), cmd)
+        cmd="%s %s %s" % (Utils.DcdClientPath, self.dcdClientArgs(), cmd)
         if Utils.Debug: Utils.Print("cmd: %s" % (cmd))
         if exitMsg is not None:
             exitMsg="Context: " + exitMsg
@@ -1510,8 +1510,8 @@ class Node(object):
     # kill all exsiting dcdnode in case lingering from previous test
     @staticmethod
     def killAlldcdnode():
-        # kill the eos server
-        cmd="pkill -9 %s" % (Utils.EosServerName)
+        # kill the dcd server
+        cmd="pkill -9 %s" % (Utils.DcdServerName)
         ret_code = subprocess.call(cmd.split(), stdout=Utils.FNull)
         Utils.Print("cmd: %s, ret:%d" % (cmd, ret_code))
 

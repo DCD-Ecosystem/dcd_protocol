@@ -30,7 +30,7 @@ Please follow the steps below to set up a producing node:
 In order for your account to be eligible as a producer, you will need to register the account as a producer:
 
 ```sh
-dcdcli system regproducer accountname1 EOS1234534... http://producer.site Antarctica
+dcdcli system regproducer accountname1 DCD1234534... http://producer.site Antarctica
 ```
 
 ### 2. Set Producer Name
@@ -61,7 +61,7 @@ You will need to set the private key for your producer. The public key should ha
 signature-provider = PUBLIC_SIGNING_KEY=KEY:PRIVATE_SIGNING_KEY
 
 //Example
-//signature-provider = EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV=KEY:5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3
+//signature-provider = DCD6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV=KEY:5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3
 ```
 
 #### Using dcdksd:
@@ -73,7 +73,7 @@ You can also use `dcdksd` instead of hard-defining keys.
 signature-provider = dcdksd:<data>   
 
 //Example
-//EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV=dcdksd:https://127.0.0.1:88888
+//DCD6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV=dcdksd:https://127.0.0.1:88888
 ```
 
 ### 4. Define a peers list

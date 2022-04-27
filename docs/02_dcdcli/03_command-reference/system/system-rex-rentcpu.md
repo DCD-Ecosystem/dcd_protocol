@@ -20,5 +20,5 @@
 
 
 ```sh
-dcdcli system rex rentcpu accountname1 accountname2 "1 EOS" 0
+dcdcli system rex rentcpu accountname1 accountname2 "1 DCD" 0
 ```

@@ -411,7 +411,7 @@ commands = [
     ('l', 'log',                stepLog,                    True,    "Show tail of node's log"),
 ]
 
-parser.add_argument('--public-key', metavar='', help="DCD Public Key", default='EOS8Znrtgwt8TfpmbVpTKvA2oB8Nqey625CLN8bCN3TEbgx86Dsvr', dest="public_key")
+parser.add_argument('--public-key', metavar='', help="DCD Public Key", default='DCD8Znrtgwt8TfpmbVpTKvA2oB8Nqey625CLN8bCN3TEbgx86Dsvr', dest="public_key")
 parser.add_argument('--private-Key', metavar='', help="DCD Private Key", default='5K463ynhZoCDDa4RDcr63cUwWLTnKqmdcoTKTHBjqoKfv4u5V7p', dest="private_key")
 parser.add_argument('--dcdcli', metavar='', help="dcdcli command", default='../../build/programs/dcdcli/dcdcli --wallet-url http://127.0.0.1:6666 ')
 parser.add_argument('--dcdnode', metavar='', help="Path to dcdnode binary", default='../../build/programs/dcdnode/dcdnode')

@@ -4,7 +4,7 @@
 The `txn_test_gen_plugin` is used for transaction test purposes.
 
 [[info | For More Information]]
-For more information, check the [txn_test_gen_plugin/README.md](https://github.com/DCD/eos/blob/develop/plugins/txn_test_gen_plugin/README.md) on the DCD/eos repository.
+For more information, check the [txn_test_gen_plugin/README.md](https://github.com/DCD/dcd/blob/develop/plugins/txn_test_gen_plugin/README.md) on the DCD/dcd repository.
 
 ## Usage
 

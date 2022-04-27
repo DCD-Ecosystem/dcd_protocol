@@ -1,6 +1,6 @@
 /**
  *  @file
- *  @copyright defined in eos/LICENSE.txt
+ *  @copyright defined in dcd/LICENSE.txt
  */
 
 #include <dcd/chain/exceptions.hpp>
@@ -127,9 +127,21 @@ namespace dcd { namespace chain {
       return info;
    }
 
-   actions_fee_proposals transaction_fee_manager::get_fee_proposals(const controller& ctl) const {
-      actions_fee_proposals info;
-      info.owner = name{"test"};
-      return info;
+   std::vector <actions_fee_proposals> transaction_fee_manager::get_fee_proposals(const controller& ctl) const {
+      std::vector <actions_fee_proposals> result;
+      const auto &db = ctl.db();
+      const auto& prop_idx = db.get_index<action_fee_vote_object_index>();
+      auto objitr = prop_idx.begin();
+      while( objitr != prop_idx.end()) {
+         actions_fee_proposals info;
+         info.owner = objitr->owner;
+         info.fee_prop_list = objitr->fee_prop_list;
+         info.proposed_at = objitr->proposed_at;
+         info.expires_at = objitr->expires_at;
+         result.push_back(info);
+         objitr++;
+      }
+
+      return result;
    }
 }}

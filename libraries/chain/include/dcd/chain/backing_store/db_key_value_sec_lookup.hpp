@@ -17,7 +17,7 @@ namespace dcd { namespace chain { namespace backing_store {
       void extract(const dcd::session::shared_bytes& payload, uint64_t& sec_key, name& payer) {
          payer_payload pp(payload);
          payer = pp.payer;
-         EOS_ASSERT( pp.value_size == 0, db_rocksdb_invalid_operation_exception,
+         DCD_ASSERT( pp.value_size == 0, db_rocksdb_invalid_operation_exception,
                      "Payload should not have anything more than the payer");
       }
       constexpr inline uint64_t overhead() { return config::billable_size_v<index64_object>;}
@@ -32,7 +32,7 @@ namespace dcd { namespace chain { namespace backing_store {
       void extract(const dcd::session::shared_bytes& payload, dcd::chain::uint128_t& sec_key, name& payer) {
          payer_payload pp(payload);
          payer = pp.payer;
-         EOS_ASSERT( pp.value_size == 0, db_rocksdb_invalid_operation_exception,
+         DCD_ASSERT( pp.value_size == 0, db_rocksdb_invalid_operation_exception,
                      "Payload should not have anything more than the payer");
       }
       constexpr inline uint64_t overhead() { return config::billable_size_v<index128_object>;}
@@ -47,7 +47,7 @@ namespace dcd { namespace chain { namespace backing_store {
       void extract(const dcd::session::shared_bytes& payload, dcd::chain::key256_t& sec_key, name& payer) {
          payer_payload pp(payload);
          payer = pp.payer;
-         EOS_ASSERT( pp.value_size == 0, db_rocksdb_invalid_operation_exception,
+         DCD_ASSERT( pp.value_size == 0, db_rocksdb_invalid_operation_exception,
                      "Payload should not have anything more than the payer");
       }
       constexpr inline uint64_t overhead() { return config::billable_size_v<index256_object>;}
@@ -66,7 +66,7 @@ namespace dcd { namespace chain { namespace backing_store {
       }
       void extract(const dcd::session::shared_bytes& payload, float64_t& sec_key, name& payer) {
          payer_payload pp(payload);
-         EOS_ASSERT( pp.value_size == sizeof(sec_key), db_rocksdb_invalid_operation_exception,
+         DCD_ASSERT( pp.value_size == sizeof(sec_key), db_rocksdb_invalid_operation_exception,
                      "Payload does not contain the expected float64_t exact representation");
          payer = pp.payer;
          // see note on value(...) method above
@@ -89,7 +89,7 @@ namespace dcd { namespace chain { namespace backing_store {
       }
       void extract(const dcd::session::shared_bytes& payload, float128_t& sec_key, name& payer) {
          payer_payload pp(payload);
-         EOS_ASSERT( pp.value_size == sizeof(sec_key), db_rocksdb_invalid_operation_exception,
+         DCD_ASSERT( pp.value_size == sizeof(sec_key), db_rocksdb_invalid_operation_exception,
                      "Payload does not contain the expected float128_t exact representation");
          payer = pp.payer;
          // see note on value(...) method above
@@ -106,7 +106,7 @@ namespace dcd { namespace chain { namespace backing_store {
 
       int store( name scope, name table, const account_name& payer,
                  uint64_t id, const SecondaryKey& secondary ) {
-         EOS_ASSERT( payer != account_name(), invalid_table_payer, "must specify a valid account to pay for new record" );
+         DCD_ASSERT( payer != account_name(), invalid_table_payer, "must specify a valid account to pay for new record" );
 
          const sec_pair_bundle secondary_key = get_secondary_slices_in_secondaries(parent.receiver, scope, table, secondary, id);
 
@@ -114,11 +114,11 @@ namespace dcd { namespace chain { namespace backing_store {
 
          auto old_value = current_session.read(secondary_key.full_secondary_key);
 
-         EOS_ASSERT( !old_value, db_rocksdb_invalid_operation_exception, "db_${d}_store called with pre-existing key", ("d", helper.desc()));
+         DCD_ASSERT( !old_value, db_rocksdb_invalid_operation_exception, "db_${d}_store called with pre-existing key", ("d", helper.desc()));
 
          // identify if this primary key already has a secondary key of this type
          auto session_iter = current_session.lower_bound(secondary_key.prefix_primary_to_sec_key);
-         EOS_ASSERT( !match_prefix(secondary_key.prefix_primary_to_sec_key, session_iter), db_rocksdb_invalid_operation_exception,
+         DCD_ASSERT( !match_prefix(secondary_key.prefix_primary_to_sec_key, session_iter), db_rocksdb_invalid_operation_exception,
                      "db_${d}_store called, but primary key: ${primary} already has a secondary key of this type",
                      ("d", helper.desc())("primary", id));
 
@@ -140,16 +140,16 @@ namespace dcd { namespace chain { namespace backing_store {
       void remove( int iterator ) {
          const iter_obj& key_store = iter_store.get(iterator);
          const unique_table& table = iter_store.get_table(key_store);
-         EOS_ASSERT( table.contract == parent.receiver, table_access_violation, "db access violation" );
+         DCD_ASSERT( table.contract == parent.receiver, table_access_violation, "db access violation" );
 
          const sec_pair_bundle secondary_key = get_secondary_slices_in_secondaries(parent.receiver, table.scope, table.table, key_store.secondary, key_store.primary);
          auto old_value = current_session.read(secondary_key.full_secondary_key);
 
-         EOS_ASSERT( old_value, db_rocksdb_invalid_operation_exception,
+         DCD_ASSERT( old_value, db_rocksdb_invalid_operation_exception,
                      "invariant failure in db_${d}_remove, iter store found to update but nothing in database", ("d", helper.desc()));
 
          auto session_iter = current_session.lower_bound(secondary_key.prefix_primary_to_sec_key);
-         EOS_ASSERT( match_prefix(secondary_key.full_primary_to_sec_key, session_iter), db_rocksdb_invalid_operation_exception,
+         DCD_ASSERT( match_prefix(secondary_key.full_primary_to_sec_key, session_iter), db_rocksdb_invalid_operation_exception,
                      "db_${d}_remove called, but primary key: ${primary} didn't have a primary to secondary key",
                      ("d", helper.desc())("primary", key_store.primary));
 
@@ -169,18 +169,18 @@ namespace dcd { namespace chain { namespace backing_store {
       void update( int iterator, account_name payer, const SecondaryKey& secondary ) {
          const iter_obj& key_store = iter_store.get(iterator);
          const unique_table& table = iter_store.get_table(key_store);
-         EOS_ASSERT( table.contract == parent.receiver, table_access_violation, "db access violation" );
+         DCD_ASSERT( table.contract == parent.receiver, table_access_violation, "db access violation" );
 
          const sec_pair_bundle secondary_key = get_secondary_slices_in_secondaries(parent.receiver, table.scope, table.table, key_store.secondary, key_store.primary);
          auto old_value = current_session.read(secondary_key.full_secondary_key);
 
          secondary_helper<SecondaryKey> helper;
-         EOS_ASSERT( old_value, db_rocksdb_invalid_operation_exception,
+         DCD_ASSERT( old_value, db_rocksdb_invalid_operation_exception,
                      "invariant failure in db_${d}_remove, iter store found to update but nothing in database", ("d", helper.desc()));
 
          // identify if this primary key already has a secondary key of this type
          auto primary_sec_uesless_value = current_session.read(secondary_key.full_primary_to_sec_key);
-         EOS_ASSERT( primary_sec_uesless_value, db_rocksdb_invalid_operation_exception,
+         DCD_ASSERT( primary_sec_uesless_value, db_rocksdb_invalid_operation_exception,
                      "invariant failure in db_${d}_update, the secondary to primary lookup key was found, but not the "
                      "primary to secondary lookup key", ("d", helper.desc()));
 
@@ -238,7 +238,7 @@ namespace dcd { namespace chain { namespace backing_store {
          const auto full_slice = db_key_value_format::extract_legacy_slice((*session_iter).first);
          const auto prefix_secondary_slice = db_key_value_format::extract_legacy_slice(secondary_key.full_key);
          const bool valid_key = db_key_value_format::get_trailing_primary_key(full_slice, prefix_secondary_slice, primary);
-         EOS_ASSERT( valid_key, db_rocksdb_invalid_operation_exception,
+         DCD_ASSERT( valid_key, db_rocksdb_invalid_operation_exception,
                      "invariant failure in db_${d}_find_secondary, key portions were identical but "
                      "get_trailing_primary_key indicated that it couldn't extract", ("d", helper.desc()));
 
@@ -266,7 +266,7 @@ namespace dcd { namespace chain { namespace backing_store {
 
          prefix_bundle secondary_key = get_secondary_slice_in_secondaries(table.contract, table.scope, table.table, key_store.secondary, key_store.primary);
          auto session_iter = current_session.lower_bound(secondary_key.full_key);
-         EOS_ASSERT( match(secondary_key.full_key, session_iter), db_rocksdb_invalid_operation_exception,
+         DCD_ASSERT( match(secondary_key.full_key, session_iter), db_rocksdb_invalid_operation_exception,
                      "invariant failure in db_${d}_next_secondary, found iterator in iter store but didn't find "
                      "any entry in the database (no secondary keys of this specific type)", ("d", helper.desc()));
          ++session_iter;
@@ -276,7 +276,7 @@ namespace dcd { namespace chain { namespace backing_store {
 
          SecondaryKey secondary;
          const bool valid_key = db_key_value_format::get_trailing_sec_prim_keys((*session_iter).first, secondary_key.prefix_key, secondary, primary);
-         EOS_ASSERT( valid_key, db_rocksdb_invalid_operation_exception,
+         DCD_ASSERT( valid_key, db_rocksdb_invalid_operation_exception,
                      "invariant failure in db_${d}_next_secondary, since the type slice matched, the trailing "
                      "primary key should have been extracted", ("d", helper.desc()));
 
@@ -287,7 +287,7 @@ namespace dcd { namespace chain { namespace backing_store {
       int previous_secondary( int iterator, uint64_t& primary ) {
          if( iterator < iter_store.invalid_iterator() ) {
             const backing_store::unique_table* table = iter_store.find_table_by_end_iterator(iterator);
-            EOS_ASSERT( table, invalid_table_iterator, "not a valid end iterator" );
+            DCD_ASSERT( table, invalid_table_iterator, "not a valid end iterator" );
             constexpr static auto kt = db_key_value_format::derive_secondary_key_type<SecondaryKey>();
             const bytes legacy_type_key = db_key_value_format::create_prefix_type_key(table->scope, table->table, kt);
             const shared_bytes type_prefix = db_key_value_format::create_full_key(legacy_type_key, table->contract);
@@ -314,7 +314,7 @@ namespace dcd { namespace chain { namespace backing_store {
 
          prefix_bundle secondary_key = get_secondary_slice_in_secondaries(table.contract, table.scope, table.table, key_store.secondary, key_store.primary);
          auto session_iter = current_session.lower_bound(secondary_key.full_key);
-         EOS_ASSERT( match(secondary_key.full_key, session_iter), db_rocksdb_invalid_operation_exception,
+         DCD_ASSERT( match(secondary_key.full_key, session_iter), db_rocksdb_invalid_operation_exception,
                      "invariant failure in db_${d}_next_secondary, found iterator in iter store but didn't find its "
                      "matching entry in the database", ("d", helper.desc()));
          --session_iter;
@@ -323,7 +323,7 @@ namespace dcd { namespace chain { namespace backing_store {
          }
 
          auto found_keys = find_matching_sec_prim(*session_iter, secondary_key.prefix_key);
-         EOS_ASSERT( found_keys, db_rocksdb_invalid_operation_exception,
+         DCD_ASSERT( found_keys, db_rocksdb_invalid_operation_exception,
                      "invariant failure in db_${d}_previous_secondary, since the type slice matched, the trailing "
                      "primary key should have been extracted", ("d", helper.desc()));
          primary = std::get<fk_index::primary>(*found_keys);
@@ -354,12 +354,12 @@ namespace dcd { namespace chain { namespace backing_store {
          const bytes legacy_secondary_key = db_key_value_format::create_secondary_key(scope, table, secondary, primary);
          const shared_bytes secondary_key = db_key_value_format::create_full_key(legacy_secondary_key, code);
          const auto old_value = current_session.read(secondary_key);
-         EOS_ASSERT( old_value, db_rocksdb_invalid_operation_exception,
+         DCD_ASSERT( old_value, db_rocksdb_invalid_operation_exception,
                      "invariant failure in db_${d}_previous_secondary, found primary to secondary key in database but "
                      "not the secondary to primary key", ("d", helper.desc()));
-         EOS_ASSERT( old_value->data() != nullptr, db_rocksdb_invalid_operation_exception,
+         DCD_ASSERT( old_value->data() != nullptr, db_rocksdb_invalid_operation_exception,
                      "invariant failure in db_${d}_previous_secondary, empty value", ("d", helper.desc()));
-         EOS_ASSERT( old_value->size(), db_rocksdb_invalid_operation_exception,
+         DCD_ASSERT( old_value->size(), db_rocksdb_invalid_operation_exception,
                      "invariant failure in db_${d}_previous_secondary, value has zero size", ("d", helper.desc()));
          payer_payload pp{*old_value};
 
@@ -387,7 +387,7 @@ namespace dcd { namespace chain { namespace backing_store {
          const shared_bytes sec_type_prefix = db_key_value_format::create_full_key_prefix(key, end_of_prefix::at_prim_to_sec_type);
          auto session_iter = current_session.lower_bound(key);
          // This key has to exist, since it is cached in our iterator store
-         EOS_ASSERT( match(key, session_iter), db_rocksdb_invalid_operation_exception,
+         DCD_ASSERT( match(key, session_iter), db_rocksdb_invalid_operation_exception,
                      "invariant failure in db_${d}_next_primary, found iterator in iter store but didn't find its "
                      "matching entry in the database", ("d", helper.desc()));
          ++session_iter;
@@ -396,7 +396,7 @@ namespace dcd { namespace chain { namespace backing_store {
          }
 
          auto found_keys = find_matching_prim_sec(*session_iter, sec_type_prefix);
-         EOS_ASSERT( found_keys, db_rocksdb_invalid_operation_exception,
+         DCD_ASSERT( found_keys, db_rocksdb_invalid_operation_exception,
                      "invariant failure in db_${d}_next_primary, since the type slice matched, the trailing "
                      "keys should have been extracted", ("d", helper.desc()));
          primary = std::get<fk_index::primary>(*found_keys);
@@ -408,7 +408,7 @@ namespace dcd { namespace chain { namespace backing_store {
       int previous_primary( int iterator, uint64_t& primary ) {
          if( iterator < iter_store.invalid_iterator() ) {
             const backing_store::unique_table* table = iter_store.find_table_by_end_iterator(iterator);
-            EOS_ASSERT( table, invalid_table_iterator, "not a valid end iterator" );
+            DCD_ASSERT( table, invalid_table_iterator, "not a valid end iterator" );
             const bytes types_key = db_key_value_format::create_prefix_primary_to_secondary_key<SecondaryKey>(table->scope, table->table);
 
             // create the key pointing to the start of the primary to secondary keys of this type, and then increment it to be past the end
@@ -438,7 +438,7 @@ namespace dcd { namespace chain { namespace backing_store {
          const shared_bytes key = db_key_value_format::create_full_key(prim_to_sec_key, table.contract);
          const shared_bytes sec_type_prefix = db_key_value_format::create_full_key_prefix(key, end_of_prefix::at_prim_to_sec_type);
          auto session_iter = current_session.lower_bound(key);
-         EOS_ASSERT( match(key, session_iter), db_rocksdb_invalid_operation_exception,
+         DCD_ASSERT( match(key, session_iter), db_rocksdb_invalid_operation_exception,
                      "invariant failure in db_${d}_previous_primary, found iterator in iter store but didn't find its "
                      "matching entry in the database", ("d", helper.desc()));
          --session_iter;
@@ -525,7 +525,7 @@ namespace dcd { namespace chain { namespace backing_store {
             return {};
          }
 
-         EOS_ASSERT( found_kv.second, db_rocksdb_invalid_operation_exception,
+         DCD_ASSERT( found_kv.second, db_rocksdb_invalid_operation_exception,
                      "invariant failure in db_${d}_previous_secondary, the secondary key was found but it had no value "
                      "(the payer) stored for it", ("d", helper.desc()));
          account_name payer = payer_payload(*found_kv.second).payer;
@@ -544,10 +544,10 @@ namespace dcd { namespace chain { namespace backing_store {
 
          auto full_secondary_key = backing_store::db_key_value_format::create_secondary_key_from_primary_to_sec_key<SecondaryKey>(found_kv.first);
          auto session_iter = current_session.read(full_secondary_key);
-         EOS_ASSERT( match(found_kv.first, session_iter), db_rocksdb_invalid_operation_exception,
+         DCD_ASSERT( match(found_kv.first, session_iter), db_rocksdb_invalid_operation_exception,
                      "invariant failure in find_matching_prim_sec, the primary to sec key was found in the database, "
                      "but no secondary to primary key");
-         EOS_ASSERT( (*session_iter)->second, db_rocksdb_invalid_operation_exception,
+         DCD_ASSERT( (*session_iter)->second, db_rocksdb_invalid_operation_exception,
                      "invariant failure in find_matching_prim_sec, the secondary key was found but it had no value "
                      "(the payer) stored for it");
          account_name payer = payer_payload(*(*session_iter)->second).payer;
@@ -587,7 +587,7 @@ namespace dcd { namespace chain { namespace backing_store {
          uint64_t primary_ret = 0;
          const bool valid_key = db_key_value_format::get_trailing_sec_prim_keys<SecondaryKey>(
                (*session_iter).first, type_prefix, secondary_ret, primary_ret);
-         EOS_ASSERT( valid_key, db_rocksdb_invalid_operation_exception,
+         DCD_ASSERT( valid_key, db_rocksdb_invalid_operation_exception,
                      "invariant failure in db_${d}_${bt_str}bound_secondary, since the type slice matched, the trailing "
                      "keys should have been extracted", ("d", helper.desc())("bt_str",as_string(bt)));
 
@@ -622,7 +622,7 @@ namespace dcd { namespace chain { namespace backing_store {
          }
 
          auto found_keys = find_matching_prim_sec(*session_iter, sec_type_prefix);
-         EOS_ASSERT( found_keys, db_rocksdb_invalid_operation_exception,
+         DCD_ASSERT( found_keys, db_rocksdb_invalid_operation_exception,
                      "invariant failure in db_${d}_${bt_str}bound_secondary, since the type slice matched, the trailing "
                      "keys should have been extracted", ("d", helper.desc())("bt_str",as_string(bt)));
 

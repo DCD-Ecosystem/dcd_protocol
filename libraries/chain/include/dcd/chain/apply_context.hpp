@@ -38,7 +38,7 @@ class apply_context {
             int store( uint64_t scope, uint64_t table, const account_name& payer,
                        uint64_t id, secondary_key_proxy_const_type value )
             {
-               EOS_ASSERT( payer != account_name(), invalid_table_payer, "must specify a valid account to pay for new record" );
+               DCD_ASSERT( payer != account_name(), invalid_table_payer, "must specify a valid account to pay for new record" );
 
 //               context.require_write_lock( scope );
 
@@ -70,7 +70,7 @@ class apply_context {
                const auto& obj = itr_cache.get( iterator );
 
                const auto& table_obj = itr_cache.get_table( obj.t_id );
-               EOS_ASSERT( table_obj.code == context.receiver, table_access_violation, "db access violation" );
+               DCD_ASSERT( table_obj.code == context.receiver, table_access_violation, "db access violation" );
 
                std::string event_id;
                if (context.control.get_deep_mind_logger() != nullptr) {
@@ -97,7 +97,7 @@ class apply_context {
                const auto& obj = itr_cache.get( iterator );
 
                const auto& table_obj = itr_cache.get_table( obj.t_id );
-               EOS_ASSERT( table_obj.code == context.receiver, table_access_violation, "db access violation" );
+               DCD_ASSERT( table_obj.code == context.receiver, table_access_violation, "db access violation" );
 
 //               context.require_write_lock( table_obj.scope );
 
@@ -197,7 +197,7 @@ class apply_context {
                if( iterator < -1 ) // is end iterator
                {
                   auto tab = itr_cache.find_table_by_end_iterator(iterator);
-                  EOS_ASSERT( tab, invalid_table_iterator, "not a valid end iterator" );
+                  DCD_ASSERT( tab, invalid_table_iterator, "not a valid end iterator" );
 
                   auto itr = idx.upper_bound(tab->id);
                   if( idx.begin() == idx.end() || itr == idx.begin() ) return -1; // Empty index
@@ -286,7 +286,7 @@ class apply_context {
                if( iterator < -1 ) // is end iterator
                {
                   auto tab = itr_cache.find_table_by_end_iterator(iterator);
-                  EOS_ASSERT( tab, invalid_table_iterator, "not a valid end iterator" );
+                  DCD_ASSERT( tab, invalid_table_iterator, "not a valid end iterator" );
 
                   auto itr = idx.upper_bound(tab->id);
                   if( idx.begin() == idx.end() || itr == idx.begin() ) return -1; // Empty table
@@ -429,7 +429,7 @@ class apply_context {
       int32_t  kv_it_key(uint32_t itr, uint32_t offset, char* dest, uint32_t size, uint32_t& actual_size);
       int32_t  kv_it_value(uint32_t itr, uint32_t offset, char* dest, uint32_t size, uint32_t& actual_size);
       kv_context& kv_get_backing_store() {
-         EOS_ASSERT( kv_backing_store, action_validate_exception, "KV APIs cannot access state (null backing_store)" );
+         DCD_ASSERT( kv_backing_store, action_validate_exception, "KV APIs cannot access state (null backing_store)" );
          return *kv_backing_store;
       }
 

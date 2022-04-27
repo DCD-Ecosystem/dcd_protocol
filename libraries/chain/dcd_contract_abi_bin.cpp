@@ -2,7 +2,7 @@ namespace dcd { namespace chain {
 
 // Initial value for dcd ABI. This value affects consensus; if different
 // dcdnode versions have different versions of the initial dcd ABI, then
-// they could potentially fork. See https://github.com/DCD/eos/issues/7794
+// they could potentially fork. See https://github.com/DCD/dcd/issues/7794
 //
 // This is a capture of the ABI produced by versions 1.7 and 1.8.
 

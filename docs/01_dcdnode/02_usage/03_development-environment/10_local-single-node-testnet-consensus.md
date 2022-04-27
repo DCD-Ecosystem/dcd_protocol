@@ -5,7 +5,7 @@ link_text: Local Single-Node Testnet With Consensus Protocol
 
 ## Goal
 
-This section describes how to set up a single-node blockchain configuration running on a single host with [consensus protocol](https://developers.eos.io/welcome/v2.1/protocol/consensus_protocol) enabled.  This is referred to as a _**single host, single-node testnet with consensus**_.  We will set up one node on your local computer and have it produce blocks. The following diagram depicts the desired single host testnet.
+This section describes how to set up a single-node blockchain configuration running on a single host with [consensus protocol](https://developers.dcd.io/welcome/v2.1/protocol/consensus_protocol) enabled.  This is referred to as a _**single host, single-node testnet with consensus**_.  We will set up one node on your local computer and have it produce blocks. The following diagram depicts the desired single host testnet.
 
 ![Single host single node testnet](single-host-single-node-testnet.png)
 
@@ -80,7 +80,7 @@ curl --request POST \
 
 All of the protocol upgrade features introduced in v1.8 and on subsequent versions also require an updated version of the system smart contract which can make use of those protocol features.
 
-Two updated reference system smart contracts, `dcd.boot` and `dcd.bios`, are available in both source and binary form within the [`eos`](https://github.com/DCD/eos.git) repository. You can build them from source or deploy the binaries directly.
+Two updated reference system smart contracts, `dcd.boot` and `dcd.bios`, are available in both source and binary form within the [`dcd`](https://github.com/DCD/dcd.git) repository. You can build them from source or deploy the binaries directly.
 
 #### 4.1 Use the Prebuilt System Smart Contracts
 
@@ -88,8 +88,8 @@ To use the prebuilt system smart contract execute the following commands from a 
 
 ```sh
 cd ~
-git clone https://github.com/DCD/eos.git
-cd ./eos/contracts/contracts/
+git clone https://github.com/DCD/dcd.git
+cd ./dcd/contracts/contracts/
 pwd
 ```
 
@@ -99,8 +99,8 @@ Alternatively you can build the system smart contracts from source with the foll
 
 ```sh
 cd ~
-git clone https://github.com/DCD/eos.git
-cd ./eos/contracts/contracts/
+git clone https://github.com/DCD/dcd.git
+cd ./dcd/contracts/contracts/
 mkdir build
 cd build
 cmake ..
@@ -119,7 +119,7 @@ dcdcli set contract dcd DCD_SYSTEM_CONTRACTS_DIRECTORY/dcd.boot/bin/ dcd.boot.wa
 You should see something similar to the following output:
 
 ```sh
-Reading WAST/WASM from /users/documents/eos/contracts/contracts/dcd.boot/build/dcd.boot.wasm...
+Reading WAST/WASM from /users/documents/dcd/contracts/contracts/dcd.boot/build/dcd.boot.wasm...
 Using already assembled WASM...
 Publishing contract...
 executed transaction: 2150ed87e4564cd3fe98ccdea841dc9ff67351f9315b6384084e8572a35887cc  39968 bytes  4395 us

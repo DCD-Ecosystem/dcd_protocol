@@ -8,7 +8,7 @@ content_title: dcdksd
 
 ## Installation
 
-`dcdksd` is distributed as part of the [DCD software suite](https://github.com/DCD/eos/blob/master/README.md). To install `dcdksd` just visit the [DCD Software Installation](../00_install/index.md) section.
+`dcdksd` is distributed as part of the [DCD software suite](https://github.com/DCD/dcd/blob/master/README.md). To install `dcdksd` just visit the [DCD Software Installation](../00_install/index.md) section.
 
 ## Operation
 

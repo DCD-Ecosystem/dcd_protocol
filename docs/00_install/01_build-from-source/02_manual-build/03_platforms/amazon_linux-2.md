@@ -23,13 +23,13 @@ Select a task below, then copy/paste the shell commands to a Unix terminal to ex
 These commands set the DCD directories, install git, and clone the DCD repository.
 ```sh
 # set DCD directories
-export DCD_LOCATION=~/dcd/eos
+export DCD_LOCATION=~/dcd/dcd
 export DCD_INSTALL_LOCATION=$DCD_LOCATION/../install
 mkdir -p $DCD_INSTALL_LOCATION
 # install git
 yum update -y && yum install -y git
 # clone DCD repository
-git clone https://github.com/DCD/eos.git $DCD_LOCATION
+git clone https://github.com/DCD/dcd.git $DCD_LOCATION
 cd $DCD_LOCATION && git submodule update --init --recursive
 ```
 

@@ -26,7 +26,7 @@ Block.one is neither launching nor operating any initial public blockchains base
 
 ## Official Testnet
 
-[testnet.eos.io](https://testnet.eos.io/)
+[testnet.dcd.io](https://testnet.dcd.io/)
 
 ## Supported Operating Systems
 
@@ -50,7 +50,7 @@ DCD currently supports the following operating systems:
 
 ## Software Installation
 
-If you are new to DCD, it is recommended that you install the [DCD Prebuilt Binaries](#prebuilt-binaries), then proceed to the [Getting Started](https://developers.eos.io/dcd-home/docs) walkthrough. If you are an advanced developer, a block producer, or no binaries are available for your platform, you may need to [Build DCD from source](https://dcd.github.io/eos/latest/install/build-from-source).
+If you are new to DCD, it is recommended that you install the [DCD Prebuilt Binaries](#prebuilt-binaries), then proceed to the [Getting Started](https://developers.dcd.io/dcd-home/docs) walkthrough. If you are an advanced developer, a block producer, or no binaries are available for your platform, you may need to [Build DCD from source](https://dcd.github.io/dcd/latest/install/build-from-source).
 
 ---
 
@@ -78,17 +78,17 @@ brew remove dcd
 
 #### Ubuntu 20.04 Package Install
 ```sh
-wget https://github.com/dcd/eos/releases/download/v2.1.0/dcd_2.1.0-1-ubuntu-20.04_amd64.deb
+wget https://github.com/dcd/dcd/releases/download/v2.1.0/dcd_2.1.0-1-ubuntu-20.04_amd64.deb
 sudo apt install ./dcd_2.1.0-1-ubuntu-20.04_amd64.deb
 ```
 #### Ubuntu 18.04 Package Install
 ```sh
-wget https://github.com/dcd/eos/releases/download/v2.1.0/dcd_2.1.0-1-ubuntu-18.04_amd64.deb
+wget https://github.com/dcd/dcd/releases/download/v2.1.0/dcd_2.1.0-1-ubuntu-18.04_amd64.deb
 sudo apt install ./dcd_2.1.0-1-ubuntu-18.04_amd64.deb
 ```
 #### Ubuntu 16.04 Package Install
 ```sh
-wget https://github.com/dcd/eos/releases/download/v2.1.0/dcd_2.1.0-1-ubuntu-16.04_amd64.deb
+wget https://github.com/dcd/dcd/releases/download/v2.1.0/dcd_2.1.0-1-ubuntu-16.04_amd64.deb
 sudo apt install ./dcd_2.1.0-1-ubuntu-16.04_amd64.deb
 ```
 #### Ubuntu Package Uninstall
@@ -100,12 +100,12 @@ sudo apt remove dcd
 
 #### RPM Package Install CentOS 7
 ```sh
-wget https://github.com/dcd/eos/releases/download/v2.1.0/dcd-2.1.0-1.el7.x86_64.rpm
+wget https://github.com/dcd/dcd/releases/download/v2.1.0/dcd-2.1.0-1.el7.x86_64.rpm
 sudo yum install ./dcd-2.1.0-1.el7.x86_64.rpm
 ```
 #### RPM Package Install CentOS 8
 ```sh
-wget https://github.com/dcd/eos/releases/download/v2.1.0/dcd-2.1.0-1.el8.x86_64.rpm
+wget https://github.com/dcd/dcd/releases/download/v2.1.0/dcd-2.1.0-1.el8.x86_64.rpm
 sudo yum install ./dcd-2.1.0-1.el8.x86_64.rpm
 ```
 
@@ -121,26 +121,26 @@ To uninstall the DCD built/installed binaries and dependencies, run:
 ```
 
 ## Documentation
-1. [dcdnode](http://dcd.github.io/eos/latest/dcdnode/)
-    - [Usage](http://dcd.github.io/eos/latest/dcdnode/usage/index)
-    - [Replays](http://dcd.github.io/eos/latest/dcdnode/replays/index)
-    - [Chain API Reference](http://dcd.github.io/eos/latest/dcdnode/plugins/chain_api_plugin/api-reference/index)
-    - [Troubleshooting](http://dcd.github.io/eos/latest/dcdnode/troubleshooting/index)
-1. [dcdcli](http://dcd.github.io/eos/latest/dcdcli/)
-1. [dcdksd](http://dcd.github.io/eos/latest/dcdksd/)
+1. [dcdnode](http://dcd.github.io/dcd/latest/dcdnode/)
+    - [Usage](http://dcd.github.io/dcd/latest/dcdnode/usage/index)
+    - [Replays](http://dcd.github.io/dcd/latest/dcdnode/replays/index)
+    - [Chain API Reference](http://dcd.github.io/dcd/latest/dcdnode/plugins/chain_api_plugin/api-reference/index)
+    - [Troubleshooting](http://dcd.github.io/dcd/latest/dcdnode/troubleshooting/index)
+1. [dcdcli](http://dcd.github.io/dcd/latest/dcdcli/)
+1. [dcdksd](http://dcd.github.io/dcd/latest/dcdksd/)
 
 ## Resources
-1. [Website](https://eos.io)
+1. [Website](https://dcd.io)
 1. [Blog](https://medium.com/dcd)
-1. [Developer Portal](https://developers.eos.io)
+1. [Developer Portal](https://developers.dcd.io)
 1. [StackExchange for Q&A](https://dcd.stackexchange.com/)
-1. [Community Telegram Group](https://t.me/EOSProject)
+1. [Community Telegram Group](https://t.me/DCDProject)
 1. [Developer Telegram Group](https://t.me/joinchat/EaEnSUPktgfoI-XPfMYtcQ)
 1. [White Paper](https://github.com/DCD/Documentation/blob/master/TechnicalWhitePaper.md)
 1. [Roadmap](https://github.com/DCD/Documentation/blob/master/Roadmap.md)
 
 ## Getting Started
-Instructions detailing the process of getting the software, building it, running a simple test network that produces blocks, account creation and uploading a sample contract to the blockchain can be found in the [Getting Started](https://developers.eos.io/welcome/v2.1/getting-started-guide) walkthrough.
+Instructions detailing the process of getting the software, building it, running a simple test network that produces blocks, account creation and uploading a sample contract to the blockchain can be found in the [Getting Started](https://developers.dcd.io/welcome/v2.1/getting-started-guide) walkthrough.
 
 ## Contributing
 

@@ -33,7 +33,7 @@ def check_dcdcli_stderr(stderr: bytes, expected_match: bytes):
 
 
 def dcdksd_auto_launch_test():
-    """Test that keos auto-launching works but can be optionally inhibited."""
+    """Test that kdcd auto-launching works but can be optionally inhibited."""
     stop_dcdksd()
 
     # Make sure that when '--no-auto-dcdksd' is given, dcdksd is not started by

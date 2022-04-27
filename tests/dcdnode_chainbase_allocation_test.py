@@ -25,7 +25,7 @@ Utils.Debug = args.v
 killAll=args.clean_run
 dumpErrorDetails=args.dump_error_details
 dontKill=args.leave_running
-killEosInstances=not dontKill
+killDcdInstances=not dontKill
 killWallet=not dontKill
 keepLogs=args.keep_logs
 
@@ -66,15 +66,15 @@ try:
     irrNode = cluster.getNode(irrNodeId)
 
     # Create delayed transaction to create "generated_transaction_object"
-    cmd = "create account -j dcd sample EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV\
-         EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV --delay-sec 600 -p dcd"
+    cmd = "create account -j dcd sample DCD6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV\
+         DCD6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV --delay-sec 600 -p dcd"
     trans = producerNode.processdcdcliCmd(cmd, cmd, silentErrors=False)
     assert trans
 
     # Schedule a new producer to trigger new producer schedule for "global_property_object"
     newProducerAcc = Account("newprod")
-    newProducerAcc.ownerPublicKey = "EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"
-    newProducerAcc.activePublicKey = "EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"
+    newProducerAcc.ownerPublicKey = "DCD6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"
+    newProducerAcc.activePublicKey = "DCD6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"
     producerNode.createAccount(newProducerAcc, cluster.dcdAccount)
 
     setProdsStr = '{"schedule": ['
@@ -110,7 +110,7 @@ try:
 
     testSuccessful = True
 finally:
-    TestHelper.shutdown(cluster, walletMgr, testSuccessful, killEosInstances, killWallet, keepLogs, killAll, dumpErrorDetails)
+    TestHelper.shutdown(cluster, walletMgr, testSuccessful, killDcdInstances, killWallet, keepLogs, killAll, dumpErrorDetails)
 
 exitCode = 0 if testSuccessful else 1
 exit(exitCode)

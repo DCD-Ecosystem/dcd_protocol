@@ -25,11 +25,11 @@ struct se_wallet_impl {
 se_wallet::se_wallet() : my(new detail::se_wallet_impl()) {
    if(!secure_enclave::application_signed()) {
       wlog("Application does not have a valid signature; Secure Enclave support disabled");
-      EOS_THROW(secure_enclave_exception, "");
+      DCD_THROW(secure_enclave_exception, "");
    }
 
    if(!secure_enclave::hardware_supports_secure_enclave())
-      EOS_THROW(secure_enclave_exception, "Secure Enclave not supported on this hardware");
+      DCD_THROW(secure_enclave_exception, "Secure Enclave not supported on this hardware");
 }
 
 se_wallet::~se_wallet() {
@@ -43,7 +43,7 @@ bool se_wallet::is_locked() const {
    return my->locked;
 }
 void se_wallet::lock() {
-   EOS_ASSERT(!is_locked(), wallet_locked_exception, "You can not lock an already locked wallet");
+   DCD_ASSERT(!is_locked(), wallet_locked_exception, "You can not lock an already locked wallet");
    my->locked = true;
 }
 
@@ -77,12 +77,12 @@ bool se_wallet::import_key(string wif_key) {
 }
 
 string se_wallet::create_key(string key_type) {
-   EOS_ASSERT(key_type.empty() || key_type == "R1", chain::unsupported_key_type_exception, "Secure Enclave wallet only supports R1 keys");
+   DCD_ASSERT(key_type.empty() || key_type == "R1", chain::unsupported_key_type_exception, "Secure Enclave wallet only supports R1 keys");
    return secure_enclave::create_key().public_key().to_string();
 }
 
 bool se_wallet::remove_key(string key) {
-   EOS_ASSERT(!is_locked(), wallet_locked_exception, "You can not remove a key from a locked wallet");
+   DCD_ASSERT(!is_locked(), wallet_locked_exception, "You can not remove a key from a locked wallet");
 
    auto se_keys = secure_enclave::get_all_keys();
 

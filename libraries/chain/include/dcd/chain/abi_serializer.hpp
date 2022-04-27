@@ -106,10 +106,10 @@ struct abi_serializer {
          deadline += max_serialization_time;
       }
       return [max_serialization_time, deadline](size_t recursion_depth) {
-         EOS_ASSERT( recursion_depth < max_recursion_depth, abi_recursion_depth_exception,
+         DCD_ASSERT( recursion_depth < max_recursion_depth, abi_recursion_depth_exception,
                      "recursive definition, max_recursion_depth ${r} ", ("r", max_recursion_depth) );
 
-         EOS_ASSERT( fc::time_point::now() < deadline, abi_serialization_deadline_exception,
+         DCD_ASSERT( fc::time_point::now() < deadline, abi_serialization_deadline_exception,
                      "serialization time limit ${t}us exceeded", ("t", max_serialization_time) );
       };
    }
@@ -568,7 +568,7 @@ namespace impl {
          mvo("delay_sec", trx.delay_sec);
          add(mvo, "context_free_actions", trx.context_free_actions, resolver, ctx);
          add(mvo, "actions", trx.actions, resolver, ctx);
-         add(mvo, "fee", trx.fee, resolver, ctx);
+         //add(mvo, "fee", trx.fee, resolver, ctx);
 
          // process contents of block.transaction_extensions
          auto exts = trx.validate_and_extract_extensions();
@@ -586,7 +586,7 @@ namespace impl {
       template<typename Resolver>
       static void add( mutable_variant_object &out, const char* name, const transaction& trx, Resolver resolver, abi_traverse_context& ctx )
       {
-         static_assert(fc::reflector<transaction>::total_member_count == 10);
+         static_assert(fc::reflector<transaction>::total_member_count == 9);
          auto h = ctx.enter_scope();
          mutable_variant_object mvo;
          add_transaction(mvo, trx, resolver, ctx);
@@ -602,7 +602,7 @@ namespace impl {
       template<typename Resolver>
       static void add( mutable_variant_object &out, const char* name, const signed_transaction& trx, Resolver resolver, abi_traverse_context& ctx )
       {
-         static_assert(fc::reflector<signed_transaction>::total_member_count == 12);
+         static_assert(fc::reflector<signed_transaction>::total_member_count == 11);
          auto h = ctx.enter_scope();
          mutable_variant_object mvo;
          add_transaction(mvo, trx, resolver, ctx);
@@ -803,8 +803,8 @@ namespace impl {
       {
          auto h = ctx.enter_scope();
          const variant_object& vo = v.get_object();
-         EOS_ASSERT(vo.contains("account"), packed_transaction_type_exception, "Missing account");
-         EOS_ASSERT(vo.contains("name"), packed_transaction_type_exception, "Missing name");
+         DCD_ASSERT(vo.contains("account"), packed_transaction_type_exception, "Missing account");
+         DCD_ASSERT(vo.contains("name"), packed_transaction_type_exception, "Missing name");
          from_variant(vo["account"], act.account);
          from_variant(vo["name"], act.name);
 
@@ -841,7 +841,7 @@ namespace impl {
             }
          }
 
-         EOS_ASSERT(valid_empty_data || !act.data.empty(), packed_transaction_type_exception,
+         DCD_ASSERT(valid_empty_data || !act.data.empty(), packed_transaction_type_exception,
                     "Failed to deserialize data for ${account}:${name}", ("account", act.account)("name", act.name));
       }
 
@@ -872,9 +872,9 @@ namespace impl {
          if (vo.contains("actions")) {
             extract(vo["actions"], trx.actions, resolver, ctx);
          }
-         if (vo.contains("fee")) {
-            extract(vo["fee"], trx.fee, resolver, ctx);
-         }
+         // if (vo.contains("fee")) {
+         //    extract(vo["fee"], trx.fee, resolver, ctx);
+         // }
 
 
          // can have "deferred_transaction_generation" (if there is a deferred transaction and the extension was "extracted" to show data),
@@ -893,7 +893,7 @@ namespace impl {
             if (vo.contains("transaction_extensions")) {
                extensions_type trx_extensions;
                from_variant(vo["transaction_extensions"], trx_extensions);
-               EOS_ASSERT(trx.transaction_extensions == trx_extensions, packed_transaction_type_exception,
+               DCD_ASSERT(trx.transaction_extensions == trx_extensions, packed_transaction_type_exception,
                         "Transaction contained deferred_transaction_generation and transaction_extensions that did not match");
             }
          }
@@ -905,7 +905,7 @@ namespace impl {
       template<typename Resolver>
       static void extract( const fc::variant& v, transaction& trx, Resolver resolver, abi_traverse_context& ctx )
       {
-         static_assert(fc::reflector<transaction>::total_member_count == 10);
+         static_assert(fc::reflector<transaction>::total_member_count == 9);
          auto h = ctx.enter_scope();
          const variant_object& vo = v.get_object();
          extract_transaction(vo, trx, resolver, ctx);
@@ -914,7 +914,7 @@ namespace impl {
       template<typename Resolver>
       static void extract( const fc::variant& v, signed_transaction& strx, Resolver resolver, abi_traverse_context& ctx )
       {
-         static_assert(fc::reflector<signed_transaction>::total_member_count == 12);
+         static_assert(fc::reflector<signed_transaction>::total_member_count == 11);
          auto h = ctx.enter_scope();
          const variant_object& vo = v.get_object();
          extract_transaction(vo, strx, resolver, ctx);
@@ -931,8 +931,8 @@ namespace impl {
       {
          auto h = ctx.enter_scope();
          const variant_object& vo = v.get_object();
-         EOS_ASSERT(vo.contains("signatures"), packed_transaction_type_exception, "Missing signatures");
-         EOS_ASSERT(vo.contains("compression"), packed_transaction_type_exception, "Missing compression");
+         DCD_ASSERT(vo.contains("signatures"), packed_transaction_type_exception, "Missing signatures");
+         DCD_ASSERT(vo.contains("compression"), packed_transaction_type_exception, "Missing compression");
          std::vector<signature_type> signatures;
          packed_transaction_v0::compression_type compression;
          from_variant(vo["signatures"], signatures);
@@ -957,7 +957,7 @@ namespace impl {
                ptrx = packed_transaction_v0( std::move( packed_trx ), std::move( signatures ), std::move( cfd ), compression );
             }
          } else {
-            EOS_ASSERT(vo.contains("transaction"), packed_transaction_type_exception, "Missing transaction");
+            DCD_ASSERT(vo.contains("transaction"), packed_transaction_type_exception, "Missing transaction");
             if( use_packed_cfd ) {
                transaction trx;
                extract( vo["transaction"], trx, resolver, ctx );

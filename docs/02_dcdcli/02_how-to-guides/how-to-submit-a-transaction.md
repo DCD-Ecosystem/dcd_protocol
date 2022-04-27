@@ -7,16 +7,16 @@ This how-to guide provides instructions on how to submit, or push, a transaction
 * Install the currently supported version of `dcdcli`
 
 * Understand the following:
-  * What a [transaction](https://developers.eos.io/welcome/latest/glossary/index/#transaction) is.
+  * What a [transaction](https://developers.dcd.io/welcome/latest/glossary/index/#transaction) is.
   * How to generate a valid transaction JSON.
-    * Consult [dcdcli push transaction](https://developers.eos.io/manuals/eos/v2.1/dcdcli/command-reference/push/push-transaction) reference, and pay attention to option `-d` and `-j`.
-    * Consult [push transaction](https://developers.eos.io/manuals/eos/v2.1/dcdnode/plugins/chain_api_plugin/api-reference/index#operation/push_transaction) endpoint for chain api plug-in, and pay attention to the payload definition.
+    * Consult [dcdcli push transaction](https://developers.dcd.io/manuals/dcd/v2.1/dcdcli/command-reference/push/push-transaction) reference, and pay attention to option `-d` and `-j`.
+    * Consult [push transaction](https://developers.dcd.io/manuals/dcd/v2.1/dcdnode/plugins/chain_api_plugin/api-reference/index#operation/push_transaction) endpoint for chain api plug-in, and pay attention to the payload definition.
 
 ## Command Reference
 
 See the following reference guides for command line usage and related options for the `dcdcli` command:
 
-* The [dcdcli push transaction](https://developers.eos.io/manuals/eos/v2.1/dcdcli/command-reference/push/push-transaction) reference.
+* The [dcdcli push transaction](https://developers.dcd.io/manuals/dcd/v2.1/dcdcli/command-reference/push/push-transaction) reference.
 
 ## Procedure
 

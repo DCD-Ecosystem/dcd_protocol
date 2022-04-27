@@ -121,12 +121,12 @@ Config Options for dcd::chain_plugin:
                                         application config dir)
   --checkpoint arg                      Pairs of [BLOCK_NUM,BLOCK_ID] that 
                                         should be enforced as checkpoints.
-  --wasm-runtime runtime (=eos-vm-jit)  Override default WASM runtime ( 
-                                        "eos-vm-jit", "eos-vm")
-                                        "eos-vm-jit" : A WebAssembly runtime 
+  --wasm-runtime runtime (=dcd-vm-jit)  Override default WASM runtime ( 
+                                        "dcd-vm-jit", "dcd-vm")
+                                        "dcd-vm-jit" : A WebAssembly runtime 
                                         that compiles WebAssembly code to 
                                         native x86 code prior to execution.
-                                        "eos-vm" : A WebAssembly interpreter.
+                                        "dcd-vm" : A WebAssembly interpreter.
                                         
   --abi-serializer-max-time-ms arg (=15)
                                         Override default maximum ABI 

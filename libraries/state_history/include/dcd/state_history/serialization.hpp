@@ -66,7 +66,7 @@ template <typename ST, typename T>
 ST& history_serialize_container(ST& ds, const chainbase::database& db, const std::vector<std::shared_ptr<T>>& v) {
    fc::raw::pack(ds, unsigned_int(v.size()));
    for (auto& x : v) {
-      EOS_ASSERT(!!x, dcd::chain::plugin_exception, "null inside container");
+      DCD_ASSERT(!!x, dcd::chain::plugin_exception, "null inside container");
       ds << make_history_serial_wrapper(db, *x);
    }
    return ds;
@@ -445,7 +445,7 @@ ST& operator<<(ST& ds, const history_serial_wrapper<dcd::chain::permission_objec
          auto undo = index.last_undo_session();
          auto it   = std::find_if(undo.removed_values.begin(), undo.removed_values.end(),
                                 [&](auto& x) { return x.id._id == obj.obj.parent; });
-         EOS_ASSERT(it != undo.removed_values.end(), dcd::chain::plugin_exception,
+         DCD_ASSERT(it != undo.removed_values.end(), dcd::chain::plugin_exception,
                     "can not find parent of permission_object");
          parent = &*it;
       }
@@ -470,7 +470,7 @@ ST& operator<<(ST& ds, const history_serial_wrapper<dcd::chain::permission_link_
 
 //template <typename ST>
 //ST& operator<<(ST& ds, const history_serial_wrapper<dcd::chain::resource_limits::resource_limits_object>& obj) {
-//   EOS_ASSERT(!obj.obj.pending, dcd::chain::plugin_exception,
+//   DCD_ASSERT(!obj.obj.pending, dcd::chain::plugin_exception,
 //              "accepted_block sent while resource_limits_object in pending state");
 //   fc::raw::pack(ds, fc::unsigned_int(0));
 //   fc::raw::pack(ds, as_type<uint64_t>(obj.obj.owner.to_uint64_t()));

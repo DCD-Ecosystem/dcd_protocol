@@ -65,12 +65,12 @@ apply_context::apply_context(controller& con, transaction_context& trx_ctx, uint
 //         counter = 0;
 //      }
 //      if (entry.delta > 0 && entry.account != receiver) {
-//         EOS_ASSERT(not_in_notify_context, Exception,
+//         DCD_ASSERT(not_in_notify_context, Exception,
 //                     "unprivileged contract cannot increase ${resource} usage of another account within a notify context: "
 //                     "${account}",
 //                     ("resource", resource)
 //                     ("account", entry.account));
-//         EOS_ASSERT(has_authorization(entry.account), Exception,
+//         DCD_ASSERT(has_authorization(entry.account), Exception,
 //                     "unprivileged contract cannot increase ${resource} usage of another account that has not authorized the "
 //                     "action: ${account}",
 //                     ("resource", resource)
@@ -228,7 +228,7 @@ void apply_context::exec()
    }
 
    if( _cfa_inline_actions.size() > 0 || _inline_actions.size() > 0 ) {
-      EOS_ASSERT( recurse_depth < control.get_global_properties().configuration.max_inline_action_depth,
+      DCD_ASSERT( recurse_depth < control.get_global_properties().configuration.max_inline_action_depth,
                   transaction_exception, "max inline action depth per transaction reached" );
    }
 
@@ -252,7 +252,7 @@ void apply_context::require_authorization( const account_name& account ) const {
         return;
      }
    }
-   EOS_ASSERT( false, missing_auth_exception, "missing authority of ${account}", ("account",account));
+   DCD_ASSERT( false, missing_auth_exception, "missing authority of ${account}", ("account",account));
 }
 
 bool apply_context::has_authorization( const account_name& account )const {
@@ -270,7 +270,7 @@ void apply_context::require_authorization(const account_name& account,
            return;
         }
      }
-  EOS_ASSERT( false, missing_auth_exception, "missing authority of ${account}/${permission}",
+  DCD_ASSERT( false, missing_auth_exception, "missing authority of ${account}/${permission}",
               ("account",account)("permission",permission) );
 }
 
@@ -314,7 +314,7 @@ void apply_context::require_recipient( account_name recipient ) {
  */
 void apply_context::execute_inline( action&& a ) {
    auto* code = control.db().find<account_object, by_name>(a.account);
-   EOS_ASSERT( code != nullptr, action_validate_exception,
+   DCD_ASSERT( code != nullptr, action_validate_exception,
                "inline action's code account ${account} does not exist", ("account", a.account) );
 
    bool enforce_actor_whitelist_blacklist = trx_context.enforce_whiteblacklist && control.is_producing_block();
@@ -331,9 +331,9 @@ void apply_context::execute_inline( action&& a ) {
 
    for( const auto& auth : a.authorization ) {
       auto* actor = control.db().find<account_object, by_name>(auth.actor);
-      EOS_ASSERT( actor != nullptr, action_validate_exception,
+      DCD_ASSERT( actor != nullptr, action_validate_exception,
                   "inline action's authorizing actor ${account} does not exist", ("account", auth.actor) );
-      EOS_ASSERT( control.get_authorization_manager().find_permission(auth) != nullptr, action_validate_exception,
+      DCD_ASSERT( control.get_authorization_manager().find_permission(auth) != nullptr, action_validate_exception,
                   "inline action's authorizations include a non-existent permission: ${permission}",
                   ("permission", auth) );
       if( enforce_actor_whitelist_blacklist )
@@ -350,7 +350,7 @@ void apply_context::execute_inline( action&& a ) {
 
    if( !privileged && control.is_producing_block() ) {
       const auto& chain_config = control.get_global_properties().configuration;
-      EOS_ASSERT( a.data.size() < std::min(chain_config.max_inline_action_size, control.get_max_nonprivileged_inline_action_size()),
+      DCD_ASSERT( a.data.size() < std::min(chain_config.max_inline_action_size, control.get_max_nonprivileged_inline_action_size()),
                   inline_action_too_big_nonprivileged,
                   "inline action too big for nonprivileged account ${account}", ("account", a.account));
    }
@@ -384,7 +384,7 @@ void apply_context::execute_inline( action&& a ) {
          if( disallow_send_to_self_bypass || !send_to_self ) {
             throw;
          } else if( control.is_producing_block() ) {
-            EOS_THROW(subjective_block_production_exception, "Unexpected exception occurred validating inline action sent to self");
+            DCD_THROW(subjective_block_production_exception, "Unexpected exception occurred validating inline action sent to self");
          }
       }
    }
@@ -403,15 +403,15 @@ void apply_context::execute_inline( action&& a ) {
 
 void apply_context::execute_context_free_inline( action&& a ) {
    auto* code = control.db().find<account_object, by_name>(a.account);
-   EOS_ASSERT( code != nullptr, action_validate_exception,
+   DCD_ASSERT( code != nullptr, action_validate_exception,
                "inline action's code account ${account} does not exist", ("account", a.account) );
 
-   EOS_ASSERT( a.authorization.size() == 0, action_validate_exception,
+   DCD_ASSERT( a.authorization.size() == 0, action_validate_exception,
                "context-free actions cannot have authorizations" );
 
    if( !privileged && control.is_producing_block() ) {
       const auto& chain_config = control.get_global_properties().configuration;
-      EOS_ASSERT( a.data.size() < std::min(chain_config.max_inline_action_size, control.get_max_nonprivileged_inline_action_size()),
+      DCD_ASSERT( a.data.size() < std::min(chain_config.max_inline_action_size, control.get_max_nonprivileged_inline_action_size()),
                   inline_action_too_big_nonprivileged,
                   "inline action too big for nonprivileged account ${account}", ("account", a.account));
    }
@@ -430,7 +430,7 @@ void apply_context::execute_context_free_inline( action&& a ) {
 
 
 void apply_context::schedule_deferred_transaction( const uint128_t& sender_id, account_name payer, transaction&& trx, bool replace_existing ) {
-   EOS_ASSERT( trx.context_free_actions.size() == 0, cfa_inside_generated_tx, "context free actions are not currently allowed in generated transactions" );
+   DCD_ASSERT( trx.context_free_actions.size() == 0, cfa_inside_generated_tx, "context free actions are not currently allowed in generated transactions" );
 
    bool enforce_actor_whitelist_blacklist = trx_context.enforce_whiteblacklist && control.is_producing_block()
                                              && !control.sender_avoids_whitelist_blacklist_enforcement( receiver );
@@ -441,21 +441,21 @@ void apply_context::schedule_deferred_transaction( const uint128_t& sender_id, a
       if( exts.size() > 0 ) {
          auto itr = exts.lower_bound( deferred_transaction_generation_context::extension_id() );
 
-         EOS_ASSERT( exts.size() == 1 && itr != exts.end(), invalid_transaction_extension,
+         DCD_ASSERT( exts.size() == 1 && itr != exts.end(), invalid_transaction_extension,
                      "only the deferred_transaction_generation_context extension is currently supported for deferred transactions"
          );
 
          const auto& context = std::get<deferred_transaction_generation_context>(itr->second);
 
-         EOS_ASSERT( context.sender == receiver, ill_formed_deferred_transaction_generation_context,
+         DCD_ASSERT( context.sender == receiver, ill_formed_deferred_transaction_generation_context,
                      "deferred transaction generaction context contains mismatching sender",
                      ("expected", receiver)("actual", context.sender)
          );
-         EOS_ASSERT( context.sender_id == sender_id, ill_formed_deferred_transaction_generation_context,
+         DCD_ASSERT( context.sender_id == sender_id, ill_formed_deferred_transaction_generation_context,
                      "deferred transaction generaction context contains mismatching sender_id",
                      ("expected", sender_id)("actual", context.sender_id)
          );
-         EOS_ASSERT( context.sender_trx_id == trx_context.packed_trx.id(), ill_formed_deferred_transaction_generation_context,
+         DCD_ASSERT( context.sender_trx_id == trx_context.packed_trx.id(), ill_formed_deferred_transaction_generation_context,
                      "deferred transaction generaction context contains mismatching sender_trx_id",
                      ("expected", trx_context.packed_trx.id())("actual", context.sender_trx_id)
          );
@@ -487,10 +487,10 @@ void apply_context::schedule_deferred_transaction( const uint128_t& sender_id, a
    if( !control.skip_auth_check() && !privileged ) { // Do not need to check authorization if replayng irreversible block or if contract is privileged
       if( payer != receiver ) {
          if( ram_restrictions_activated ) {
-            EOS_ASSERT( receiver == act->account, action_validate_exception,
+            DCD_ASSERT( receiver == act->account, action_validate_exception,
                         "cannot bill RAM usage of deferred transactions to another account within notify context"
             );
-            EOS_ASSERT( has_authorization( payer ), action_validate_exception,
+            DCD_ASSERT( has_authorization( payer ), action_validate_exception,
                         "cannot bill RAM usage of deferred transaction to another account that has not authorized the action: ${payer}",
                         ("payer", payer)
             );
@@ -545,7 +545,7 @@ void apply_context::schedule_deferred_transaction( const uint128_t& sender_id, a
          if( disallow_send_to_self_bypass || !is_sending_only_to_self(receiver) ) {
             throw;
          } else if( control.is_producing_block() ) {
-            EOS_THROW(subjective_block_production_exception, "Unexpected exception occurred validating sent deferred transaction consisting only of actions to self");
+            DCD_THROW(subjective_block_production_exception, "Unexpected exception occurred validating sent deferred transaction consisting only of actions to self");
          }
       }
    }
@@ -554,11 +554,11 @@ void apply_context::schedule_deferred_transaction( const uint128_t& sender_id, a
    std::string event_id;
    const char* operation = "";
    if ( auto ptr = db.find<generated_transaction_object,by_sender_id>(boost::make_tuple(receiver, sender_id)) ) {
-      EOS_ASSERT( replace_existing, deferred_tx_duplicate, "deferred transaction with the same sender_id and payer already exists" );
+      DCD_ASSERT( replace_existing, deferred_tx_duplicate, "deferred transaction with the same sender_id and payer already exists" );
 
       bool replace_deferred_activated = control.is_builtin_activated(builtin_protocol_feature_t::replace_deferred);
 
-      EOS_ASSERT( replace_deferred_activated || !control.is_producing_block()
+      DCD_ASSERT( replace_deferred_activated || !control.is_producing_block()
                      || control.all_subjective_mitigations_disabled(),
                   subjective_block_production_exception,
                   "Replacing a deferred transaction is temporarily disabled." );
@@ -658,7 +658,7 @@ void apply_context::schedule_deferred_transaction( const uint128_t& sender_id, a
       } );
    }
 
-   EOS_ASSERT( ram_restrictions_activated
+   DCD_ASSERT( ram_restrictions_activated
                || control.is_ram_billing_in_notify_allowed()
                || (receiver == act->account) || (receiver == payer) || privileged,
                subjective_block_production_exception,
@@ -779,7 +779,7 @@ void apply_context::update_db_usage( const account_name& payer, int64_t delta, c
       if( !(privileged || payer == account_name(receiver)
                || control.is_builtin_activated( builtin_protocol_feature_t::ram_restrictions ) ) )
       {
-         EOS_ASSERT( control.is_ram_billing_in_notify_allowed() || (receiver == act->account),
+         DCD_ASSERT( control.is_ram_billing_in_notify_allowed() || (receiver == act->account),
                      subjective_block_production_exception, "Cannot charge RAM to other accounts during notify." );
          require_authorization( payer );
       }
@@ -804,7 +804,7 @@ int apply_context::get_action( uint32_t type, uint32_t index, char* buffer, size
       act_ptr = &trx.actions[index];
    }
 
-   EOS_ASSERT(act_ptr, action_not_found_exception, "action is not found" );
+   DCD_ASSERT(act_ptr, action_not_found_exception, "action is not found" );
 
    auto ps = fc::raw::pack_size( *act_ptr );
    if( ps <= buffer_size ) {
@@ -835,9 +835,9 @@ int apply_context::get_context_free_data( uint32_t index, char* buffer, size_t b
 
    if( !cfd ) {
       if( control.is_producing_block() ) {
-         EOS_THROW( subjective_block_production_exception, "pruned context free data not available" );
+         DCD_THROW( subjective_block_production_exception, "pruned context free data not available" );
       } else {
-         EOS_THROW( pruned_context_free_data_bad_block_exception, "pruned context free data not available" );
+         DCD_THROW( pruned_context_free_data_bad_block_exception, "pruned context free data not available" );
       }
    }
 
@@ -855,7 +855,7 @@ int apply_context::db_store_i64_chainbase( name scope, name table, const account
    const auto& tab = find_or_create_table( receiver, scope, table, payer );
    auto tableid = tab.id;
 
-   EOS_ASSERT( payer != account_name(), invalid_table_payer, "must specify a valid account to pay for new record" );
+   DCD_ASSERT( payer != account_name(), invalid_table_payer, "must specify a valid account to pay for new record" );
 
    const auto& obj = db.create<key_value_object>( [&]( auto& o ) {
       o.t_id        = tableid;
@@ -889,7 +889,7 @@ void apply_context::db_update_i64_chainbase( int iterator, account_name payer, c
    const key_value_object& obj = db_iter_store.get( iterator );
 
    const auto& table_obj = db_iter_store.get_table( obj.t_id );
-   EOS_ASSERT( table_obj.code == receiver, table_access_violation, "db access violation" );
+   DCD_ASSERT( table_obj.code == receiver, table_access_violation, "db access violation" );
 
 //   require_write_lock( table_obj.scope );
 
@@ -930,7 +930,7 @@ void apply_context::db_remove_i64_chainbase( int iterator ) {
    const key_value_object& obj = db_iter_store.get( iterator );
 
    const auto& table_obj = db_iter_store.get_table( obj.t_id );
-   EOS_ASSERT( table_obj.code == receiver, table_access_violation, "db access violation" );
+   DCD_ASSERT( table_obj.code == receiver, table_access_violation, "db access violation" );
 
 //   require_write_lock( table_obj.scope );
 
@@ -990,7 +990,7 @@ int apply_context::db_previous_i64_chainbase( int iterator, uint64_t& primary ) 
    if( iterator < -1 ) // is end iterator
    {
       auto tab = db_iter_store.find_table_by_end_iterator(iterator);
-      EOS_ASSERT( tab, invalid_table_iterator, "not a valid end iterator" );
+      DCD_ASSERT( tab, invalid_table_iterator, "not a valid end iterator" );
 
       auto itr = idx.upper_bound(tab->id);
       if( idx.begin() == idx.end() || itr == idx.begin() ) return -1; // Empty table
@@ -1094,7 +1094,7 @@ uint32_t apply_context::kv_it_create(uint64_t contract, const char* prefix, uint
       kv_destroyed_iterators.pop_back();
    } else {
       // Sanity check in case the per-database limits are set poorly
-      EOS_ASSERT(kv_iterators.size() <= 0xFFFFFFFFu, kv_bad_iter, "Too many iterators");
+      DCD_ASSERT(kv_iterators.size() <= 0xFFFFFFFFu, kv_bad_iter, "Too many iterators");
       itr = kv_iterators.size();
       kv_iterators.emplace_back();
    }
@@ -1155,7 +1155,7 @@ int32_t apply_context::kv_it_value(uint32_t itr, uint32_t offset, char* dest, ui
 }
 
 void apply_context::kv_check_iterator(uint32_t itr) {
-   EOS_ASSERT(itr < kv_iterators.size() && kv_iterators[itr], kv_bad_iter, "Bad key-value iterator");
+   DCD_ASSERT(itr < kv_iterators.size() && kv_iterators[itr], kv_bad_iter, "Bad key-value iterator");
 }
 
 uint64_t apply_context::next_global_sequence() {
@@ -1207,7 +1207,7 @@ void apply_context::increment_action_id() {
 }
 
 db_context& apply_context::db_get_context() {
-   EOS_ASSERT( _db_context, action_validate_exception,
+   DCD_ASSERT( _db_context, action_validate_exception,
                "context-free actions cannot access state" );
    return *_db_context;
 }

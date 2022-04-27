@@ -33,7 +33,8 @@ namespace dcdsystem {
     _rexbalance(get_self(), get_self().value),
     _rexorders(get_self(), get_self().value),
     _oracles(get_self(), get_self().value),
-    _fee_proposals(get_self(), get_self().value)
+    _fee_proposals(get_self(), get_self().value),
+    _fee_proposals_fin(get_self(), get_self().value)
    {
       _gstate  = _global.exists() ? _global.get() : get_default_parameters();
       _gstate2 = _global2.exists() ? _global2.get() : dcd_global_state2{};

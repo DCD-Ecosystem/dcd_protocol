@@ -26,7 +26,7 @@ killAll=args.clean_run
 
 Utils.Debug=debug
 
-killEosInstances=not dontKill
+killDcdInstances=not dontKill
 topo="mesh"
 delay=1
 prodCount=1 # producers per producer node
@@ -46,7 +46,7 @@ try:
     Print("Stand up cluster")
 
     if cluster.launch(pnodes=pnodes, totalNodes=total_nodes, prodCount=prodCount, topo=topo, delay=delay, onlyBios=onlyBios) is False:
-        errorExit("Failed to stand up eos cluster.")
+        errorExit("Failed to stand up dcd cluster.")
 
     Print ("Wait for Cluster stabilization")
     # wait for cluster to start producing blocks
@@ -65,6 +65,6 @@ try:
 
     testSuccessful=True
 finally:
-    TestHelper.shutdown(cluster, None, testSuccessful, killEosInstances, False, False, killAll, dumpErrorDetails)
+    TestHelper.shutdown(cluster, None, testSuccessful, killDcdInstances, False, False, killAll, dumpErrorDetails)
 
 exit(0)

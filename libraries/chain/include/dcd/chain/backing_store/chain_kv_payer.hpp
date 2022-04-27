@@ -7,7 +7,7 @@ namespace dcd { namespace chain { namespace backing_store {
    static constexpr auto payer_in_value_size = sizeof(account_name);
 
    inline static uint32_t actual_value_size(const uint32_t raw_value_size) {
-      EOS_ASSERT(raw_value_size >= payer_in_value_size, kv_rocksdb_bad_value_size_exception , "The size of value returned from RocksDB is less than payer's size");
+      DCD_ASSERT(raw_value_size >= payer_in_value_size, kv_rocksdb_bad_value_size_exception , "The size of value returned from RocksDB is less than payer's size");
       return (raw_value_size - payer_in_value_size);
    }
 

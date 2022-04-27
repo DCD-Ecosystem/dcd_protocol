@@ -59,21 +59,21 @@ class db_key_value_iter_store {
 
       int get_end_iterator_by_table( const unique_table& tobj )const {
          auto itr = _table_cache.find(tobj);
-         EOS_ASSERT( itr != _table_cache.end(), table_not_in_cache, "an invariant was broken, table should be in cache" );
+         DCD_ASSERT( itr != _table_cache.end(), table_not_in_cache, "an invariant was broken, table should be in cache" );
          return itr->second;
       }
 
       const unique_table* find_table_by_end_iterator( int ei )const {
-         EOS_ASSERT( ei < invalid_iterator(), invalid_table_iterator, "not an end iterator" );
+         DCD_ASSERT( ei < invalid_iterator(), invalid_table_iterator, "not an end iterator" );
          auto indx = end_iterator_to_index(ei);
          if( indx >= _end_iterator_to_table.size() ) return nullptr;
          return &_end_iterator_to_table[indx];
       }
 
       const unique_table& get_table( const secondary_obj_type& obj )const {
-         EOS_ASSERT( obj.table_ei < invalid_iterator(), invalid_table_iterator, "not an end iterator" );
+         DCD_ASSERT( obj.table_ei < invalid_iterator(), invalid_table_iterator, "not an end iterator" );
          auto indx = end_iterator_to_index(obj.table_ei);
-         EOS_ASSERT( indx < _end_iterator_to_table.size(), table_not_in_cache,
+         DCD_ASSERT( indx < _end_iterator_to_table.size(), table_not_in_cache,
                      "an invariant was broken, secondary object references table that is not in cache" );
          return _end_iterator_to_table[indx];
       }
@@ -82,7 +82,7 @@ class db_key_value_iter_store {
          validate_object_iterator(iterator, "dereference of end iterator");
          // grab a const ref, to ensure that we are returning a reference to the actual object in the vector
          const auto& result = _iterator_to_object[iterator];
-         EOS_ASSERT( result, table_operation_not_permitted, "dereference of deleted object" );
+         DCD_ASSERT( result, table_operation_not_permitted, "dereference of deleted object" );
          return *result;
       }
 
@@ -129,9 +129,9 @@ class db_key_value_iter_store {
          if( itr != invalid_iterator() )
               return itr;
 
-         EOS_ASSERT( obj.table_ei < invalid_iterator(), invalid_table_iterator, "not an end iterator" );
+         DCD_ASSERT( obj.table_ei < invalid_iterator(), invalid_table_iterator, "not an end iterator" );
          const auto indx = end_iterator_to_index(obj.table_ei);
-         EOS_ASSERT( indx < _end_iterator_to_table.size(), invalid_table_iterator, "an invariant was broken, table should be in cache" );
+         DCD_ASSERT( indx < _end_iterator_to_table.size(), invalid_table_iterator, "an invariant was broken, table should be in cache" );
          _object_to_iterator.insert({ obj, _iterator_to_object.size() });
          _iterator_to_object.emplace_back( obj );
 
@@ -140,9 +140,9 @@ class db_key_value_iter_store {
 
    private:
       void validate_object_iterator(int iterator, const char* explanation_for_no_end_iterators) const {
-         EOS_ASSERT( iterator != invalid_iterator(), invalid_table_iterator, "invalid iterator" );
-         EOS_ASSERT( iterator >= 0, table_operation_not_permitted, explanation_for_no_end_iterators );
-         EOS_ASSERT( (size_t)iterator < _iterator_to_object.size(), invalid_table_iterator, "iterator out of range" );
+         DCD_ASSERT( iterator != invalid_iterator(), invalid_table_iterator, "invalid iterator" );
+         DCD_ASSERT( iterator >= 0, table_operation_not_permitted, explanation_for_no_end_iterators );
+         DCD_ASSERT( (size_t)iterator < _iterator_to_object.size(), invalid_table_iterator, "iterator out of range" );
       }
 
       map<unique_table, int>                    _table_cache;

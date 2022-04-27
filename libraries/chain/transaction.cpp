@@ -18,7 +18,7 @@ void deferred_transaction_generation_context::reflector_init() {
                      "deferred_transaction_generation_context expects FC to support reflector_init" );
 
 
-      EOS_ASSERT( sender != account_name(), ill_formed_deferred_transaction_generation_context,
+      DCD_ASSERT( sender != account_name(), ill_formed_deferred_transaction_generation_context,
                   "Deferred transaction generation context extension must have a non-empty sender account",
       );
 }
@@ -34,7 +34,7 @@ bool transaction_header::verify_reference_block( const block_id_type& reference_
 }
 
 void transaction_header::validate()const {
-   EOS_ASSERT( max_net_usage_words.value < UINT32_MAX / 8UL, transaction_exception,
+   DCD_ASSERT( max_net_usage_words.value < UINT32_MAX / 8UL, transaction_exception,
                "declared max_net_usage_words overflows when expanded to max net usage" );
 }
 
@@ -66,10 +66,10 @@ fc::microseconds transaction::get_signature_keys( const vector<signature_type>& 
 
    for(const signature_type& sig : signatures) {
       auto now = fc::time_point::now();
-      EOS_ASSERT( now < deadline, tx_cpu_usage_exceeded, "transaction signature verification executed for too long ${time}us",
+      DCD_ASSERT( now < deadline, tx_cpu_usage_exceeded, "transaction signature verification executed for too long ${time}us",
                   ("time", now - start)("now", now)("deadline", deadline)("start", start) );
       auto[ itr, successful_insertion ] = recovered_pub_keys.emplace( sig, digest );
-      EOS_ASSERT( allow_duplicate_keys || successful_insertion, tx_duplicate_sig,
+      DCD_ASSERT( allow_duplicate_keys || successful_insertion, tx_duplicate_sig,
                   "transaction includes more than one signature signed using the same key associated with public key: ${key}",
                   ("key", *itr ) );
    }
@@ -88,7 +88,7 @@ flat_multimap<uint16_t, transaction_extension> transaction::validate_and_extract
       const auto& e = transaction_extensions[i];
       auto id = e.first;
 
-      EOS_ASSERT( id >= id_type_lower_bound, invalid_transaction_extension,
+      DCD_ASSERT( id >= id_type_lower_bound, invalid_transaction_extension,
                   "Transaction extensions are not in the correct order (ascending id types required)"
       );
 
@@ -98,13 +98,13 @@ flat_multimap<uint16_t, transaction_extension> transaction::validate_and_extract
       );
 
       auto match = decompose_t::extract<transaction_extension>( id, e.second, iter->second );
-      EOS_ASSERT( match, invalid_transaction_extension,
+      DCD_ASSERT( match, invalid_transaction_extension,
                   "Transaction extension with id type ${id} is not supported",
                   ("id", id)
       );
 
       if( match->enforce_unique ) {
-         EOS_ASSERT( i == 0 || id > id_type_lower_bound, invalid_transaction_extension,
+         DCD_ASSERT( i == 0 || id > id_type_lower_bound, invalid_transaction_extension,
                      "Transaction extension with id type ${id} is not allowed to repeat",
                      ("id", id)
          );
@@ -136,14 +136,14 @@ signed_transaction::get_signature_keys( const chain_id_type& chain_id, fc::time_
 uint32_t packed_transaction_v0::get_unprunable_size()const {
    uint64_t size = config::fixed_net_overhead_of_packed_trx;
    size += packed_trx.size();
-   EOS_ASSERT( size <= std::numeric_limits<uint32_t>::max(), tx_too_big, "packed_transaction is too big" );
+   DCD_ASSERT( size <= std::numeric_limits<uint32_t>::max(), tx_too_big, "packed_transaction is too big" );
    return static_cast<uint32_t>(size);
 }
 
 uint32_t packed_transaction_v0::get_prunable_size()const {
    uint64_t size = fc::raw::pack_size(signatures);
    size += packed_context_free_data.size();
-   EOS_ASSERT( size <= std::numeric_limits<uint32_t>::max(), tx_too_big, "packed_transaction is too big" );
+   DCD_ASSERT( size <= std::numeric_limits<uint32_t>::max(), tx_too_big, "packed_transaction is too big" );
    return static_cast<uint32_t>(size);
 }
 
@@ -170,7 +170,7 @@ struct read_limiter {
    template<typename Sink>
    size_t write(Sink &sink, const char* s, size_t count)
    {
-      EOS_ASSERT(_total + count <= Limit, tx_decompression_error, "Exceeded maximum decompressed transaction size");
+      DCD_ASSERT(_total + count <= Limit, tx_decompression_error, "Exceeded maximum decompressed transaction size");
       _total += count;
       return bio::write(sink, s, count);
    }
@@ -309,7 +309,7 @@ void packed_transaction_v0::reflector_init()
    // called after construction, but always on the same thread and before packed_transaction passed to any other threads
    static_assert(fc::raw::has_feature_reflector_init_on_unpacked_reflected_types,
                  "FC unpack needs to call reflector_init otherwise unpacked_trx will not be initialized");
-   EOS_ASSERT( unpacked_trx.expiration == time_point_sec(), tx_decompression_error, "packed_transaction_v0 already unpacked" );
+   DCD_ASSERT( unpacked_trx.expiration == time_point_sec(), tx_decompression_error, "packed_transaction_v0 already unpacked" );
    local_unpack_transaction({});
    local_unpack_context_free_data();
 }
@@ -322,7 +322,7 @@ static transaction unpack_transaction(const bytes& packed_trx, packed_transactio
          case packed_transaction_v0::compression_type::zlib:
             return zlib_decompress_transaction( packed_trx );
          default:
-            EOS_THROW( unknown_transaction_compression, "Unknown transaction compression algorithm" );
+            DCD_THROW( unknown_transaction_compression, "Unknown transaction compression algorithm" );
       }
    } FC_CAPTURE_AND_RETHROW( (compression) )
 }
@@ -342,14 +342,14 @@ static vector<bytes> unpack_context_free_data(const bytes& packed_context_free_d
          case packed_transaction_v0::compression_type::zlib:
             return zlib_decompress_context_free_data( packed_context_free_data );
          default:
-            EOS_THROW( unknown_transaction_compression, "Unknown transaction compression algorithm" );
+            DCD_THROW( unknown_transaction_compression, "Unknown transaction compression algorithm" );
       }
    } FC_CAPTURE_AND_RETHROW( (compression) )
 }
 
 void packed_transaction_v0::local_unpack_context_free_data()
 {
-   EOS_ASSERT(unpacked_trx.context_free_data.empty(), tx_decompression_error, "packed_transaction.context_free_data not empty");
+   DCD_ASSERT(unpacked_trx.context_free_data.empty(), tx_decompression_error, "packed_transaction.context_free_data not empty");
    unpacked_trx.context_free_data = unpack_context_free_data( packed_context_free_data, compression );
 }
 
@@ -362,7 +362,7 @@ static bytes pack_transaction(const transaction& trx, packed_transaction_v0::com
          case packed_transaction_v0::compression_type::zlib:
             return zlib_compress_transaction(trx);
          default:
-            EOS_THROW(unknown_transaction_compression, "Unknown transaction compression algorithm");
+            DCD_THROW(unknown_transaction_compression, "Unknown transaction compression algorithm");
       }
    } FC_CAPTURE_AND_RETHROW((compression))
 }
@@ -380,7 +380,7 @@ static bytes pack_context_free_data( const vector<bytes>& cfd, packed_transactio
          case packed_transaction_v0::compression_type::zlib:
             return zlib_compress_context_free_data(cfd);
          default:
-            EOS_THROW(unknown_transaction_compression, "Unknown transaction compression algorithm");
+            DCD_THROW(unknown_transaction_compression, "Unknown transaction compression algorithm");
       }
    } FC_CAPTURE_AND_RETHROW((compression))
 }
@@ -396,11 +396,11 @@ digest_type packed_transaction::prunable_data_type::none::prunable_digest() cons
 }
 
 digest_type  packed_transaction::prunable_data_type::partial::prunable_digest() const {
-   EOS_THROW(tx_prune_exception, "unimplemented");
+   DCD_THROW(tx_prune_exception, "unimplemented");
 }
 
 digest_type packed_transaction::prunable_data_type::full::prunable_digest() const {
-   EOS_THROW(tx_prune_exception, "unimplemented");
+   DCD_THROW(tx_prune_exception, "unimplemented");
 }
 
 digest_type packed_transaction::prunable_data_type::full_legacy::prunable_digest() const {
@@ -422,17 +422,17 @@ static constexpr std::size_t digest_pack_size = 32;
 
 static std::size_t padded_pack_size(const packed_transaction::prunable_data_type::none& obj, packed_transaction::prunable_data_type::compression_type) {
    std::size_t result = fc::raw::pack_size(obj);
-   EOS_ASSERT(result == digest_pack_size, packed_transaction_type_exception, "Unexpected size of packed digest");
+   DCD_ASSERT(result == digest_pack_size, packed_transaction_type_exception, "Unexpected size of packed digest");
    return result;
 }
 
 
 static std::size_t padded_pack_size(const packed_transaction::prunable_data_type::partial& obj, packed_transaction::prunable_data_type::compression_type segment_compression) {
-     EOS_THROW(tx_prune_exception, "unimplemented");
+     DCD_THROW(tx_prune_exception, "unimplemented");
 }
 
 static std::size_t padded_pack_size(const packed_transaction::prunable_data_type::full& obj, packed_transaction::prunable_data_type::compression_type segment_compression) {
-   EOS_THROW(tx_prune_exception, "unimplemented");
+   DCD_THROW(tx_prune_exception, "unimplemented");
 #if 0
    std::size_t context_free_size = fc::raw::pack_size(fc::unsigned_int(obj.context_free_segments.size()));
    context_free_size += obj.context_free_segments.size();
@@ -484,7 +484,7 @@ packed_transaction::packed_transaction(const packed_transaction_v0& other, bool 
    unpacked_trx(other.unpacked_trx),
    trx_id(other.id())
 {
-   EOS_ASSERT( legacy, transaction_exception, "Full type of prunable_data_type is not supported" );
+   DCD_ASSERT( legacy, transaction_exception, "Full type of prunable_data_type is not supported" );
    estimated_size = calculate_estimated_size();
 }
 
@@ -499,13 +499,13 @@ packed_transaction::packed_transaction(packed_transaction_v0&& other, bool legac
    unpacked_trx(std::move(other.unpacked_trx)),
    trx_id(other.id())
 {
-   EOS_ASSERT( legacy, transaction_exception, "Full type of prunable_data_type is not supported" );
+   DCD_ASSERT( legacy, transaction_exception, "Full type of prunable_data_type is not supported" );
    estimated_size = calculate_estimated_size();
 }
 
 packed_transaction_v0_ptr packed_transaction::to_packed_transaction_v0() const {
    const auto* sigs = get_signatures();
-   EOS_ASSERT( std::holds_alternative<packed_transaction::prunable_data_type::full_legacy>(prunable_data.prunable_data), transaction_exception, "Failed to get full_legacy variant in to_packed_transaction_v0" );
+   DCD_ASSERT( std::holds_alternative<packed_transaction::prunable_data_type::full_legacy>(prunable_data.prunable_data), transaction_exception, "Failed to get full_legacy variant in to_packed_transaction_v0" );
    auto& legacy = std::get<prunable_data_type::full_legacy>(prunable_data.prunable_data);
    return std::make_shared<const packed_transaction_v0>( packed_trx,
                             sigs != nullptr ? *sigs : vector<signature_type>(),
@@ -516,24 +516,24 @@ packed_transaction_v0_ptr packed_transaction::to_packed_transaction_v0() const {
 uint32_t packed_transaction::get_unprunable_size()const {
    uint64_t size = config::fixed_net_overhead_of_packed_trx;
    size += packed_trx.size();
-   EOS_ASSERT( size <= std::numeric_limits<uint32_t>::max(), tx_too_big, "packed_transaction is too big" );
+   DCD_ASSERT( size <= std::numeric_limits<uint32_t>::max(), tx_too_big, "packed_transaction is too big" );
    return static_cast<uint32_t>(size);
 }
 
 static uint32_t get_prunable_size_impl(const packed_transaction::prunable_data_type::full_legacy& obj) {
    uint64_t size = fc::raw::pack_size(obj.signatures);
    size += obj.packed_context_free_data.size();
-   EOS_ASSERT( size <= std::numeric_limits<uint32_t>::max(), tx_too_big, "packed_transaction is too big" );
+   DCD_ASSERT( size <= std::numeric_limits<uint32_t>::max(), tx_too_big, "packed_transaction is too big" );
    return static_cast<uint32_t>(size);
 }
 
 static uint32_t get_prunable_size_impl(const packed_transaction::prunable_data_type::full&) {
-   EOS_THROW(tx_prune_exception, "unimplemented");
+   DCD_THROW(tx_prune_exception, "unimplemented");
 }
 
 template<typename T>
 static uint32_t get_prunable_size_impl(const T&) {
-   EOS_THROW(tx_prune_exception, "unknown size: prunable data has been pruned.");
+   DCD_THROW(tx_prune_exception, "unknown size: prunable data has been pruned.");
 }
 
 uint32_t packed_transaction::get_prunable_size()const {
@@ -634,7 +634,7 @@ void packed_transaction::reflector_init()
    // called after construction, but always on the same thread and before packed_transaction passed to any other threads
    static_assert(fc::raw::has_feature_reflector_init_on_unpacked_reflected_types,
                  "FC unpack needs to call reflector_init otherwise unpacked_trx will not be initialized");
-   EOS_ASSERT( unpacked_trx.expiration == time_point_sec(), tx_decompression_error, "packed_transaction already unpacked" );
+   DCD_ASSERT( unpacked_trx.expiration == time_point_sec(), tx_decompression_error, "packed_transaction already unpacked" );
    unpacked_trx = unpack_transaction(packed_trx, compression);
    trx_id = unpacked_trx.id();
    if( std::holds_alternative<prunable_data_type::full_legacy>(prunable_data.prunable_data) ) {

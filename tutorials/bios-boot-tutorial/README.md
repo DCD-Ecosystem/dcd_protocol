@@ -11,7 +11,7 @@ The `bios-boot-tutorial.py` script simulates the DCD bios boot sequence.
 ## Steps
 
 1. Install dcd binaries by following the steps outlined in below tutorial
-[Install dcd binaries](https://github.com/DCD/eos#mac-os-x-brew-install)
+[Install dcd binaries](https://github.com/DCD/dcd#mac-os-x-brew-install)
 
 2. Install dcd.cdt binaries by following the steps outlined in below tutorial
 [Install dcd.cdt binaries](https://github.com/DCD/dcd.cdt#binary-releases)
@@ -25,10 +25,10 @@ Minimal command line to launch the script below, make sure you replace `DCD_CONT
 
 ```bash
 $ cd ~
-$ git clone https://github.com/DCD/eos.git
-$ cd ./eos/tutorials/bios-boot-tutorial/
+$ git clone https://github.com/DCD/dcd.git
+$ cd ./dcd/tutorials/bios-boot-tutorial/
 $ python3 bios-boot-tutorial.py --dcdcli=dcdcli --dcdnode=dcdnode --dcdksd=dcdksd --contracts-dir="DCD_CONTRACTS_DIRECTORY" -w -a
 
 ```
 
-See [DCD Documentation Wiki: Tutorial - Bios Boot](https://github.com/DCD/eos/wiki/Tutorial-Bios-Boot-Sequence) for additional information.
+See [DCD Documentation Wiki: Tutorial - Bios Boot](https://github.com/DCD/dcd/wiki/Tutorial-Bios-Boot-Sequence) for additional information.

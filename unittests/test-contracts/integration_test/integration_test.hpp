@@ -15,7 +15,7 @@ public:
 
       uint64_t primary_key()const { return key; }
 
-      EOSLIB_SERIALIZE( payload, (key)(data) )
+      DCDLIB_SERIALIZE( payload, (key)(data) )
    };
 
    using payloads_table = dcd::multi_index< "payloads"_n,  payload >;

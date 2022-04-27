@@ -50,10 +50,10 @@ walletPort=TestHelper.DEFAULT_WALLET_PORT
 
 walletMgr=WalletMgr(True, port=walletPort)
 testSuccessful=False
-killEosInstances=not dontKill
+killDcdInstances=not dontKill
 killWallet=not dontKill
 
-WalletdName=Utils.EosWalletName
+WalletdName=Utils.DcdWalletName
 ClientName="dcdcli"
 shipTempDir=None
 
@@ -73,7 +73,7 @@ try:
                       totalNodes=totalNodes, totalProducers=totalProducers,
                       useBiosBootFile=False, specificExtradcdnodeArgs=specificExtradcdnodeArgs) is False:
         Utils.cmdError("launcher")
-        Utils.errorExit("Failed to stand up eos cluster.")
+        Utils.errorExit("Failed to stand up dcd cluster.")
 
     # ***   identify each node (producers and non-producing node)   ***
 
@@ -201,7 +201,7 @@ try:
 
     testSuccessful = True
 finally:
-    TestHelper.shutdown(cluster, walletMgr, testSuccessful=testSuccessful, killEosInstances=killEosInstances, killWallet=killWallet, keepLogs=keepLogs, cleanRun=killAll, dumpErrorDetails=dumpErrorDetails)
+    TestHelper.shutdown(cluster, walletMgr, testSuccessful=testSuccessful, killDcdInstances=killDcdInstances, killWallet=killWallet, keepLogs=keepLogs, cleanRun=killAll, dumpErrorDetails=dumpErrorDetails)
     if shipTempDir is not None:
         if testSuccessful and not keepLogs:
             shutil.rmtree(shipTempDir, ignore_errors=True)

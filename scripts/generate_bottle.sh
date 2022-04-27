@@ -35,7 +35,7 @@ echo "class Dcd < Formula
 
    homepage \"${URL}\"
    revision 0
-   url \"https://github.com/dcd/eos/archive/v${VERSION}.tar.gz\"
+   url \"https://github.com/dcd/dcd/archive/v${VERSION}.tar.gz\"
    version \"${VERSION}\"
 
    option :universal
@@ -48,7 +48,7 @@ echo "class Dcd < Formula
    depends_on :arch =>  :intel
 
    bottle do
-      root_url \"https://github.com/dcd/eos/releases/download/v${VERSION}\"
+      root_url \"https://github.com/dcd/dcd/releases/download/v${VERSION}\"
       sha256 \"${hash}\" => :${MAC_VERSION}
    end
    def install

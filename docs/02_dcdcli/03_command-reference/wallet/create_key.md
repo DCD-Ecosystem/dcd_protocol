@@ -19,5 +19,5 @@ dcdcli wallet create_key K1
 ## Outputs
 
 ```console
-Created new private key with a public key of: "EOS67xHKzQArkWZN6rKLCq7NLvaj8kurwxzRxoTVz6cgDJkiWdGug"
+Created new private key with a public key of: "DCD67xHKzQArkWZN6rKLCq7NLvaj8kurwxzRxoTVz6cgDJkiWdGug"
 ```

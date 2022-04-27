@@ -28,8 +28,10 @@ namespace dcd { namespace chain {
 
    void apply_dcd_canceldelay(apply_context&);
    void apply_dcd_setfee(apply_context&);
-   void apply_dcd_setfeeforce(apply_context&);
-   
+   void apply_dcd_setrate(apply_context&);
+   void apply_dcd_procfeeprop(apply_context&);
+   void apply_dcd_rmfeeprop(apply_context&);
+
    ///@}  end action handlers
 
 } } /// namespace dcd::chain

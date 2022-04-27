@@ -28,7 +28,7 @@ RocksDB is an open source persistent key value store. Storing state in memory is
 
 ## DCD Interfaces
 
-DCD provides a set of [services](../../) and [interfaces](https://developers.eos.io/manuals/dcd.cdt/latest/files) that enable contract developers to persist state across action, and consequently transaction, boundaries. Contracts may use these services and interfaces for various purposes. For example, `dcd.token` contract keeps balances for all users in the `chain database`. Each instance of `dcdnode` maintains the `chain database` in an efficient data store, so contracts can read and write data with ease.
+DCD provides a set of [services](../../) and [interfaces](https://developers.dcd.io/manuals/dcd.cdt/latest/files) that enable contract developers to persist state across action, and consequently transaction, boundaries. Contracts may use these services and interfaces for various purposes. For example, `dcd.token` contract keeps balances for all users in the `chain database`. Each instance of `dcdnode` maintains the `chain database` in an efficient data store, so contracts can read and write data with ease.
 
 ### dcdnode RPC API
 

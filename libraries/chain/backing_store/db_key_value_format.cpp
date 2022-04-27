@@ -65,10 +65,10 @@ namespace dcd { namespace chain { namespace backing_store { namespace db_key_val
       intermittent_decomposed_prefix_values extract_from_composite_key_prefix(b1::chain_kv::bytes::const_iterator begin, b1::chain_kv::bytes::const_iterator key_end) {
          auto key_loc = begin;
          uint64_t scope_name = 0;
-         EOS_ASSERT(b1::chain_kv::extract_key(key_loc, key_end, scope_name), bad_composite_key_exception,
+         DCD_ASSERT(b1::chain_kv::extract_key(key_loc, key_end, scope_name), bad_composite_key_exception,
                     "DB intrinsic key-value store composite key is malformed, it does not contain a scope");
          uint64_t table_name = 0;
-         EOS_ASSERT(b1::chain_kv::extract_key(key_loc, key_end, table_name), bad_composite_key_exception,
+         DCD_ASSERT(b1::chain_kv::extract_key(key_loc, key_end, table_name), bad_composite_key_exception,
                     "DB intrinsic key-value store composite key is malformed, it does not contain a table");
          return { name{scope_name}, name{table_name}, key_loc };
       }
@@ -76,7 +76,7 @@ namespace dcd { namespace chain { namespace backing_store { namespace db_key_val
       intermittent_decomposed_values extract_from_composite_key(b1::chain_kv::bytes::const_iterator begin, b1::chain_kv::bytes::const_iterator key_end) {
          auto intermittent = extract_from_composite_key_prefix(begin, key_end);
          auto& key_loc = std::get<2>(intermittent);
-         EOS_ASSERT(key_loc != key_end, bad_composite_key_exception,
+         DCD_ASSERT(key_loc != key_end, bad_composite_key_exception,
                     "DB intrinsic key-value store composite key is malformed, it does not contain an indication of the "
                     "type of the db-key (primary uint64_t or secondary uint64_t/uint128_t/etc)");
          const key_type kt{*key_loc++};
@@ -102,9 +102,9 @@ namespace dcd { namespace chain { namespace backing_store { namespace db_key_val
       if (kt != key_type::primary) {
          return false;
       }
-      EOS_ASSERT(b1::chain_kv::extract_key(composite_loc, composite_key.cend(), primary_key), bad_composite_key_exception,
+      DCD_ASSERT(b1::chain_kv::extract_key(composite_loc, composite_key.cend(), primary_key), bad_composite_key_exception,
                  "DB intrinsic key-value store composite key is malformed, it is supposed to have a primary key");
-      EOS_ASSERT(composite_loc == composite_key.cend(), bad_composite_key_exception,
+      DCD_ASSERT(composite_loc == composite_key.cend(), bad_composite_key_exception,
                  "DB intrinsic key-value store composite key is malformed, it has extra data after the primary key");
       return true;
    }
@@ -123,7 +123,7 @@ namespace dcd { namespace chain { namespace backing_store { namespace db_key_val
 
    dcd::session::shared_bytes create_table_key(const dcd::session::shared_bytes& prefix_key) {
       const std::size_t full_prefix_size = db_key_value_format::detail::prefix_size<dcd::session::shared_bytes>();
-      EOS_ASSERT(prefix_key.size() >= full_prefix_size, bad_composite_key_exception,
+      DCD_ASSERT(prefix_key.size() >= full_prefix_size, bad_composite_key_exception,
                  "DB intrinsic key-value store composite key is malformed, create_table_key expects to be given a full "
                  "key that has a full prefix leading up to the type");
       const auto new_kt = static_cast<char>(key_type::table);
@@ -140,7 +140,7 @@ namespace dcd { namespace chain { namespace backing_store { namespace db_key_val
       if (kt != key_type::table) {
          return false;
       }
-      EOS_ASSERT(composite_loc == composite_key.cend(), bad_composite_key_exception,
+      DCD_ASSERT(composite_loc == composite_key.cend(), bad_composite_key_exception,
                  "DB intrinsic key-value store composite key is malformed, there should be no trailing primary/secondary key");
       return true;
    }
@@ -160,7 +160,7 @@ namespace dcd { namespace chain { namespace backing_store { namespace db_key_val
 
    bool get_trailing_primary_key(const rocksdb::Slice& full_key, const rocksdb::Slice& secondary_key_prefix, uint64_t& primary_key) {
       const auto sec_prefix_size = secondary_key_prefix.size();
-      EOS_ASSERT(full_key.size() == sec_prefix_size + sizeof(primary_key), bad_composite_key_exception,
+      DCD_ASSERT(full_key.size() == sec_prefix_size + sizeof(primary_key), bad_composite_key_exception,
                  "DB intrinsic key-value get_trailing_primary_key was passed a full key size: ${s1} bytes that was not "
                  "exactly ${s2} bytes (the size of a primary key) larger than the secondary_key_prefix size: ${s3}",
                  ("s1", full_key.size())("s2", sizeof(primary_key))("s3", sec_prefix_size));
@@ -171,7 +171,7 @@ namespace dcd { namespace chain { namespace backing_store { namespace db_key_val
       auto start_offset = full_key.data() + sec_prefix_size;
       const b1::chain_kv::bytes composite_primary_key {start_offset, start_offset + sizeof(primary_key)};
       auto composite_loc = composite_primary_key.cbegin();
-      EOS_ASSERT(b1::chain_kv::extract_key(composite_loc, composite_primary_key.cend(), primary_key), bad_composite_key_exception,
+      DCD_ASSERT(b1::chain_kv::extract_key(composite_loc, composite_primary_key.cend(), primary_key), bad_composite_key_exception,
                  "DB intrinsic key-value store invariant has changed, extract_key should only fail if the string size is"
                  " less than the sizeof(uint64_t)");
       return true;
@@ -187,9 +187,9 @@ namespace dcd { namespace chain { namespace backing_store { namespace db_key_val
       b1::chain_kv::bytes::const_iterator composite_loc;
       key_type kt = key_type::primary;
       std::tie(std::ignore, std::ignore, composite_loc, kt) = detail::extract_from_composite_key(composite_key.cbegin(), composite_key.cend());
-      EOS_ASSERT(kt == key_type::primary_to_sec, bad_composite_key_exception,
+      DCD_ASSERT(kt == key_type::primary_to_sec, bad_composite_key_exception,
                  "DB intrinsic extract_primary_to_sec_key_type was passed a key that was not of type: ${type}", ("type", detail::to_string(kt)));
-      EOS_ASSERT(composite_loc != composite_key.cend(), bad_composite_key_exception,
+      DCD_ASSERT(composite_loc != composite_key.cend(), bad_composite_key_exception,
                  "DB intrinsic extract_primary_to_sec_key_type was passed a key that was only the type prefix");
       const key_type sec_kt{*composite_loc++};
       return sec_kt;
@@ -234,7 +234,7 @@ namespace dcd { namespace chain { namespace backing_store { namespace db_key_val
       };
       const std::size_t extension_size = calc_extension(prefix_end);
       const std::size_t full_prefix_size = db_key_value_format::detail::prefix_size<dcd::session::shared_bytes>() + extension_size;
-      EOS_ASSERT( full_prefix_size < full_key.size(), db_rocksdb_invalid_operation_exception,
+      DCD_ASSERT( full_prefix_size < full_key.size(), db_rocksdb_invalid_operation_exception,
                   "invariant failure in prefix_bundle, the passed in full_key was: ${size1} bytes, but it needs to "
                   "be at least: ${size2}", ("size1", full_key.size())("size2", full_prefix_size));
       return dcd::session::shared_bytes(full_key.data(), full_prefix_size);
@@ -242,7 +242,7 @@ namespace dcd { namespace chain { namespace backing_store { namespace db_key_val
 
    full_key_data parse_full_key(const dcd::session::shared_bytes& full_key) {
       static const char db_type_prefix = make_rocksdb_contract_db_prefix();
-      EOS_ASSERT( full_key.size() >= 1, db_rocksdb_invalid_operation_exception,
+      DCD_ASSERT( full_key.size() >= 1, db_rocksdb_invalid_operation_exception,
                   "parse_full_key was passed an empty key.");
       full_key_data data;
       const char* offset = full_key.data();
@@ -254,16 +254,16 @@ namespace dcd { namespace chain { namespace backing_store { namespace db_key_val
       const std::size_t full_prefix_size = db_key_value_format::detail::prefix_size<dcd::session::shared_bytes>();
       const std::size_t full_prefix_type_size = full_prefix_size + sizeof(key_type);
       const std::size_t db_type_and_contract_size = db_type_size + sizeof(name);
-      EOS_ASSERT( full_key.size() >= db_type_and_contract_size, db_rocksdb_invalid_operation_exception,
+      DCD_ASSERT( full_key.size() >= db_type_and_contract_size, db_rocksdb_invalid_operation_exception,
                   "parse_full_key was passed a key with a db type and erroneous data trailing.");
       const b1::chain_kv::bytes composite_contract_key {offset, offset + sizeof(name)};
       offset += sizeof(name);
       auto composite_loc = composite_contract_key.cbegin();
       uint64_t contract;
-      EOS_ASSERT(b1::chain_kv::extract_key(composite_loc, composite_contract_key.cend(), contract), bad_composite_key_exception,
+      DCD_ASSERT(b1::chain_kv::extract_key(composite_loc, composite_contract_key.cend(), contract), bad_composite_key_exception,
                  "DB intrinsic key-value store invariant has changed, extract_key should only fail if the string size is"
                  " less than the sizeof(uint64_t), which was verified that it was not");
-      EOS_ASSERT( composite_loc == composite_contract_key.cend(), db_rocksdb_invalid_operation_exception,
+      DCD_ASSERT( composite_loc == composite_contract_key.cend(), db_rocksdb_invalid_operation_exception,
                   "bytes constructed to extract contract was constructed incorrectly.");
       data.contract = name{contract};
       const auto remaining = full_key.size() - db_type_and_contract_size;

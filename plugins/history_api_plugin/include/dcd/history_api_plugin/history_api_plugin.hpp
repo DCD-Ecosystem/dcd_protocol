@@ -2,6 +2,7 @@
 #include <dcd/history_plugin/history_plugin.hpp>
 #include <dcd/chain_plugin/chain_plugin.hpp>
 #include <dcd/http_plugin/http_plugin.hpp>
+#include <dcd/ws_plugin/ws_plugin.hpp>
 
 #include <appbase/application.hpp>
 
