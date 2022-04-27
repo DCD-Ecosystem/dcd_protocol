@@ -67,7 +67,7 @@ killEosInstances=not dontKill
 killWallet=not dontKill
 
 WalletdName=Utils.EosWalletName
-ClientName="cleos"
+ClientName="dcdcli"
 
 maxTransactionAttempts = 2            # max number of attempts to try to send a transaction
 maxTransactionAttemptsNoSend = 1      # max number of attempts to try to create a transaction to be sent as a duplicate

@@ -1,6 +1,6 @@
 ## Description
 
-The `http_plugin` is a core plugin supported by both `nodeos` and `keosd`. The plugin is required to enable any RPC API functionality provided by a `nodeos` or `keosd` instance.
+The `http_plugin` is a core plugin supported by both `nodeos` and `dcdksd`. The plugin is required to enable any RPC API functionality provided by a `nodeos` or `dcdksd` instance.
 
 ## Usage
 
@@ -13,7 +13,7 @@ plugin = eosio::http_plugin
 # command-line
 nodeos ... --plugin eosio::http_plugin [options]
  (or)
-keosd ... --plugin eosio::http_plugin [options]
+dcdksd ... --plugin eosio::http_plugin [options]
 ```
 
 ## Options

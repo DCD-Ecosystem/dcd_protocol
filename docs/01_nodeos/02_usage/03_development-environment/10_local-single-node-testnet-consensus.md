@@ -9,12 +9,12 @@ This section describes how to set up a single-node blockchain configuration runn
 
 ![Single host single node testnet](single-host-single-node-testnet.png)
 
-`cleos` is used to interact with wallets, and send actions to the blockchain. `keosd` performs wallet management, including digital signing. If not started explicitly, `keosd` is started by `cleos` by default.
+`dcdcli` is used to interact with wallets, and send actions to the blockchain. `dcdksd` performs wallet management, including digital signing. If not started explicitly, `dcdksd` is started by `dcdcli` by default.
 
 ## Before you begin
 
 * [Install the EOSIO software](../../../00_install/index.md) before starting this section.
-* It is assumed that `nodeos`, `cleos`, and `keosd` are accessible through the path
+* It is assumed that `nodeos`, `dcdcli`, and `dcdksd` are accessible through the path
 * Know how to pass [Nodeos options](../../02_usage/00_nodeos-options.md) to enable or disable functionality.
 
 ## Steps
@@ -34,7 +34,7 @@ Open one "terminal" window and perform the following steps:
 Execute the following at the command prompt:
 
 ```sh
-cleos wallet import --private-key 5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3
+dcdcli wallet import --private-key 5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3
 ```
 
 ### 2. Start the Producer Node
@@ -113,7 +113,7 @@ pwd
 To install the `eosio.boot` system contract execute the following command from a terminal. Make sure you replace the `EOSIO_SYSTEM_CONTRACTS_DIRECTORY` with the directory path where the `eosio.boot.wasm` and `eosio.boot.abi` files are located.
 
 ```sh
-cleos set contract eosio EOSIO_SYSTEM_CONTRACTS_DIRECTORY/eosio.boot/bin/ eosio.boot.wasm eosio.boot.abi
+dcdcli set contract eosio EOSIO_SYSTEM_CONTRACTS_DIRECTORY/eosio.boot/bin/ eosio.boot.wasm eosio.boot.abi
 ```
 
 You should see something similar to the following output:
@@ -136,52 +136,52 @@ After you deploy the `eosio.boot` contract, run the following commands from a te
 
 ```sh
 echo KV_DATABASE
-cleos push action eosio activate '["825ee6288fb1373eab1b5187ec2f04f6eacb39cb3a97f356a07c91622dd61d16"]' -p eosio
+dcdcli push action eosio activate '["825ee6288fb1373eab1b5187ec2f04f6eacb39cb3a97f356a07c91622dd61d16"]' -p eosio
 
 echo ACTION_RETURN_VALUE
-cleos push action eosio activate '["c3a6138c5061cf291310887c0b5c71fcaffeab90d5deb50d3b9e687cead45071"]' -p eosio
+dcdcli push action eosio activate '["c3a6138c5061cf291310887c0b5c71fcaffeab90d5deb50d3b9e687cead45071"]' -p eosio
 
 echo CONFIGURABLE_WASM_LIMITS
-cleos push action eosio activate '["bf61537fd21c61a60e542a5d66c3f6a78da0589336868307f94a82bccea84e88"]' -p eosio
+dcdcli push action eosio activate '["bf61537fd21c61a60e542a5d66c3f6a78da0589336868307f94a82bccea84e88"]' -p eosio
 
 echo BLOCKCHAIN_PARAMETERS
-cleos push action eosio activate '["5443fcf88330c586bc0e5f3dee10e7f63c76c00249c87fe4fbf7f38c082006b4"]' -p eosio
+dcdcli push action eosio activate '["5443fcf88330c586bc0e5f3dee10e7f63c76c00249c87fe4fbf7f38c082006b4"]' -p eosio
 
 echo GET_SENDER
-cleos push action eosio activate '["f0af56d2c5a48d60a4a5b5c903edfb7db3a736a94ed589d0b797df33ff9d3e1d"]' -p eosio
+dcdcli push action eosio activate '["f0af56d2c5a48d60a4a5b5c903edfb7db3a736a94ed589d0b797df33ff9d3e1d"]' -p eosio
 
 echo FORWARD_SETCODE
-cleos push action eosio activate '["2652f5f96006294109b3dd0bbde63693f55324af452b799ee137a81a905eed25"]' -p eosio
+dcdcli push action eosio activate '["2652f5f96006294109b3dd0bbde63693f55324af452b799ee137a81a905eed25"]' -p eosio
 
 echo ONLY_BILL_FIRST_AUTHORIZER
-cleos push action eosio activate '["8ba52fe7a3956c5cd3a656a3174b931d3bb2abb45578befc59f283ecd816a405"]' -p eosio
+dcdcli push action eosio activate '["8ba52fe7a3956c5cd3a656a3174b931d3bb2abb45578befc59f283ecd816a405"]' -p eosio
 
 echo RESTRICT_ACTION_TO_SELF
-cleos push action eosio activate '["ad9e3d8f650687709fd68f4b90b41f7d825a365b02c23a636cef88ac2ac00c43"]' -p eosio
+dcdcli push action eosio activate '["ad9e3d8f650687709fd68f4b90b41f7d825a365b02c23a636cef88ac2ac00c43"]' -p eosio
 
 echo DISALLOW_EMPTY_PRODUCER_SCHEDULE
-cleos push action eosio activate '["68dcaa34c0517d19666e6b33add67351d8c5f69e999ca1e37931bc410a297428"]' -p eosio
+dcdcli push action eosio activate '["68dcaa34c0517d19666e6b33add67351d8c5f69e999ca1e37931bc410a297428"]' -p eosio
 
  echo FIX_LINKAUTH_RESTRICTION
-cleos push action eosio activate '["e0fb64b1085cc5538970158d05a009c24e276fb94e1a0bf6a528b48fbc4ff526"]' -p eosio
+dcdcli push action eosio activate '["e0fb64b1085cc5538970158d05a009c24e276fb94e1a0bf6a528b48fbc4ff526"]' -p eosio
 
  echo REPLACE_DEFERRED
-cleos push action eosio activate '["ef43112c6543b88db2283a2e077278c315ae2c84719a8b25f25cc88565fbea99"]' -p eosio
+dcdcli push action eosio activate '["ef43112c6543b88db2283a2e077278c315ae2c84719a8b25f25cc88565fbea99"]' -p eosio
 
 echo NO_DUPLICATE_DEFERRED_ID
-cleos push action eosio activate '["4a90c00d55454dc5b059055ca213579c6ea856967712a56017487886a4d4cc0f"]' -p eosio
+dcdcli push action eosio activate '["4a90c00d55454dc5b059055ca213579c6ea856967712a56017487886a4d4cc0f"]' -p eosio
 
 echo ONLY_LINK_TO_EXISTING_PERMISSION
-cleos push action eosio activate '["1a99a59d87e06e09ec5b028a9cbb7749b4a5ad8819004365d02dc4379a8b7241"]' -p eosio
+dcdcli push action eosio activate '["1a99a59d87e06e09ec5b028a9cbb7749b4a5ad8819004365d02dc4379a8b7241"]' -p eosio
 
 echo RAM_RESTRICTIONS
-cleos push action eosio activate '["4e7bf348da00a945489b2a681749eb56f5de00b900014e137ddae39f48f69d67"]' -p eosio
+dcdcli push action eosio activate '["4e7bf348da00a945489b2a681749eb56f5de00b900014e137ddae39f48f69d67"]' -p eosio
 
 echo WEBAUTHN_KEY
-cleos push action eosio activate '["4fca8bd82bbd181e714e283f83e1b45d95ca5af40fb89ad3977b653c448f78c2"]' -p eosio
+dcdcli push action eosio activate '["4fca8bd82bbd181e714e283f83e1b45d95ca5af40fb89ad3977b653c448f78c2"]' -p eosio
 
 echo WTMSIG_BLOCK_SIGNATURES
-cleos push action eosio activate '["299dcb6af692324b899b39f16d5a530a33062804e41f09dc97e9f156b4476707"]' -p eosio
+dcdcli push action eosio activate '["299dcb6af692324b899b39f16d5a530a33062804e41f09dc97e9f156b4476707"]' -p eosio
 ```
 
 ### 7. Install eosio.bios System Contract
@@ -189,13 +189,13 @@ cleos push action eosio activate '["299dcb6af692324b899b39f16d5a530a33062804e41f
 To deploy the `eosio.bios` system contract execute the following command from a terminal. Make sure you replace the `EOSIO_SYSTEM_CONTRACTS_DIRECTORY` with the directory path where the `eosio.bios.wasm` and `eosio.bios.abi` files are located.
 
 ```sh
-cleos set contract eosio EOSIO_SYSTEM_CONTRACTS_DIRECTORY/eosio.bios/bin/ eosio.bios.wasm eosio.bios.abi
+dcdcli set contract eosio EOSIO_SYSTEM_CONTRACTS_DIRECTORY/eosio.bios/bin/ eosio.bios.wasm eosio.bios.abi
 ```
 
 If you want instead of `eosio.bios`, a more elaborate system smart contract like `eosio.system`, you have to build it first and then execute the following command from a terminal (or from the shell). Make sure you replace the `EOSIO_SYSTEM_CONTRACTS_DIRECTORY` with the directory path where you have built the `eosio.system` system contract, the directory path where `eoios.system.abi` and `eosio.system.wasm` are located.
 
 ```sh
-cleos set contract eosio EOSIO_SYSTEM_CONTRACTS_DIRECTORY/eosio.system/ eosio.system.wasm eosio.system.abi
+dcdcli set contract eosio EOSIO_SYSTEM_CONTRACTS_DIRECTORY/eosio.system/ eosio.system.wasm eosio.system.abi
 ```
 
 [[info | What's next?]]

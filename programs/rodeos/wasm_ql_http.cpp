@@ -212,7 +212,7 @@ void handle_request(const wasm_ql::http_config& http_config, const wasm_ql::shar
          state_cache.store_state(std::move(thread_state));
          return;
       } else if (req.target() ==
-                 "/v1/chain/get_block") { // todo: replace with /v1/chain/get_block_header. upgrade cleos.
+                 "/v1/chain/get_block") { // todo: replace with /v1/chain/get_block_header. upgrade dcdcli.
          if (req.method() != http::verb::post)
             return send(
                   error(http::status::bad_request, "Unsupported HTTP-method for " + req.target().to_string() + "\n"));
@@ -222,7 +222,7 @@ void handle_request(const wasm_ql::http_config& http_config, const wasm_ql::shar
                  "application/json"));
          state_cache.store_state(std::move(thread_state));
          return;
-      } else if (req.target() == "/v1/chain/get_abi") { // todo: get_raw_abi. upgrade cleos to use get_raw_abi.
+      } else if (req.target() == "/v1/chain/get_abi") { // todo: get_raw_abi. upgrade dcdcli to use get_raw_abi.
          if (req.method() != http::verb::post)
             return send(
                   error(http::status::bad_request, "Unsupported HTTP-method for " + req.target().to_string() + "\n"));

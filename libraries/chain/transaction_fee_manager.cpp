@@ -12,7 +12,7 @@
 namespace eosio { namespace chain {
 
    transaction_fee_manager::transaction_fee_manager(){
-      init_native_fee(config::system_account_name, name{"defaultfee"} , asset::from_string("1.0000 USD"));
+      init_native_fee(config::system_account_name, name{"defaultfee"} , asset::from_string("0.0000 USD"));
    }
 
    void copy_inline_row_my(const chain::key_value_object& obj, vector<char>& data) {

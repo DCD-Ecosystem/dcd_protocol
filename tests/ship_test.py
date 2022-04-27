@@ -54,7 +54,7 @@ killEosInstances=not dontKill
 killWallet=not dontKill
 
 WalletdName=Utils.EosWalletName
-ClientName="cleos"
+ClientName="dcdcli"
 shipTempDir=None
 
 try:

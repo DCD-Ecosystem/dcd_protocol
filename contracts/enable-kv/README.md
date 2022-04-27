@@ -16,7 +16,7 @@ In the first terminal
 1. cd build
 1. cmake .. -DCMAKE_PREFIX_PATH=$EOS_2_1_0/build
 1. make
-1. cleos create account eosio jane EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
-1. cleos set contract jane $EOSIO_CDT_1_8_0/examples/kv_map/build/kv_map -p jane@active
-1. cleos push action jane upsert '[1, "jane.acct" "jane", "doe", "1 main st", "new york", "NY", "USA", "123"]' -p jane@active
-1. cleos push action jane get '[1]' -p jane@active
+1. dcdcli create account eosio jane EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
+1. dcdcli set contract jane $EOSIO_CDT_1_8_0/examples/kv_map/build/kv_map -p jane@active
+1. dcdcli push action jane upsert '[1, "jane.acct" "jane", "doe", "1 main st", "new york", "NY", "USA", "123"]' -p jane@active
+1. dcdcli push action jane get '[1]' -p jane@active

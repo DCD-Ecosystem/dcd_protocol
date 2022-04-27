@@ -68,7 +68,7 @@ try:
     # Create delayed transaction to create "generated_transaction_object"
     cmd = "create account -j eosio sample EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV\
          EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV --delay-sec 600 -p eosio"
-    trans = producerNode.processCleosCmd(cmd, cmd, silentErrors=False)
+    trans = producerNode.processdcdcliCmd(cmd, cmd, silentErrors=False)
     assert trans
 
     # Schedule a new producer to trigger new producer schedule for "global_property_object"
@@ -81,7 +81,7 @@ try:
     setProdsStr += '{"producer_name":' + newProducerAcc.name + ',"block_signing_key":' + newProducerAcc.activePublicKey + '}'
     setProdsStr += ']}'
     cmd="push action -j eosio setprods '{}' -p eosio".format(setProdsStr)
-    trans = producerNode.processCleosCmd(cmd, cmd, silentErrors=False)
+    trans = producerNode.processdcdcliCmd(cmd, cmd, silentErrors=False)
     assert trans
     setProdsBlockNum = int(trans["processed"]["block_num"])
 

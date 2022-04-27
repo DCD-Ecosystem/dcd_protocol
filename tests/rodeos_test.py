@@ -182,7 +182,7 @@ try:
     } 
 
     cmd = "push transaction '{}' -p payloadless".format(json.dumps(trx))
-    trans = producerNode.processCleosCmd(cmd, cmd, silentErrors=False)
+    trans = producerNode.processdcdcliCmd(cmd, cmd, silentErrors=False)
     assert trans, "Failed to push transaction with context free data"
     
     cfTrxBlockNum = int(trans["processed"]["block_num"])

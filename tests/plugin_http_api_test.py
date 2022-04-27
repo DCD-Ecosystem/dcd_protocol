@@ -14,7 +14,7 @@ class PluginHttpTest(unittest.TestCase):
     sleep_s = 2
     base_node_cmd_str = ("curl http://%s:%s/v1/") % (TestHelper.LOCAL_HOST, TestHelper.DEFAULT_PORT)
     base_wallet_cmd_str = ("curl http://%s:%s/v1/") % (TestHelper.LOCAL_HOST, TestHelper.DEFAULT_WALLET_PORT)
-    keosd = WalletMgr(True, TestHelper.DEFAULT_PORT, TestHelper.LOCAL_HOST, TestHelper.DEFAULT_WALLET_PORT, TestHelper.LOCAL_HOST)
+    dcdksd = WalletMgr(True, TestHelper.DEFAULT_PORT, TestHelper.LOCAL_HOST, TestHelper.DEFAULT_WALLET_PORT, TestHelper.LOCAL_HOST)
     node_id = 1
     nodeos = Node(TestHelper.LOCAL_HOST, TestHelper.DEFAULT_PORT, node_id)
     data_dir = Utils.getNodeDataDir(node_id)
@@ -28,19 +28,19 @@ class PluginHttpTest(unittest.TestCase):
             shutil.rmtree(self.data_dir)
         os.makedirs(self.data_dir)
 
-    # kill nodeos and keosd and clean up dir
+    # kill nodeos and dcdksd and clean up dir
     def cleanEnv(self) :
-        self.keosd.killall(True)
+        self.dcdksd.killall(True)
         WalletMgr.cleanup()
         Node.killAllNodeos()
         if os.path.exists(self.data_dir):
             shutil.rmtree(self.data_dir)
         time.sleep(self.sleep_s)
 
-    # start keosd and nodeos
+    # start dcdksd and nodeos
     def startEnv(self) :
         self.createDataDir(self)
-        self.keosd.launch()
+        self.dcdksd.launch()
         nodeos_plugins = (" --plugin %s --plugin %s --plugin %s --plugin %s --plugin %s --plugin %s --plugin %s --plugin %s "
                           " --plugin %s --plugin %s --plugin %s --plugin %s ") % ( "eosio::trace_api_plugin",
                                                                                    "eosio::test_control_api_plugin",

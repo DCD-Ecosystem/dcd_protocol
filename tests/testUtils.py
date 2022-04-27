@@ -112,11 +112,11 @@ class Utils:
     Debug=False
     FNull = open(os.devnull, 'w')
 
-    EosClientPath="programs/cleos/cleos"
-    MiscEosClientArgs="--no-auto-keosd"
+    EosClientPath="programs/dcdcli/dcdcli"
+    MiscEosClientArgs="--no-auto-dcdksd"
 
-    EosWalletName="keosd"
-    EosWalletPath="programs/keosd/"+ EosWalletName
+    EosWalletName="dcdksd"
+    EosWalletPath="programs/dcdksd/"+ EosWalletName
 
     EosServerName="nodeos"
     EosServerPath="programs/nodeos/"+ EosServerName

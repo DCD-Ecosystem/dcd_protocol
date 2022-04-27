@@ -17,7 +17,7 @@ class TraceApiPluginTest(unittest.TestCase):
     accounts = []
     cluster.setWalletMgr(walletMgr)
 
-    # kill nodeos and keosd and clean up dir
+    # kill nodeos and dcdksd and clean up dir
     def cleanEnv(self, shouldCleanup: bool) :
         self.cluster.killall(allInstances=True)
         if shouldCleanup:
@@ -26,7 +26,7 @@ class TraceApiPluginTest(unittest.TestCase):
         if shouldCleanup:
             self.walletMgr.cleanup()
 
-    # start keosd and nodeos
+    # start dcdksd and nodeos
     def startEnv(self) :
         account_names = ["alice", "bob", "charlie"]
         traceNodeosArgs = " --plugin eosio::trace_api_plugin --trace-no-abis --trace-dir=."

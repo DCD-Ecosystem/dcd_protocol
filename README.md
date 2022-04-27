@@ -126,8 +126,8 @@ To uninstall the EOSIO built/installed binaries and dependencies, run:
     - [Replays](http://eosio.github.io/eos/latest/nodeos/replays/index)
     - [Chain API Reference](http://eosio.github.io/eos/latest/nodeos/plugins/chain_api_plugin/api-reference/index)
     - [Troubleshooting](http://eosio.github.io/eos/latest/nodeos/troubleshooting/index)
-1. [Cleos](http://eosio.github.io/eos/latest/cleos/)
-1. [Keosd](http://eosio.github.io/eos/latest/keosd/)
+1. [dcdcli](http://eosio.github.io/eos/latest/dcdcli/)
+1. [dcdksd](http://eosio.github.io/eos/latest/dcdksd/)
 
 ## Resources
 1. [Website](https://eos.io)

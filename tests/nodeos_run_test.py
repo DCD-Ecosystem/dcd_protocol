@@ -16,7 +16,7 @@ import os
 ###############################################################
 # nodeos_run_test
 #
-# General test that tests a wide range of general use actions around nodeos and keosd
+# General test that tests a wide range of general use actions around nodeos and dcdksd
 #
 ###############################################################
 
@@ -53,7 +53,7 @@ killWallet=not dontKill
 dontBootstrap=sanityTest # intent is to limit the scope of the sanity test to just verifying that nodes can be started
 
 WalletdName=Utils.EosWalletName
-ClientName="cleos"
+ClientName="dcdcli"
 timeout = .5 * 12 * 2 + 60 # time for finalization with 1 producer + 60 seconds padding
 Utils.setIrreversibleTimeout(timeout)
 
@@ -634,7 +634,7 @@ try:
         raise
 
     signCmd = "sign --public-key {0} {1} -p".format(currencyAccount.activePublicKey, unsignedTrxJsonFile)
-    node.processCleosCmd(signCmd, "Sign and push a transaction", False, True)
+    node.processdcdcliCmd(signCmd, "Sign and push a transaction", False, True)
     os.remove(unsignedTrxJsonFile)
 
     testeraAccountAmountAfterSign=node.getAccountEosBalanceStr(testeraAccount.name)

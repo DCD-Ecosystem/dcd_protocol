@@ -50,7 +50,7 @@ killWallet=not dontKill
 dontBootstrap=sanityTest
 
 WalletdName=Utils.EosWalletName
-ClientName="cleos"
+ClientName="dcdcli"
 
 try:
     TestHelper.printSystemInfo("BEGIN prod_preactivation_test.py")

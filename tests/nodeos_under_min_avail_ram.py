@@ -43,7 +43,7 @@ killEosInstances=not dontKill
 killWallet=not dontKill
 
 WalletdName=Utils.EosWalletName
-ClientName="cleos"
+ClientName="dcdcli"
 
 try:
     TestHelper.printSystemInfo("BEGIN")

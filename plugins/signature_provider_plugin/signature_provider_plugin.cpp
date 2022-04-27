@@ -15,7 +15,7 @@ namespace eosio {
 
 class signature_provider_plugin_impl {
    public:
-      fc::microseconds  _keosd_provider_timeout_us;
+      fc::microseconds  _dcdksd_provider_timeout_us;
 
       signature_provider_plugin::signature_provider_type
       make_key_signature_provider(const chain::private_key_type& key) const {
@@ -42,20 +42,20 @@ class signature_provider_plugin_impl {
 #endif
 
       signature_provider_plugin::signature_provider_type
-      make_keosd_signature_provider(const string& url_str, const chain::public_key_type pubkey) const {
-         fc::url keosd_url;
+      make_dcdksd_signature_provider(const string& url_str, const chain::public_key_type pubkey) const {
+         fc::url dcdksd_url;
          if(boost::algorithm::starts_with(url_str, "unix://"))
             //send the entire string after unix:// to http_plugin. It'll auto-detect which part
             // is the unix socket path, and which part is the url to hit on the server
-            keosd_url = fc::url("unix", url_str.substr(7), fc::ostring(), fc::ostring(), fc::ostring(), fc::ostring(), fc::ovariant_object(), std::optional<uint16_t>());
+            dcdksd_url = fc::url("unix", url_str.substr(7), fc::ostring(), fc::ostring(), fc::ostring(), fc::ostring(), fc::ovariant_object(), std::optional<uint16_t>());
          else
-            keosd_url = fc::url(url_str);
+            dcdksd_url = fc::url(url_str);
 
-         return [to=_keosd_provider_timeout_us, keosd_url, pubkey](const chain::digest_type& digest) {
+         return [to=_dcdksd_provider_timeout_us, dcdksd_url, pubkey](const chain::digest_type& digest) {
             fc::variant params;
             fc::to_variant(std::make_pair(digest, pubkey), params);
             auto deadline = to.count() >= 0 ? fc::time_point::now() + to : fc::time_point::maximum();
-            return app().get_plugin<http_client_plugin>().get_client().post_sync(keosd_url, params, deadline).as<chain::signature_type>();
+            return app().get_plugin<http_client_plugin>().get_client().post_sync(dcdksd_url, params, deadline).as<chain::signature_type>();
          };
       }
 };
@@ -65,8 +65,8 @@ signature_provider_plugin::~signature_provider_plugin(){}
 
 void signature_provider_plugin::set_program_options(options_description&, options_description& cfg) {
    cfg.add_options()
-         ("keosd-provider-timeout", boost::program_options::value<int32_t>()->default_value(5),
-          "Limits the maximum time (in milliseconds) that is allowed for sending requests to a keosd provider for signing")
+         ("dcdksd-provider-timeout", boost::program_options::value<int32_t>()->default_value(5),
+          "Limits the maximum time (in milliseconds) that is allowed for sending requests to a dcdksd provider for signing")
          ;
 }
 
@@ -75,9 +75,9 @@ const char* const signature_provider_plugin::signature_provider_help_text() cons
           "Where:\n"
           "   <public-key>    \tis a string form of a vaild EOSIO public key\n\n"
           "   <provider-spec> \tis a string in the form <provider-type>:<data>\n\n"
-          "   <provider-type> \tis KEY, KEOSD, or SE\n\n"
+          "   <provider-type> \tis KEY, dcdksd, or SE\n\n"
           "   KEY:<data>      \tis a string form of a valid EOSIO private key which maps to the provided public key\n\n"
-          "   KEOSD:<data>    \tis the URL where keosd is available and the approptiate wallet(s) are unlocked\n\n"
+          "   dcdksd:<data>    \tis the URL where dcdksd is available and the approptiate wallet(s) are unlocked\n\n"
 #ifdef __APPLE__
           "   SE:             \tindicates the key resides in Secure Enclave"
 #endif
@@ -86,7 +86,7 @@ const char* const signature_provider_plugin::signature_provider_help_text() cons
 }
 
 void signature_provider_plugin::plugin_initialize(const variables_map& options) {
-   my->_keosd_provider_timeout_us = fc::milliseconds( options.at("keosd-provider-timeout").as<int32_t>() );
+   my->_dcdksd_provider_timeout_us = fc::milliseconds( options.at("dcdksd-provider-timeout").as<int32_t>() );
 }
 
 std::pair<chain::public_key_type,signature_provider_plugin::signature_provider_type>
@@ -108,8 +108,8 @@ signature_provider_plugin::signature_provider_for_specification(const std::strin
       EOS_ASSERT(pubkey == priv.get_public_key(), chain::plugin_config_exception, "Private key does not match given public key for ${pub}", ("pub", pubkey));
       return std::make_pair(pubkey, my->make_key_signature_provider(priv));
    }
-   else if(spec_type_str == "KEOSD")
-      return std::make_pair(pubkey, my->make_keosd_signature_provider(spec_data, pubkey));
+   else if(spec_type_str == "dcdksd")
+      return std::make_pair(pubkey, my->make_dcdksd_signature_provider(spec_data, pubkey));
 #ifdef __APPLE__
    else if(spec_type_str == "SE")
       return std::make_pair(pubkey, my->make_se_signature_provider(pubkey));

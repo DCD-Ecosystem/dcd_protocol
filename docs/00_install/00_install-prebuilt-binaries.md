@@ -67,7 +67,7 @@ After installing the prebuilt packages, the actual EOSIO binaries will be locate
 
 where `version-string` is the EOSIO version that was installed.
 
-Also, soft links for each EOSIO program (`nodeos`, `cleos`, `keosd`, etc.) will be created under `usr/bin` or `usr/local/bin` to allow them to be executed from any directory.
+Also, soft links for each EOSIO program (`nodeos`, `dcdcli`, `dcdksd`, etc.) will be created under `usr/bin` or `usr/local/bin` to allow them to be executed from any directory.
 
 ## Previous Versions
 

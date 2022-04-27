@@ -47,7 +47,7 @@ A transaction is considered confirmed when a `nodeos` instance has received, pro
 
 ### Speculative Mode
 
-Clients such as `cleos` and the RPC API, will see database state as of the current head block plus changes made by all transactions known to this node but potentially not included in the chain, unconfirmed transactions for example.
+Clients such as `dcdcli` and the RPC API, will see database state as of the current head block plus changes made by all transactions known to this node but potentially not included in the chain, unconfirmed transactions for example.
 
 Speculative mode is low latency but fragile, there is no guarantee that the transactions reflected in the state will be included in the chain OR that they will reflected in the same order the state implies.  
 
@@ -57,7 +57,7 @@ In speculative mode `nodeos` is able to execute transactions which have TaPoS (T
 
 ### Head Mode
 
-Clients such as `cleos` and the RPC API will see database state as of the current head block of the chain.  Since current head block is not yet irreversible and short-lived forks are possible, state read in this mode may become inaccurate  if `nodeos` switches to a better fork.  Note that this is also true of speculative mode.  
+Clients such as `dcdcli` and the RPC API will see database state as of the current head block of the chain.  Since current head block is not yet irreversible and short-lived forks are possible, state read in this mode may become inaccurate  if `nodeos` switches to a better fork.  Note that this is also true of speculative mode.  
 
 This mode represents a good trade-off between highly consistent views of the data and latency.
 
@@ -68,13 +68,13 @@ In this mode `nodeos` is able to execute transactions which have TaPoS pointing 
 [[caution | Deprecation Notice]]
 | The explicit `read-mode = read-only` mode is deprecated. Similar functionality can now be achieved in `head` mode by combining options: `read-mode = head`, `p2p-accept-transactions = false`, `api-accept-transactions = false`.
 
-Clients such as `cleos` and the RPC API will see database state as of the current head block of the chain. It **will not** include changes made by transactions known to this node but not included in the chain, such as unconfirmed transactions.
+Clients such as `dcdcli` and the RPC API will see database state as of the current head block of the chain. It **will not** include changes made by transactions known to this node but not included in the chain, such as unconfirmed transactions.
 
 ### Irreversible Mode
 
 When `nodeos` is configured to be in irreversible read mode, it will still track the most up-to-date blocks in the fork database, but the state will lag behind the current best head block, sometimes referred to as the fork DB head, to always reflect the state of the last irreversible block. 
 
-Clients such as `cleos` and the RPC API will see database state as of the current head block of the chain. It **will not** include changes made by transactions known to this node but not included in the chain, such as unconfirmed transactions.
+Clients such as `dcdcli` and the RPC API will see database state as of the current head block of the chain. It **will not** include changes made by transactions known to this node but not included in the chain, such as unconfirmed transactions.
 
 ## How To Specify the Read Mode
 
