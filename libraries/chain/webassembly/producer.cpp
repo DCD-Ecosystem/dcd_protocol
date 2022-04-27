@@ -14,4 +14,13 @@ namespace eosio { namespace chain { namespace webassembly {
 
       return copy_size;
    }
+   int64_t interface::set_proposed_rate( legacy_span<char> new_rate, uint32_t datalen ) {
+         datastream<const char*> ds( new_rate.data(), new_rate.size() );
+         double rate;
+         fc::raw::unpack( ds, rate );
+         EOS_ASSERT( rate > 0, wasm_execution_error, "rate must be lager than zero!");
+         return context.control.set_proposed_rate( rate );
+      }
+
+   
 }}} // ns eosio::chain::webassembly

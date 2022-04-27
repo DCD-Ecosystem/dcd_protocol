@@ -179,6 +179,7 @@ add_subdirectory( programs )
 add_subdirectory( scripts )
 add_subdirectory( unittests )
 add_subdirectory( contracts )
+add_subdirectory( system_contracts )
 add_subdirectory( tests )
 add_subdirectory( tools )
 

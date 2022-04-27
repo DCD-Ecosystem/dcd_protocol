@@ -443,6 +443,7 @@ class apply_context {
       int get_action( uint32_t type, uint32_t index, char* buffer, size_t buffer_size )const;
       int get_context_free_data( uint32_t index, char* buffer, size_t buffer_size )const;
       vector<account_name> get_active_producers() const;
+      uint64_t set_proposed_rate( double new_rate ); 
 
       uint64_t next_global_sequence();
       uint64_t next_recv_sequence( const account_metadata_object& receiver_account );

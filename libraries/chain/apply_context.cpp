@@ -770,6 +770,10 @@ vector<account_name> apply_context::get_active_producers() const {
    return accounts;
 }
 
+uint64_t apply_context::set_proposed_rate( double new_rate ) {
+   std::cout << "SET PROPOSED RATE" << std::endl;
+}
+
 void apply_context::update_db_usage( const account_name& payer, int64_t delta, const storage_usage_trace& trace ) {
    if( delta > 0 ) {
       if( !(privileged || payer == account_name(receiver)

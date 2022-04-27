@@ -3,7 +3,6 @@
 
 #include <eosio/crypto.hpp>
 #include <eosio/dispatcher.hpp>
-
 #include <cmath>
 
 namespace eosiosystem {
@@ -20,6 +19,8 @@ namespace eosiosystem {
     _voters(get_self(), get_self().value),
     _producers(get_self(), get_self().value),
     _producers2(get_self(), get_self().value),
+    _prodstodelete(get_self(), get_self().value),
+    _prodsdelinfo(get_self(), get_self().value),
     _global(get_self(), get_self().value),
     _global2(get_self(), get_self().value),
     _global3(get_self(), get_self().value),
@@ -308,6 +309,12 @@ namespace eosiosystem {
       _gstate4.inflation_pay_factor = inflation_pay_factor;
       _gstate4.votepay_factor       = votepay_factor;
       _global4.set( _gstate4, get_self() );
+   }
+
+   void system_contract::setfeeprop(const name account, 
+                      const feeproperty fee_property) {
+      _gstate.new_rate_period = fee_property.new_rate_period;
+      _gstate.out_of_date_time = fee_property.out_of_date_time;
    }
 
    /**

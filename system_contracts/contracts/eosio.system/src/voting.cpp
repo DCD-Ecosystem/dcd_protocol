@@ -6,6 +6,8 @@
 #include <eosio/privileged.hpp>
 #include <eosio/serialize.hpp>
 #include <eosio/singleton.hpp>
+#include <eosio.system/native.hpp>
+
 
 #include <eosio.system/eosio.system.hpp>
 #include <eosio.token/eosio.token.hpp>
@@ -134,16 +136,125 @@ namespace eosiosystem {
          info.deactivate();
       });
    }
+   
+   void system_contract::setrateprod( const name& producer, const double fee_rate ) {
+     /*DCD_TODO*/
+      require_auth( producer );
+
+      check( fee_rate > 0, "fee_rate must be positive" );
+      const auto prod = _producers.find( producer.value );
+      check( prod != _producers.end(), "producer not found" );
+
+
+      //check( prod.confirmed == 1, "only confirmed producer can set rate" );
+      _producers.modify( prod, same_payer, [&]( producer_info& info ){
+         info.fee_rate = fee_rate;
+         info.fee_rate_time = current_time_point();
+      });
+      
+   }
+
+   bool system_contract::all_voted(const name& producer, const del_producer_vote& vote_info) {
+      /* DCD_TODO
+      auto active_prods = eosio::get_active_producers();
+      std::set<name> voted_prods = vote_info.voted;
+      voted_prods.insert(producer);
+      voted_prods.insert(vote_info.to_delete);
+      bool all_votes = true;
+      
+      for(auto& prod: active_prods)
+         if(voted_prods.find(prod) == voted_prods.end())
+            return false;
+      */
+      return true;
+   }
+
+   void system_contract::replace_confirmed(const name& prod_to_delete,const name& prod_to_replace) {
+/*DCD_TODO
+      auto itr_to_del = _producers.find(prod_to_delete.value);
+      _producers.modify( itr_to_del, same_payer, [&]( auto& p ) {
+         p.confirmed = 0;
+      });
+      auto itr_to_replace = _producers.find(prod_to_replace.value);
+      _producers.modify( itr_to_replace, same_payer, [&]( auto& p ) {
+         p.confirmed = 1;
+         p.confirmed_time = current_time_point();
+      });
+ */
+
+   }
+
+   void system_contract::voteprod( const name& producer, const name& prod_to_delete, bool vote) {
+/*DCD_TODO   
+      require_auth( producer );
+
+      check(producer != prod_to_delete, "can`t vote for self");
+
+      const auto& prod = _producers.get( producer.value, "producer not found" );
+      check( prod.confirmed == 1, "producer is not confirmed" );
+
+      auto pitr = _prodstodelete.find( prod_to_delete.value );
+      check(pitr != _prodstodelete.end(), "no such to_delete producer");
+
+      check(pitr->voted.find(producer) == pitr->voted.end(), "producer already voted");
+
+      if( (vote == false) || all_voted(producer, *pitr)) {
+         _prodsdelinfo.emplace( get_self(), [&]( del_producer_result& res ){
+            res.to_delete = pitr->to_delete;
+            res.to_replace = pitr->to_replace;
+            res.start_time = pitr->start_time;
+            res.voting_result = vote;
+         });
+
+         if(vote)
+            replace_confirmed(pitr->to_delete, pitr->to_replace);
+
+         _prodstodelete.erase(pitr);
+      }
+      else {
+         _prodstodelete.modify( pitr, same_payer, [&](auto& p) {
+            p.voted.insert(producer);
+         } );
+      }
+   */
+   }
+
+   void system_contract::deloldvotes() {
+/*
+      time_point cur_time = current_time_point();
+      auto indx = _prodstodelete.get_index<"bytime"_n>();
+      auto itr = indx.begin();
+      while( itr != indx.end())
+      {
+         uint64_t elapsed = cur_time.sec_since_epoch() - itr->start_time.sec_since_epoch();
+         if(elapsed > time_to_vote_for_del_producer)
+         {
+            _prodsdelinfo.emplace( get_self(), [&]( del_producer_result& res ){
+               res.to_delete = itr->to_delete;
+               res.to_replace = itr->to_replace;
+               res.start_time = itr->start_time;
+               res.voting_result = false;
+            });
+            itr = indx.erase(itr);
+         }
+         else
+            break;
+      }
+*/
+   }
 
    void system_contract::update_elected_producers( const block_timestamp& block_time ) {
       _gstate.last_producer_schedule_update = block_time;
 
       auto idx = _producers.get_index<"prototalvote"_n>();
+      //auto idx = _producers.get_index<"confirmed"_n>();
 
       using value_type = std::pair<eosio::producer_authority, uint16_t>;
       std::vector< value_type > top_producers;
       top_producers.reserve(21);
+//      top_producers.reserve(_gstate.top_producers_count);
 
+//      for( auto it = idx.cbegin(); it != idx.cend() && 0 < it->confirmed && it->active(); ++it ) {
       for( auto it = idx.cbegin(); it != idx.cend() && top_producers.size() < 21 && 0 < it->total_votes && it->active(); ++it ) {
          top_producers.emplace_back(
             eosio::producer_authority{
@@ -171,6 +282,57 @@ namespace eosiosystem {
 
       if( set_proposed_producers( producers ) >= 0 ) {
          _gstate.last_producer_schedule_size = static_cast<decltype(_gstate.last_producer_schedule_size)>( top_producers.size() );
+      }
+   }
+
+   void system_contract::calculate_new_rate( const block_timestamp& block_time )
+   {
+      if(block_time.slot < (_gstate.cur_rate_time.slot + _gstate.new_rate_period*2)) {
+         return;
+      }
+
+      std::vector<producers_rate_info> new_producers;
+      std::vector<double> rates;
+
+      std::vector<name> active_producers = eosio::get_active_producers();
+      for(auto producer: active_producers) {
+         auto prod = _producers.find( producer.value );
+         if( prod == _producers.end()) // eosio producer
+            return;
+
+         if (prod->fee_rate_time == time_point()) {
+            continue;
+         }
+         
+         if (prod->fee_rate_time.sec_since_epoch() + _gstate.out_of_date_time < block_time.to_time_point().sec_since_epoch()) {
+            continue;
+         }
+
+         producers_rate_info info;
+         info.name = producer;
+         info.rate_time = prod->fee_rate_time;
+         info.rate = prod->fee_rate;
+         new_producers.push_back(info);
+         rates.push_back(prod->fee_rate);
+      }
+
+      uint32_t rates_size = rates.size();
+
+      _gstate.cur_rate_time = block_time;
+      if(rates_size) {
+         std::sort(rates.begin(), rates.end());
+         double median;
+
+         if(rates_size%2)
+            median = rates[rates_size/2];
+         else 
+            median = (rates[rates_size/2 - 1] + rates[rates_size/2])/2;
+
+         _gstate.cur_rate_producers = new_producers;
+         _gstate.prev_rate = _gstate.cur_rate;
+         _gstate.cur_rate = median;
+
+         //eosio::set_proposed_rate(median);         
       }
    }
 
@@ -239,6 +401,88 @@ namespace eosiosystem {
 //      if( rex_itr != _rexbalance.end() && rex_itr->rex_balance.amount > 0 ) {
 //         check_voting_requirement( voter_name, "voter holding REX tokens must vote for at least 21 producers or for a proxy" );
 //      }
+
+   }
+
+   void system_contract::confirmprod(const name& producer) {
+   /*DCD_TODO
+      require_auth( get_self() );
+
+      auto pitr = _producers.find( producer.value );
+      check( pitr != _producers.end(), "account is not registered as producer" );
+      check( pitr->confirmed != true, "account is already confirmed");
+      
+      for(auto itr = _prodstodelete.begin(); itr != _prodstodelete.end(); itr++) {
+         check(itr->to_replace != producer, "producer proposed to replace");
+      }
+      check( _gstate.cur_producers_confirmed + 1 <= _gstate.top_producers_count, "maximum confirmed producers exceeded");
+      
+      _producers.modify( pitr, same_payer, [&]( auto& p ) {
+         p.confirmed = 1;
+         p.confirmed_time = current_time_point();
+      });
+
+      _gstate.cur_producers_confirmed += 1;
+
+      if( _gstate.thresh_activated_stake_time == time_point())
+            _gstate.thresh_activated_stake_time = current_time_point();
+*/
+   }
+
+   void system_contract::setprodscnt(uint16_t count) {
+/*
+      require_auth( get_self() );
+
+      check(count >= min_top_producers_count, "the count is too small");
+      check(count <= max_top_producers_count, "the count is too big");
+      check(count > _gstate.top_producers_count, "the count less or equal than current");
+
+      eosio_global_state gs = _global.get();
+      gs.top_producers_count = count;
+      _global.set( gs, get_self() );
+
+      _gstate.top_producers_count = count;
+*/
+   }
+
+   void system_contract::delproducer(const name& to_delete, const name& to_replace) {
+      require_auth( get_self() );
+
+      for(auto itr = _prodstodelete.begin(); itr != _prodstodelete.end(); itr++) {
+         check(itr->to_delete != to_delete, "producer already proposed to delete");
+      }
+
+      for(auto itr = _prodstodelete.begin(); itr != _prodstodelete.end(); itr++) {
+         check(itr->to_replace != to_replace, "producer already proposed to replace");
+      }
+
+      auto pitr = _producers.find( to_delete.value );
+      check( pitr != _producers.end(), "to_delete account is not registered as producer" );
+      check( pitr->confirmed == true, "to_delete account is not confirmed");
+
+      pitr = _producers.find( to_replace.value );
+      check( pitr != _producers.end(), "to_replace account is not registered as producer" );
+      check( pitr->confirmed != true, "to_replace account is already confirmed");      
+
+      if(eosio::get_active_producers().size() == 1) {
+         replace_confirmed(to_delete, to_replace);
+         return;
+      }
+
+      _prodstodelete.emplace(get_self(), [&]( auto& p ) {
+               p.to_delete  = to_delete;
+               p.to_replace = to_replace;
+               p.start_time = current_time_point();
+            });
+   }
+
+   void system_contract::delvoting(const name& to_delete) {
+      require_auth( get_self() );
+
+      auto pitr = _prodstodelete.find( to_delete.value );
+      check(pitr != _prodstodelete.end(), "to_delete producer not found in voting table");
+
+      _prodstodelete.erase(pitr);
    }
 
    void system_contract::update_votes( const name& voter_name, const name& proxy, const std::vector<name>& producers, bool voting ) {

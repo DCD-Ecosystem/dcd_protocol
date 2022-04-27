@@ -87,6 +87,13 @@ abi_def eosio_contract_abi(const abi_def& eosio_system_abi)
    });
 
    eos_abi.structs.emplace_back( struct_def {
+      "rate_schedule", "", {
+         {"version", "uint32"},
+         {"rate", "double"}
+      }
+   });
+
+   eos_abi.structs.emplace_back( struct_def {
       "block_header", "", {
          {"timestamp", "uint32"},
          {"producer", "account_name"},
@@ -96,6 +103,8 @@ abi_def eosio_contract_abi(const abi_def& eosio_system_abi)
          {"action_mroot", "checksum256"},
          {"schedule_version", "uint32"},
          {"new_producers", "producer_schedule?"},
+         {"rate_version", "uint32"},
+         {"new_rate", "rate_schedule?"},
          {"header_extensions", "extension[]"}
       }
    });
@@ -213,10 +222,35 @@ abi_def eosio_contract_abi(const abi_def& eosio_system_abi)
       }
    });
 
+   eos_abi.structs.emplace_back( struct_def {
+         "setfee", "", {
+               {"account", "account_name"},
+               {"action", "action_name"},
+               {"fee", "asset"}
+         }
+   });
+
+   eos_abi.structs.emplace_back( struct_def {
+         "setfeeforce", "", {
+               {"new_rate", "double"}
+         }
+   });
+
+   eos_abi.structs.emplace_back( struct_def {
+         "onfee", "", {
+               {"account", "account_name"},
+               {"action", "action_name"},
+               {"fee", "asset"}
+         }
+   });
+
    // TODO add ricardian contracts
    eos_abi.actions.push_back( action_def{name("newaccount"), "newaccount",""} );
    eos_abi.actions.push_back( action_def{name("setcode"), "setcode",""} );
    eos_abi.actions.push_back( action_def{name("setabi"), "setabi",""} );
+   eos_abi.actions.push_back( action_def{name("onfee"), "onfee",""} );
+   eos_abi.actions.push_back( action_def{name("setfee"), "setfee",""} );
+   eos_abi.actions.push_back( action_def{name("setfeeforce"), "setfeeforce",""} );
    eos_abi.actions.push_back( action_def{name("updateauth"), "updateauth",""} );
    eos_abi.actions.push_back( action_def{name("deleteauth"), "deleteauth",""} );
    eos_abi.actions.push_back( action_def{name("linkauth"), "linkauth",""} );

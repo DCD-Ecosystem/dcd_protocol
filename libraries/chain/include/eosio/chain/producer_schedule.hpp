@@ -93,6 +93,36 @@ namespace eosio { namespace chain {
       shared_vector<shared_producer_authority>       producers;
    };
 
+   struct shared_rate_info {
+      uint32_t       version = 0; ///< sequentially incrementing version number
+      double         rate = 1.0;
+   };
+
+   struct producer_rate_info {
+      producer_rate_info() = default;
+      producer_rate_info( uint32_t version, double rate )
+      :version(version)
+      ,rate(rate)
+      {}
+
+      uint32_t    version = 0; ///< sequentially incrementing version number
+      double      rate = 0;                  
+      //vector<producer_authority>                     producers;
+
+      friend bool operator == ( const producer_rate_info& a, const producer_rate_info& b )
+      {
+         if( a.version != b.version ) return false;
+         if ( a.rate != b.rate ) return false;
+         return true;
+      }
+
+      friend bool operator != ( const producer_rate_info& a, const producer_rate_info& b )
+      {
+         return !(a==b);
+      }
+   };
+
+
    /**
     * block signing authority version 0
     * this authority allows for a weighted threshold multi-sig per-producer
@@ -335,4 +365,6 @@ FC_REFLECT_DERIVED( eosio::chain::producer_schedule_change_extension, (eosio::ch
 FC_REFLECT( eosio::chain::shared_block_signing_authority_v0, (threshold)(keys))
 FC_REFLECT( eosio::chain::shared_producer_authority, (producer_name)(authority) )
 FC_REFLECT( eosio::chain::shared_producer_authority_schedule, (version)(producers) )
+FC_REFLECT( eosio::chain::shared_rate_info, (version)(rate) )
+FC_REFLECT( eosio::chain::producer_rate_info, (version)(rate) )
 

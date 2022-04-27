@@ -306,6 +306,52 @@ public:
       flat_set<public_key_type> required_keys;
    };
 
+      struct get_action_fee_params {
+      account_name account;
+      action_name  action;
+   };
+   struct get_action_fee_result {
+      asset core_fee;
+      asset usd_fee;
+      double rate;
+   };
+
+   get_action_fee_result get_action_fee( const get_action_fee_params& params )const;
+
+   struct get_required_fee_params {
+      fc::variant transaction;
+   };
+   struct get_required_fee_result {
+      asset required_fee;
+   };
+
+   struct get_fee_rate_params {
+   };
+
+   struct get_fee_rate_result {
+      asset           base_rate_asset;
+      uint64_t        new_rate_period;
+      uint64_t        out_of_date_time;
+      double          prev_rate;
+      double          cur_rate;
+      fc::time_point  cur_rate_time;
+      std::vector<chain::producers_rate_info>    cur_rate_producers;   
+   };
+
+   get_required_fee_result get_required_fee( const get_required_fee_params& params)const;
+   get_fee_rate_result get_fee_rate(const get_fee_rate_params& params)const;
+
+   struct get_rate_schedule_params {
+   };
+
+   struct get_rate_schedule_result {
+      fc::variant active;
+      fc::variant pending;
+      fc::variant proposed;
+   };
+
+   get_rate_schedule_result get_rate_schedule( const get_rate_schedule_params& params )const;
+
    get_required_keys_result get_required_keys( const get_required_keys_params& params)const;
 
    using get_transaction_id_params = transaction;
@@ -1111,6 +1157,10 @@ FC_REFLECT( eosio::chain_apis::read_only::get_producers_result, (rows)(total_pro
 FC_REFLECT_EMPTY( eosio::chain_apis::read_only::get_producer_schedule_params )
 FC_REFLECT( eosio::chain_apis::read_only::get_producer_schedule_result, (active)(pending)(proposed) );
 
+//Fee rate
+FC_REFLECT_EMPTY( eosio::chain_apis::read_only::get_rate_schedule_params )
+FC_REFLECT( eosio::chain_apis::read_only::get_rate_schedule_result, (active)(pending)(proposed) );
+
 FC_REFLECT( eosio::chain_apis::read_only::get_scheduled_transactions_params, (json)(lower_bound)(limit) )
 FC_REFLECT( eosio::chain_apis::read_only::get_scheduled_transactions_result, (transactions)(more) );
 
@@ -1138,3 +1188,11 @@ FC_REFLECT( eosio::chain_apis::read_only::abi_bin_to_json_params, (code)(action)
 FC_REFLECT( eosio::chain_apis::read_only::abi_bin_to_json_result, (args) )
 FC_REFLECT( eosio::chain_apis::read_only::get_required_keys_params, (transaction)(available_keys) )
 FC_REFLECT( eosio::chain_apis::read_only::get_required_keys_result, (required_keys) )
+
+//Fee rate reflects 
+FC_REFLECT( eosio::chain_apis::read_only::get_action_fee_params, (account)(action) )
+FC_REFLECT( eosio::chain_apis::read_only::get_action_fee_result, (core_fee)(usd_fee)(rate) )
+FC_REFLECT( eosio::chain_apis::read_only::get_required_fee_params, (transaction) )
+FC_REFLECT( eosio::chain_apis::read_only::get_required_fee_result, (required_fee) )
+FC_REFLECT_EMPTY( eosio::chain_apis::read_only::get_fee_rate_params )
+FC_REFLECT( eosio::chain_apis::read_only::get_fee_rate_result, (base_rate_asset)(new_rate_period)(out_of_date_time)(prev_rate)(cur_rate)(cur_rate_time)(cur_rate_producers) )

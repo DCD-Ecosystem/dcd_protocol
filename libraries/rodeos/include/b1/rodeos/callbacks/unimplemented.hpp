@@ -28,6 +28,8 @@ struct unimplemented_callbacks {
 
    // producer_api
    int get_active_producers(int, int) { return unimplemented<int>("get_active_producers"); }
+   int64_t set_proposed_rate( double new_rate ) {return unimplemented<int64_t>("set_proposed_rate");}
+   
 
 #define DB_SECONDARY_INDEX_METHODS_SIMPLE(IDX)                                                                         \
    int  db_##IDX##_store(int64_t, int64_t, int64_t, int64_t, int) { return unimplemented<int>("db_" #IDX "_store"); }  \
@@ -154,6 +156,7 @@ struct unimplemented_callbacks {
 
       // producer_api
       Rft::template add<&Derived::get_active_producers>("env", "get_active_producers");
+      Rft::template add<&Derived::set_proposed_rate>("env", "set_proposed_rate");
 
 #define DB_SECONDARY_INDEX_METHODS_SIMPLE(IDX)                                                                         \
    Rft::template add<&Derived::db_##IDX##_store>("env", "db_" #IDX "_store");                                          \

@@ -73,6 +73,7 @@ inline constexpr auto get_intrinsic_table() {
       //"env.set_resource_limits",
       "env.set_proposed_producers",
       "env.set_proposed_producers_ex",
+      "env.set_proposed_rate",
       "env.get_blockchain_parameters_packed",
       "env.set_blockchain_parameters_packed",
       "env.is_privileged",

@@ -19,6 +19,14 @@ namespace eosiosystem {
    using eosio::time_point_sec;
    using eosio::token;
 
+   void system_contract::onfee( const name& actor, const asset& fee ) {
+      const name& payer = actor;
+      require_auth( payer );
+
+      token::transfer_action transfer_act{ token_account, { {payer, active_permission} } };
+      transfer_act.send( actor, fee_account, fee, "onfee action" );
+   }
+
    /**
     *  This action will buy an exact amount of ram and bill the payer the current market price.
     */

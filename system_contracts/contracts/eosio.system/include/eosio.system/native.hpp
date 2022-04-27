@@ -8,6 +8,8 @@
 #include <eosio/print.hpp>
 #include <eosio/privileged.hpp>
 #include <eosio/producer_schedule.hpp>
+#include <eosio/asset.hpp>
+
 
 namespace eosiosystem {
 
@@ -16,6 +18,7 @@ namespace eosiosystem {
    using eosio::name;
    using eosio::permission_level;
    using eosio::public_key;
+   using eosio::asset;
 
    /**
     * A weighted permission.
@@ -248,6 +251,16 @@ namespace eosiosystem {
          [[eosio::action]]
          void setcode( const name& account, uint8_t vmtype, uint8_t vmversion, const std::vector<char>& code ) {}
 
+         [[eosio::action]]
+         void setfee( const ignore<name> account, 
+                      const ignore<name> action, 
+                      const ignore<asset> fee ) {}
+
+         [[eosio::action]]
+         void setfeeforce( const ignore<double> new_rate) {}
+
+
+
          using newaccount_action = eosio::action_wrapper<"newaccount"_n, &native::newaccount>;
          using updateauth_action = eosio::action_wrapper<"updateauth"_n, &native::updateauth>;
          using deleteauth_action = eosio::action_wrapper<"deleteauth"_n, &native::deleteauth>;
@@ -256,5 +269,7 @@ namespace eosiosystem {
          using canceldelay_action = eosio::action_wrapper<"canceldelay"_n, &native::canceldelay>;
          using setcode_action = eosio::action_wrapper<"setcode"_n, &native::setcode>;
          using setabi_action = eosio::action_wrapper<"setabi"_n, &native::setabi>;
+         using setfee_action = eosio::action_wrapper<"setfee"_n, &native::setfee>;
+         using setfeeforce_action = eosio::action_wrapper<"setfeeforce"_n, &native::setfeeforce>;
    };
 }

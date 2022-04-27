@@ -50,6 +50,34 @@ struct setabi {
    }
 };
 
+struct setfee{
+   account_name  account;
+   action_name   action;
+   asset         fee;
+
+   static account_name get_account() {
+      return config::system_account_name;
+   }
+
+   static action_name get_name() {
+      return "setfee"_n;
+   }
+};
+
+
+struct setfeeforce{
+   double        new_rate;
+
+   static account_name get_account() {
+      return config::system_account_name;
+   }
+
+   static action_name get_name() {
+      return "setfeeforce"_n;
+   }
+
+
+};
 
 struct updateauth {
    account_name                      account;
@@ -150,6 +178,9 @@ struct onerror {
    static action_name get_name() {
       return "onerror"_n;
    }
+
+
+
 };
 
 } } /// namespace eosio::chain
@@ -163,3 +194,5 @@ FC_REFLECT( eosio::chain::linkauth                         , (account)(code)(typ
 FC_REFLECT( eosio::chain::unlinkauth                       , (account)(code)(type) )
 FC_REFLECT( eosio::chain::canceldelay                      , (canceling_auth)(trx_id) )
 FC_REFLECT( eosio::chain::onerror                          , (sender_id)(sent_trx) )
+FC_REFLECT( eosio::chain::setfee                           , (account)(action)(fee) )
+FC_REFLECT( eosio::chain::setfeeforce                  , (new_rate) )

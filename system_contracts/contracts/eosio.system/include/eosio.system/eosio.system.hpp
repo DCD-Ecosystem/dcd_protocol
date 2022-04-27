@@ -80,6 +80,9 @@ namespace eosiosystem {
    static constexpr int64_t  default_inflation_pay_factor  = 50000;   // producers pay share = 10000 / 50000 = 20% of the inflation
    static constexpr int64_t  default_votepay_factor        = 40000;   // per-block pay share = 10000 / 40000 = 25% of the producer pay
 
+   static constexpr uint16_t min_top_producers_count = 3; // for check in top_prodecers set
+   static constexpr uint16_t max_top_producers_count = 101; // for check in top_prodecers set
+   static constexpr uint32_t time_to_vote_for_del_producer = 24 * 3600 * 5; // 5 days
   /**
    * The `eosio.system` smart contract is provided by `block.one` as a sample system contract, and it defines the structures and actions needed for blockchain's core functionality.
    * 
@@ -124,6 +127,45 @@ namespace eosiosystem {
 
    typedef eosio::multi_index< "bidrefunds"_n, bid_refund > bid_refund_table;
 
+   // Defines delete producer vote info
+   struct [[eosio::table, eosio::contract("sig.system")]] del_producer_vote {
+      name            to_delete;
+      name            to_replace;
+      time_point      start_time;
+      std::set<name>  voted;
+
+      uint64_t primary_key()const { return to_delete.value; }
+      uint64_t by_time()const { return start_time.elapsed.count(); }
+
+      // explicit serialization macro is not necessary, used here only to improve compilation time
+      EOSLIB_SERIALIZE( del_producer_vote, (to_delete)(to_replace)(start_time)(voted) )
+   };
+
+   typedef eosio::multi_index< "delprodvote"_n, del_producer_vote,
+                                indexed_by<"bytime"_n, const_mem_fun<del_producer_vote, uint64_t, &del_producer_vote::by_time> >
+                                > del_producer_vote_table;
+
+   // Defines delete producer vote result
+   struct [[eosio::table, eosio::contract("sig.system")]] del_producer_result {
+      name            to_delete;
+      name            to_replace;
+      time_point      start_time;
+      bool            voting_result;
+
+      uint64_t primary_key()const { return start_time.elapsed.count(); }
+
+      // explicit serialization macro is not necessary, used here only to improve compilation time
+      EOSLIB_SERIALIZE( del_producer_result, (to_delete)(to_replace)(start_time)(voting_result) )
+   };
+
+   typedef eosio::multi_index< "delprodinfo"_n, del_producer_result > del_producer_result_table;
+
+   struct producers_rate_info {
+      name        name;
+      double      rate;
+      time_point  rate_time;
+   };
+
    // Defines new global state parameters.
    struct [[eosio::table("global"), eosio::contract("eosio.system")]] eosio_global_state : eosio::blockchain_parameters {
       uint64_t free_ram()const { return max_ram_size - total_ram_bytes_reserved; }
@@ -139,6 +181,19 @@ namespace eosiosystem {
       uint32_t             total_unpaid_blocks = 0; /// all blocks which have been produced but not paid
       int64_t              total_activated_stake = 0;
       time_point           thresh_activated_stake_time;
+
+      uint16_t             cur_producers_confirmed = 0;
+      uint16_t             top_producers_count = 21; // [3 - 101]
+
+      
+      asset                base_rate_asset = asset(10000, symbol(symbol_code("USD"), 4));
+      uint64_t             new_rate_period = 10*60; // in seconds
+      uint64_t             out_of_date_time = 3*24*60*60; // in seconds
+      double               prev_rate;
+      double               cur_rate = 1.0;
+      block_timestamp      cur_rate_time;
+      std::vector<producers_rate_info>    cur_rate_producers;
+
       uint16_t             last_producer_schedule_size = 0;
       double               total_producer_vote_weight = 0; /// the sum of all producer votes
       block_timestamp      last_name_close;
@@ -148,6 +203,8 @@ namespace eosiosystem {
                                 (max_ram_size)(total_ram_bytes_reserved)(total_ram_stake)
                                 (last_producer_schedule_update)(last_pervote_bucket_fill)
                                 (pervote_bucket)(perblock_bucket)(total_unpaid_blocks)(total_activated_stake)(thresh_activated_stake_time)
+                                (cur_producers_confirmed)(top_producers_count)
+                                (base_rate_asset)(new_rate_period)(out_of_date_time)(prev_rate)(cur_rate)(cur_rate_time)(cur_rate_producers)
                                 (last_producer_schedule_size)(total_producer_vote_weight)(last_name_close) )
    };
 
@@ -198,10 +255,17 @@ namespace eosiosystem {
       uint32_t                                                 unpaid_blocks = 0;
       time_point                                               last_claim_time;
       uint16_t                                                 location = 0;
+
+      time_point                                               fee_rate_time;
+      double                                                   fee_rate = 1.0;
+      uint8_t                                                  confirmed = 0;
+      time_point                                               confirmed_time;
+
       eosio::binary_extension<eosio::block_signing_authority>  producer_authority; // added in version 1.9.0
 
       uint64_t primary_key()const { return owner.value;                             }
       double   by_votes()const    { return is_active ? -total_votes : total_votes;  }
+      uint64_t by_confirmed()const { return confirmed == 0 ? 2 : static_cast<uint64_t>(confirmed); }
       bool     active()const      { return is_active;                               }
       void     deactivate()       { producer_key = public_key(); producer_authority.reset(); is_active = false; }
 
@@ -236,7 +300,12 @@ namespace eosiosystem {
             << t.url
             << t.unpaid_blocks
             << t.last_claim_time
-            << t.location;
+            << t.location
+            << t.fee_rate_time
+            << t.fee_rate
+            << t.confirmed
+            << t.confirmed_time
+            ;
 
          if( !t.producer_authority.has_value() ) return ds;
 
@@ -253,6 +322,10 @@ namespace eosiosystem {
                    >> t.unpaid_blocks
                    >> t.last_claim_time
                    >> t.location
+                   >> t.fee_rate_time
+                   >> t.fee_rate
+                   >> t.confirmed
+                   >> t.confirmed_time
                    >> t.producer_authority;
       }
    };
@@ -311,7 +384,8 @@ namespace eosiosystem {
 
 
    typedef eosio::multi_index< "producers"_n, producer_info,
-                               indexed_by<"prototalvote"_n, const_mem_fun<producer_info, double, &producer_info::by_votes>  >
+                               indexed_by<"prototalvote"_n, const_mem_fun<producer_info, double, &producer_info::by_votes>  >,
+                               indexed_by<"confirmed"_n, const_mem_fun<producer_info, uint64_t, &producer_info::by_confirmed>  >
                              > producers_table;
 
    typedef eosio::multi_index< "producers2"_n, producer_info2 > producers_table2;
@@ -525,6 +599,12 @@ namespace eosiosystem {
       asset stake_change;
    };
 
+   struct feeproperty {
+      asset         base_rate_asset;
+      uint64_t      new_rate_period;
+      uint64_t      out_of_date_time;
+   };
+
    struct powerup_config_resource {
       std::optional<int64_t>        current_weight_ratio;   // Immediately set weight_ratio to this amount. 1x = 10^15. 0.01x = 10^13.
                                                             //    Do not specify to preserve the existing setting or use the default;
@@ -662,6 +742,8 @@ namespace eosiosystem {
          voters_table             _voters;
          producers_table          _producers;
          producers_table2         _producers2;
+         del_producer_vote_table  _prodstodelete;
+         del_producer_result_table _prodsdelinfo;
          global_state_singleton   _global;
          global_state2_singleton  _global2;
          global_state3_singleton  _global3;
@@ -681,6 +763,7 @@ namespace eosiosystem {
       public:
          static constexpr eosio::name active_permission{"active"_n};
          static constexpr eosio::name token_account{"eosio.token"_n};
+         static constexpr eosio::name fee_account{"dcd.feebank"_n};
          static constexpr eosio::name ram_account{"eosio.ram"_n};
          static constexpr eosio::name ramfee_account{"eosio.ramfee"_n};
          static constexpr eosio::name stake_account{"eosio.stake"_n};
@@ -733,7 +816,10 @@ namespace eosiosystem {
          [[eosio::action]]
          void onblock( ignore<block_header> header );
 
-         /**
+         [[eosio::action]]
+         void setfeeprop(const name account, 
+                      const feeproperty fee_property);
+          /**
           * Set account limits action sets the resource limits of an account
           *
           * @param account - name of the account whose resource limit to be set,
@@ -1067,6 +1153,9 @@ namespace eosiosystem {
          void undelegatebw( const name& from, const name& receiver,
                             const asset& unstake_net_quantity, const asset& unstake_cpu_quantity );
 
+         [[eosio::action]]
+         void onfee( const name& actor, const asset& fee );
+
          /**
           * Buy ram action, increases receiver's ram quota based upon current price and quantity of
           * tokens provided. An inline transfer from receiver to system contract of
@@ -1153,6 +1242,22 @@ namespace eosiosystem {
          void unregprod( const name& producer );
 
          /**
+          * Unregister producer action, deactivates the block producer with account name `producer`.
+          *
+          * Deactivate the block producer with account name `producer`.
+          * @param producer
+          * @param fee_rate 
+          */
+         [[eosio::action]]
+         void setrateprod( const name& producer , const double fee_rate);
+
+         [[eosio::action]]
+         void voteprod( const name& producer, const name& prod_to_delete, bool vote);
+
+         [[eosio::action]]
+         void setprodscnt( uint16_t count);
+
+         /**
           * Set ram action sets the ram supply.
           * @param max_ram_size - the amount of ram supply to set.
           */
@@ -1168,6 +1273,28 @@ namespace eosiosystem {
           */
          [[eosio::action]]
          void setramrate( uint16_t bytes_per_block );
+
+	  /**
+          * Confirm producer action.
+          *
+          * @param producer - the name of confirmed producer.
+          *
+          */
+         [[eosio::action]]
+         void confirmprod(const name& producer );
+
+         /**
+          * Propose producer to delete action.
+          *
+          * @param to_delete - the name of producer to delete.
+          * @param to_replace- the name of producer to replace.
+          *
+          */
+         [[eosio::action]]
+         void delproducer(const name& to_delete, const name& to_replace );
+  
+         [[eosio::action]]
+         void delvoting(const name& to_delete);
 
          /**
           * Vote producer action, votes for a set of producers. This action updates the list of `producers` voted for,
@@ -1361,8 +1488,11 @@ namespace eosiosystem {
          using regproducer_action = eosio::action_wrapper<"regproducer"_n, &system_contract::regproducer>;
          using regproducer2_action = eosio::action_wrapper<"regproducer2"_n, &system_contract::regproducer2>;
          using unregprod_action = eosio::action_wrapper<"unregprod"_n, &system_contract::unregprod>;
+         using setrateprod_action = eosio::action_wrapper<"setrateprod"_n, &system_contract::setrateprod>;
          using setram_action = eosio::action_wrapper<"setram"_n, &system_contract::setram>;
          using setramrate_action = eosio::action_wrapper<"setramrate"_n, &system_contract::setramrate>;
+         using confirmprod_action = eosio::action_wrapper<"confirmprod"_n, &system_contract::confirmprod>;
+         using delproducer_action = eosio::action_wrapper<"delproducer"_n, &system_contract::delproducer>;
          using voteproducer_action = eosio::action_wrapper<"voteproducer"_n, &system_contract::voteproducer>;
          using regproxy_action = eosio::action_wrapper<"regproxy"_n, &system_contract::regproxy>;
          using claimrewards_action = eosio::action_wrapper<"claimrewards"_n, &system_contract::claimrewards>;
@@ -1377,6 +1507,7 @@ namespace eosiosystem {
          using cfgpowerup_action = eosio::action_wrapper<"cfgpowerup"_n, &system_contract::cfgpowerup>;
          using powerupexec_action = eosio::action_wrapper<"powerupexec"_n, &system_contract::powerupexec>;
          using powerup_action = eosio::action_wrapper<"powerup"_n, &system_contract::powerup>;
+         using onfee_action = eosio::action_wrapper<"onfee"_n, &system_contract::onfee>;
 
       private:
          // Implementation details:
@@ -1438,7 +1569,11 @@ namespace eosiosystem {
          // defined in voting.cpp
          void register_producer( const name& producer, const eosio::block_signing_authority& producer_authority, const std::string& url, uint16_t location );
          void update_elected_producers( const block_timestamp& timestamp );
+         void calculate_new_rate( const block_timestamp& block_time );
          void update_votes( const name& voter, const name& proxy, const std::vector<name>& producers, bool voting );
+         bool all_voted(const name& producer, const del_producer_vote& vote_info);
+         void deloldvotes();
+         void replace_confirmed(const name& prod_to_delete,const name& prod_to_replace);
          void propagate_weight_change( const voter_info& voter );
          double update_producer_votepay_share( const producers_table2::const_iterator& prod_itr,
                                                const time_point& ct,

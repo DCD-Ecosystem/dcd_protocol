@@ -68,6 +68,8 @@ namespace eosio { namespace chain {
       id_type                             id;
       std::optional<block_num_type>       proposed_schedule_block_num;
       shared_producer_authority_schedule  proposed_schedule;
+      std::optional<block_num_type>       proposed_rate_block_num;
+      shared_rate_info                    proposed_rate;
       chain_config                        configuration;
       chain_id_type                       chain_id;
       kv_database_config                  kv_configuration;
@@ -76,6 +78,7 @@ namespace eosio { namespace chain {
      void initalize_from( const legacy::snapshot_global_property_object_v2& legacy, const chain_id_type& chain_id_val, const kv_database_config& kv_config_val, const wasm_config& wasm_config_val ) {
          proposed_schedule_block_num = legacy.proposed_schedule_block_num;
          proposed_schedule = producer_authority_schedule(legacy.proposed_schedule).to_shared(proposed_schedule.producers.get_allocator());
+         proposed_rate_block_num = legacy.proposed_schedule_block_num;
          configuration = legacy.configuration;
          chain_id = chain_id_val;
          kv_configuration = kv_config_val;
@@ -85,6 +88,7 @@ namespace eosio { namespace chain {
       void initalize_from( const legacy::snapshot_global_property_object_v3& legacy, const kv_database_config& kv_config_val, const wasm_config& wasm_config_val ) {
          proposed_schedule_block_num = legacy.proposed_schedule_block_num;
          proposed_schedule = legacy.proposed_schedule.to_shared(proposed_schedule.producers.get_allocator());
+         proposed_rate_block_num = legacy.proposed_schedule_block_num;
          configuration = legacy.configuration;
          chain_id = legacy.chain_id;
          kv_configuration = kv_config_val;
@@ -94,6 +98,7 @@ namespace eosio { namespace chain {
       void initalize_from( const legacy::snapshot_global_property_object_v4& legacy ) {
          proposed_schedule_block_num = legacy.proposed_schedule_block_num;
          proposed_schedule = legacy.proposed_schedule.to_shared(proposed_schedule.producers.get_allocator());
+         proposed_rate_block_num = legacy.proposed_schedule_block_num;
          configuration = legacy.configuration;
          chain_id = legacy.chain_id;
          kv_configuration = legacy.kv_configuration;

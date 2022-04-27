@@ -42,6 +42,7 @@ struct building_block {
 
    pending_block_header_state                 _pending_block_header_state;
    std::optional<producer_authority_schedule> _new_pending_producer_schedule;
+   std::optional<producer_rate_info>	        _new_pending_rate_info;
    vector<digest_type>                        _new_protocol_feature_activations;
    size_t                                     _num_new_protocol_features_that_have_activated = 0;
    deque<transaction_metadata_ptr>            _pending_trx_metas;
@@ -58,6 +59,7 @@ struct assembled_block {
 
    // if the _unsigned_block pre-dates block-signing authorities this may be present.
    std::optional<producer_authority_schedule> _new_producer_authority_cache;
+   std::optional<producer_rate_info>          _new_rate_info;
 };
 
 struct completed_block {
@@ -161,6 +163,7 @@ struct controller_impl {
 //   resource_limits_manager             resource_limits;
    authorization_manager               authorization;
    protocol_feature_manager            protocol_features;
+   transaction_fee_manager             transaction_fee;
    controller::config                  conf;
    const chain_id_type                 chain_id; // read by thread_pool threads, value will not be changed
    std::optional<fc::time_point>       replay_head_time;
@@ -277,6 +280,9 @@ struct controller_impl {
    SET_APP_HANDLER( eosio, eosio, deleteauth );
    SET_APP_HANDLER( eosio, eosio, linkauth );
    SET_APP_HANDLER( eosio, eosio, unlinkauth );
+   SET_APP_HANDLER( eosio, eosio, setfee );
+   SET_APP_HANDLER( eosio, eosio, setfeeforce );
+
 /*
    SET_APP_HANDLER( eosio, eosio, postrecovery );
    SET_APP_HANDLER( eosio, eosio, passrecovery );
@@ -397,6 +403,8 @@ struct controller_impl {
       wlog( "Initializing new blockchain with genesis state" );
       producer_authority_schedule initial_schedule = { 0, { producer_authority{config::system_account_name, block_signing_authority_v0{ 1, {{genesis.initial_key, 1}} } } } };
       legacy::producer_schedule_type initial_legacy_schedule{ 0, {{config::system_account_name, genesis.initial_key}} };
+      producer_rate_info initial_rate_schedule = {0, 1.0};
+
 
       block_header_state genheader;
       genheader.active_schedule                = initial_schedule;
@@ -407,6 +415,11 @@ struct controller_impl {
       genheader.header.action_mroot            = genesis.compute_chain_id();
       genheader.id                             = genheader.header.calculate_id();
       genheader.block_num                      = genheader.header.block_num();
+
+      //Current and pending rates inside the blocks 
+      genheader.active_rate                  = initial_rate_schedule;
+      genheader.pending_rate.rate_info       = initial_rate_schedule;
+      genheader.pending_rate.rate_hash       = fc::sha256::hash(initial_rate_schedule);
 
       head = std::make_shared<block_state>();
       static_cast<block_header_state&>(*head) = genheader;
@@ -1500,6 +1513,34 @@ struct controller_impl {
             });
          }
 
+         if( gpo.proposed_rate_block_num) {
+             if (*gpo.proposed_rate_block_num <= pbhs.dpos_irreversible_blocknum) {
+                if(pbhs.prev_pending_rate.rate_info.rate == 0) {
+                   std::cout << "found proposed rate" << std::endl;
+                  if( !replay_head_time ) {
+                  ilog( "promoting proposed rate (set in block ${proposed_num}) to pending; current block: ${n} lib: ${lib} rate: ${rate} ",
+                     ("proposed_num", *gpo.proposed_rate_block_num)("n", pbhs.block_num)
+                     ("lib", pbhs.dpos_irreversible_blocknum)
+                     ("rate", gpo.proposed_rate.rate ) );
+                  }
+
+                  EOS_ASSERT( gpo.proposed_rate.version == pbhs.active_rate_version + 1,
+                        producer_schedule_exception, "wrong producer rate version specified" );
+
+                  producer_rate_info ri;
+                  ri.version = gpo.proposed_rate.version;
+                  ri.rate = gpo.proposed_rate.rate;
+
+                  std::get<building_block>(pending->_block_stage)._new_pending_rate_info = ri;
+                  db.modify( gpo, [&]( auto& gp ) {
+                     gp.proposed_rate_block_num = std::optional<block_num_type>();
+                     gp.proposed_rate.version=0;
+                     gp.proposed_rate.rate = 0;
+                  });
+               }
+             }
+         }
+
          try {
             transaction_metadata_ptr onbtrx =
                   transaction_metadata::create_no_recover_keys( std::make_shared<packed_transaction>( get_on_block_transaction(), true ),
@@ -1571,6 +1612,7 @@ struct controller_impl {
          calc_trx_merkle ? trx_merkle_fut.get() : std::get<checksum256_type>(bb._trx_mroot_or_receipt_digests),
          action_merkle_fut.get(),
          bb._new_pending_producer_schedule,
+         bb._new_pending_rate_info,
          std::move( bb._new_protocol_feature_activations ),
          protocol_features.get_protocol_feature_set()
       ) );
@@ -1601,7 +1643,9 @@ struct controller_impl {
                                  std::move( bb._pending_block_header_state ),
                                  std::move( bb._pending_trx_metas ),
                                  std::move( block_ptr ),
-                                 std::move( bb._new_pending_producer_schedule )
+                                 std::move( bb._new_pending_producer_schedule ),
+                                 std::move( bb._new_pending_rate_info )
+
                               };
    } FC_CAPTURE_AND_RETHROW() } /// finalize_block
 
@@ -1609,6 +1653,7 @@ struct controller_impl {
     * @post regardless of the success of commit block there is no active pending block
     */
    void commit_block( bool add_to_fork_db ) {
+      transaction_fee.get_new_rate_params(self);
       auto reset_pending_on_exit = fc::make_scoped_exit([this]{ /// TODO: 8 after
          pending.reset(); /// TODO: !!! reset
       });
@@ -2328,6 +2373,16 @@ authorization_manager&         controller::get_mutable_authorization_manager()
    return my->authorization;
 }
 
+const transaction_fee_manager&   controller::get_transaction_fee_manager()const
+{
+   return my->transaction_fee;
+}
+
+transaction_fee_manager&   controller::get_mutable_transaction_fee_manager()
+{
+   return my->transaction_fee;
+}
+
 const protocol_feature_manager& controller::get_protocol_feature_manager()const
 {
    return my->protocol_features;
@@ -2919,6 +2974,99 @@ const producer_authority_schedule&    controller::active_producers()const {
 
    return my->pending->get_pending_block_header_state().active_schedule;
 }
+
+const producer_rate_info&    controller::active_rate()const {
+   if( !(my->pending) )
+   {
+      std::cout  << "Getting active rate" << std::endl;
+      return  my->head->active_rate;
+   }
+   
+   if( std::holds_alternative<completed_block>(my->pending->_block_stage) )
+      return std::get<completed_block>(my->pending->_block_stage)._block_state->active_rate;
+   
+   return my->pending->get_pending_block_header_state().active_rate;
+}
+
+const producer_rate_info& controller::pending_rate()const {
+   if( !(my->pending) )
+      return  my->head->pending_rate.rate_info;
+   
+   if( std::holds_alternative<completed_block>(my->pending->_block_stage) )
+         return std::get<completed_block>(my->pending->_block_stage)._block_state->pending_rate.rate_info;;
+
+   if(std::holds_alternative<assembled_block>(my->pending->_block_stage)) {
+      const auto& new_rate_cache = std::get<assembled_block>(my->pending->_block_stage)._new_rate_info;
+      if( new_rate_cache ) {
+         return *new_rate_cache;
+      }
+   }
+
+     const auto& bb = std::get<building_block>(my->pending->_block_stage);
+
+     if( bb._new_pending_rate_info )
+        return *bb._new_pending_rate_info;
+
+     return bb._pending_block_header_state.prev_pending_rate.rate_info;
+ }
+
+int64_t controller::set_proposed_rate( double new_rate ) {
+   const auto& gpo = get_global_properties();
+   auto cur_block_num = head_block_num() + 1;
+   if( gpo.proposed_rate_block_num ) {
+      if( *gpo.proposed_rate_block_num != cur_block_num )
+         return -1; // there is already a proposed rate set in a previous block, wait for it to become pending
+
+      if( gpo.proposed_rate.rate == new_rate )
+         return -1; // the proposed rate does not change
+   }
+
+   producer_rate_info sch;
+
+   const auto& pending_sch = pending_rate();
+   double old_rate;
+
+   if( pending_sch.rate == 0 ) {
+      const auto& active_sch = active_rate();
+      old_rate = active_sch.rate;
+      sch.version = active_sch.version + 1;
+   } else {
+      old_rate = pending_sch.rate;
+      sch.version = pending_sch.version + 1;
+   }
+
+   if( new_rate == old_rate )
+      return -1; // the producer rate would not change
+
+    sch.rate = new_rate;
+
+    int64_t version = sch.version;
+
+    ilog( "proposed new rate with version ${v}", ("v", version) );
+
+   std::cout<<"NEW RATE SET"<<std::endl;
+    my->db.modify( gpo, [&]( auto& gp ) {
+       gp.proposed_rate_block_num = cur_block_num;
+       gp.proposed_rate.version = sch.version;
+       gp.proposed_rate.rate = sch.rate;
+    });
+   return version;
+}
+
+
+//Transaction fees get proposed rate from the chain
+std::optional<producer_rate_info> controller::proposed_rate()const {
+   const auto& gpo = get_global_properties();
+    if( !gpo.proposed_rate_block_num )
+       return std::optional<producer_rate_info>();
+
+   producer_rate_info res;
+   res.version = gpo.proposed_rate.version;
+   res.rate = gpo.proposed_rate.rate;
+
+   return res;
+}
+
 
 const producer_authority_schedule& controller::pending_producers()const {
    if( !(my->pending) )

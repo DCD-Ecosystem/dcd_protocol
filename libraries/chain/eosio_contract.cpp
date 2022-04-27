@@ -19,6 +19,7 @@
 
 #include <eosio/chain/authorization_manager.hpp>
 //#include <eosio/chain/resource_limits.hpp>
+#include <eosio/chain/transaction_fee_manager.hpp>
 
 namespace eosio { namespace chain {
 
@@ -458,5 +459,44 @@ void apply_eosio_canceldelay(apply_context& context) {
 
    context.cancel_deferred_transaction(transaction_id_to_sender_id(trx_id), account_name());
 }
+
+void apply_eosio_setfee(apply_context& context) {
+   auto &db = context.db;
+   auto act = context.get_action().data_as<setfee>();
+
+   context.require_authorization(config::system_account_name);
+
+   asset base_rate_asset = context.control.get_transaction_fee_manager().get_base_rate_asset(context.control);
+
+   EOS_ASSERT( act.fee.get_symbol() == base_rate_asset.get_symbol(), account_query_exception, "Wrong base rate asset symbol");
+
+   const auto key = boost::make_tuple(act.account, act.action); 
+   
+   auto fee_old = db.find<chain::action_fee_object, chain::by_action_name>(key);
+   
+   if(fee_old == nullptr) {
+      db.create<chain::action_fee_object>([&]( auto& fee_obj ) {
+         fee_obj.account = act.account;
+         fee_obj.message_type = act.action;
+         fee_obj.fee = act.fee;
+      });
+   } else {
+      db.modify<chain::action_fee_object>( *fee_old, [&]( auto& fee_obj ) {
+         fee_obj.fee = act.fee;
+      });
+   }
+}
+
+void apply_eosio_setfeeforce(apply_context& context) {
+
+   auto &db = context.db;
+   auto act = context.get_action().data_as<setfeeforce>();
+
+   context.require_authorization(config::system_account_name);
+   context.control.set_proposed_rate(act.new_rate);
+}
+
+
+
 
 } } // namespace eosio::chain

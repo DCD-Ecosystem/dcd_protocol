@@ -2778,7 +2778,12 @@ read_only::get_producers_result read_only::get_producers( const read_only::get_p
          ("owner", p.producer_name)
          ("producer_authority", p.authority)
          ("url", "")
-         ("total_votes", 0.0f);
+         ("total_votes", 0.0f)
+         ("fee_rate_time", "")
+         ("fee_rate", "")
+         ("confirmed", "")
+         ("confirmed_time", "");
+
 
       // detect a legacy key and maintain API compatibility for those entries
       if (std::holds_alternative<block_signing_authority_v0>(p.authority)) {
@@ -2804,6 +2809,50 @@ read_only::get_producer_schedule_result read_only::get_producer_schedule( const 
       to_variant(*proposed, result.proposed);
    return result;
 }
+
+/// Fee related calls 
+read_only::get_rate_schedule_result read_only::get_rate_schedule( const read_only::get_rate_schedule_params& p ) const {
+   read_only::get_rate_schedule_result result;
+   to_variant(db.active_rate(), result.active);
+   if(db.pending_rate().rate)
+      to_variant(db.pending_rate(), result.pending);
+   auto proposed = db.proposed_rate();
+   if(proposed && proposed->rate)
+      to_variant(*proposed, result.proposed);
+   return result;
+}
+
+read_only::get_action_fee_result read_only::get_action_fee( const get_action_fee_params& params )const {
+   auto res = db.get_transaction_fee_manager().get_action_fee(db, params.account, params.action);
+   get_action_fee_result result;
+   result.core_fee = res.core_fee;
+   result.usd_fee = res.usd_fee;
+   result.rate = res.cur_rate;
+   return result;
+}
+
+read_only::get_required_fee_result read_only::get_required_fee( const get_required_fee_params& params )const {
+   transaction pretty_input;
+   from_variant(params.transaction, pretty_input);
+   auto required_fee = db.get_transaction_fee_manager().get_required_fee(db, pretty_input);
+   get_required_fee_result result;
+   result.required_fee = required_fee;
+   return result;
+}
+
+read_only::get_fee_rate_result read_only::get_fee_rate(const get_fee_rate_params& params)const {
+   auto res = db.get_transaction_fee_manager().get_fee_rate(db);
+   get_fee_rate_result result;
+   result.base_rate_asset = res.base_rate_asset;
+   result.new_rate_period = res.new_rate_period;
+   result.out_of_date_time = res.out_of_date_time;
+   result.prev_rate = res.prev_rate;
+   result.cur_rate = res.cur_rate;
+   result.cur_rate_time = res.cur_rate_time;
+   result.cur_rate_producers = res.cur_rate_producers;
+   return result;
+}
+
 
 template<typename Api>
 struct resolver_factory {

@@ -3,7 +3,10 @@
 #include <eosio/chain/types.hpp>
 #include <eosio/chain/webassembly/common.hpp>
 #include <fc/crypto/sha1.hpp>
-#include <boost/hana/string.hpp>
+
+
+
+
 
 namespace eosio { namespace chain {
 class apply_context;
@@ -198,6 +201,14 @@ namespace webassembly {
          int64_t set_proposed_producers_ex(uint64_t packed_producer_format, legacy_span<const char> packed_producer_schedule);
 
          /**
+         //TODO dcd_protocol
+         */
+         int64_t set_proposed_rate( legacy_span<char> new_rate, uint32_t datalen );
+         
+
+
+
+         /**
           * Retrieve the blockchain config parameters.
           *
           * @ingroup privileged
@@ -305,6 +316,8 @@ namespace webassembly {
           * @param is_priv - privileged status (true or false).
          */
          void set_privileged(account_name account, bool is_priv);
+
+         //void force_proposed_rate(double rate);
 
          // softfloat api
          float _eosio_f32_add(float, float) const;

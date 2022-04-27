@@ -69,6 +69,7 @@ namespace eosio { namespace chain {
                                                     bool skip_recording );
 
          void init_for_deferred_trx( fc::time_point published );
+         void set_fee_payer(const transaction& trx);
 
          void exec();
          void finalize();
@@ -120,6 +121,9 @@ namespace eosio { namespace chain {
 
          friend struct controller_impl;
          friend class apply_context;
+
+         bool need_fee_action(const transaction& trx) const;
+         void schedule_fee_action(const transaction& trx);
 
          //void add_ram_usage( account_name account, int64_t ram_delta, const storage_usage_trace& trace );
 
@@ -179,7 +183,6 @@ namespace eosio { namespace chain {
          int64_t                       billed_cpu_time_us = 0;
          uint32_t                      subjective_cpu_bill_us = 0;
          bool                          explicit_billed_cpu_time = false;
-
          transaction_checktime_timer   transaction_timer;
 
          /// kept to track ids of action_traces push via this transaction

@@ -175,6 +175,7 @@ namespace eosio { namespace chain { namespace webassembly {
       return set_proposed_producers_common( context, std::move(producers), true );
    }
 
+   //Set proposed rate call from system contract
    int64_t interface::set_proposed_producers_ex( uint64_t packed_producer_format, legacy_span<const char> packed_producer_schedule) {
       if (packed_producer_format == 0) {
          return set_proposed_producers(std::move(packed_producer_schedule));

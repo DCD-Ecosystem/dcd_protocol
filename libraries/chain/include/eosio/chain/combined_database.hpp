@@ -46,7 +46,7 @@ namespace eosio { namespace chain {
          index_set<account_index, account_metadata_index, /*account_ram_correction_index,*/ global_property_multi_index,
                    protocol_state_multi_index, dynamic_global_property_multi_index, block_summary_multi_index,
                    transaction_multi_index, generated_transaction_multi_index, table_id_multi_index, code_index,
-                   database_header_multi_index, kv_db_config_index>;
+                   database_header_multi_index, kv_db_config_index, action_fee_object_index>;
 
    using contract_database_index_set = index_set<key_value_index, index64_index, index128_index, index256_index,
                                                  index_double_index, index_long_double_index>;

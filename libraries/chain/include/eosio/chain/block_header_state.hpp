@@ -53,6 +53,7 @@ namespace detail {
       uint32_t                          dpos_proposed_irreversible_blocknum = 0;
       uint32_t                          dpos_irreversible_blocknum = 0;
       producer_authority_schedule       active_schedule;
+      producer_rate_info                active_rate;
       incremental_merkle                blockroot_merkle;
       flat_map<account_name,uint32_t>   producer_to_last_produced;
       flat_map<account_name,uint32_t>   producer_to_last_implied_irb;
@@ -66,6 +67,12 @@ namespace detail {
       producer_authority_schedule       schedule;
    };
 
+   struct rate_info {
+      uint32_t                          rate_lib_num = 0; /// last irr block num
+      digest_type                       rate_hash;
+      producer_rate_info                rate_info;
+   };
+
    bool is_builtin_activated( const protocol_feature_activation_set_ptr& pfa,
                               const protocol_feature_set& pfs,
                               builtin_protocol_feature_t feature_codename );
@@ -74,16 +81,20 @@ namespace detail {
 struct pending_block_header_state : public detail::block_header_state_common {
    protocol_feature_activation_set_ptr  prev_activated_protocol_features;
    detail::schedule_info                prev_pending_schedule;
+   detail::rate_info                    prev_pending_rate;
    bool                                 was_pending_promoted = false;
+   bool                                 was_pending_rate_promoted = false;
    block_id_type                        previous;
    account_name                         producer;
    block_timestamp_type                 timestamp;
    uint32_t                             active_schedule_version = 0;
+   uint32_t                             active_rate_version = 0;
    uint16_t                             confirmed = 1;
 
    signed_block_header make_block_header( const checksum256_type& transaction_mroot,
                                           const checksum256_type& action_mroot,
                                           const std::optional<producer_authority_schedule>& new_producers,
+                                          const std::optional<producer_rate_info>& new_rate,
                                           vector<digest_type>&& new_protocol_feature_activations,
                                           const protocol_feature_set& pfs)const;
 
@@ -118,6 +129,7 @@ struct block_header_state : public detail::block_header_state_common {
    block_id_type                        id;
    signed_block_header                  header;
    detail::schedule_info                pending_schedule;
+   detail::rate_info                    pending_rate;
    protocol_feature_activation_set_ptr  activated_protocol_features;
    vector<signature_type>               additional_signatures;
 
@@ -144,6 +156,7 @@ struct block_header_state : public detail::block_header_state_common {
                               bool skip_validate_signee = false )const;
 
    bool                 has_pending_producers()const { return pending_schedule.schedule.producers.size(); }
+   bool                 has_pending_rate()const { return pending_rate.rate_info.rate > 0; }
    uint32_t             calc_dpos_last_irreversible( account_name producer_of_next_block )const;
 
    producer_authority     get_scheduled_producer( block_timestamp_type t )const;
@@ -164,6 +177,7 @@ FC_REFLECT( eosio::chain::detail::block_header_state_common,
             (dpos_proposed_irreversible_blocknum)
             (dpos_irreversible_blocknum)
             (active_schedule)
+            (active_rate)
             (blockroot_merkle)
             (producer_to_last_produced)
             (producer_to_last_implied_irb)
@@ -177,11 +191,18 @@ FC_REFLECT( eosio::chain::detail::schedule_info,
             (schedule)
 )
 
+FC_REFLECT( eosio::chain::detail::rate_info,
+            (rate_lib_num)
+            (rate_hash)
+            (rate_info)
+)
+
 // @ignore header_exts
 FC_REFLECT_DERIVED(  eosio::chain::block_header_state, (eosio::chain::detail::block_header_state_common),
                      (id)
                      (header)
                      (pending_schedule)
+                     (pending_rate)
                      (activated_protocol_features)
                      (additional_signatures)
 )

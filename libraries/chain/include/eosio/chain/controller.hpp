@@ -11,6 +11,7 @@
 #include <eosio/chain/webassembly/eos-vm-oc/config.hpp>
 #include <eosio/chain/block_log_config.hpp>
 #include <eosio/chain/backing_store.hpp>
+#include <eosio/chain/transaction_fee_manager.hpp>
 
 namespace chainbase {
    class database;
@@ -204,6 +205,14 @@ namespace eosio { namespace chain {
          const authorization_manager&          get_authorization_manager()const;
          authorization_manager&                get_mutable_authorization_manager();
          const protocol_feature_manager&       get_protocol_feature_manager()const;
+
+         ///Transaction retrieval and setting functions
+         const transaction_fee_manager&         get_transaction_fee_manager()const;
+         transaction_fee_manager&               get_mutable_transaction_fee_manager();
+         const producer_rate_info&              active_rate()const;
+         const producer_rate_info&              pending_rate()const;
+         std::optional<producer_rate_info>      proposed_rate()const;
+         
          uint32_t                              get_max_nonprivileged_inline_action_size()const;
          const config&                         get_config()const;
 
@@ -296,6 +305,8 @@ namespace eosio { namespace chain {
          bool is_known_unexpired_transaction( const transaction_id_type& id) const;
 
          int64_t set_proposed_producers( vector<producer_authority> producers );
+
+         int64_t set_proposed_rate( double new_rate );
 
          bool light_validation_allowed() const;
          bool skip_auth_check()const;

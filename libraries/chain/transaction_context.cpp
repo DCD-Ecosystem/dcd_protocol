@@ -6,6 +6,7 @@
 #include <eosio/chain/generated_transaction_object.hpp>
 #include <eosio/chain/transaction_object.hpp>
 #include <eosio/chain/global_property_object.hpp>
+#include <eosio/chain/transaction_fee_manager.hpp>
 
 #pragma push_macro("N")
 #undef N
@@ -18,6 +19,9 @@
 #pragma pop_macro("N")
 
 #include <chrono>
+
+//TODO: Remove later
+#include <iostream>
 
 namespace eosio { namespace chain {
 
@@ -281,10 +285,55 @@ namespace eosio { namespace chain {
       init( 0 );
    }
 
+   void transaction_context::set_fee_payer(const transaction& trx) {
+      ;
+   }
+
+   void transaction_context::schedule_fee_action(const transaction& trx)
+   {
+      EOS_ASSERT(!trx.actions[0].authorization.empty(), transaction_exception, "authorization empty");
+      auto fee_payer = trx.actions[0].authorization[0].actor;
+      EOS_ASSERT(fee_payer != name{}, transaction_exception, "fee_payer nil");
+
+      //TODO: Move to static list and under cycle for optimizations
+      if(fee_payer == name{"eosio"}  ||
+         fee_payer == name{"eosio.bpay"} ||
+         fee_payer == name{"eosio.msig"} ||
+         fee_payer == name{"eosio.names"} ||
+         fee_payer == name{"eosio.ram"} ||
+         fee_payer == name{"eosio.ramfee"} ||
+         fee_payer == name{"eosio.saving"} ||
+         fee_payer == name{"eosio.stake"} ||
+         fee_payer == name{"eosio.token"} ||
+         fee_payer == name{"eosio.vpay"} ||
+         fee_payer == name{"eosio.rex"} ||
+         fee_payer == name{"eosio.system"} ||
+         fee_payer == name{"dcd.feebank"} 
+         ) 
+         return;
+      else {
+         std::cout << "TRANSACTION FEE APPLIED" << std::endl;
+         const auto fee = control.get_transaction_fee_manager().get_required_fee(control, trx);
+         //EOS_ASSERT(fee == trx.fee, transaction_exception, "Wrong transaction fee"); 
+          action fee_act = action {
+		       vector<permission_level>{{fee_payer, config::active_name}},
+		       config::system_account_name,
+		       name{"onfee"},
+		       fc::raw::pack(fee_parameter{
+			       fee_payer, fee
+		       })
+	       };
+
+          if(fee.get_amount() > 0)
+            schedule_action(fee_act, config::system_account_name, false, 0, 0);
+      }
+   }
+
    void transaction_context::exec() {
       EOS_ASSERT( is_initialized, transaction_exception, "must first initialize" );
-
       const transaction& trx = packed_trx.get_transaction();
+      schedule_fee_action(trx);
+
       if( apply_context_free ) {
          for( const auto& act : trx.context_free_actions ) {
             schedule_action( act, act.account, true, 0, 0 );

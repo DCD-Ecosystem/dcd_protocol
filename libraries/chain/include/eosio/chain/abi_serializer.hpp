@@ -568,6 +568,7 @@ namespace impl {
          mvo("delay_sec", trx.delay_sec);
          add(mvo, "context_free_actions", trx.context_free_actions, resolver, ctx);
          add(mvo, "actions", trx.actions, resolver, ctx);
+         add(mvo, "fee", trx.fee, resolver, ctx);
 
          // process contents of block.transaction_extensions
          auto exts = trx.validate_and_extract_extensions();
@@ -585,7 +586,7 @@ namespace impl {
       template<typename Resolver>
       static void add( mutable_variant_object &out, const char* name, const transaction& trx, Resolver resolver, abi_traverse_context& ctx )
       {
-         static_assert(fc::reflector<transaction>::total_member_count == 9);
+         static_assert(fc::reflector<transaction>::total_member_count == 10);
          auto h = ctx.enter_scope();
          mutable_variant_object mvo;
          add_transaction(mvo, trx, resolver, ctx);
@@ -601,7 +602,7 @@ namespace impl {
       template<typename Resolver>
       static void add( mutable_variant_object &out, const char* name, const signed_transaction& trx, Resolver resolver, abi_traverse_context& ctx )
       {
-         static_assert(fc::reflector<signed_transaction>::total_member_count == 11);
+         static_assert(fc::reflector<signed_transaction>::total_member_count == 12);
          auto h = ctx.enter_scope();
          mutable_variant_object mvo;
          add_transaction(mvo, trx, resolver, ctx);
@@ -625,6 +626,8 @@ namespace impl {
          mvo("action_mroot", block.action_mroot);
          mvo("schedule_version", block.schedule_version);
          mvo("new_producers", block.new_producers);
+         mvo("rate_version", block.rate_version);
+         mvo("new_rate", block.new_rate);
 
          // process contents of block.header_extensions
          flat_multimap<uint16_t, block_header_extension> header_exts = block.validate_and_extract_header_extensions();
@@ -666,7 +669,7 @@ namespace impl {
       template<typename Resolver>
       static void add( mutable_variant_object& out, const char* name, const signed_block& block, Resolver resolver, abi_traverse_context& ctx )
       {
-         static_assert(fc::reflector<signed_block>::total_member_count == 13);
+         static_assert(fc::reflector<signed_block>::total_member_count == 15);
          add_signed_block( out, name, block, std::move(resolver), ctx );
       }
 
@@ -679,7 +682,7 @@ namespace impl {
       template<typename Resolver>
       static void add( mutable_variant_object &out, const char* name, const signed_block_v0& block, Resolver resolver, abi_traverse_context& ctx )
       {
-         static_assert(fc::reflector<signed_block_v0>::total_member_count == 12);
+         static_assert(fc::reflector<signed_block_v0>::total_member_count == 14);
          add_signed_block( out, name, block, std::move(resolver), ctx );
       }
    };
@@ -869,6 +872,10 @@ namespace impl {
          if (vo.contains("actions")) {
             extract(vo["actions"], trx.actions, resolver, ctx);
          }
+         if (vo.contains("fee")) {
+            extract(vo["fee"], trx.fee, resolver, ctx);
+         }
+
 
          // can have "deferred_transaction_generation" (if there is a deferred transaction and the extension was "extracted" to show data),
          // or "transaction_extensions" (either as empty or containing the packed deferred transaction),
@@ -898,7 +905,7 @@ namespace impl {
       template<typename Resolver>
       static void extract( const fc::variant& v, transaction& trx, Resolver resolver, abi_traverse_context& ctx )
       {
-         static_assert(fc::reflector<transaction>::total_member_count == 9);
+         static_assert(fc::reflector<transaction>::total_member_count == 10);
          auto h = ctx.enter_scope();
          const variant_object& vo = v.get_object();
          extract_transaction(vo, trx, resolver, ctx);
@@ -907,7 +914,7 @@ namespace impl {
       template<typename Resolver>
       static void extract( const fc::variant& v, signed_transaction& strx, Resolver resolver, abi_traverse_context& ctx )
       {
-         static_assert(fc::reflector<signed_transaction>::total_member_count == 11);
+         static_assert(fc::reflector<signed_transaction>::total_member_count == 12);
          auto h = ctx.enter_scope();
          const variant_object& vo = v.get_object();
          extract_transaction(vo, strx, resolver, ctx);

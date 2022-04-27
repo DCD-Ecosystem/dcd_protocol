@@ -337,6 +337,7 @@ REGISTER_INJECTED_HOST_FUNCTION(_eosio_ui64_to_f64);
 
 // producer api
 REGISTER_LEGACY_HOST_FUNCTION(get_active_producers);
+REGISTER_LEGACY_HOST_FUNCTION(set_proposed_rate);
 
 // crypto api
 REGISTER_LEGACY_CF_HOST_FUNCTION(assert_recover_key);

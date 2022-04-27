@@ -1221,6 +1221,8 @@ struct unregister_producer_subcommand {
    }
 };
 
+
+
 struct vote_producer_proxy_subcommand {
    string voter_str;
    string proxy_str;
@@ -1241,6 +1243,7 @@ struct vote_producer_proxy_subcommand {
       });
    }
 };
+
 
 struct vote_producers_subcommand {
    string voter_str;
@@ -1409,6 +1412,29 @@ struct list_producers_subcommand {
    }
 };
 
+struct set_fee_rate_producer_subcommand {
+   string producer_str;
+   string producer_fee_rate_str;
+
+   set_fee_rate_producer_subcommand(CLI::App* actionRoot) {
+      auto set_fee_rate_producer = actionRoot->add_subcommand("setrateprod", localized("Set fee rate for an existing producer"));
+      set_fee_rate_producer->add_option("account", producer_str, localized("The producer account"))->required();
+      set_fee_rate_producer->add_option("fee_rate", producer_fee_rate_str, localized("The producer fee rate"))->required();
+      add_standard_transaction_options(set_fee_rate_producer, "account@active");
+
+      set_fee_rate_producer->callback([this] {
+         fc::variant act_payload = fc::mutable_variant_object()
+                  ("producer", producer_str)
+                  ("fee_rate", producer_fee_rate_str);
+
+         auto accountPermissions = get_account_permissions(tx_permission, {name(producer_str), config::active_name});
+         send_actions({create_action(accountPermissions, config::system_account_name, "setrateprod"_n, act_payload)}, signing_keys_opt.get_keys());
+
+      });
+   }
+};
+
+
 struct get_schedule_subcommand {
    bool print_json = false;
 
@@ -1441,6 +1467,36 @@ struct get_schedule_subcommand {
       get_schedule->add_flag("--json,-j", print_json, localized("Output in JSON format"));
       get_schedule->callback([this] {
          auto result = call(get_schedule_func, fc::mutable_variant_object());
+         if ( print_json ) {
+            std::cout << fc::json::to_pretty_string(result) << std::endl;
+            return;
+         }
+         print("active", result["active"]);
+         print("pending", result["pending"]);
+         print("proposed", result["proposed"]);
+      });
+   }
+};
+
+//Transaction fee get rate
+struct get_rate_subcommand {
+   bool print_json = false;
+
+   void print(const char* name, const fc::variant& schedule) {
+      if (schedule.is_null()) {
+         printf("%s schedule empty\n\n", name);
+         return;
+      }
+      printf("%s schedule version %s\n", name, schedule["version"].as_string().c_str());
+      printf("Rate: %-13s ", schedule["rate"].as_string().c_str() );
+      printf("\n");
+   }
+
+   get_rate_subcommand(CLI::App* actionRoot) {
+      auto get_schedule = actionRoot->add_subcommand("schedule_rate", localized("Retrieve the rate schedule"));
+      get_schedule->add_flag("--json,-j", print_json, localized("Output in JSON format"));
+      get_schedule->callback([this] {
+         auto result = call(get_rate_func, fc::mutable_variant_object());
          if ( print_json ) {
             std::cout << fc::json::to_pretty_string(result) << std::endl;
             return;
@@ -2201,6 +2257,66 @@ struct closerex_subcommand {
       });
    }
 };
+
+/* 
+   Direct set fee for action request
+*/
+struct set_fee_subcommand {
+   string account;
+   string action_to_set_fee;
+   string fee_to_set;
+   const name act_name{ "setfee"_n };
+
+
+set_fee_subcommand( CLI::App* actionRoot ) {
+      auto set_fee_subcmd = actionRoot->add_subcommand("setfee", localized("Set Fee need to action"));
+      set_fee_subcmd->add_option("account", account, localized("The account to set the Fee for"))->required();
+      set_fee_subcmd->add_option("action", action_to_set_fee, localized("The action to set the Fee for"))->required();
+      set_fee_subcmd->add_option("fee", fee_to_set, localized("The Fee to set to action"))->required();
+      add_standard_transaction_options(set_fee_subcmd);
+
+      set_fee_subcmd->callback([this] {
+         asset a;
+         a = a.from_string(fee_to_set);
+
+         const auto permission_account = config::system_account_name;
+
+         fc::variant setfee_data = fc::mutable_variant_object()
+               ("account", string_to_name( account ))
+               ("action", action_to_set_fee)
+               ("fee", a);
+
+         send_actions({create_action({permission_level{ permission_account, config::active_name }}, config::system_account_name, act_name, setfee_data )});
+      });
+   }
+};
+
+
+/* 
+   Direct set fee  rate request to the current node
+*/
+struct set_feerateforce_subcommand {
+   string new_rate_to_set;
+   const name act_name{ "setfeeforce"_n };
+
+set_feerateforce_subcommand( CLI::App* actionRoot ) {
+      auto set_feerateforce_subcmd = actionRoot->add_subcommand("setfeeforce", localized("Force the fee rate"));
+      set_feerateforce_subcmd->add_option("new_rate", new_rate_to_set, localized("The new rate to set"))->required();
+      add_standard_transaction_options(set_feerateforce_subcmd);
+
+      set_feerateforce_subcmd->callback([this] {
+         double a;
+         a = std::stod(new_rate_to_set);
+         const auto permission_account = config::system_account_name;
+
+         fc::variant setfeeforce_data = fc::mutable_variant_object()
+               ("new_rate", a);
+         send_actions({create_action({permission_level{ permission_account, config::active_name }}, config::system_account_name, act_name, setfeeforce_data )});
+      });
+   }
+};
+
+
 
 void get_account( const string& accountName, const string& coresym, bool json_format ) {
    fc::variant json;
@@ -3012,6 +3128,27 @@ int main( int argc, char** argv ) {
       std::cout << fc::json::to_pretty_string(call(get_transaction_func, arg)) << std::endl;
    });
 
+   /// Get fee subcommand
+   string get_fee_account_name_str;
+   string get_fee_action_name_str;
+   auto getActionFee = get->add_subcommand("fee", localized("Get fee of action account name and action name"));
+   getActionFee->add_option("account", get_fee_account_name_str, localized("Action account"))->required();
+   getActionFee->add_option("action", get_fee_action_name_str, localized("Action name"))->required();
+   getActionFee->callback([&] {
+      auto result = call(get_action_fee, fc::mutable_variant_object("json", false)
+         ("account", get_fee_account_name_str)
+         ("action", get_fee_action_name_str)
+      );
+      std::cout << fc::json::to_pretty_string(result) << std::endl;
+   });
+
+   // get fee rate information
+   auto getFeeRateInformation = get->add_subcommand("fee_rate_info", localized("Get fee rate information"));
+   getFeeRateInformation->callback([&] {
+      auto result = call(get_fee_rate, fc::mutable_variant_object("json", false));
+      std::cout << fc::json::to_pretty_string(result) << std::endl;
+   });
+
    // get actions
    string account_name;
    string skip_seq_str;
@@ -3111,6 +3248,8 @@ int main( int argc, char** argv ) {
 
    auto getSchedule = get_schedule_subcommand{get};
    auto getTransactionId = get_transaction_id_subcommand{get};
+   //Get fee rate 
+   auto getRate = get_rate_subcommand{get};
 
    auto getCmd = get->add_subcommand("best", localized("Display message based on account name"));
    getCmd->add_option("name", accountName, localized("The name of the account to use"))->required();
@@ -3332,6 +3471,9 @@ int main( int argc, char** argv ) {
    abiSubcommand->add_option("abi-file", abiPath, localized("The path containing the contract ABI"));//->required();
    abiSubcommand->add_flag( "-c,--clear", contract_clear, localized("Remove abi on an account"));
    abiSubcommand->add_flag( "--suppress-duplicate-check", suppress_duplicate_check, localized("Don't check for duplicate"));
+
+   auto setFeeSubcommand = set_fee_subcommand(setSubcommand);
+   auto setfeeforceSubcommand = set_feerateforce_subcommand(setSubcommand);
 
    auto contractSubcommand = setSubcommand->add_subcommand("contract", localized("Create or update the contract on an account"));
    contractSubcommand->add_option("account", account, localized("The account to publish a contract for"))
@@ -4321,9 +4463,11 @@ int main( int argc, char** argv ) {
    auto voteProducer = system->add_subcommand("voteproducer", localized("Vote for a producer"));
    voteProducer->require_subcommand();
    auto voteProxy = vote_producer_proxy_subcommand(voteProducer);
+
    auto voteProducers = vote_producers_subcommand(voteProducer);
    auto approveProducer = approve_producer_subcommand(voteProducer);
    auto unapproveProducer = unapprove_producer_subcommand(voteProducer);
+   auto setfeerateProducer = set_fee_rate_producer_subcommand(system);
 
    auto listProducers = list_producers_subcommand(system);
 
