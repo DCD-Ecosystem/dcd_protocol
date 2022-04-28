@@ -50,9 +50,9 @@ class Node(object):
         self.missingTransaction=False
         self.popenProc=None           # initial process is started by launcher, this will only be set on relaunch
 
-    def eosClientArgs(self):
+    def dcdClientArgs(self):
         walletArgs=" " + self.walletMgr.getWalletEndpointArgs() if self.walletMgr is not None else ""
-        return self.endpointArgs + walletArgs + " " + Utils.MiscEosClientArgs
+        return self.endpointArgs + walletArgs + " " + Utils.MiscDcdClientArgs
 
     def __str__(self):
         return "Host: %s, Port:%d, NodeNum:%s, Pid:%s" % (self.host, self.port, self.nodeId, self.pid)
@@ -213,7 +213,7 @@ class Node(object):
             assert(account)
             assert(isinstance(account, Account))
             if Utils.Debug: Utils.Print("Validating account %s" % (account.name))
-            accountInfo=self.getEosAccount(account.name, exitOnError=True)
+            accountInfo=self.getDcdAccount(account.name, exitOnError=True)
             try:
                 assert(accountInfo["account_name"] == account.name)
             except (AssertionError, TypeError, KeyError) as _:
@@ -228,7 +228,7 @@ class Node(object):
         numOrId="number" if isinstance(blockNumOrId, int) else "id"
         cmd="%s %s" % (cmdDesc, blockNumOrId)
         msg="(block %s=%s)" % (numOrId, blockNumOrId)
-        return self.processCleosCmd(cmd, cmdDesc, silentErrors=silentErrors, exitOnError=exitOnError, exitMsg=msg)
+        return self.processdcdcliCmd(cmd, cmdDesc, silentErrors=silentErrors, exitOnError=exitOnError, exitMsg=msg)
 
     def isBlockPresent(self, blockNum, blockType=BlockType.head):
         """Does node have head_block_num/last_irreversible_block_num >= blockNum"""
@@ -272,7 +272,7 @@ class Node(object):
         cmd="%s %s" % (cmdDesc, transId)
         msg="(transaction id=%s)" % (transId);
         for i in range(0,(int(60/timeout) - 1)):
-            trans=self.processCleosCmd(cmd, cmdDesc, silentErrors=silentErrors, exitOnError=exitOnErrorForDelayed, exitMsg=msg)
+            trans=self.processdcdcliCmd(cmd, cmdDesc, silentErrors=silentErrors, exitOnError=exitOnErrorForDelayed, exitMsg=msg)
             if trans is not None or not delayedRetry:
                 return trans
             if Utils.Debug: Utils.Print("Could not find transaction with id %s, delay and retry" % (transId))
@@ -280,7 +280,7 @@ class Node(object):
 
         self.missingTransaction=True
         # either it is there or the transaction has timed out
-        return self.processCleosCmd(cmd, cmdDesc, silentErrors=silentErrors, exitOnError=exitOnError, exitMsg=msg)
+        return self.processdcdcliCmd(cmd, cmdDesc, silentErrors=silentErrors, exitOnError=exitOnError, exitMsg=msg)
 
     def isTransInBlock(self, transId, blockId):
         """Check if transId is within block identified by blockId"""
@@ -371,7 +371,7 @@ class Node(object):
             cmdDesc, creatorAccount.name, account.name, account.ownerPublicKey,
             account.activePublicKey, stakeNet, CORE_SYMBOL, stakeCPU, CORE_SYMBOL, buyRAM, CORE_SYMBOL)
         msg="(creator account=%s, account=%s)" % (creatorAccount.name, account.name);
-        trans=self.processCleosCmd(cmd, cmdDesc, silentErrors=False, exitOnError=exitOnError, exitMsg=msg)
+        trans=self.processdcdcliCmd(cmd, cmdDesc, silentErrors=False, exitOnError=exitOnError, exitMsg=msg)
         self.trackCmdTransaction(trans)
         transId=Node.getTransId(trans)
 
@@ -390,7 +390,7 @@ class Node(object):
         cmd="%s -j %s %s %s %s %s" % (
             cmdDesc, signStr, creatorAccount.name, account.name, account.ownerPublicKey, account.activePublicKey)
         msg="(creator account=%s, account=%s)" % (creatorAccount.name, account.name);
-        trans=self.processCleosCmd(cmd, cmdDesc, silentErrors=False, exitOnError=exitOnError, exitMsg=msg)
+        trans=self.processdcdcliCmd(cmd, cmdDesc, silentErrors=False, exitOnError=exitOnError, exitMsg=msg)
         self.trackCmdTransaction(trans)
         transId=Node.getTransId(trans)
 
@@ -402,19 +402,19 @@ class Node(object):
 
         return self.waitForTransBlockIfNeeded(trans, waitForTransBlock, exitOnError=exitOnError)
 
-    def getEosAccount(self, name, exitOnError=False, returnType=ReturnType.json):
+    def getDcdAccount(self, name, exitOnError=False, returnType=ReturnType.json):
         assert(isinstance(name, str))
         cmdDesc="get account"
         jsonFlag="-j" if returnType==ReturnType.json else ""
         cmd="%s %s %s" % (cmdDesc, jsonFlag, name)
-        msg="( getEosAccount(name=%s) )" % (name);
-        return self.processCleosCmd(cmd, cmdDesc, silentErrors=False, exitOnError=exitOnError, exitMsg=msg, returnType=returnType)
+        msg="( getDcdAccount(name=%s) )" % (name);
+        return self.processdcdcliCmd(cmd, cmdDesc, silentErrors=False, exitOnError=exitOnError, exitMsg=msg, returnType=returnType)
 
     def getTable(self, contract, scope, table, exitOnError=False):
         cmdDesc = "get table"
         cmd="%s %s %s %s" % (cmdDesc, contract, scope, table)
         msg="contract=%s, scope=%s, table=%s" % (contract, scope, table);
-        return self.processCleosCmd(cmd, cmdDesc, exitOnError=exitOnError, exitMsg=msg)
+        return self.processdcdcliCmd(cmd, cmdDesc, exitOnError=exitOnError, exitMsg=msg)
 
     def getTableAccountBalance(self, contract, scope):
         assert(isinstance(contract, str))
@@ -438,7 +438,7 @@ class Node(object):
         cmdDesc = "get currency balance"
         cmd="%s %s %s %s" % (cmdDesc, contract, account, symbol)
         msg="contract=%s, account=%s, symbol=%s" % (contract, account, symbol);
-        return self.processCleosCmd(cmd, cmdDesc, exitOnError=exitOnError, exitMsg=msg, returnType=ReturnType.raw)
+        return self.processdcdcliCmd(cmd, cmdDesc, exitOnError=exitOnError, exitMsg=msg, returnType=ReturnType.raw)
 
     def getCurrencyStats(self, contract, symbol=CORE_SYMBOL, exitOnError=False):
         """returns Json output from get currency stats."""
@@ -449,12 +449,12 @@ class Node(object):
         cmdDesc = "get currency stats"
         cmd="%s %s %s" % (cmdDesc, contract, symbol)
         msg="contract=%s, symbol=%s" % (contract, symbol);
-        return self.processCleosCmd(cmd, cmdDesc, exitOnError=exitOnError, exitMsg=msg)
+        return self.processdcdcliCmd(cmd, cmdDesc, exitOnError=exitOnError, exitMsg=msg)
 
     # Verifies account. Returns "get account" json return object
     def verifyAccount(self, account):
         assert(account)
-        ret = self.getEosAccount(account.name)
+        ret = self.getDcdAccount(account.name)
         if ret is not None:
             account_name = ret["account_name"]
             if account_name is None:
@@ -464,7 +464,7 @@ class Node(object):
 
     def verifyAccountMdb(self, account):
         assert(account)
-        ret=self.getEosAccountFromDb(account.name)
+        ret=self.getDcdAccountFromDb(account.name)
         if ret is not None:
             account_name=ret["name"]
             if account_name is None:
@@ -577,7 +577,7 @@ class Node(object):
         if expiration is not None:
             expirationStr = "--expiration %d " % (expiration)
         cmd="%s %s -v transfer -j %s %s" % (
-            Utils.EosClientPath, self.eosClientArgs(), dontSendStr, expirationStr)
+            Utils.DcdClientPath, self.dcdClientArgs(), dontSendStr, expirationStr)
         cmdArr=cmd.split()
         # not using __sign_str, since cmdArr messes up the string
         if sign:
@@ -621,7 +621,7 @@ class Node(object):
 
     @staticmethod
     def currencyStrToInt(balanceStr):
-        """Converts currency string of form "12.3456 SYS" to int 123456"""
+        """Converts currency string of form "12.3456 DCD" to int 123456"""
         assert(isinstance(balanceStr, str))
         balanceStr=balanceStr.split()[0]
         #balance=int(decimal.Decimal(balanceStr[1:])*10000)
@@ -631,7 +631,7 @@ class Node(object):
 
     @staticmethod
     def currencyIntToStr(balance, symbol):
-        """Converts currency int of form 123456 to string "12.3456 SYS" where SYS is symbol string"""
+        """Converts currency int of form 123456 to string "12.3456 DCD" where DCD is symbol string"""
         assert(isinstance(balance, int))
         assert(isinstance(symbol, str))
         balanceStr="%.04f %s" % (balance/10000.0, symbol)
@@ -639,7 +639,7 @@ class Node(object):
         return balanceStr
 
     def validateFunds(self, initialBalances, transferAmount, source, accounts):
-        """Validate each account has the expected SYS balance. Validate cumulative balance matches expectedTotal."""
+        """Validate each account has the expected DCD balance. Validate cumulative balance matches expectedTotal."""
         assert(source)
         assert(isinstance(source, Account))
         assert(accounts)
@@ -649,7 +649,7 @@ class Node(object):
         assert(isinstance(initialBalances, dict))
         assert(isinstance(transferAmount, int))
 
-        currentBalances=self.getEosBalances([source] + accounts)
+        currentBalances=self.getDcdBalances([source] + accounts)
         assert(currentBalances)
         assert(isinstance(currentBalances, dict))
         assert(len(initialBalances) == len(currentBalances))
@@ -670,14 +670,14 @@ class Node(object):
                             (expectedInitialBalance, initialBalance, key.name))
                 return False
 
-    def getEosBalances(self, accounts):
+    def getDcdBalances(self, accounts):
         """Returns a dictionary with account balances keyed by accounts"""
         assert(accounts)
         assert(isinstance(accounts, list))
 
         balances={}
         for account in accounts:
-            balance = self.getAccountEosBalance(account.name)
+            balance = self.getAccountDcdBalance(account.name)
             balances[account]=balance
 
         return balances
@@ -687,9 +687,9 @@ class Node(object):
         cmdDesc = "get accounts"
         cmd="%s %s" % (cmdDesc, key)
         msg="key=%s" % (key);
-        return self.processCleosCmd(cmd, cmdDesc, exitOnError=exitOnError, exitMsg=msg)
+        return self.processdcdcliCmd(cmd, cmdDesc, exitOnError=exitOnError, exitMsg=msg)
 
-    # Get actions mapped to an account (cleos get actions)
+    # Get actions mapped to an account (dcdcli get actions)
     def getActions(self, account, pos=-1, offset=-1, exitOnError=False):
         assert(isinstance(account, Account))
         assert(isinstance(pos, int))
@@ -698,7 +698,7 @@ class Node(object):
         cmdDesc = "get actions"
         cmd = "%s -j %s %d %d" % (cmdDesc, account.name, pos, offset)
         msg = "account=%s, pos=%d, offset=%d" % (account.name, pos, offset);
-        return self.processCleosCmd(cmd, cmdDesc, exitOnError=exitOnError, exitMsg=msg)
+        return self.processdcdcliCmd(cmd, cmdDesc, exitOnError=exitOnError, exitMsg=msg)
 
     # Gets accounts mapped to key. Returns array
     def getAccountsArrByKey(self, key):
@@ -712,29 +712,29 @@ class Node(object):
         cmdDesc = "get servants"
         cmd="%s %s" % (cmdDesc, name)
         msg="name=%s" % (name);
-        return self.processCleosCmd(cmd, cmdDesc, exitOnError=exitOnError, exitMsg=msg)
+        return self.processdcdcliCmd(cmd, cmdDesc, exitOnError=exitOnError, exitMsg=msg)
 
     def getServantsArr(self, name):
         trans=self.getServants(name, exitOnError=True)
         servants=trans["controlled_accounts"]
         return servants
 
-    def getAccountEosBalanceStr(self, scope):
-        """Returns SYS currency0000 account balance from cleos get table command. Returned balance is string following syntax "98.0311 SYS". """
+    def getAccountDcdBalanceStr(self, scope):
+        """Returns DCD currency0000 account balance from dcdcli get table command. Returned balance is string following syntax "98.0311 DCD". """
         assert isinstance(scope, str)
-        amount=self.getTableAccountBalance("eosio.token", scope)
-        if Utils.Debug: Utils.Print("getNodeAccountEosBalance %s %s" % (scope, amount))
+        amount=self.getTableAccountBalance("dcd.token", scope)
+        if Utils.Debug: Utils.Print("getNodeAccountDcdBalance %s %s" % (scope, amount))
         assert isinstance(amount, str)
         return amount
 
-    def getAccountEosBalance(self, scope):
-        """Returns SYS currency0000 account balance from cleos get table command. Returned balance is an integer e.g. 980311. """
-        balanceStr=self.getAccountEosBalanceStr(scope)
+    def getAccountDcdBalance(self, scope):
+        """Returns DCD currency0000 account balance from dcdcli get table command. Returned balance is an integer e.g. 980311. """
+        balanceStr=self.getAccountDcdBalanceStr(scope)
         balance=Node.currencyStrToInt(balanceStr)
         return balance
 
     def getAccountCodeHash(self, account):
-        cmd="%s %s get code %s" % (Utils.EosClientPath, self.eosClientArgs(), account)
+        cmd="%s %s get code %s" % (Utils.DcdClientPath, self.dcdClientArgs(), account)
         if Utils.Debug: Utils.Print("cmd: %s" % (cmd))
         start=time.perf_counter()
         try:
@@ -760,7 +760,7 @@ class Node(object):
     # publish contract and return transaction as json object
     def publishContract(self, account, contractDir, wasmFile, abiFile, waitForTransBlock=False, shouldFail=False, sign=False):
         signStr = Node.__sign_str(sign, [ account.activePublicKey ])
-        cmd="%s %s -v set contract -j %s %s %s" % (Utils.EosClientPath, self.eosClientArgs(), signStr, account.name, contractDir)
+        cmd="%s %s -v set contract -j %s %s %s" % (Utils.DcdClientPath, self.dcdClientArgs(), signStr, account.name, contractDir)
         cmd += "" if wasmFile is None else (" "+ wasmFile)
         cmd += "" if abiFile is None else (" " + abiFile)
         if Utils.Debug: Utils.Print("cmd: %s" % (cmd))
@@ -820,7 +820,7 @@ class Node(object):
 
     # returns tuple with indication if transaction was successfully sent and either the transaction or else the exception output
     def pushMessage(self, account, action, data, opts, silentErrors=False, signatures=None):
-        cmd="%s %s push action -j %s %s" % (Utils.EosClientPath, self.eosClientArgs(), account, action)
+        cmd="%s %s push action -j %s %s" % (Utils.DcdClientPath, self.dcdClientArgs(), account, action)
         cmdArr=cmd.split()
         # not using __sign_str, since cmdArr messes up the string
         if signatures is not None:
@@ -851,7 +851,7 @@ class Node(object):
         assert(isinstance(trans, dict))
         if isinstance(permissions, str):
             permissions=[permissions]
-        cmd="%s %s push transaction -j" % (Utils.EosClientPath, self.eosClientArgs())
+        cmd="%s %s push transaction -j" % (Utils.DcdClientPath, self.dcdClientArgs())
         cmdArr=cmd.split()
         transStr = json.dumps(trans, separators=(',', ':'))
         transStr = transStr.replace("'", '"')
@@ -895,7 +895,7 @@ class Node(object):
         signStr = Node.__sign_str(sign, [ account.activePublicKey ])
         cmdDesc="set action permission"
         cmd="%s -j %s %s %s %s %s" % (cmdDesc, signStr, account.name, code.name, pType, requirement)
-        trans=self.processCleosCmd(cmd, cmdDesc, silentErrors=False, exitOnError=exitOnError)
+        trans=self.processdcdcliCmd(cmd, cmdDesc, silentErrors=False, exitOnError=exitOnError)
         self.trackCmdTransaction(trans)
 
         return self.waitForTransBlockIfNeeded(trans, waitForTransBlock, exitOnError=exitOnError)
@@ -910,7 +910,7 @@ class Node(object):
         cmd="%s -j %s %s %s \"%s %s\" \"%s %s\" %s" % (
             cmdDesc, signStr, fromAccount.name, toAccount.name, netQuantity, CORE_SYMBOL, cpuQuantity, CORE_SYMBOL, transferStr)
         msg="fromAccount=%s, toAccount=%s" % (fromAccount.name, toAccount.name);
-        trans=self.processCleosCmd(cmd, cmdDesc, exitOnError=exitOnError, exitMsg=msg)
+        trans=self.processdcdcliCmd(cmd, cmdDesc, exitOnError=exitOnError, exitMsg=msg)
         self.trackCmdTransaction(trans, reportStatus=reportStatus)
 
         return self.waitForTransBlockIfNeeded(trans, waitForTransBlock, exitOnError=exitOnError)
@@ -924,7 +924,7 @@ class Node(object):
         cmd="%s -j %s %s %s \"%s %s\" \"%s %s\"" % (
             cmdDesc, signStr, fromAccount.name, toAccount.name, netQuantity, CORE_SYMBOL, cpuQuantity, CORE_SYMBOL)
         msg="fromAccount=%s, toAccount=%s" % (fromAccount.name, toAccount.name);
-        trans=self.processCleosCmd(cmd, cmdDesc, exitOnError=exitOnError, exitMsg=msg)
+        trans=self.processdcdcliCmd(cmd, cmdDesc, exitOnError=exitOnError, exitMsg=msg)
         self.trackCmdTransaction(trans)
 
         return self.waitForTransBlockIfNeeded(trans, waitForTransBlock, exitOnError=exitOnError)
@@ -935,7 +935,7 @@ class Node(object):
         cmd="%s -j %s %s %s %s %s" % (
             cmdDesc, signStr, producer.name, producer.activePublicKey, url, location)
         msg="producer=%s" % (producer.name);
-        trans=self.processCleosCmd(cmd, cmdDesc, exitOnError=exitOnError, exitMsg=msg)
+        trans=self.processdcdcliCmd(cmd, cmdDesc, exitOnError=exitOnError, exitMsg=msg)
         self.trackCmdTransaction(trans)
 
         return self.waitForTransBlockIfNeeded(trans, waitForTransBlock, exitOnError=exitOnError)
@@ -946,14 +946,14 @@ class Node(object):
         cmd="%s -j %s %s %s" % (
             cmdDesc, signStr, account.name, " ".join(producers))
         msg="account=%s, producers=[ %s ]" % (account.name, ", ".join(producers));
-        trans=self.processCleosCmd(cmd, cmdDesc, exitOnError=exitOnError, exitMsg=msg)
+        trans=self.processdcdcliCmd(cmd, cmdDesc, exitOnError=exitOnError, exitMsg=msg)
         self.trackCmdTransaction(trans)
 
         return self.waitForTransBlockIfNeeded(trans, waitForTransBlock, exitOnError=exitOnError)
 
-    def processCleosCmd(self, cmd, cmdDesc, silentErrors=True, exitOnError=False, exitMsg=None, returnType=ReturnType.json):
+    def processdcdcliCmd(self, cmd, cmdDesc, silentErrors=True, exitOnError=False, exitMsg=None, returnType=ReturnType.json):
         assert(isinstance(returnType, ReturnType))
-        cmd="%s %s %s" % (Utils.EosClientPath, self.eosClientArgs(), cmd)
+        cmd="%s %s %s" % (Utils.DcdClientPath, self.dcdClientArgs(), cmd)
         if Utils.Debug: Utils.Print("cmd: %s" % (cmd))
         if exitMsg is not None:
             exitMsg="Context: " + exitMsg
@@ -1071,7 +1071,7 @@ class Node(object):
 
     def getInfo(self, silentErrors=False, exitOnError=False):
         cmdDesc = "get info"
-        info=self.processCleosCmd(cmdDesc, cmdDesc, silentErrors=silentErrors, exitOnError=exitOnError)
+        info=self.processdcdcliCmd(cmdDesc, cmdDesc, silentErrors=silentErrors, exitOnError=exitOnError)
         if info is None:
             self.infoValid=False
         else:
@@ -1086,7 +1086,7 @@ class Node(object):
         return False if info is None else True
 
     def getHeadBlockNum(self):
-        """returns head block number(string) as returned by cleos get info."""
+        """returns head block number(string) as returned by dcdcli get info."""
         info = self.getInfo(exitOnError=True)
         if info is not None:
             headBlockNumTag = "head_block_num"
@@ -1229,8 +1229,8 @@ class Node(object):
 
 
     # pylint: disable=too-many-locals
-    # If nodeosPath is equal to None, it will use the existing nodeos path
-    def relaunch(self, chainArg=None, newChain=False, skipGenesis=True, timeout=Utils.systemWaitTimeout, addSwapFlags=None, cachePopen=False, nodeosPath=None):
+    # If dcdnodePath is equal to None, it will use the existing dcdnode path
+    def relaunch(self, chainArg=None, newChain=False, skipGenesis=True, timeout=Utils.systemWaitTimeout, addSwapFlags=None, cachePopen=False, dcdnodePath=None):
 
         assert(self.pid is None)
         assert(self.killed)
@@ -1239,7 +1239,7 @@ class Node(object):
 
         cmdArr=[]
         splittedCmd=self.cmd.split()
-        if nodeosPath: splittedCmd[0] = nodeosPath
+        if dcdnodePath: splittedCmd[0] = dcdnodePath
         myCmd=" ".join(splittedCmd)
         toAddOrSwap=copy.deepcopy(addSwapFlags) if addSwapFlags is not None else {}
         if not newChain:
@@ -1448,19 +1448,19 @@ class Node(object):
                     break
         return protocolFeatures
 
-    # Require PREACTIVATE_FEATURE to be activated and require eosio.bios with preactivate_feature
+    # Require PREACTIVATE_FEATURE to be activated and require dcd.bios with preactivate_feature
     def preactivateProtocolFeatures(self, featureDigests:list):
         for digest in featureDigests:
             Utils.Print("push activate action with digest {}".format(digest))
             data="{{\"feature_digest\":{}}}".format(digest)
-            opts="--permission eosio@active"
-            trans=self.pushMessage("eosio", "activate", data, opts)
+            opts="--permission dcd@active"
+            trans=self.pushMessage("dcd", "activate", data, opts)
             if trans is None or not trans[0]:
                 Utils.Print("ERROR: Failed to preactive digest {}".format(digest))
                 return None
         self.waitForHeadToAdvance()
 
-    # Require PREACTIVATE_FEATURE to be activated and require eosio.bios with preactivate_feature
+    # Require PREACTIVATE_FEATURE to be activated and require dcd.bios with preactivate_feature
     def preactivateAllBuiltinProtocolFeature(self):
         allBuiltinProtocolFeatureDigests = self.getAllBuiltinFeatureDigestsToPreactivate()
         self.preactivateProtocolFeatures(allBuiltinProtocolFeatureDigests)
@@ -1468,7 +1468,7 @@ class Node(object):
     def getLatestBlockHeaderState(self):
         headBlockNum = self.getHeadBlockNum()
         cmdDesc = "get block {} --header-state".format(headBlockNum)
-        latestBlockHeaderState = self.processCleosCmd(cmdDesc, cmdDesc)
+        latestBlockHeaderState = self.processdcdcliCmd(cmdDesc, cmdDesc)
         return latestBlockHeaderState
 
     def getActivatedProtocolFeatures(self):
@@ -1505,13 +1505,13 @@ class Node(object):
         if reverse:
             cmd+="--reverse "
         msg="contract=%s" % (contract);
-        return self.processCleosCmd(cmd, cmdDesc, exitOnError=exitOnError, exitMsg=msg)
+        return self.processdcdcliCmd(cmd, cmdDesc, exitOnError=exitOnError, exitMsg=msg)
 
-    # kill all exsiting nodeos in case lingering from previous test
+    # kill all exsiting dcdnode in case lingering from previous test
     @staticmethod
-    def killAllNodeos():
-        # kill the eos server
-        cmd="pkill -9 %s" % (Utils.EosServerName)
+    def killAlldcdnode():
+        # kill the dcd server
+        cmd="pkill -9 %s" % (Utils.DcdServerName)
         ret_code = subprocess.call(cmd.split(), stdout=Utils.FNull)
         Utils.Print("cmd: %s, ret:%d" % (cmd, ret_code))
 

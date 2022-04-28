@@ -3,10 +3,10 @@
 
 #include <fc/variant_object.hpp>
 
-#include <eosio/resource_monitor_plugin/file_space_handler.hpp>
+#include <dcd/resource_monitor_plugin/file_space_handler.hpp>
 
-using namespace eosio;
-using namespace eosio::resource_monitor;
+using namespace dcd;
+using namespace dcd::resource_monitor;
 using namespace boost::system;
 
 struct space_handler_fixture {

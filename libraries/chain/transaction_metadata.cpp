@@ -1,8 +1,8 @@
-#include <eosio/chain/transaction_metadata.hpp>
-#include <eosio/chain/thread_utils.hpp>
+#include <dcd/chain/transaction_metadata.hpp>
+#include <dcd/chain/thread_utils.hpp>
 #include <boost/asio/thread_pool.hpp>
 
-namespace eosio { namespace chain {
+namespace dcd { namespace chain {
 
 recover_keys_future transaction_metadata::start_recover_keys( packed_transaction_ptr trx,
                                                               boost::asio::io_context& thread_pool,
@@ -15,7 +15,7 @@ recover_keys_future transaction_metadata::start_recover_keys( packed_transaction
                                    fc::time_point::maximum() : fc::time_point::now() + time_limit;
          const vector<signature_type>& sigs = check_variable_sig_size( trx, max_variable_sig_size );
          const vector<bytes>* context_free_data = trx->get_context_free_data();
-         EOS_ASSERT( context_free_data, tx_no_context_free_data, "context free data pruned from packed_transaction" );
+         DCD_ASSERT( context_free_data, tx_no_context_free_data, "context free data pruned from packed_transaction" );
          flat_set<public_key_type> recovered_pub_keys;
          const bool allow_duplicate_keys = false;
          fc::microseconds cpu_usage =
@@ -29,4 +29,4 @@ uint32_t transaction_metadata::get_estimated_size() const {
    return sizeof(*this) + _recovered_pub_keys.size() * sizeof(public_key_type) + packed_trx()->get_estimated_size();
 }
 
-} } // eosio::chain
+} } // dcd::chain

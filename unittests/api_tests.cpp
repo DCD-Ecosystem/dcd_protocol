@@ -14,14 +14,14 @@
 #include <boost/iostreams/stream_buffer.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
-#include <eosio/testing/tester.hpp>
-#include <eosio/chain/exceptions.hpp>
-#include <eosio/chain/account_object.hpp>
-#include <eosio/chain/contract_table_objects.hpp>
-#include <eosio/chain/block_summary_object.hpp>
-#include <eosio/chain/global_property_object.hpp>
-#include <eosio/chain/generated_transaction_object.hpp>
-#include <eosio/chain/resource_limits.hpp>
+#include <dcd/testing/tester.hpp>
+#include <dcd/chain/exceptions.hpp>
+#include <dcd/chain/account_object.hpp>
+#include <dcd/chain/contract_table_objects.hpp>
+#include <dcd/chain/block_summary_object.hpp>
+#include <dcd/chain/global_property_object.hpp>
+#include <dcd/chain/generated_transaction_object.hpp>
+//#include <dcd/chain/resource_limits.hpp>
 
 #include <fc/crypto/digest.hpp>
 #include <fc/exception/exception.hpp>
@@ -54,7 +54,7 @@ struct u128_action {
   unsigned __int128  values[3]; //16*3
 };
 
-using namespace eosio::chain::literals;
+using namespace dcd::chain::literals;
 
 // Deferred Transaction Trigger Action
 struct dtt_action {
@@ -83,10 +83,10 @@ FC_REFLECT( u128_action, (values) )
 FC_REFLECT( dtt_action, (payer)(deferred_account)(deferred_action)(permission_name)(delay_sec) )
 FC_REFLECT( invalid_access_action, (code)(val)(index)(store) )
 
-#include <eosio/testing/backing_store_tester_macros.hpp>
+#include <dcd/testing/backing_store_tester_macros.hpp>
 
-using namespace eosio;
-using namespace eosio::testing;
+using namespace dcd;
+using namespace dcd::testing;
 using namespace chain;
 using namespace fc;
 
@@ -94,10 +94,10 @@ using backing_store_ts = boost::mpl::list<TESTER, ROCKSDB_TESTER>;
 
 namespace test_detail {
     struct chainbase_backing_store_type {
-        operator eosio::chain::backing_store_type() const { return eosio::chain::backing_store_type::CHAINBASE; }
+        operator dcd::chain::backing_store_type() const { return dcd::chain::backing_store_type::CHAINBASE; }
     };
     struct rocksdb_backing_store_type {
-        operator eosio::chain::backing_store_type() const { return eosio::chain::backing_store_type::ROCKSDB; }
+        operator dcd::chain::backing_store_type() const { return dcd::chain::backing_store_type::ROCKSDB; }
     };
 }
 using backing_store_type_suite = boost::mpl::list<test_detail::chainbase_backing_store_type, test_detail::rocksdb_backing_store_type>;
@@ -247,7 +247,7 @@ bool is_access_violation(fc::unhandled_exception const & e) {
    try {
       std::rethrow_exception(e.get_inner_exception());
     }
-    catch (const eosio::chain::wasm_execution_error& e) {
+    catch (const dcd::chain::wasm_execution_error& e) {
        return true;
     } catch (...) {
 
@@ -259,7 +259,7 @@ bool is_access_violation(const Runtime::Exception& e) { return true; }
 bool is_assert_exception(fc::assert_exception const & e) { return true; }
 bool is_page_memory_error(page_memory_error const &e) { return true; }
 bool is_unsatisfied_authorization(unsatisfied_authorization const & e) { return true;}
-bool is_wasm_execution_error(eosio::chain::wasm_execution_error const& e) {return true;}
+bool is_wasm_execution_error(dcd::chain::wasm_execution_error const& e) {return true;}
 bool is_tx_net_usage_exceeded(const tx_net_usage_exceeded& e) { return true; }
 bool is_block_net_usage_exceeded(const tx_cpu_usage_exceeded& e) { return true; }
 bool is_tx_cpu_usage_exceeded(const tx_cpu_usage_exceeded& e) { return true; }
@@ -374,10 +374,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(action_receipt_tests, TESTER_T, backing_store_ts) 
       BOOST_CHECK_EQUAL( m.begin()->second, base_test_auth_seq_num + 4 );
    } );
 
-   t.set_code( config::system_account_name, contracts::eosio_bios_wasm() );
+   t.set_code( config::system_account_name, contracts::dcd_bios_wasm() );
 
-   t.set_code( "test"_n, contracts::eosio_bios_wasm() );
-   t.set_abi( "test"_n, contracts::eosio_bios_abi().data() );
+   t.set_code( "test"_n, contracts::dcd_bios_wasm() );
+   t.set_abi( "test"_n, contracts::dcd_bios_abi().data() );
    t.set_code( "test"_n, contracts::payloadless_wasm() );
 
    call_doit_and_check( "test"_n, "test"_n, [&]( const transaction_trace_ptr& res ) {
@@ -414,7 +414,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(action_tests, TESTER_T, backing_store_ts) { try {
 
    //test assert_false
    BOOST_CHECK_EXCEPTION( CALL_TEST_FUNCTION( t, "test_action", "assert_false", {} ),
-                          eosio_assert_message_exception, eosio_assert_message_is("test_action::assert_false") );
+                          dcd_assert_message_exception, dcd_assert_message_is("test_action::assert_false") );
 
    // test read_action_normal
    dummy_action dummy13{DUMMY_ACTION_DEFAULT_A, DUMMY_ACTION_DEFAULT_B, DUMMY_ACTION_DEFAULT_C};
@@ -426,8 +426,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(action_tests, TESTER_T, backing_store_ts) { try {
 
    // test read_action_to_0
    raw_bytes.resize((1<<16)+1);
-   BOOST_CHECK_EXCEPTION(CALL_TEST_FUNCTION( t, "test_action", "read_action_to_0", raw_bytes), eosio::chain::wasm_execution_error,
-         [](const eosio::chain::wasm_execution_error& e) {
+   BOOST_CHECK_EXCEPTION(CALL_TEST_FUNCTION( t, "test_action", "read_action_to_0", raw_bytes), dcd::chain::wasm_execution_error,
+         [](const dcd::chain::wasm_execution_error& e) {
             return expect_assert_message(e, "access violation");
          }
       );
@@ -438,8 +438,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(action_tests, TESTER_T, backing_store_ts) { try {
 
    // test read_action_to_64k
    raw_bytes.resize(3);
-	BOOST_CHECK_EXCEPTION(CALL_TEST_FUNCTION( t, "test_action", "read_action_to_64k", raw_bytes ), eosio::chain::wasm_execution_error,
-         [](const eosio::chain::wasm_execution_error& e) {
+	BOOST_CHECK_EXCEPTION(CALL_TEST_FUNCTION( t, "test_action", "read_action_to_64k", raw_bytes ), dcd::chain::wasm_execution_error,
+         [](const dcd::chain::wasm_execution_error& e) {
             return expect_assert_message(e, "access violation");
          }
       );
@@ -523,7 +523,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(action_tests, TESTER_T, backing_store_ts) { try {
    // test current_time
    t.produce_block();
    BOOST_CHECK_EXCEPTION( CALL_TEST_FUNCTION( t, "test_action", "test_current_time", fc::raw::pack(now) ),
-                          eosio_assert_message_exception, eosio_assert_message_is("tmp == current_time()")     );
+                          dcd_assert_message_exception, dcd_assert_message_is("tmp == current_time()")     );
 
    // test test_current_receiver
    CALL_TEST_FUNCTION( t, "test_action", "test_current_receiver", fc::raw::pack("testapi"_n));
@@ -711,8 +711,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(cf_action_tests, TESTER_T, backing_store_ts) { try
       BOOST_CHECK_EQUAL(ttrace->action_traces[1].act.authorization.size(), 0);
 
       BOOST_CHECK_EXCEPTION( CALL_TEST_FUNCTION( t, "test_transaction", "send_cf_action_fail", {} ),
-                             eosio_assert_message_exception,
-                             eosio_assert_message_is("context free actions cannot have authorizations") );
+                             dcd_assert_message_exception,
+                             dcd_assert_message_is("context free actions cannot have authorizations") );
 
       BOOST_REQUIRE_EQUAL( t.validate(), true );
 } FC_LOG_AND_RETHROW() }
@@ -889,7 +889,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(light_validation_skip_cfa, TYPE_T, backing_store_t
    auto conf_genesis = tester::default_config( tempdir );
 
    auto& cfg = conf_genesis.first;
-   cfg.trusted_producers = { "eosio"_n }; // light validation
+   cfg.trusted_producers = { "dcd"_n }; // light validation
 
    tester other( conf_genesis.first, conf_genesis.second );
    other.execute_setup_policy( setup_policy::full );
@@ -976,7 +976,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(checktime_fail_tests, TESTER_T, backing_store_ts) 
    t.produce_blocks(1);
 
    int64_t x; int64_t net; int64_t cpu;
-   t.control->get_resource_limits_manager().get_account_limits( "testapi"_n, x, net, cpu );
+//   t.control->get_resource_limits_manager().get_account_limits( "testapi"_n, x, net, cpu );
    wdump((net)(cpu));
 
 #warning TODO call the contract before testing to cache it, and validate that it was cached
@@ -1215,8 +1215,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(transaction_tests, TESTER_T, backing_store_ts) { t
 
    // test send_action_inline_fail
    BOOST_CHECK_EXCEPTION( CALL_TEST_FUNCTION(t, "test_transaction", "send_action_inline_fail", {}),
-                          eosio_assert_message_exception,
-                          eosio_assert_message_is("test_action::assert_false")                          );
+                          dcd_assert_message_exception,
+                          dcd_assert_message_is("test_action::assert_false")                          );
 
    //   test send_transaction
       CALL_TEST_FUNCTION(t, "test_transaction", "send_transaction", {});
@@ -1284,8 +1284,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(transaction_tests, TESTER_T, backing_store_ts) { t
    CALL_TEST_FUNCTION(t, "test_transaction", "test_tapos_block_prefix", fc::raw::pack(t.control->head_block_id()._hash[1]) );
 
    // test send_action_recurse
-   BOOST_CHECK_EXCEPTION(CALL_TEST_FUNCTION(t, "test_transaction", "send_action_recurse", {}), eosio::chain::transaction_exception,
-         [](const eosio::chain::transaction_exception& e) {
+   BOOST_CHECK_EXCEPTION(CALL_TEST_FUNCTION(t, "test_transaction", "send_action_recurse", {}), dcd::chain::transaction_exception,
+         [](const dcd::chain::transaction_exception& e) {
             return expect_assert_message(e, "max inline action depth per transaction reached");
          }
       );
@@ -1335,7 +1335,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(inline_action_subjective_limit, TYPE_T, backing_st
    TYPE_T bs_type;
    const uint32_t _4k = 4 * 1024;
    tester chain(setup_policy::full, db_read_mode::SPECULATIVE, {_4k + 100}, {_4k + 1}, {bs_type});
-   eosio::chain::backing_store_type real = bs_type;
+   dcd::chain::backing_store_type real = bs_type;
    tester chain2(setup_policy::full, db_read_mode::SPECULATIVE, {_4k + 100}, {_4k}, {bs_type});
    signed_block_ptr block;
    for (int n=0; n < 2; ++n) {
@@ -1602,7 +1602,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(deferred_transaction_tests, TESTER_T, backing_stor
       dtt_act2.delay_sec = 5;
 
       auto auth = authority(t.get_public_key(name("testapi"), name(dtt_act2.permission_name).to_string()), 10);
-      auth.accounts.push_back( permission_level_weight{{"testapi"_n, config::eosio_code_name}, 1} );
+      auth.accounts.push_back( permission_level_weight{{"testapi"_n, config::dcd_code_name}, 1} );
 
       t.push_action(config::system_account_name, updateauth::get_name(), name("testapi"), fc::mutable_variant_object()
               ("account", "testapi")
@@ -1623,7 +1623,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(deferred_transaction_tests, TESTER_T, backing_stor
 
       // If the deferred tx receiver == this tx receiver, the authorization checking would originally be bypassed.
       // But not anymore. With the RESTRICT_ACTION_TO_SELF protocol feature activated, it should now objectively
-      // fail because testapi@additional permission is not unilaterally satisfied by testapi@eosio.code.
+      // fail because testapi@additional permission is not unilaterally satisfied by testapi@dcd.code.
       dtt_action dtt_act3;
       dtt_act3.deferred_account = "testapi"_n.to_uint64_t();
       dtt_act3.permission_name = "additional"_n.to_uint64_t();
@@ -1729,8 +1729,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(more_deferred_transaction_tests, TYPE_T, backing_s
    trx.sign( chain.get_private_key( test_account, "active" ), chain.control->get_chain_id() );
    BOOST_REQUIRE_EXCEPTION(
       chain.push_transaction( trx ),
-      eosio_assert_message_exception,
-      eosio_assert_message_is("fail")
+      dcd_assert_message_exception,
+      dcd_assert_message_is("fail")
    );
 
    BOOST_REQUIRE_EQUAL(1, index.size());
@@ -1821,8 +1821,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(more_deferred_transaction_tests, TYPE_T, backing_s
    trx2.sign( chain.get_private_key( test_account, "active" ), chain.control->get_chain_id() );
    BOOST_REQUIRE_EXCEPTION(
       chain.push_transaction( trx2 ),
-      eosio_assert_message_exception,
-      eosio_assert_message_is("fail")
+      dcd_assert_message_exception,
+      dcd_assert_message_is("fail")
    );
 
    BOOST_REQUIRE_EQUAL(3, index.size());
@@ -1911,22 +1911,22 @@ BOOST_FIXTURE_TEST_CASE(get_producers1_tests, TESTER) { try {
 } FC_LOG_AND_RETHROW() }
 
 // get_active_producers interprets its second argument as the size in bytes (but see below).
-// This WASM expects that the current producers are the default {"eosio"}.
+// This WASM expects that the current producers are the default {"dcd"}.
 static const char get_active_producers2_wast[] = R"=====(
 (module
  (import "env" "get_active_producers" (func $get_active_producers (param i32 i32) (result i32)))
- (import "env" "eosio_assert" (func $eosio_assert (param i32 i32)))
+ (import "env" "dcd_assert" (func $dcd_assert (param i32 i32)))
  (memory 1)
  (func (export "apply") (param i64 i64 i64)
   (i64.store (i32.const 8) (i64.const 0xCCCCCCCCCCCCCCCC))
-  (call $eosio_assert
+  (call $dcd_assert
    (i32.eq
     (call $get_active_producers
      (i32.const 8)
      (i32.const 1))
     (i32.const 1))
    (i32.const 256))
-  (call $eosio_assert
+  (call $dcd_assert
    (i64.eq (i64.load (i32.const 8)) (i64.const 0xCCCCCCCCCCCCCC00))
    (i32.const 512)))
  (data (i32.const 256) "get_active_producers should return 1")
@@ -2143,7 +2143,7 @@ BOOST_FIXTURE_TEST_CASE(db_notify_tests, TESTER) {
  (func $db_idx_double_find_primary (import "env" "db_idx_double_find_primary") (param i64 i64 i64 i32 i64) (result i32))
  (func $db_idx_long_double_store (import "env" "db_idx_long_double_store") (param i64 i64 i64 i64 i32) (result i32))
  (func $db_idx_long_double_find_primary (import "env" "db_idx_long_double_find_primary") (param i64 i64 i64 i32 i64) (result i32))
- (func $eosio_assert (import "env" "eosio_assert") (param i32 i32))
+ (func $dcd_assert (import "env" "dcd_assert") (param i32 i32))
  (func $require_recipient (import "env" "require_recipient") (param i64))
  (memory 1)
  (func (export "apply") (param i64 i64 i64)
@@ -2156,12 +2156,12 @@ BOOST_FIXTURE_TEST_CASE(db_notify_tests, TESTER) {
   (drop (call $db_idx256_store (i64.const 0) (i64.const 0) (get_local 0) (i64.const 0) (i32.const 256) (i32.const 2)))
   (drop (call $db_idx_double_store (i64.const 0) (i64.const 0) (get_local 0) (i64.const 0) (i32.const 256)))
   (drop (call $db_idx_long_double_store (i64.const 0) (i64.const 0) (get_local 0) (i64.const 0) (i32.const 256)))
-  (call $eosio_assert (i32.eq (call $db_find_i64 (get_local 0) (i64.const 0) (i64.const 0) (i64.const 0) ) (get_local 3)) (i32.const 0))
-  (call $eosio_assert (i32.eq (call $db_idx64_find_primary (get_local 0) (i64.const 0) (i64.const 0) (i32.const 256) (i64.const 0)) (get_local 3)) (i32.const 32))
-  (call $eosio_assert (i32.eq (call $db_idx128_find_primary (get_local 0) (i64.const 0) (i64.const 0) (i32.const 256) (i64.const 0)) (get_local 3)) (i32.const 64))
-  (call $eosio_assert (i32.eq (call $db_idx256_find_primary (get_local 0) (i64.const 0) (i64.const 0) (i32.const 256) (i32.const 2) (i64.const 0)) (get_local 3)) (i32.const 96))
-  (call $eosio_assert (i32.eq (call $db_idx_double_find_primary (get_local 0) (i64.const 0) (i64.const 0) (i32.const 256) (i64.const 0)) (get_local 3)) (i32.const 128))
-  (call $eosio_assert (i32.eq (call $db_idx_long_double_find_primary (get_local 0) (i64.const 0) (i64.const 0) (i32.const 256) (i64.const 0)) (get_local 3)) (i32.const 160))
+  (call $dcd_assert (i32.eq (call $db_find_i64 (get_local 0) (i64.const 0) (i64.const 0) (i64.const 0) ) (get_local 3)) (i32.const 0))
+  (call $dcd_assert (i32.eq (call $db_idx64_find_primary (get_local 0) (i64.const 0) (i64.const 0) (i32.const 256) (i64.const 0)) (get_local 3)) (i32.const 32))
+  (call $dcd_assert (i32.eq (call $db_idx128_find_primary (get_local 0) (i64.const 0) (i64.const 0) (i32.const 256) (i64.const 0)) (get_local 3)) (i32.const 64))
+  (call $dcd_assert (i32.eq (call $db_idx256_find_primary (get_local 0) (i64.const 0) (i64.const 0) (i32.const 256) (i32.const 2) (i64.const 0)) (get_local 3)) (i32.const 96))
+  (call $dcd_assert (i32.eq (call $db_idx_double_find_primary (get_local 0) (i64.const 0) (i64.const 0) (i32.const 256) (i64.const 0)) (get_local 3)) (i32.const 128))
+  (call $dcd_assert (i32.eq (call $db_idx_long_double_find_primary (get_local 0) (i64.const 0) (i64.const 0) (i32.const 256) (i64.const 0)) (get_local 3)) (i32.const 160))
   (call $require_recipient (i64.const 11327368596746665984))
  )
  (data (i32.const 0) "notifier: primary")
@@ -2194,8 +2194,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(multi_index_tests, TESTER_T, backing_store_ts_only
 
    auto check_failure = [&t]( action_name a, const char* expected_error_msg ) {
       BOOST_CHECK_EXCEPTION(  t.push_action( "testapi"_n, a, "testapi"_n, {} ),
-                              eosio_assert_message_exception,
-                              eosio_assert_message_is( expected_error_msg )
+                              dcd_assert_message_exception,
+                              dcd_assert_message_is( expected_error_msg )
       );
    };
 
@@ -2340,12 +2340,12 @@ BOOST_FIXTURE_TEST_CASE(crypto_tests, TESTER) { try {
 static const char memcpy_pass_wast[] = R"======(
 (module
  (import "env" "memcpy" (func $memcpy (param i32 i32 i32) (result i32)))
- (import "env" "eosio_assert" (func $eosio_assert (param i32 i32)))
+ (import "env" "dcd_assert" (func $dcd_assert (param i32 i32)))
  (memory 1)
  (func (export "apply") (param i64 i64 i64)
   (i64.store (i32.const 0) (i64.const 0x8877665544332211))
-  (call $eosio_assert (i32.eq (call $memcpy (i32.const 65535) (i32.const 0) (i32.const 1)) (i32.const 65535)) (i32.const 128))
-  (call $eosio_assert (i64.eq (i64.load (i32.const 65528)) (i64.const 0x1100000000000000)) (i32.const 256))
+  (call $dcd_assert (i32.eq (call $memcpy (i32.const 65535) (i32.const 0) (i32.const 1)) (i32.const 65535)) (i32.const 128))
+  (call $dcd_assert (i64.eq (i64.load (i32.const 65528)) (i64.const 0x1100000000000000)) (i32.const 256))
   (drop (call $memcpy (i32.const 8) (i32.const 7) (i32.const 1)))
   (drop (call $memcpy (i32.const 7) (i32.const 8) (i32.const 1)))
  )
@@ -2377,7 +2377,7 @@ static const char memcpy_past_end_wast[] = R"======(
 static const char memmove_pass_wast[] = R"======(
 (module
  (import "env" "memmove" (func $memmove (param i32 i32 i32) (result i32)))
- (import "env" "eosio_assert" (func $eosio_assert (param i32 i32)))
+ (import "env" "dcd_assert" (func $dcd_assert (param i32 i32)))
  (memory 1)
  (func $fillmem (param i32 i32)
   (loop
@@ -2389,7 +2389,7 @@ static const char memmove_pass_wast[] = R"======(
  )
  (func $checkmem (param i32 i32 i32)
    (loop
-    (call $eosio_assert (i32.eq (i32.load8_u (get_local 0)) (get_local 1)) (get_local 2))
+    (call $dcd_assert (i32.eq (i32.load8_u (get_local 0)) (get_local 1)) (get_local 2))
     (set_local 1 (i32.sub (get_local 1) (i32.const 1)))
     (set_local 0 (i32.add (get_local 0) (i32.const 1)))
     (br_if 0 (get_local 1))
@@ -2397,8 +2397,8 @@ static const char memmove_pass_wast[] = R"======(
  )
  (func (export "apply") (param i64 i64 i64)
   (i64.store (i32.const 0) (i64.const 0x8877665544332211))
-  (call $eosio_assert (i32.eq (call $memmove (i32.const 65535) (i32.const 0) (i32.const 1)) (i32.const 65535)) (i32.const 128))
-  (call $eosio_assert (i64.eq (i64.load (i32.const 65528)) (i64.const 0x1100000000000000)) (i32.const 256))
+  (call $dcd_assert (i32.eq (call $memmove (i32.const 65535) (i32.const 0) (i32.const 1)) (i32.const 65535)) (i32.const 128))
+  (call $dcd_assert (i64.eq (i64.load (i32.const 65528)) (i64.const 0x1100000000000000)) (i32.const 256))
 
   (call $fillmem (i32.const 8) (i32.const 128))
   (drop (call $memmove (i32.const 64) (i32.const 8) (i32.const 128)))
@@ -2423,13 +2423,13 @@ static const char memmove_pass_wast[] = R"======(
 static const char memcmp_pass_wast[] = R"======(
 (module
  (import "env" "memcmp" (func $memcmp (param i32 i32 i32) (result i32)))
- (import "env" "eosio_assert" (func $eosio_assert (param i32 i32)))
+ (import "env" "dcd_assert" (func $dcd_assert (param i32 i32)))
  (memory 1)
  (func (export "apply") (param i64 i64 i64)
-  (call $eosio_assert (i32.eq (call $memcmp (i32.const 65535) (i32.const 65535) (i32.const 1)) (i32.const 0)) (i32.const 128))
-  (call $eosio_assert (i32.eq (call $memcmp (i32.const 0) (i32.const 2) (i32.const 3)) (i32.const 0)) (i32.const 256))
-  (call $eosio_assert (i32.eq (call $memcmp (i32.const 0) (i32.const 2) (i32.const 6)) (i32.const -1)) (i32.const 384))
-  (call $eosio_assert (i32.eq (call $memcmp (i32.const 2) (i32.const 0) (i32.const 6)) (i32.const 1)) (i32.const 512))
+  (call $dcd_assert (i32.eq (call $memcmp (i32.const 65535) (i32.const 65535) (i32.const 1)) (i32.const 0)) (i32.const 128))
+  (call $dcd_assert (i32.eq (call $memcmp (i32.const 0) (i32.const 2) (i32.const 3)) (i32.const 0)) (i32.const 256))
+  (call $dcd_assert (i32.eq (call $memcmp (i32.const 0) (i32.const 2) (i32.const 6)) (i32.const -1)) (i32.const 384))
+  (call $dcd_assert (i32.eq (call $memcmp (i32.const 2) (i32.const 0) (i32.const 6)) (i32.const 1)) (i32.const 512))
  )
  (data (i32.const 0) "abababcdcdcd")
  (data (i32.const 128) "memcmp at end of memory")
@@ -2442,11 +2442,11 @@ static const char memcmp_pass_wast[] = R"======(
 static const char memset_pass_wast[] = R"======(
 (module
  (import "env" "memset" (func $memset (param i32 i32 i32) (result i32)))
- (import "env" "eosio_assert" (func $eosio_assert (param i32 i32)))
+ (import "env" "dcd_assert" (func $dcd_assert (param i32 i32)))
  (memory 1)
  (func (export "apply") (param i64 i64 i64)
-  (call $eosio_assert (i32.eq (call $memset (i32.const 65535) (i32.const 0xCC) (i32.const 1)) (i32.const 65535)) (i32.const 128))
-  (call $eosio_assert (i64.eq (i64.load (i32.const 65528)) (i64.const 0xCC00000000000000)) (i32.const 256))
+  (call $dcd_assert (i32.eq (call $memset (i32.const 65535) (i32.const 0xCC) (i32.const 1)) (i32.const 65535)) (i32.const 128))
+  (call $dcd_assert (i64.eq (i64.load (i32.const 65528)) (i64.const 0xCC00000000000000)) (i32.const 256))
  )
  (data (i32.const 128) "expected memset to return 65535")
  (data (i32.const 256) "expected memset to write one byte")
@@ -2670,7 +2670,7 @@ BOOST_FIXTURE_TEST_CASE(permission_tests, TESTER) { try {
          .account    = "testapi"_n,
          .permission = "active"_n,
          .pubkeys    = {
-            public_key_type(string("EOS7GfRtyDWWgxV88a5TRaYY59XmHptyfjsFmHHfioGNJtPjpSmGX"))
+            public_key_type(string("DCD7GfRtyDWWgxV88a5TRaYY59XmHptyfjsFmHHfioGNJtPjpSmGX"))
          }
       })
    );
@@ -2682,7 +2682,7 @@ BOOST_FIXTURE_TEST_CASE(permission_tests, TESTER) { try {
          .permission = "active"_n,
          .pubkeys    = {
             get_public_key("testapi"_n, "active"),
-            public_key_type(string("EOS7GfRtyDWWgxV88a5TRaYY59XmHptyfjsFmHHfioGNJtPjpSmGX"))
+            public_key_type(string("DCD7GfRtyDWWgxV88a5TRaYY59XmHptyfjsFmHHfioGNJtPjpSmGX"))
          }
       })
    );
@@ -2725,27 +2725,27 @@ static const char resource_limits_wast[] = R"=====(
 (module
  (func $set_resource_limits (import "env" "set_resource_limits") (param i64 i64 i64 i64))
  (func $get_resource_limits (import "env" "get_resource_limits") (param i64 i32 i32 i32))
- (func $eosio_assert (import "env" "eosio_assert") (param i32 i32))
+ (func $dcd_assert (import "env" "dcd_assert") (param i32 i32))
  (memory 1)
  (func (export "apply") (param i64 i64 i64)
   (call $set_resource_limits (get_local 2) (i64.const 2788) (i64.const 11) (i64.const 12))
   (call $get_resource_limits (get_local 2) (i32.const 0x100) (i32.const 0x108) (i32.const 0x110))
-  (call $eosio_assert (i64.eq (i64.const 2788) (i64.load (i32.const 0x100))) (i32.const 8))
-  (call $eosio_assert (i64.eq (i64.const 11) (i64.load (i32.const 0x108))) (i32.const 32))
-  (call $eosio_assert (i64.eq (i64.const 12) (i64.load (i32.const 0x110))) (i32.const 64))
+  (call $dcd_assert (i64.eq (i64.const 2788) (i64.load (i32.const 0x100))) (i32.const 8))
+  (call $dcd_assert (i64.eq (i64.const 11) (i64.load (i32.const 0x108))) (i32.const 32))
+  (call $dcd_assert (i64.eq (i64.const 12) (i64.load (i32.const 0x110))) (i32.const 64))
   ;; Aligned overlap
   (call $get_resource_limits (get_local 2) (i32.const 0x100) (i32.const 0x100) (i32.const 0x110))
-  (call $eosio_assert (i64.eq (i64.const 11) (i64.load (i32.const 0x100))) (i32.const 96))
+  (call $dcd_assert (i64.eq (i64.const 11) (i64.load (i32.const 0x100))) (i32.const 96))
   (call $get_resource_limits (get_local 2) (i32.const 0x100) (i32.const 0x110) (i32.const 0x110))
-  (call $eosio_assert (i64.eq (i64.const 12) (i64.load (i32.const 0x110))) (i32.const 128))
+  (call $dcd_assert (i64.eq (i64.const 12) (i64.load (i32.const 0x110))) (i32.const 128))
   ;; Unaligned beats aligned
   (call $get_resource_limits (get_local 2) (i32.const 0x101) (i32.const 0x108) (i32.const 0x100))
-  (call $eosio_assert (i64.eq (i64.const 2788) (i64.load (i32.const 0x101))) (i32.const 160))
+  (call $dcd_assert (i64.eq (i64.const 2788) (i64.load (i32.const 0x101))) (i32.const 160))
   ;; Unaligned overlap
   (call $get_resource_limits (get_local 2) (i32.const 0x101) (i32.const 0x101) (i32.const 0x110))
-  (call $eosio_assert (i64.eq (i64.const 11) (i64.load (i32.const 0x101))) (i32.const 192))
+  (call $dcd_assert (i64.eq (i64.const 11) (i64.load (i32.const 0x101))) (i32.const 192))
   (call $get_resource_limits (get_local 2) (i32.const 0x100) (i32.const 0x111) (i32.const 0x111))
-  (call $eosio_assert (i64.eq (i64.const 12) (i64.load (i32.const 0x111))) (i32.const 224))
+  (call $dcd_assert (i64.eq (i64.const 12) (i64.load (i32.const 0x111))) (i32.const 224))
  )
  (data (i32.const 8) "expected ram 2788")
  (data (i32.const 32) "expected net 11")
@@ -2792,7 +2792,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(resource_limits_tests, TESTER_T, backing_store_ts)
    TESTER_T t;
    t.create_accounts( { "rlimits"_n, "testacnt"_n } );
    t.set_code("rlimits"_n, resource_limits_wast);
-   t.push_action( "eosio"_n, "setpriv"_n, "eosio"_n, mutable_variant_object()("account", "rlimits"_n)("is_priv", 1));
+   t.push_action( "dcd"_n, "setpriv"_n, "dcd"_n, mutable_variant_object()("account", "rlimits"_n)("is_priv", 1));
    t.produce_block();
 
    auto pushit = [&]{
@@ -2881,11 +2881,11 @@ static const char set_privileged2_wast[] = R"======(
 (module
   (import "env" "set_privileged" (func $set_privileged (param i64 i32)))
   (import "env" "is_privileged" (func $is_privileged (param i64) (result i32)))
-  (import "env" "eosio_assert" (func $eosio_assert (param i32 i32)))
+  (import "env" "dcd_assert" (func $dcd_assert (param i32 i32)))
   (memory 1)
   (func (export "apply") (param i64 i64 i64)
     (call $set_privileged (get_local 0) (i32.const 0))
-    (call $eosio_assert (i32.eqz (call $is_privileged (get_local 0))) (i32.const 0))
+    (call $dcd_assert (i32.eqz (call $is_privileged (get_local 0))) (i32.const 0))
   )
   (data (i32.const 0) "is_privileged should return false")
 )
@@ -3014,7 +3014,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(permission_usage_tests, TESTER_T, backing_store_ts
                                        "testapi"_n, config::active_name,
                                        t.control->head_block_time() + fc::milliseconds(config::block_interval_ms)
                                      })
-   ), eosio_assert_message_exception );
+   ), dcd_assert_message_exception );
 
    t.produce_blocks(5);
 
@@ -3022,7 +3022,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(permission_usage_tests, TESTER_T, backing_store_ts
 
    t.push_action(config::system_account_name, linkauth::get_name(), "bob"_n, fc::mutable_variant_object()
            ("account", "bob")
-           ("code", "eosio")
+           ("code", "dcd")
            ("type", "reqauth")
            ("requirement", "perm1")
    );
@@ -3056,7 +3056,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(permission_usage_tests, TESTER_T, backing_store_ts
                                                             "bob"_n, "perm1"_n,
                                                             permission_creation_time
                                           })
-   ), eosio_assert_message_exception );
+   ), dcd_assert_message_exception );
 
    CALL_TEST_FUNCTION( t, "test_permission", "test_permission_last_used",
                        fc::raw::pack(test_permission_last_used_action{
@@ -3134,9 +3134,9 @@ BOOST_FIXTURE_TEST_CASE(extended_symbol_api_tests, TESTER) { try {
 } FC_LOG_AND_RETHROW() }
 
 /*************************************************************************************
- * eosio_assert_code_tests test cases
+ * dcd_assert_code_tests test cases
  *************************************************************************************/
-BOOST_FIXTURE_TEST_CASE(eosio_assert_code_tests, TESTER) { try {
+BOOST_FIXTURE_TEST_CASE(dcd_assert_code_tests, TESTER) { try {
    produce_block();
    create_account( "testapi"_n );
    produce_block();
@@ -3166,7 +3166,7 @@ BOOST_FIXTURE_TEST_CASE(eosio_assert_code_tests, TESTER) { try {
    produce_blocks(10);
 
    BOOST_CHECK_EXCEPTION( CALL_TEST_FUNCTION( *this, "test_action", "test_assert_code", fc::raw::pack((uint64_t)42) ),
-                          eosio_assert_code_exception, eosio_assert_code_is(42)                                        );
+                          dcd_assert_code_exception, dcd_assert_code_is(42)                                        );
 
 
    auto trace = CALL_TEST_FUNCTION_NO_THROW( *this, "test_action", "test_assert_code", fc::raw::pack((uint64_t)42) );

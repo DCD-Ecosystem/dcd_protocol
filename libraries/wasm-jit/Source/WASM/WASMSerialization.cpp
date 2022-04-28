@@ -1,4 +1,4 @@
-#include "../../../chain/include/eosio/chain/wasm_eosio_constraints.hpp"
+#include "../../../chain/include/dcd/chain/wasm_dcd_constraints.hpp"
 #include "Inline/BasicTypes.h"
 #include "Inline/Serialization.h"
 #include "Inline/UTF8.h"
@@ -491,7 +491,7 @@ namespace WASM
 		Uptr numLocalSets = 0;
 		serializeVarUInt32(bodyStream,numLocalSets);
 
-		constexpr size_t max_size = eosio::chain::wasm_constraints::maximum_code_size;
+		constexpr size_t max_size = dcd::chain::wasm_constraints::maximum_code_size;
 		if (numBodyBytes >= max_size && WASM::check_limits)
 			throw FatalSerializationException(std::string("Function body too large"));
 		if (numLocalSets >= 1024 && WASM::check_limits)
@@ -503,7 +503,7 @@ namespace WASM
 			LocalSet localSet;
 			serialize(bodyStream,localSet);
 			locals_accum += localSet.num*4;
-			if( locals_accum > eosio::chain::wasm_constraints::maximum_func_local_bytes && WASM::check_limits )
+			if( locals_accum > dcd::chain::wasm_constraints::maximum_func_local_bytes && WASM::check_limits )
 				throw FatalSerializationException( "too many locals" );
 
 			for(Uptr index = 0;index < localSet.num;++index) { functionDef.nonParameterLocalTypes.push_back(localSet.type); }
@@ -571,7 +571,7 @@ namespace WASM
 				+ module.memories.imports.size()
 				+ module.globals.imports.size();
 			serializeVarUInt32(sectionStream,size);
-			constexpr size_t max_size = eosio::chain::wasm_constraints::maximum_section_elements;
+			constexpr size_t max_size = dcd::chain::wasm_constraints::maximum_section_elements;
 			if(Stream::isInput)
 			{
 				for(Uptr index = 0;index < size;++index)
@@ -680,7 +680,7 @@ namespace WASM
 				// Grow the vector one element at a time:
 				// try to get a serialization exception before making a huge allocation for malformed input.
 				module.functions.defs.clear();
-				constexpr size_t max_size = eosio::chain::wasm_constraints::maximum_section_elements;
+				constexpr size_t max_size = dcd::chain::wasm_constraints::maximum_section_elements;
 				if ( numFunctions >= max_size && WASM::check_limits )
 					throw FatalSerializationException(std::string("Too many function defs"));
 				for(Uptr functionIndex = 0;functionIndex < numFunctions;++functionIndex)

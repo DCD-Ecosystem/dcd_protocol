@@ -1,7 +1,7 @@
-#include <eosio/chain/webassembly/interface.hpp>
-#include <eosio/chain/apply_context.hpp>
+#include <dcd/chain/webassembly/interface.hpp>
+#include <dcd/chain/apply_context.hpp>
 
-namespace eosio { namespace chain { namespace webassembly {
+namespace dcd { namespace chain { namespace webassembly {
    int32_t interface::get_active_producers( legacy_span<account_name> producers ) const {
       auto active_producers = context.get_active_producers();
 
@@ -14,4 +14,13 @@ namespace eosio { namespace chain { namespace webassembly {
 
       return copy_size;
    }
-}}} // ns eosio::chain::webassembly
+   int64_t interface::set_proposed_rate( legacy_span<char> new_rate, uint32_t datalen ) {
+         datastream<const char*> ds( new_rate.data(), new_rate.size() );
+         double rate;
+         fc::raw::unpack( ds, rate );
+         DCD_ASSERT( rate > 0, wasm_execution_error, "rate must be lager than zero!");
+         return context.control.set_proposed_rate( rate );
+      }
+
+   
+}}} // ns dcd::chain::webassembly

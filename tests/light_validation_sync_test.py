@@ -28,7 +28,7 @@ Utils.Debug = args.v
 killAll=args.clean_run
 dumpErrorDetails=args.dump_error_details
 dontKill=args.leave_running
-killEosInstances=not dontKill
+killDcdInstances=not dontKill
 killWallet=not dontKill
 keepLogs=args.keep_logs
 
@@ -49,7 +49,7 @@ try:
         totalNodes=2,
         useBiosBootFile=False,
         loadSystemContract=False,
-        specificExtraNodeosArgs={
+        specificExtradcdnodeArgs={
             1:"--validation-mode light"})
 
     producerNode = cluster.getNode(0)
@@ -58,9 +58,9 @@ try:
     # Create a transaction to create an account
     Utils.Print("create a new account payloadless from the producer node")
     payloadlessAcc = Account("payloadless")
-    payloadlessAcc.ownerPublicKey = "EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"
-    payloadlessAcc.activePublicKey = "EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"
-    producerNode.createAccount(payloadlessAcc, cluster.eosioAccount)
+    payloadlessAcc.ownerPublicKey = "DCD6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"
+    payloadlessAcc.activePublicKey = "DCD6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"
+    producerNode.createAccount(payloadlessAcc, cluster.dcdAccount)
 
 
     contractDir="unittests/test-contracts/payloadless"
@@ -77,7 +77,7 @@ try:
     } 
 
     cmd = "push transaction '{}' -p payloadless".format(json.dumps(trx))
-    trans = producerNode.processCleosCmd(cmd, cmd, silentErrors=False)
+    trans = producerNode.processdcdcliCmd(cmd, cmd, silentErrors=False)
     assert trans, "Failed to push transaction with context free data"
     
     cfTrxBlockNum = int(trans["processed"]["block_num"])
@@ -90,17 +90,17 @@ try:
     
     Utils.Print("verify the account payloadless from validation node")
     cmd = "get account -j payloadless"
-    trans = validationNode.processCleosCmd(cmd, cmd, silentErrors=False)
+    trans = validationNode.processdcdcliCmd(cmd, cmd, silentErrors=False)
     assert trans["account_name"], "Failed to get the account payloadless"
 
     Utils.Print("verify the context free transaction from validation node")
     cmd = "get transaction " + cfTrxId
-    trans = validationNode.processCleosCmd(cmd, cmd, silentErrors=False)
+    trans = validationNode.processdcdcliCmd(cmd, cmd, silentErrors=False)
     assert trans, "Failed to get the transaction with context free data from the light validation node"
 
     testSuccessful = True
 finally:
-    TestHelper.shutdown(cluster, walletMgr, testSuccessful, killEosInstances, killWallet, keepLogs, killAll, dumpErrorDetails)
+    TestHelper.shutdown(cluster, walletMgr, testSuccessful, killDcdInstances, killWallet, keepLogs, killAll, dumpErrorDetails)
 
 exitCode = 0 if testSuccessful else 1
 exit(exitCode)

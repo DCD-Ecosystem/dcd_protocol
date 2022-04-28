@@ -1,4 +1,4 @@
-#include <eosio/trace_api/store_provider.hpp>
+#include <dcd/trace_api/store_provider.hpp>
 
 #include <fc/variant_object.hpp>
 #include <fc/log/logger_config.hpp>
@@ -28,7 +28,7 @@ namespace {
       }
 }
 
-namespace eosio::trace_api {
+namespace dcd::trace_api {
    namespace bfs = boost::filesystem;
    store_provider::store_provider(const bfs::path& slice_dir, uint32_t stride_width, std::optional<uint32_t> minimum_irreversible_history_blocks, std::optional<uint32_t> minimum_uncompressed_irreversible_history_blocks, size_t compression_seek_point_stride)
    : _slice_directory(slice_dir, stride_width, minimum_irreversible_history_blocks, minimum_uncompressed_irreversible_history_blocks, compression_seek_point_stride) {

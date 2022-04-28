@@ -1,23 +1,23 @@
-#include <eosio/state_history/compression.hpp>
-#include <eosio/state_history/create_deltas.hpp>
-#include <eosio/state_history/log.hpp>
-#include <eosio/state_history/serialization.hpp>
-#include <eosio/state_history/trace_converter.hpp>
+#include <dcd/state_history/compression.hpp>
+#include <dcd/state_history/create_deltas.hpp>
+#include <dcd/state_history/log.hpp>
+#include <dcd/state_history/serialization.hpp>
+#include <dcd/state_history/trace_converter.hpp>
 
-namespace eosio {
+namespace dcd {
 
 uint64_t state_history_log_data::payload_size_at(uint64_t pos) const {
-   EOS_ASSERT(file.size() >= pos + sizeof(state_history_log_header), chain::state_history_exception,
+   DCD_ASSERT(file.size() >= pos + sizeof(state_history_log_header), chain::state_history_exception,
               "corrupt ${name}: invalid entry size at at position ${pos}", ("name", filename)("pos", pos));
 
    fc::datastream<const char*> ds(file.const_data() + pos, sizeof(state_history_log_header));
    state_history_log_header    header;
    fc::raw::unpack(ds, header);
 
-   EOS_ASSERT(is_ship(header.magic) && is_ship_supported_version(header.magic), chain::state_history_exception,
+   DCD_ASSERT(is_ship(header.magic) && is_ship_supported_version(header.magic), chain::state_history_exception,
               "corrupt ${name}: invalid header for entry at position ${pos}", ("name", filename)("pos", pos));
 
-   EOS_ASSERT(file.size() >= pos + sizeof(state_history_log_header) + header.payload_size,
+   DCD_ASSERT(file.size() >= pos + sizeof(state_history_log_header) + header.payload_size,
               chain::state_history_exception, "corrupt ${name}: invalid payload size for entry at position ${pos}",
               ("name", filename)("pos", pos));
    return header.payload_size;
@@ -50,10 +50,10 @@ void state_history_log::read_header(state_history_log_header& header, bool asser
    read_log.read(bytes, sizeof(bytes));
    fc::datastream<const char*> ds(bytes, sizeof(bytes));
    fc::raw::unpack(ds, header);
-   EOS_ASSERT(!ds.remaining(), chain::state_history_exception, "state_history_log_header_serial_size mismatch");
+   DCD_ASSERT(!ds.remaining(), chain::state_history_exception, "state_history_log_header_serial_size mismatch");
    version = get_ship_version(header.magic);
    if (assert_version)
-      EOS_ASSERT(is_ship(header.magic) && is_ship_supported_version(header.magic), chain::state_history_exception,
+      DCD_ASSERT(is_ship(header.magic) && is_ship_supported_version(header.magic), chain::state_history_exception,
                  "corrupt ${name}.log (0)", ("name", name));
 }
 
@@ -62,7 +62,7 @@ void state_history_log::write_header(const state_history_log_header& header) { f
 // returns cfile positioned at payload
 void state_history_log::get_entry_header(state_history_log::block_num_type block_num,
                                          state_history_log_header&         header) {
-   EOS_ASSERT(block_num >= _begin_block && block_num < _end_block, chain::state_history_exception,
+   DCD_ASSERT(block_num >= _begin_block && block_num < _end_block, chain::state_history_exception,
               "read non-existing block in ${name}.log", ("name", name));
    read_log.seek(get_pos(block_num));
    read_header(header);
@@ -116,7 +116,7 @@ void state_history_log::recover_blocks(uint64_t size) {
       uint64_t suffix;
       if (!is_ship(header.magic) || !is_ship_supported_version(header.magic) || header.payload_size > size ||
           pos + state_history_log_header_serial_size + header.payload_size + sizeof(suffix) > size) {
-         EOS_ASSERT(!is_ship(header.magic) || is_ship_supported_version(header.magic), chain::state_history_exception,
+         DCD_ASSERT(!is_ship(header.magic) || is_ship_supported_version(header.magic), chain::state_history_exception,
                     "${name}.log has an unsupported version", ("name", name));
          break;
       }
@@ -132,7 +132,7 @@ void state_history_log::recover_blocks(uint64_t size) {
    read_log.flush();
    boost::filesystem::resize_file(read_log.get_file_path(), pos);
    read_log.flush();
-   EOS_ASSERT(get_last_block(pos), chain::state_history_exception, "recover ${name}.log failed", ("name", name));
+   DCD_ASSERT(get_last_block(pos), chain::state_history_exception, "recover ${name}.log failed", ("name", name));
 }
 
 void state_history_log::open_log(bfs::path log_filename) {
@@ -148,7 +148,7 @@ void state_history_log::open_log(bfs::path log_filename) {
       state_history_log_header header;
       read_log.seek(0);
       read_header(header, false);
-      EOS_ASSERT(is_ship(header.magic) && is_ship_supported_version(header.magic) &&
+      DCD_ASSERT(is_ship(header.magic) && is_ship_supported_version(header.magic) &&
                      state_history_log_header_serial_size + header.payload_size + sizeof(uint64_t) <= size,
                  chain::state_history_exception, "corrupt ${name}.log (1)", ("name", name));
       _begin_block  = chain::block_header::num_from_id(header.block_id);
@@ -157,7 +157,7 @@ void state_history_log::open_log(bfs::path log_filename) {
          recover_blocks(size);
       ilog("${name}.log has blocks ${b}-${e}", ("name", name)("b", _begin_block)("e", _end_block - 1));
    } else {
-      EOS_ASSERT(!size, chain::state_history_exception, "corrupt ${name}.log (5)", ("name", name));
+      DCD_ASSERT(!size, chain::state_history_exception, "corrupt ${name}.log (5)", ("name", name));
       ilog("${name}.log is empty", ("name", name));
    }
 }
@@ -224,17 +224,17 @@ void state_history_log::truncate(state_history_log::block_num_type block_num) {
 std::pair<state_history_log::block_num_type, state_history_log::file_position_type>
 state_history_log::write_entry_header(const state_history_log_header& header, const chain::block_id_type& prev_id) {
    block_num_type block_num = chain::block_header::num_from_id(header.block_id);
-   EOS_ASSERT(_begin_block == _end_block || block_num <= _end_block, chain::state_history_exception,
+   DCD_ASSERT(_begin_block == _end_block || block_num <= _end_block, chain::state_history_exception,
               "missed a block in ${name}.log", ("name", name));
 
    if (_begin_block != _end_block && block_num > _begin_block) {
       if (block_num == _end_block) {
-         EOS_ASSERT(prev_id == last_block_id, chain::state_history_exception, "missed a fork change in ${name}.log",
+         DCD_ASSERT(prev_id == last_block_id, chain::state_history_exception, "missed a fork change in ${name}.log",
                     ("name", name));
       } else {
          state_history_log_header prev;
          get_entry_header(block_num - 1, prev);
-         EOS_ASSERT(prev_id == prev.block_id, chain::state_history_exception, "missed a fork change in ${name}.log",
+         DCD_ASSERT(prev_id == prev.block_id, chain::state_history_exception, "missed a fork change in ${name}.log",
                     ("name", name));
       }
    }
@@ -342,7 +342,7 @@ void state_history_traces_log::prune_transactions(state_history_log::block_num_t
    auto [ds, version] = catalog.rw_stream_for_block(block_num);
 
    if (ds.remaining()) {
-      EOS_ASSERT(version > 0, chain::state_history_exception,
+      DCD_ASSERT(version > 0, chain::state_history_exception,
               "The trace log version 0 does not support transaction pruning.");
       state_history::trace_converter::prune_traces(ds, ds.remaining(), ids);
       return;
@@ -352,7 +352,7 @@ void state_history_traces_log::prune_transactions(state_history_log::block_num_t
       return;
    state_history_log_header header;
    get_entry_header(block_num, header);
-   EOS_ASSERT(get_ship_version(header.magic) > 0, chain::state_history_exception,
+   DCD_ASSERT(get_ship_version(header.magic) > 0, chain::state_history_exception,
               "The trace log version 0 does not support transaction pruning.");
    write_log.seek(read_log.tellp());
    state_history::trace_converter::prune_traces(write_log, header.payload_size, ids);
@@ -404,4 +404,4 @@ void state_history_chain_state_log::store(const chain::combined_database& db,
    this->write_entry(header, block_state->block->previous, [&deltas](auto& stream) { zlib_pack(stream, deltas); });
 }
 
-} // namespace eosio
+} // namespace dcd

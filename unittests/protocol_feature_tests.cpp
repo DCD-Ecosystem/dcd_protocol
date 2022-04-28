@@ -1,7 +1,7 @@
-#include <eosio/chain/abi_serializer.hpp>
-#include <eosio/chain/resource_limits.hpp>
-#include <eosio/chain/generated_transaction_object.hpp>
-#include <eosio/testing/tester.hpp>
+#include <dcd/chain/abi_serializer.hpp>
+//#include <dcd/chain/resource_limits.hpp>
+#include <dcd/chain/generated_transaction_object.hpp>
+#include <dcd/testing/tester.hpp>
 
 #include <Runtime/Runtime.h>
 
@@ -13,8 +13,8 @@
 
 #include "fork_test_utilities.hpp"
 
-using namespace eosio::chain;
-using namespace eosio::testing;
+using namespace dcd::chain;
+using namespace dcd::testing;
 using namespace std::literals;
 
 BOOST_AUTO_TEST_SUITE(protocol_feature_tests)
@@ -26,13 +26,13 @@ BOOST_AUTO_TEST_CASE( activate_preactivate_feature ) try {
    c.produce_block();
 
    // Cannot set latest bios contract since it requires intrinsics that have not yet been whitelisted.
-   BOOST_CHECK_EXCEPTION( c.set_code( config::system_account_name, contracts::eosio_bios_wasm() ),
+   BOOST_CHECK_EXCEPTION( c.set_code( config::system_account_name, contracts::dcd_bios_wasm() ),
                           wasm_exception, fc_exception_message_is("env.is_feature_activated unresolveable")
    );
 
    // But the old bios contract can still be set.
-   c.set_code( config::system_account_name, contracts::before_preactivate_eosio_bios_wasm() );
-   c.set_abi( config::system_account_name, contracts::before_preactivate_eosio_bios_abi().data() );
+   c.set_code( config::system_account_name, contracts::before_preactivate_dcd_bios_wasm() );
+   c.set_abi( config::system_account_name, contracts::before_preactivate_dcd_bios_abi().data() );
 
    auto t = c.control->pending_block_time();
    c.control->abort_block();
@@ -55,8 +55,8 @@ BOOST_AUTO_TEST_CASE( activate_preactivate_feature ) try {
 
    BOOST_CHECK_EXCEPTION( c.push_action( config::system_account_name, "reqactivated"_n, config::system_account_name,
                                           mutable_variant_object()("feature_digest",  digest_type()) ),
-                           eosio_assert_message_exception,
-                           eosio_assert_message_is( "protocol feature is not activated" )
+                           dcd_assert_message_exception,
+                           dcd_assert_message_is( "protocol feature is not activated" )
    );
 
    c.push_action( config::system_account_name, "reqactivated"_n, config::system_account_name, mutable_variant_object()
@@ -378,7 +378,7 @@ BOOST_AUTO_TEST_CASE( replace_deferred_test ) try {
    c.set_abi( "test"_n, contracts::deferred_test_abi().data() );
    c.produce_block();
 
-   auto alice_ram_usage0 = c.control->get_resource_limits_manager().get_account_ram_usage( "alice"_n );
+//   auto alice_ram_usage0 = c.control->get_resource_limits_manager().get_account_ram_usage( "alice"_n );
 
    c.push_action( "test"_n, "defercall"_n, "alice"_n, fc::mutable_variant_object()
       ("payer", "alice")
@@ -387,7 +387,7 @@ BOOST_AUTO_TEST_CASE( replace_deferred_test ) try {
       ("payload", 100)
    );
 
-   auto alice_ram_usage1 = c.control->get_resource_limits_manager().get_account_ram_usage( "alice"_n );
+//   auto alice_ram_usage1 = c.control->get_resource_limits_manager().get_account_ram_usage( "alice"_n );
 
    // Verify subjective mitigation is in place
    BOOST_CHECK_EXCEPTION(
@@ -401,7 +401,7 @@ BOOST_AUTO_TEST_CASE( replace_deferred_test ) try {
       fc_exception_message_is( "Replacing a deferred transaction is temporarily disabled." )
    );
 
-   BOOST_CHECK_EQUAL( c.control->get_resource_limits_manager().get_account_ram_usage( "alice"_n ), alice_ram_usage1 );
+//   BOOST_CHECK_EQUAL( c.control->get_resource_limits_manager().get_account_ram_usage( "alice"_n ), alice_ram_usage1 );
 
    c.control->abort_block();
 
@@ -410,7 +410,7 @@ BOOST_AUTO_TEST_CASE( replace_deferred_test ) try {
    cfg.disable_all_subjective_mitigations = true;
    c.init( cfg );
 
-   BOOST_CHECK_EQUAL( c.control->get_resource_limits_manager().get_account_ram_usage( "alice"_n ), alice_ram_usage0 );
+//   BOOST_CHECK_EQUAL( c.control->get_resource_limits_manager().get_account_ram_usage( "alice"_n ), alice_ram_usage0 );
 
    c.push_action( "test"_n, "defercall"_n, "alice"_n, fc::mutable_variant_object()
       ("payer", "alice")
@@ -419,7 +419,7 @@ BOOST_AUTO_TEST_CASE( replace_deferred_test ) try {
       ("payload", 100)
    );
 
-   BOOST_CHECK_EQUAL( c.control->get_resource_limits_manager().get_account_ram_usage( "alice"_n ), alice_ram_usage1 );
+//   BOOST_CHECK_EQUAL( c.control->get_resource_limits_manager().get_account_ram_usage( "alice"_n ), alice_ram_usage1 );
    auto dtrxs = c.get_scheduled_transactions();
    BOOST_CHECK_EQUAL( dtrxs.size(), 1 );
    auto first_dtrx_id = dtrxs[0];
@@ -432,8 +432,8 @@ BOOST_AUTO_TEST_CASE( replace_deferred_test ) try {
       ("payload", 101)
    );
 
-   auto alice_ram_usage2 = c.control->get_resource_limits_manager().get_account_ram_usage( "alice"_n );
-   BOOST_CHECK_EQUAL( alice_ram_usage2, alice_ram_usage1 + (alice_ram_usage1 - alice_ram_usage0) );
+//   auto alice_ram_usage2 = c.control->get_resource_limits_manager().get_account_ram_usage( "alice"_n );
+//   BOOST_CHECK_EQUAL( alice_ram_usage2, alice_ram_usage1 + (alice_ram_usage1 - alice_ram_usage0) );
 
    dtrxs = c.get_scheduled_transactions();
    BOOST_CHECK_EQUAL( dtrxs.size(), 1 );
@@ -441,8 +441,8 @@ BOOST_AUTO_TEST_CASE( replace_deferred_test ) try {
 
    c.produce_block();
 
-   auto alice_ram_usage3 = c.control->get_resource_limits_manager().get_account_ram_usage( "alice"_n );
-   BOOST_CHECK_EQUAL( alice_ram_usage3, alice_ram_usage1 );
+//   auto alice_ram_usage3 = c.control->get_resource_limits_manager().get_account_ram_usage( "alice"_n );
+//   BOOST_CHECK_EQUAL( alice_ram_usage3, alice_ram_usage1 );
 
    dtrxs = c.get_scheduled_transactions();
    BOOST_CHECK_EQUAL( dtrxs.size(), 0 );
@@ -461,7 +461,7 @@ BOOST_AUTO_TEST_CASE( replace_deferred_test ) try {
    c.preactivate_protocol_features( {*d} );
    c.produce_block();
 
-   BOOST_CHECK_EQUAL( c.control->get_resource_limits_manager().get_account_ram_usage( "alice"_n ), alice_ram_usage0 );
+//   BOOST_CHECK_EQUAL( c.control->get_resource_limits_manager().get_account_ram_usage( "alice"_n ), alice_ram_usage0 );
 
    c.push_action( "test"_n, "defercall"_n, "alice"_n, fc::mutable_variant_object()
       ("payer", "alice")
@@ -470,7 +470,7 @@ BOOST_AUTO_TEST_CASE( replace_deferred_test ) try {
       ("payload", 100)
    );
 
-   BOOST_CHECK_EQUAL( c.control->get_resource_limits_manager().get_account_ram_usage( "alice"_n ), alice_ram_usage1 );
+//   BOOST_CHECK_EQUAL( c.control->get_resource_limits_manager().get_account_ram_usage( "alice"_n ), alice_ram_usage1 );
 
    dtrxs = c.get_scheduled_transactions();
    BOOST_CHECK_EQUAL( dtrxs.size(), 1 );
@@ -484,7 +484,7 @@ BOOST_AUTO_TEST_CASE( replace_deferred_test ) try {
       ("payload", 101)
    );
 
-   BOOST_CHECK_EQUAL( c.control->get_resource_limits_manager().get_account_ram_usage( "alice"_n ), alice_ram_usage1 );
+//   BOOST_CHECK_EQUAL( c.control->get_resource_limits_manager().get_account_ram_usage( "alice"_n ), alice_ram_usage1 );
 
    dtrxs = c.get_scheduled_transactions();
    BOOST_CHECK_EQUAL( dtrxs.size(), 1 );
@@ -499,7 +499,7 @@ BOOST_AUTO_TEST_CASE( replace_deferred_test ) try {
       100 // Needed to make this input transaction unique
    );
 
-   BOOST_CHECK_EQUAL( c.control->get_resource_limits_manager().get_account_ram_usage( "alice"_n ), alice_ram_usage1 );
+//   BOOST_CHECK_EQUAL( c.control->get_resource_limits_manager().get_account_ram_usage( "alice"_n ), alice_ram_usage1 );
 
    dtrxs = c.get_scheduled_transactions();
    BOOST_CHECK_EQUAL( dtrxs.size(), 1 );
@@ -598,7 +598,7 @@ BOOST_AUTO_TEST_CASE( no_duplicate_deferred_id_test ) try {
 
    trace1 = nullptr;
 
-   // Retire the delayed eosio::reqauth transaction.
+   // Retire the delayed dcd::reqauth transaction.
    c.produce_blocks(5);
    BOOST_REQUIRE( trace1 );
    BOOST_REQUIRE_EQUAL(0, index.size());
@@ -706,15 +706,15 @@ BOOST_AUTO_TEST_CASE( fix_linkauth_restriction ) { try {
                ("type", type)
                ("requirement", "first")),
          action_validate_exception,
-         fc_exception_message_is(std::string("Cannot link eosio::") + std::string(type) + std::string(" to a minimum permission"))
+         fc_exception_message_is(std::string("Cannot link dcd::") + std::string(type) + std::string(" to a minimum permission"))
       );
    };
 
-   validate_disallow("eosio", "linkauth");
-   validate_disallow("eosio", "unlinkauth");
-   validate_disallow("eosio", "deleteauth");
-   validate_disallow("eosio", "updateauth");
-   validate_disallow("eosio", "canceldelay");
+   validate_disallow("dcd", "linkauth");
+   validate_disallow("dcd", "unlinkauth");
+   validate_disallow("dcd", "deleteauth");
+   validate_disallow("dcd", "updateauth");
+   validate_disallow("dcd", "canceldelay");
 
    validate_disallow("currency", "linkauth");
    validate_disallow("currency", "unlinkauth");
@@ -737,11 +737,11 @@ BOOST_AUTO_TEST_CASE( fix_linkauth_restriction ) { try {
             ("requirement", "first"));
    };
 
-   validate_disallow("eosio", "linkauth");
-   validate_disallow("eosio", "unlinkauth");
-   validate_disallow("eosio", "deleteauth");
-   validate_disallow("eosio", "updateauth");
-   validate_disallow("eosio", "canceldelay");
+   validate_disallow("dcd", "linkauth");
+   validate_disallow("dcd", "unlinkauth");
+   validate_disallow("dcd", "deleteauth");
+   validate_disallow("dcd", "updateauth");
+   validate_disallow("dcd", "canceldelay");
 
    validate_allowed("currency", "linkauth");
    validate_allowed("currency", "unlinkauth");
@@ -860,7 +860,7 @@ BOOST_AUTO_TEST_CASE( only_bill_to_first_authorizer ) { try {
       ("net_weight", 1000)
       ("cpu_weight", 1000));
 
-   const resource_limits_manager& mgr = chain.control->get_resource_limits_manager();
+//   const resource_limits_manager& mgr = chain.control->get_resource_limits_manager();
 
    chain.produce_blocks();
 
@@ -881,25 +881,25 @@ BOOST_AUTO_TEST_CASE( only_bill_to_first_authorizer ) { try {
       trx.sign(get_private_key(tester_account2, "active"), chain.control->get_chain_id());
 
 
-      auto tester_cpu_limit0  = mgr.get_account_cpu_limit_ex(tester_account).first;
-      auto tester2_cpu_limit0 = mgr.get_account_cpu_limit_ex(tester_account2).first;
-      auto tester_net_limit0  = mgr.get_account_net_limit_ex(tester_account).first;
-      auto tester2_net_limit0 = mgr.get_account_net_limit_ex(tester_account2).first;
+//      auto tester_cpu_limit0  = mgr.get_account_cpu_limit_ex(tester_account).first;
+//      auto tester2_cpu_limit0 = mgr.get_account_cpu_limit_ex(tester_account2).first;
+//      auto tester_net_limit0  = mgr.get_account_net_limit_ex(tester_account).first;
+//      auto tester2_net_limit0 = mgr.get_account_net_limit_ex(tester_account2).first;
 
       chain.push_transaction(trx);
 
-      auto tester_cpu_limit1  = mgr.get_account_cpu_limit_ex(tester_account).first;
-      auto tester2_cpu_limit1 = mgr.get_account_cpu_limit_ex(tester_account2).first;
-      auto tester_net_limit1  = mgr.get_account_net_limit_ex(tester_account).first;
-      auto tester2_net_limit1 = mgr.get_account_net_limit_ex(tester_account2).first;
+//      auto tester_cpu_limit1  = mgr.get_account_cpu_limit_ex(tester_account).first;
+//      auto tester2_cpu_limit1 = mgr.get_account_cpu_limit_ex(tester_account2).first;
+//      auto tester_net_limit1  = mgr.get_account_net_limit_ex(tester_account).first;
+//      auto tester2_net_limit1 = mgr.get_account_net_limit_ex(tester_account2).first;
 
-      BOOST_CHECK(tester_cpu_limit1.used > tester_cpu_limit0.used);
-      BOOST_CHECK(tester2_cpu_limit1.used > tester2_cpu_limit0.used);
-      BOOST_CHECK(tester_net_limit1.used > tester_net_limit0.used);
-      BOOST_CHECK(tester2_net_limit1.used > tester2_net_limit0.used);
+//      BOOST_CHECK(tester_cpu_limit1.used > tester_cpu_limit0.used);
+//      BOOST_CHECK(tester2_cpu_limit1.used > tester2_cpu_limit0.used);
+//      BOOST_CHECK(tester_net_limit1.used > tester_net_limit0.used);
+//      BOOST_CHECK(tester2_net_limit1.used > tester2_net_limit0.used);
 
-      BOOST_CHECK_EQUAL(tester_cpu_limit1.used - tester_cpu_limit0.used, tester2_cpu_limit1.used - tester2_cpu_limit0.used);
-      BOOST_CHECK_EQUAL(tester_net_limit1.used - tester_net_limit0.used, tester2_net_limit1.used - tester2_net_limit0.used);
+//      BOOST_CHECK_EQUAL(tester_cpu_limit1.used - tester_cpu_limit0.used, tester2_cpu_limit1.used - tester2_cpu_limit0.used);
+//      BOOST_CHECK_EQUAL(tester_net_limit1.used - tester_net_limit0.used, tester2_net_limit1.used - tester2_net_limit0.used);
    }
 
    const auto& pfm = chain.control->get_protocol_feature_manager();
@@ -925,22 +925,22 @@ BOOST_AUTO_TEST_CASE( only_bill_to_first_authorizer ) { try {
       trx.sign(get_private_key(tester_account, "active"), chain.control->get_chain_id());
       trx.sign(get_private_key(tester_account2, "active"), chain.control->get_chain_id());
 
-      auto tester_cpu_limit0  = mgr.get_account_cpu_limit_ex(tester_account).first;
-      auto tester2_cpu_limit0 = mgr.get_account_cpu_limit_ex(tester_account2).first;
-      auto tester_net_limit0  = mgr.get_account_net_limit_ex(tester_account).first;
-      auto tester2_net_limit0 = mgr.get_account_net_limit_ex(tester_account2).first;
+//      auto tester_cpu_limit0  = mgr.get_account_cpu_limit_ex(tester_account).first;
+//      auto tester2_cpu_limit0 = mgr.get_account_cpu_limit_ex(tester_account2).first;
+//      auto tester_net_limit0  = mgr.get_account_net_limit_ex(tester_account).first;
+//      auto tester2_net_limit0 = mgr.get_account_net_limit_ex(tester_account2).first;
 
       chain.push_transaction(trx);
 
-      auto tester_cpu_limit1  = mgr.get_account_cpu_limit_ex(tester_account).first;
-      auto tester2_cpu_limit1 = mgr.get_account_cpu_limit_ex(tester_account2).first;
-      auto tester_net_limit1  = mgr.get_account_net_limit_ex(tester_account).first;
-      auto tester2_net_limit1 = mgr.get_account_net_limit_ex(tester_account2).first;
+//      auto tester_cpu_limit1  = mgr.get_account_cpu_limit_ex(tester_account).first;
+//      auto tester2_cpu_limit1 = mgr.get_account_cpu_limit_ex(tester_account2).first;
+//      auto tester_net_limit1  = mgr.get_account_net_limit_ex(tester_account).first;
+//      auto tester2_net_limit1 = mgr.get_account_net_limit_ex(tester_account2).first;
 
-      BOOST_CHECK(tester_cpu_limit1.used > tester_cpu_limit0.used);
-      BOOST_CHECK(tester2_cpu_limit1.used == tester2_cpu_limit0.used);
-      BOOST_CHECK(tester_net_limit1.used > tester_net_limit0.used);
-      BOOST_CHECK(tester2_net_limit1.used == tester2_net_limit0.used);
+//      BOOST_CHECK(tester_cpu_limit1.used > tester_cpu_limit0.used);
+//      BOOST_CHECK(tester2_cpu_limit1.used == tester2_cpu_limit0.used);
+//      BOOST_CHECK(tester_net_limit1.used > tester_net_limit0.used);
+//      BOOST_CHECK(tester2_net_limit1.used == tester2_net_limit0.used);
    }
 
 } FC_LOG_AND_RETHROW() }
@@ -953,15 +953,15 @@ BOOST_AUTO_TEST_CASE( forward_setcode_test ) { try {
    c.create_accounts( {tester1_account, tester2_account} );
 
    // Deploy contract that rejects all actions dispatched to it with the following exceptions:
-   //   * eosio::setcode to set code on the eosio is allowed (unless the rejectall account exists)
-   //   * eosio::newaccount is allowed only if it creates the rejectall account.
+   //   * dcd::setcode to set code on the dcd is allowed (unless the rejectall account exists)
+   //   * dcd::newaccount is allowed only if it creates the rejectall account.
    c.set_code( config::system_account_name, contracts::reject_all_wasm() );
    c.produce_block();
 
-   // Before activation, deploying a contract should work since setcode won't be forwarded to the WASM on eosio.
+   // Before activation, deploying a contract should work since setcode won't be forwarded to the WASM on dcd.
    c.set_code( tester1_account, contracts::noop_wasm() );
 
-   // Activate FORWARD_SETCODE protocol feature and then return contract on eosio back to what it was.
+   // Activate FORWARD_SETCODE protocol feature and then return contract on dcd back to what it was.
    const auto& pfm = c.control->get_protocol_feature_manager();
    const auto& d = pfm.get_builtin_digest( builtin_protocol_feature_t::forward_setcode );
    BOOST_REQUIRE( d );
@@ -971,11 +971,11 @@ BOOST_AUTO_TEST_CASE( forward_setcode_test ) { try {
    c.set_code( config::system_account_name, contracts::reject_all_wasm() );
    c.produce_block();
 
-   // After activation, deploying a contract causes setcode to be dispatched to the WASM on eosio,
+   // After activation, deploying a contract causes setcode to be dispatched to the WASM on dcd,
    // and in this case the contract is configured to reject the setcode action.
    BOOST_REQUIRE_EXCEPTION( c.set_code( tester2_account, contracts::noop_wasm() ),
-                            eosio_assert_message_exception,
-                            eosio_assert_message_is( "rejecting all actions" ) );
+                            dcd_assert_message_exception,
+                            dcd_assert_message_is( "rejecting all actions" ) );
 
 
    tester c2(setup_policy::none);
@@ -986,20 +986,20 @@ BOOST_AUTO_TEST_CASE( forward_setcode_test ) { try {
    c.produce_block();
    // The existence of the rejectall account will make the reject_all contract reject all actions with no exception.
 
-   // It will now not be possible to deploy the reject_all contract to the eosio account,
+   // It will now not be possible to deploy the reject_all contract to the dcd account,
    // because after it is set by the native function, it is called immediately after which will reject the transaction.
    BOOST_REQUIRE_EXCEPTION( c.set_code( config::system_account_name, contracts::reject_all_wasm() ),
-                            eosio_assert_message_exception,
-                            eosio_assert_message_is( "rejecting all actions" ) );
+                            dcd_assert_message_exception,
+                            dcd_assert_message_is( "rejecting all actions" ) );
 
 
    // Going back to the backup chain, we can create the rejectall account while the reject_all contract is
-   // already deployed on eosio.
+   // already deployed on dcd.
    c2.create_account( "rejectall"_n );
    c2.produce_block();
-   // Now all actions dispatched to the eosio account should be rejected.
+   // Now all actions dispatched to the dcd account should be rejected.
 
-   // However, it should still be possible to set the bios contract because the WASM on eosio is called after the
+   // However, it should still be possible to set the bios contract because the WASM on dcd is called after the
    // native setcode function completes.
    c2.set_before_producer_authority_bios_contract();
    c2.produce_block();
@@ -1033,8 +1033,8 @@ BOOST_AUTO_TEST_CASE( get_sender_test ) { try {
    BOOST_CHECK_EXCEPTION(  c.push_action( tester1_account, "sendinline"_n, tester1_account, mutable_variant_object()
                                              ("to", tester2_account.to_string())
                                              ("expected_sender", account_name{}) ),
-                           eosio_assert_message_exception,
-                           eosio_assert_message_is( "sender did not match" ) );
+                           dcd_assert_message_exception,
+                           dcd_assert_message_is( "sender did not match" ) );
 
    c.push_action( tester1_account, "sendinline"_n, tester1_account, mutable_variant_object()
       ("to", tester2_account.to_string())
@@ -1338,7 +1338,7 @@ BOOST_AUTO_TEST_CASE( webauthn_producer ) { try {
 
    BOOST_CHECK_THROW(
       c.push_action(config::system_account_name, "setprods"_n, config::system_account_name, fc::mutable_variant_object()("schedule", waprodsched)),
-      eosio::chain::unactivated_key_type
+      dcd::chain::unactivated_key_type
    );
 
    c.preactivate_protocol_features( {*d} );
@@ -1368,7 +1368,7 @@ BOOST_AUTO_TEST_CASE( webauthn_create_account ) { try {
 
    c.set_transaction_headers(trx);
    trx.sign(get_private_key(config::system_account_name, "active"), c.control->get_chain_id());
-   BOOST_CHECK_THROW(c.push_transaction(trx), eosio::chain::unactivated_key_type);
+   BOOST_CHECK_THROW(c.push_transaction(trx), dcd::chain::unactivated_key_type);
 
    c.preactivate_protocol_features( {*d} );
    c.produce_block();
@@ -1387,7 +1387,7 @@ BOOST_AUTO_TEST_CASE( webauthn_update_account_auth ) { try {
 
    BOOST_CHECK_THROW(c.set_authority("billy"_n, config::active_name,
                         authority(public_key_type("PUB_WA_WdCPfafVNxVMiW5ybdNs83oWjenQXvSt1F49fg9mv7qrCiRwHj5b38U3ponCFWxQTkDsMC"s))),
-                     eosio::chain::unactivated_key_type);
+                     dcd::chain::unactivated_key_type);
 
    c.preactivate_protocol_features( {*d} );
    c.produce_block();
@@ -1446,7 +1446,7 @@ BOOST_AUTO_TEST_CASE( webauthn_recover_key ) { try {
 
    c.set_transaction_headers(trx);
    trx.sign(c.get_private_key( "bob"_n, "active" ), c.control->get_chain_id());
-   BOOST_CHECK_THROW(c.push_transaction(trx), eosio::chain::unactivated_signature_type);
+   BOOST_CHECK_THROW(c.push_transaction(trx), dcd::chain::unactivated_signature_type);
 
    c.preactivate_protocol_features( {*d} );
    c.produce_block();
@@ -1494,7 +1494,7 @@ BOOST_AUTO_TEST_CASE( webauthn_assert_recover_key ) { try {
 
    c.set_transaction_headers(trx);
    trx.sign(c.get_private_key( "bob"_n, "active" ), c.control->get_chain_id());
-   BOOST_CHECK_THROW(c.push_transaction(trx), eosio::chain::unactivated_signature_type);
+   BOOST_CHECK_THROW(c.push_transaction(trx), dcd::chain::unactivated_signature_type);
 
    c.preactivate_protocol_features( {*d} );
    c.produce_block();
@@ -1593,7 +1593,7 @@ BOOST_AUTO_TEST_CASE( producer_schedule_change_extension_test ) { try {
       // re-sign the bad block
       auto header_bmroot = digest_type::hash( std::make_pair( bad_block->digest(), remote.control->head_block_state()->blockroot_merkle ) );
       auto sig_digest = digest_type::hash( std::make_pair(header_bmroot, remote.control->head_block_state()->pending_schedule.schedule_hash) );
-      bad_block->producer_signature = remote.get_private_key("eosio"_n, "active").sign(sig_digest);
+      bad_block->producer_signature = remote.get_private_key("dcd"_n, "active").sign(sig_digest);
 
       // ensure it is rejected as an unknown extension
       BOOST_REQUIRE_EXCEPTION(
@@ -1612,7 +1612,7 @@ BOOST_AUTO_TEST_CASE( producer_schedule_change_extension_test ) { try {
       // re-sign the bad block
       auto header_bmroot = digest_type::hash( std::make_pair( bad_block->digest(), remote.control->head_block_state()->blockroot_merkle ) );
       auto sig_digest = digest_type::hash( std::make_pair(header_bmroot, remote.control->head_block_state()->pending_schedule.schedule_hash) );
-      bad_block->producer_signature = remote.get_private_key("eosio"_n, "active").sign(sig_digest);
+      bad_block->producer_signature = remote.get_private_key("dcd"_n, "active").sign(sig_digest);
 
       // ensure it is accepted (but rejected because it doesn't match expected state)
       BOOST_REQUIRE_EXCEPTION(
@@ -1640,7 +1640,7 @@ BOOST_AUTO_TEST_CASE( producer_schedule_change_extension_test ) { try {
       // re-sign the bad block
       auto header_bmroot = digest_type::hash( std::make_pair( bad_block->digest(), remote.control->head_block_state()->blockroot_merkle ) );
       auto sig_digest = digest_type::hash( std::make_pair(header_bmroot, remote.control->head_block_state()->pending_schedule.schedule_hash) );
-      bad_block->producer_signature = remote.get_private_key("eosio"_n, "active").sign(sig_digest);
+      bad_block->producer_signature = remote.get_private_key("dcd"_n, "active").sign(sig_digest);
 
       // ensure it is rejected because it doesn't match expected state (but the extention was accepted)
       BOOST_REQUIRE_EXCEPTION(
@@ -1659,7 +1659,7 @@ BOOST_AUTO_TEST_CASE( producer_schedule_change_extension_test ) { try {
       // re-sign the bad block
       auto header_bmroot = digest_type::hash( std::make_pair( bad_block->digest(), remote.control->head_block_state()->blockroot_merkle ) );
       auto sig_digest = digest_type::hash( std::make_pair(header_bmroot, remote.control->head_block_state()->pending_schedule.schedule_hash) );
-      bad_block->producer_signature = remote.get_private_key("eosio"_n, "active").sign(sig_digest);
+      bad_block->producer_signature = remote.get_private_key("dcd"_n, "active").sign(sig_digest);
 
       // ensure it is rejected because the new_producers field is not null
       BOOST_REQUIRE_EXCEPTION(
@@ -1683,7 +1683,7 @@ BOOST_AUTO_TEST_CASE( wtmsig_block_signing_inflight_legacy_test ) { try {
 
    // activate the feature, and start an in-flight producer schedule change with the legacy format
    c.preactivate_protocol_features( {*d} );
-   vector<legacy::producer_key> sched = {{"eosio"_n, c.get_public_key("eosio"_n, "bsk")}};
+   vector<legacy::producer_key> sched = {{"dcd"_n, c.get_public_key("dcd"_n, "bsk")}};
    c.push_action(config::system_account_name, "setprods"_n, config::system_account_name, fc::mutable_variant_object()("schedule", sched));
    c.produce_block();
 
@@ -1698,7 +1698,7 @@ BOOST_AUTO_TEST_CASE( wtmsig_block_signing_inflight_legacy_test ) { try {
    BOOST_REQUIRE_EXCEPTION( c.produce_block(), no_block_signatures, fc_exception_message_is( "Signer returned no signatures" ));
    c.control->abort_block();
 
-   c.block_signing_private_keys.emplace(get_public_key("eosio"_n, "bsk"), get_private_key("eosio"_n, "bsk"));
+   c.block_signing_private_keys.emplace(get_public_key("dcd"_n, "bsk"), get_private_key("dcd"_n, "bsk"));
    c.produce_block();
 
 } FC_LOG_AND_RETHROW() }
@@ -1717,7 +1717,7 @@ BOOST_AUTO_TEST_CASE( wtmsig_block_signing_inflight_extension_test ) { try {
    c.produce_block();
 
    // start an in-flight producer schedule change before the activation is availble to header only validators
-   vector<legacy::producer_key> sched = {{"eosio"_n, c.get_public_key("eosio"_n, "bsk")}};
+   vector<legacy::producer_key> sched = {{"dcd"_n, c.get_public_key("dcd"_n, "bsk")}};
    c.push_action(config::system_account_name, "setprods"_n, config::system_account_name, fc::mutable_variant_object()("schedule", sched));
    c.produce_block();
 
@@ -1734,7 +1734,7 @@ BOOST_AUTO_TEST_CASE( wtmsig_block_signing_inflight_extension_test ) { try {
    BOOST_REQUIRE_EXCEPTION( c.produce_block(), no_block_signatures, fc_exception_message_is( "Signer returned no signatures" ));
    c.control->abort_block();
 
-   c.block_signing_private_keys.emplace(get_public_key("eosio"_n, "bsk"), get_private_key("eosio"_n, "bsk"));
+   c.block_signing_private_keys.emplace(get_public_key("dcd"_n, "bsk"), get_private_key("dcd"_n, "bsk"));
    c.produce_block();
 
 } FC_LOG_AND_RETHROW() }

@@ -1,14 +1,14 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
-#include <eosio/testing/tester.hpp>
-#include <eosio/chain/abi_serializer.hpp>
-#include <eosio/chain/wasm_eosio_constraints.hpp>
-#include <eosio/chain/resource_limits.hpp>
-#include <eosio/chain/exceptions.hpp>
-#include <eosio/chain/wast_to_wasm.hpp>
-#include <eosio/chain_plugin/chain_plugin.hpp>
-#include <eosio/chain/backing_store/kv_context.hpp>
+#include <dcd/testing/tester.hpp>
+#include <dcd/chain/abi_serializer.hpp>
+#include <dcd/chain/wasm_dcd_constraints.hpp>
+//#include <dcd/chain/resource_limits.hpp>
+#include <dcd/chain/exceptions.hpp>
+#include <dcd/chain/wast_to_wasm.hpp>
+#include <dcd/chain_plugin/chain_plugin.hpp>
+#include <dcd/chain/backing_store/kv_context.hpp>
 
 #include <contracts.hpp>
 
@@ -30,12 +30,12 @@
 
 BOOST_AUTO_TEST_SUITE(get_kv_table_addr_tests)
 
-using namespace eosio::chain;
-using namespace eosio::testing;
+using namespace dcd::chain;
+using namespace dcd::testing;
 using namespace fc;
 
 BOOST_FIXTURE_TEST_CASE( get_kv_table_addr_test, TESTER ) try {
-   eosio::chain_apis::read_only::get_table_rows_result result;
+   dcd::chain_apis::read_only::get_table_rows_result result;
    auto chk_result = [&](int row, int data) {
       if( data == 1 )
       {
@@ -91,7 +91,7 @@ BOOST_FIXTURE_TEST_CASE( get_kv_table_addr_test, TESTER ) try {
 
    set_code(config::system_account_name, contracts::kv_bios_wasm());
    set_abi(config::system_account_name, contracts::kv_bios_abi().data());
-   push_action("eosio"_n, "ramkvlimits"_n, "eosio"_n, mutable_variant_object()("k", 1024)("v", 1024)("i", 1024));
+   push_action("dcd"_n, "ramkvlimits"_n, "dcd"_n, mutable_variant_object()("k", 1024)("v", 1024)("i", 1024));
    produce_blocks(1);
 
    set_code( "kvaddrbook"_n, contracts::kv_addr_book_wasm() );
@@ -102,8 +102,8 @@ BOOST_FIXTURE_TEST_CASE( get_kv_table_addr_test, TESTER ) try {
    push_action("kvaddrbook"_n, "test"_n, "kvaddrbook"_n, arg );
 
 
-   eosio::chain_apis::read_only plugin(*(this->control), {}, fc::microseconds::maximum());
-   eosio::chain_apis::read_only::get_kv_table_rows_params p;
+   dcd::chain_apis::read_only plugin(*(this->control), {}, fc::microseconds::maximum());
+   dcd::chain_apis::read_only::get_kv_table_rows_params p;
    p.code = "kvaddrbook"_n;
    p.table = "kvaddrbook"_n;
    p.index_name = "accname"_n;

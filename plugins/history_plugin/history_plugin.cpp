@@ -1,16 +1,16 @@
-#include <eosio/history_plugin/history_plugin.hpp>
-#include <eosio/history_plugin/account_control_history_object.hpp>
-#include <eosio/history_plugin/public_key_history_object.hpp>
-#include <eosio/chain/controller.hpp>
-#include <eosio/chain/trace.hpp>
-#include <eosio/chain_plugin/chain_plugin.hpp>
+#include <dcd/history_plugin/history_plugin.hpp>
+#include <dcd/history_plugin/account_control_history_object.hpp>
+#include <dcd/history_plugin/public_key_history_object.hpp>
+#include <dcd/chain/controller.hpp>
+#include <dcd/chain/trace.hpp>
+#include <dcd/chain_plugin/chain_plugin.hpp>
 
 #include <fc/io/json.hpp>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/signals2/connection.hpp>
 
-namespace eosio {
+namespace dcd {
    using namespace chain;
    using boost::signals2::scoped_connection;
 
@@ -73,12 +73,12 @@ namespace eosio {
       >
    >;
 
-} /// namespace eosio
+} /// namespace dcd
 
-CHAINBASE_SET_INDEX_TYPE(eosio::account_history_object, eosio::account_history_index)
-CHAINBASE_SET_INDEX_TYPE(eosio::action_history_object, eosio::action_history_index)
+CHAINBASE_SET_INDEX_TYPE(dcd::account_history_object, dcd::account_history_index)
+CHAINBASE_SET_INDEX_TYPE(dcd::action_history_object, dcd::action_history_index)
 
-namespace eosio {
+namespace dcd {
 
    template<typename MultiIndex, typename LookupType>
    static void remove(chainbase::database& db, const account_name& account_name, const permission_name& permission)
@@ -315,14 +315,14 @@ namespace eosio {
             for( auto& s : fo ) {
                if( s == "*" || s == "\"*\"" ) {
                   my->bypass_filter = true;
-                  wlog( "--filter-on * enabled. This can fill shared_mem, causing nodeos to stop." );
+                  wlog( "--filter-on * enabled. This can fill shared_mem, causing dcdnode to stop." );
                   break;
                }
                std::vector<std::string> v;
                boost::split( v, s, boost::is_any_of( ":" ));
-               EOS_ASSERT( v.size() == 3, fc::invalid_arg_exception, "Invalid value ${s} for --filter-on", ("s", s));
-               filter_entry fe{eosio::chain::name(v[0]), eosio::chain::name(v[1]), eosio::chain::name(v[2])};
-               EOS_ASSERT( fe.receiver.to_uint64_t(), fc::invalid_arg_exception,
+               DCD_ASSERT( v.size() == 3, fc::invalid_arg_exception, "Invalid value ${s} for --filter-on", ("s", s));
+               filter_entry fe{dcd::chain::name(v[0]), dcd::chain::name(v[1]), dcd::chain::name(v[2])};
+               DCD_ASSERT( fe.receiver.to_uint64_t(), fc::invalid_arg_exception,
                            "Invalid value ${s} for --filter-on", ("s", s));
                my->filter_on.insert( fe );
             }
@@ -332,16 +332,16 @@ namespace eosio {
             for( auto& s : fo ) {
                std::vector<std::string> v;
                boost::split( v, s, boost::is_any_of( ":" ));
-               EOS_ASSERT( v.size() == 3, fc::invalid_arg_exception, "Invalid value ${s} for --filter-out", ("s", s));
-               filter_entry fe{eosio::chain::name(v[0]), eosio::chain::name(v[1]), eosio::chain::name(v[2])};
-               EOS_ASSERT( fe.receiver.to_uint64_t(), fc::invalid_arg_exception,
+               DCD_ASSERT( v.size() == 3, fc::invalid_arg_exception, "Invalid value ${s} for --filter-out", ("s", s));
+               filter_entry fe{dcd::chain::name(v[0]), dcd::chain::name(v[1]), dcd::chain::name(v[2])};
+               DCD_ASSERT( fe.receiver.to_uint64_t(), fc::invalid_arg_exception,
                            "Invalid value ${s} for --filter-out", ("s", s));
                my->filter_out.insert( fe );
             }
          }
 
          my->chain_plug = app().find_plugin<chain_plugin>();
-         EOS_ASSERT( my->chain_plug, chain::missing_chain_plugin_exception, ""  );
+         DCD_ASSERT( my->chain_plug, chain::missing_chain_plugin_exception, ""  );
          auto& chain = my->chain_plug->chain();
 
          chainbase::database& db = const_cast<chainbase::database&>( chain.db() ); // Override read-only access to state DB (highly unrecommended practice!)
@@ -404,7 +404,7 @@ namespace eosio {
            if( start > pos ) start = 0;
            end   = pos;
         }
-        EOS_ASSERT( end >= start, chain::plugin_exception, "end position is earlier than start position" );
+        DCD_ASSERT( end >= start, chain::plugin_exception, "end position is earlier than start position" );
 
         idump((start)(end));
 
@@ -449,7 +449,7 @@ namespace eosio {
             FC_ASSERT( input_id_length <= 64, "hex string is too long to represent an actual transaction id" );
             FC_ASSERT( input_id_length >= 8,  "hex string representing transaction id should be at least 8 characters long to avoid excessive collisions" );
             input_id = transaction_id_type(p.id);
-         } EOS_RETHROW_EXCEPTIONS(transaction_id_type_exception, "Invalid transaction ID: ${transaction_id}", ("transaction_id", p.id))
+         } DCD_RETHROW_EXCEPTIONS(transaction_id_type_exception, "Invalid transaction ID: ${transaction_id}", ("transaction_id", p.id))
 
          auto txn_id_matched = [&input_id, input_id_size = input_id_length/2, no_half_byte_at_end = (input_id_length % 2 == 0)]
                                ( const transaction_id_type &id ) -> bool // hex prefix comparison
@@ -469,7 +469,7 @@ namespace eosio {
          bool in_history = (itr != idx.end() && txn_id_matched(itr->trx_id) );
 
          if( !in_history && !p.block_num_hint ) {
-            EOS_THROW(tx_not_found, "Transaction ${id} not found in history and no block hint was given", ("id",p.id));
+            DCD_THROW(tx_not_found, "Transaction ${id} not found in history and no block hint was given", ("id",p.id));
          }
 
          get_transaction_result result;
@@ -560,7 +560,7 @@ namespace eosio {
             }
 
             if (!found) {
-               EOS_THROW(tx_not_found, "Transaction ${id} not found in history or in block number ${n}", ("id",p.id)("n", *p.block_num_hint));
+               DCD_THROW(tx_not_found, "Transaction ${id} not found in history or in block number ${n}", ("id",p.id)("n", *p.block_num_hint));
             }
          }
 
@@ -591,4 +591,4 @@ namespace eosio {
 
 
 
-} /// namespace eosio
+} /// namespace dcd

@@ -14,9 +14,9 @@
 #include <rocksdb/slice_transform.h>
 
 #include <b1/session/session.hpp>
-#include <eosio/chain/exceptions.hpp>
+#include <dcd/chain/exceptions.hpp>
 
-namespace eosio::session {
+namespace dcd::session {
 
 /// \brief A tag type used to create the RocksDB session specialization.
 /// \remarks To instantiate a RocksDB session use the following syntax <code>auto db = session<rocksdb_t>{...};</code>
@@ -190,7 +190,7 @@ inline session<rocksdb_t> make_session(std::shared_ptr<rocksdb::DB> db, size_t m
 
 inline session<rocksdb_t>::session(std::shared_ptr<rocksdb::DB> db, size_t max_iterators)
     : m_db{ [&]() {
-         EOS_ASSERT(db, eosio::chain::database_exception, "db parameter cannot be null");
+         DCD_ASSERT(db, dcd::chain::database_exception, "db parameter cannot be null");
          return std::move(db);
       }() },
       m_iterator_read_options{ [&]() {
@@ -563,4 +563,4 @@ bool session<rocksdb_t>::rocks_iterator<Iterator_traits>::operator!=(const rocks
    return !(*this == other);
 }
 
-} // namespace eosio::session
+} // namespace dcd::session

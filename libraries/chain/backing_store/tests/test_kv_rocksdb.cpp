@@ -1,14 +1,14 @@
 #define BOOST_TEST_MODULE kv_rocksdb_unittests
 
 #include <boost/test/included/unit_test.hpp>
-#include <eosio/chain/backing_store/kv_context_rocksdb.hpp>
-#include <eosio/chain/backing_store/chain_kv_payer.hpp>
-#include <eosio/chain/kv_chainbase_objects.hpp>
+#include <dcd/chain/backing_store/kv_context_rocksdb.hpp>
+#include <dcd/chain/backing_store/chain_kv_payer.hpp>
+#include <dcd/chain/kv_chainbase_objects.hpp>
 
 #include <b1/session/shared_bytes.hpp>
 
-using namespace eosio;
-using namespace eosio::chain;
+using namespace dcd;
+using namespace dcd::chain;
 
 // Global test data
 constexpr account_name receiver              = "kvrdb"_n;
@@ -25,7 +25,7 @@ constexpr uint32_t max_value_size = 1020 * 1024;
 constexpr uint32_t max_iterators  = 3;
 kv_database_config limits{ max_key_size, max_value_size, max_iterators };
 
-using namespace eosio::chain::backing_store;
+using namespace dcd::chain::backing_store;
 
 struct kv_rocksdb_fixture {
 
@@ -44,17 +44,17 @@ struct kv_rocksdb_fixture {
          iterator                                                              operator++(int) { return *this; }
          iterator&                                                             operator--() { m_is_end = false; return *this; }
          iterator                                                              operator--(int) { return *this; }
-         std::pair<eosio::session::shared_bytes, std::optional<eosio::session::shared_bytes>> operator*() const {
+         std::pair<dcd::session::shared_bytes, std::optional<dcd::session::shared_bytes>> operator*() const {
             return m_fixture->mock_get_kv();
          }
-         std::pair<eosio::session::shared_bytes, std::optional<eosio::session::shared_bytes>> operator->() const {
+         std::pair<dcd::session::shared_bytes, std::optional<dcd::session::shared_bytes>> operator->() const {
             return m_fixture->mock_get_kv();
          }
          bool operator==(const iterator& other) const { return m_is_end == other.m_is_end; }
          bool operator!=(const iterator& other) const { return !(*this == other); }
 
          bool deleted() const { return m_fixture->mock_is_erased(); }
-         eosio::session::shared_bytes key() { return m_fixture->mock_get_kv().first; }
+         dcd::session::shared_bytes key() { return m_fixture->mock_get_kv().first; }
        private:
          kv_rocksdb_fixture* m_fixture;
          bool                m_is_end{ false };
@@ -63,16 +63,16 @@ struct kv_rocksdb_fixture {
     public:
       mock_session(kv_rocksdb_fixture& fixture) : m_fixture{ &fixture } {}
 
-      std::optional<eosio::session::shared_bytes> read(const eosio::session::shared_bytes& key) const {
+      std::optional<dcd::session::shared_bytes> read(const dcd::session::shared_bytes& key) const {
          return m_fixture->mock_get(key);
       }
-      void write(const eosio::session::shared_bytes& key, const eosio::session::shared_bytes& value) {}
-      bool contains(const eosio::session::shared_bytes& key) const { return false; }
-      void erase(const eosio::session::shared_bytes& key) {}
+      void write(const dcd::session::shared_bytes& key, const dcd::session::shared_bytes& value) {}
+      bool contains(const dcd::session::shared_bytes& key) const { return false; }
+      void erase(const dcd::session::shared_bytes& key) {}
 
       iterator begin() { return iterator{ *m_fixture, false }; }
       iterator end() { return iterator{ *m_fixture, true }; }
-      iterator lower_bound(const eosio::session::shared_bytes& key) { 
+      iterator lower_bound(const dcd::session::shared_bytes& key) { 
         return iterator{ *m_fixture, key != m_fixture->mock_get_key_prefix() || m_fixture->mock_is_end() }; 
       }
 
@@ -111,12 +111,12 @@ struct kv_rocksdb_fixture {
    std::function<int64_t(uint64_t contract, const char* key, uint32_t key_size, const char* value, uint32_t value_size,
                          account_name payer)>
                                                                                                 mock_kv_set;
-   std::function<std::optional<eosio::session::shared_bytes>(const eosio::session::shared_bytes&)>             mock_get;
-   std::function<std::pair<eosio::session::shared_bytes, std::optional<eosio::session::shared_bytes>> const()> mock_get_kv;
+   std::function<std::optional<dcd::session::shared_bytes>(const dcd::session::shared_bytes&)>             mock_get;
+   std::function<std::pair<dcd::session::shared_bytes, std::optional<dcd::session::shared_bytes>> const()> mock_get_kv;
    std::function<bool()>                                                                        mock_is_end = [](){return false;};
    std::function<bool()>                                                                        mock_is_valid;
    std::function<bool()>                                                                        mock_is_erased;
-   std::function<eosio::session::shared_bytes()>                                                mock_get_key_prefix;
+   std::function<dcd::session::shared_bytes()>                                                mock_get_key_prefix;
 
    // object being tested
    std::unique_ptr<kv_context_rocksdb<mock_session, mock_resource_manager>> my_kv_context;
@@ -164,12 +164,12 @@ struct kv_rocksdb_fixture {
    }
 
    void check_test_kv_it_status(it_state state, it_pos pos, kv_it_stat expected_status) {
-      mock_get_kv = []() -> std::pair<eosio::session::shared_bytes, std::optional<eosio::session::shared_bytes>> {
+      mock_get_kv = []() -> std::pair<dcd::session::shared_bytes, std::optional<dcd::session::shared_bytes>> {
          static const auto expected_key = prefix + std::string{"key"};
-         static const auto key = eosio::chain::make_prefix_key(contract, expected_key.c_str(), expected_key.size());
-         return std::pair{ key, eosio::session::shared_bytes{"payernamValue", 13} };
+         static const auto key = dcd::chain::make_prefix_key(contract, expected_key.c_str(), expected_key.size());
+         return std::pair{ key, dcd::session::shared_bytes{"payernamValue", 13} };
       };
-      mock_get_key_prefix = [&]() { return eosio::chain::make_prefix_key(contract, prefix.c_str(), prefix.size()); };
+      mock_get_key_prefix = [&]() { return dcd::chain::make_prefix_key(contract, prefix.c_str(), prefix.size()); };
       mock_is_erased = []() -> bool { return false; };
       mock_is_end = []() -> bool { return false; };
       std::unique_ptr<kv_iterator> it = my_kv_context->kv_it_create(contract, prefix.c_str(), prefix.size());
@@ -190,11 +190,11 @@ struct kv_rocksdb_fixture {
 
       mock_is_valid = [pos, state]() -> bool { return state == it_state::NOT_ERASED && pos == it_pos::NOT_END; };
 
-      mock_get_kv = []() -> std::pair<eosio::session::shared_bytes, std::optional<eosio::session::shared_bytes>> {
-         return std::pair{ eosio::session::shared_bytes("keykeykeykeykey", 15),
-                           std::optional<eosio::session::shared_bytes>{eosio::session::shared_bytes("payernamMyvalue", 15)} };
+      mock_get_kv = []() -> std::pair<dcd::session::shared_bytes, std::optional<dcd::session::shared_bytes>> {
+         return std::pair{ dcd::session::shared_bytes("keykeykeykeykey", 15),
+                           std::optional<dcd::session::shared_bytes>{dcd::session::shared_bytes("payernamMyvalue", 15)} };
       };
-      mock_get_key_prefix = [&]() { return eosio::chain::make_prefix_key(contract, prefix.c_str(), it_key_size); };
+      mock_get_key_prefix = [&]() { return dcd::chain::make_prefix_key(contract, prefix.c_str(), it_key_size); };
 
       std::unique_ptr<kv_iterator> it = my_kv_context->kv_it_create(contract, prefix.c_str(), it_key_size);
       uint32_t                     found_key_size, found_value_size;
@@ -227,16 +227,16 @@ struct kv_rocksdb_fixture {
 
       std::string        key              = "keykeykeykeykey";
       constexpr uint32_t key_size         = 15;
-      auto               sample_key_value = std::pair{ eosio::session::shared_bytes(key.c_str(), key.size()),
-                                                       std::optional<eosio::session::shared_bytes>{eosio::session::shared_bytes("valuevaluevalue", 15)} };
-      mock_get_kv                         = [key_existing, sample_key_value]() -> std::pair<eosio::session::shared_bytes, std::optional<eosio::session::shared_bytes>> {
+      auto               sample_key_value = std::pair{ dcd::session::shared_bytes(key.c_str(), key.size()),
+                                                       std::optional<dcd::session::shared_bytes>{dcd::session::shared_bytes("valuevaluevalue", 15)} };
+      mock_get_kv                         = [key_existing, sample_key_value]() -> std::pair<dcd::session::shared_bytes, std::optional<dcd::session::shared_bytes>> {
          if (key_existing == it_key_existing::YES) {
             return sample_key_value;
          } else {
-            return {eosio::session::shared_bytes{}, std::optional<eosio::session::shared_bytes>{}};
+            return {dcd::session::shared_bytes{}, std::optional<dcd::session::shared_bytes>{}};
          }
       };
-      mock_get_key_prefix = [&]() { return eosio::chain::make_prefix_key(contract, prefix.c_str(), it_key_size); };
+      mock_get_key_prefix = [&]() { return dcd::chain::make_prefix_key(contract, prefix.c_str(), it_key_size); };
 
       std::unique_ptr<kv_iterator> it     = my_kv_context->kv_it_create(contract, prefix.c_str(), it_key_size);
       uint32_t                     offset = 0;
@@ -268,16 +268,16 @@ struct kv_rocksdb_fixture {
 
       std::string        value            = "payernamMyvalue";
       constexpr uint32_t value_size       = 7; // Myvalue
-      auto               sample_key_value = std::pair{ eosio::session::shared_bytes("keykeykeykeykey", 15),
-                                                        std::optional<eosio::session::shared_bytes>{eosio::session::shared_bytes(value.c_str(), value.size())} };
-      mock_get_kv                         = [&]() -> std::pair<eosio::session::shared_bytes, std::optional<eosio::session::shared_bytes>> {
+      auto               sample_key_value = std::pair{ dcd::session::shared_bytes("keykeykeykeykey", 15),
+                                                        std::optional<dcd::session::shared_bytes>{dcd::session::shared_bytes(value.c_str(), value.size())} };
+      mock_get_kv                         = [&]() -> std::pair<dcd::session::shared_bytes, std::optional<dcd::session::shared_bytes>> {
          if (key_existing == it_key_existing::YES) {
             return sample_key_value;
          } else {
-            return { eosio::session::shared_bytes{}, std::optional<eosio::session::shared_bytes>{} };
+            return { dcd::session::shared_bytes{}, std::optional<dcd::session::shared_bytes>{} };
          }
       };
-      mock_get_key_prefix = [&]() { return eosio::chain::make_prefix_key(contract, prefix.c_str(), it_key_size); };
+      mock_get_key_prefix = [&]() { return dcd::chain::make_prefix_key(contract, prefix.c_str(), it_key_size); };
 
       std::unique_ptr<kv_iterator> it     = my_kv_context->kv_it_create(contract, prefix.c_str(), it_key_size);
       uint32_t                     offset = 0;
@@ -306,15 +306,15 @@ struct kv_rocksdb_fixture {
    void check_kv_it_compare(it_state state, it_exception_expected exception_expected, uint64_t rhs_contract) {
       mock_is_erased = [state]() -> bool { return state == it_state::ERASED; };
       mock_get_kv = []() {
-         return std::pair{ eosio::session::shared_bytes{}, std::optional<eosio::session::shared_bytes>{} };
+         return std::pair{ dcd::session::shared_bytes{}, std::optional<dcd::session::shared_bytes>{} };
       };
 
-      mock_get_key_prefix = [&]() { return eosio::chain::make_prefix_key(contract, prefix.c_str(), it_key_size); };
+      mock_get_key_prefix = [&]() { return dcd::chain::make_prefix_key(contract, prefix.c_str(), it_key_size); };
       std::unique_ptr<kv_iterator> it = my_kv_context->kv_it_create(contract, prefix.c_str(), it_key_size);
 
       uint32_t num_iterators = 5;
       uint32_t size          = 10;
-      mock_get_key_prefix = [&]() { return eosio::chain::make_prefix_key(rhs_contract, prefix.c_str(), size); };
+      mock_get_key_prefix = [&]() { return dcd::chain::make_prefix_key(rhs_contract, prefix.c_str(), size); };
       kv_iterator_rocksdb<mock_session> rhs{ num_iterators, *my_kv_context->session, rhs_contract, prefix.c_str(), size };
 
       if (exception_expected == it_exception_expected::YES) {
@@ -327,12 +327,12 @@ struct kv_rocksdb_fixture {
    void check_kv_it_key_compare(it_state state, it_keys_equal keys_equal, const std::string& mykey) {
       mock_is_erased = [state]() -> bool { return state == it_state::ERASED; };
 
-      mock_get_kv = []() -> std::pair<eosio::session::shared_bytes, std::optional<eosio::session::shared_bytes>> {
+      mock_get_kv = []() -> std::pair<dcd::session::shared_bytes, std::optional<dcd::session::shared_bytes>> {
          static const auto expected_key = prefix + std::string{"key"};
-         static const auto key = eosio::chain::make_prefix_key(contract, expected_key.c_str(), expected_key.size());
-         return std::pair{ key, eosio::session::shared_bytes{"payernamValue", 13} };
+         static const auto key = dcd::chain::make_prefix_key(contract, expected_key.c_str(), expected_key.size());
+         return std::pair{ key, dcd::session::shared_bytes{"payernamValue", 13} };
       };
-      mock_get_key_prefix = [&]() { return eosio::chain::make_prefix_key(contract, prefix.c_str(), prefix.size()); };
+      mock_get_key_prefix = [&]() { return dcd::chain::make_prefix_key(contract, prefix.c_str(), prefix.size()); };
       std::unique_ptr<kv_iterator> it = my_kv_context->kv_it_create(contract, prefix.c_str(), prefix.size());
       if (state == it_state::ERASED) {
          BOOST_CHECK_THROW(it->kv_it_key_compare(mykey.c_str(), mykey.size()), kv_bad_iter);
@@ -377,8 +377,8 @@ BOOST_AUTO_TEST_CASE(test_actual_value_start) {
 
 BOOST_FIXTURE_TEST_CASE(test_kv_erase, kv_rocksdb_fixture) {
    std::string v = "111111119876543210"; // "1111111" is payer
-   mock_get      = [v](const eosio::session::shared_bytes&) -> std::optional<eosio::session::shared_bytes> {
-      return eosio::session::shared_bytes(v.data(), v.size());
+   mock_get      = [v](const dcd::session::shared_bytes&) -> std::optional<dcd::session::shared_bytes> {
+      return dcd::session::shared_bytes(v.data(), v.size());
    };
 
    std::string key            = "key";
@@ -389,8 +389,8 @@ BOOST_FIXTURE_TEST_CASE(test_kv_erase, kv_rocksdb_fixture) {
 
 BOOST_FIXTURE_TEST_CASE(test_kv_erase_zero_value, kv_rocksdb_fixture) {
    std::string v = "11111111"; // "1111111" is payer, no value existing
-   mock_get      = [v](const eosio::session::shared_bytes&) -> std::optional<eosio::session::shared_bytes> {
-      return eosio::session::shared_bytes(v.data(), v.size());
+   mock_get      = [v](const dcd::session::shared_bytes&) -> std::optional<dcd::session::shared_bytes> {
+      return dcd::session::shared_bytes(v.data(), v.size());
    };
 
    std::string key            = "key";
@@ -400,8 +400,8 @@ BOOST_FIXTURE_TEST_CASE(test_kv_erase_zero_value, kv_rocksdb_fixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(test_kv_erase_key_not_exist, kv_rocksdb_fixture) {
-   mock_get = [](const eosio::session::shared_bytes&) -> std::optional<eosio::session::shared_bytes> {
-      return std::optional<eosio::session::shared_bytes>{};
+   mock_get = [](const dcd::session::shared_bytes&) -> std::optional<dcd::session::shared_bytes> {
+      return std::optional<dcd::session::shared_bytes>{};
    };
 
    std::string key = "key";
@@ -409,8 +409,8 @@ BOOST_FIXTURE_TEST_CASE(test_kv_erase_key_not_exist, kv_rocksdb_fixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(test_kv_erase_key_contract_not_match, kv_rocksdb_fixture) {
-   mock_get = [](const eosio::session::shared_bytes&) -> std::optional<eosio::session::shared_bytes> {
-      return std::optional<eosio::session::shared_bytes>{};
+   mock_get = [](const dcd::session::shared_bytes&) -> std::optional<dcd::session::shared_bytes> {
+      return std::optional<dcd::session::shared_bytes>{};
    };
 
    std::string key = "key";
@@ -418,8 +418,8 @@ BOOST_FIXTURE_TEST_CASE(test_kv_erase_key_contract_not_match, kv_rocksdb_fixture
 }
 
 BOOST_FIXTURE_TEST_CASE(test_kv_set_new_val, kv_rocksdb_fixture) {
-   mock_get = [](const eosio::session::shared_bytes&) -> std::optional<eosio::session::shared_bytes> {
-      return std::optional<eosio::session::shared_bytes>{}; // Not found means we need to create new key
+   mock_get = [](const dcd::session::shared_bytes&) -> std::optional<dcd::session::shared_bytes> {
+      return std::optional<dcd::session::shared_bytes>{}; // Not found means we need to create new key
    };
 
    check_set_new_value({ .key = "1", .value = "" });
@@ -431,8 +431,8 @@ BOOST_FIXTURE_TEST_CASE(test_kv_set_new_val, kv_rocksdb_fixture) {
 
 BOOST_FIXTURE_TEST_CASE(test_kv_set_bigger_existing_val, kv_rocksdb_fixture) {
    std::string v = "111111112345";
-   mock_get      = [v](const eosio::session::shared_bytes&) -> std::optional<eosio::session::shared_bytes> {
-      return eosio::session::shared_bytes(v.data(), v.size());
+   mock_get      = [v](const dcd::session::shared_bytes&) -> std::optional<dcd::session::shared_bytes> {
+      return dcd::session::shared_bytes(v.data(), v.size());
    };
 
    check_set_existing_value({ .key = "1234567890", .value = "23" }, v.size());
@@ -440,8 +440,8 @@ BOOST_FIXTURE_TEST_CASE(test_kv_set_bigger_existing_val, kv_rocksdb_fixture) {
 
 BOOST_FIXTURE_TEST_CASE(test_kv_set_smaller_existing_val, kv_rocksdb_fixture) {
    std::string v = "1111111123";
-   mock_get      = [v](const eosio::session::shared_bytes&) -> std::optional<eosio::session::shared_bytes> {
-      return eosio::session::shared_bytes(v.data(), v.size());
+   mock_get      = [v](const dcd::session::shared_bytes&) -> std::optional<dcd::session::shared_bytes> {
+      return dcd::session::shared_bytes(v.data(), v.size());
    };
 
    check_set_existing_value({ .key = "1234567890", .value = "2345678" }, v.size());
@@ -449,8 +449,8 @@ BOOST_FIXTURE_TEST_CASE(test_kv_set_smaller_existing_val, kv_rocksdb_fixture) {
 
 BOOST_FIXTURE_TEST_CASE(test_kv_set_same_existing_val, kv_rocksdb_fixture) {
    std::string v = "1111111123"; // First 8 bytes are the payer
-   mock_get      = [v](const eosio::session::shared_bytes&) -> std::optional<eosio::session::shared_bytes> {
-      return eosio::session::shared_bytes(v.data(), v.size());
+   mock_get      = [v](const dcd::session::shared_bytes&) -> std::optional<dcd::session::shared_bytes> {
+      return dcd::session::shared_bytes(v.data(), v.size());
    };
 
    check_set_existing_value({ .key = "1234567890", .value = "23" }, v.size());
@@ -478,8 +478,8 @@ BOOST_FIXTURE_TEST_CASE(test_kv_set_value_too_large, kv_rocksdb_fixture) {
 
 BOOST_FIXTURE_TEST_CASE(test_kv_get, kv_rocksdb_fixture) {
    std::string v = "1111111123"; // First 8 bytes are the payer
-   mock_get      = [v](const eosio::session::shared_bytes&) -> std::optional<eosio::session::shared_bytes> {
-      return eosio::session::shared_bytes(v.data(), v.size());
+   mock_get      = [v](const dcd::session::shared_bytes&) -> std::optional<dcd::session::shared_bytes> {
+      return dcd::session::shared_bytes(v.data(), v.size());
    };
 
    uint32_t value_size;
@@ -488,8 +488,8 @@ BOOST_FIXTURE_TEST_CASE(test_kv_get, kv_rocksdb_fixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(test_kv_get_not_existing, kv_rocksdb_fixture) {
-   mock_get = [](const eosio::session::shared_bytes&) -> std::optional<eosio::session::shared_bytes> {
-      return std::optional<eosio::session::shared_bytes>{};
+   mock_get = [](const dcd::session::shared_bytes&) -> std::optional<dcd::session::shared_bytes> {
+      return std::optional<dcd::session::shared_bytes>{};
    };
 
    uint32_t value_size;
@@ -499,8 +499,8 @@ BOOST_FIXTURE_TEST_CASE(test_kv_get_not_existing, kv_rocksdb_fixture) {
 
 BOOST_FIXTURE_TEST_CASE(test_kv_get_data, kv_rocksdb_fixture) {
    std::string v = "111111119876543210"; // First 8 bytes (11111111) are the payer
-   mock_get      = [v](const eosio::session::shared_bytes&) -> std::optional<eosio::session::shared_bytes> {
-      return eosio::session::shared_bytes(v.data(), v.size());
+   mock_get      = [v](const dcd::session::shared_bytes&) -> std::optional<dcd::session::shared_bytes> {
+      return dcd::session::shared_bytes(v.data(), v.size());
    };
 
    uint32_t           value_size;
@@ -526,8 +526,8 @@ BOOST_FIXTURE_TEST_CASE(test_kv_get_data, kv_rocksdb_fixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(test_kv_get_data_no_key, kv_rocksdb_fixture) {
-   mock_get = [](const eosio::session::shared_bytes&) -> std::optional<eosio::session::shared_bytes> {
-      return std::optional<eosio::session::shared_bytes>{};
+   mock_get = [](const dcd::session::shared_bytes&) -> std::optional<dcd::session::shared_bytes> {
+      return std::optional<dcd::session::shared_bytes>{};
    };
 
    uint32_t           value_size;
@@ -548,13 +548,13 @@ BOOST_FIXTURE_TEST_CASE(test_kv_get_data_no_key, kv_rocksdb_fixture) {
 // Iterators
 
 BOOST_FIXTURE_TEST_CASE(test_iter_creation_success, kv_rocksdb_fixture) {
-   mock_get_key_prefix = [&]() { return eosio::chain::make_prefix_key(contract, prefix.c_str(), it_key_size); };
+   mock_get_key_prefix = [&]() { return dcd::chain::make_prefix_key(contract, prefix.c_str(), it_key_size); };
    BOOST_CHECK_NO_THROW(my_kv_context->kv_it_create(contract, prefix.c_str(), it_key_size));
 }
 
 BOOST_FIXTURE_TEST_CASE(test_iter_creation_too_many, kv_rocksdb_fixture) {
    std::unique_ptr<kv_iterator> its[max_iterators + 1]; // save first max_iterators so they won't be destroyed
-   mock_get_key_prefix = [&]() { return eosio::chain::make_prefix_key(contract, prefix.c_str(), it_key_size); };
+   mock_get_key_prefix = [&]() { return dcd::chain::make_prefix_key(contract, prefix.c_str(), it_key_size); };
 
    // Creating max_iterators iterators
    for (auto i = 0U; i < max_iterators; ++i) {
@@ -566,20 +566,20 @@ BOOST_FIXTURE_TEST_CASE(test_iter_creation_too_many, kv_rocksdb_fixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(test_iter_creation_key_size_too_big, kv_rocksdb_fixture) {
-   mock_get_key_prefix = [&]() { return eosio::chain::make_prefix_key(contract, prefix.c_str(), max_key_size); };
+   mock_get_key_prefix = [&]() { return dcd::chain::make_prefix_key(contract, prefix.c_str(), max_key_size); };
    BOOST_CHECK_NO_THROW(my_kv_context->kv_it_create(contract, prefix.c_str(), max_key_size)); // within the size
    BOOST_CHECK_THROW(my_kv_context->kv_it_create(contract, prefix.c_str(), max_key_size + 1),
                      kv_bad_iter); // outside of the max key size
 }
 
 BOOST_FIXTURE_TEST_CASE(test_is_kv_chainbase_context_iterator, kv_rocksdb_fixture) {
-   mock_get_key_prefix = [&]() { return eosio::chain::make_prefix_key(contract, prefix.c_str(), it_key_size); };
+   mock_get_key_prefix = [&]() { return dcd::chain::make_prefix_key(contract, prefix.c_str(), it_key_size); };
    std::unique_ptr<kv_iterator> it = my_kv_context->kv_it_create(contract, prefix.c_str(), it_key_size);
    BOOST_CHECK(!it->is_kv_chainbase_context_iterator());
 }
 
 BOOST_FIXTURE_TEST_CASE(test_is_kv_rocksdb_context_iterator, kv_rocksdb_fixture) {
-   mock_get_key_prefix = [&]() { return eosio::chain::make_prefix_key(contract, prefix.c_str(), it_key_size); };
+   mock_get_key_prefix = [&]() { return dcd::chain::make_prefix_key(contract, prefix.c_str(), it_key_size); };
    std::unique_ptr<kv_iterator> it = my_kv_context->kv_it_create(contract, prefix.c_str(), it_key_size);
    BOOST_CHECK(it->is_kv_rocksdb_context_iterator());
 }
@@ -626,7 +626,7 @@ BOOST_FIXTURE_TEST_CASE(test_kv_it_status_ok, kv_rocksdb_fixture) {
 
 BOOST_FIXTURE_TEST_CASE(test_kv_it_move_to_end, kv_rocksdb_fixture) {
    mock_is_erased                  = []() -> bool { return false; };
-   mock_get_key_prefix = [&]() { return eosio::chain::make_prefix_key(contract, prefix.c_str(), it_key_size); };
+   mock_get_key_prefix = [&]() { return dcd::chain::make_prefix_key(contract, prefix.c_str(), it_key_size); };
    std::unique_ptr<kv_iterator> it = my_kv_context->kv_it_create(contract, prefix.c_str(), it_key_size);
    BOOST_CHECK(it->kv_it_move_to_end() == kv_it_stat::iterator_end);
 }

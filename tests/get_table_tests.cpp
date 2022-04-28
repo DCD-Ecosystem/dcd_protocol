@@ -1,13 +1,13 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
-#include <eosio/testing/tester.hpp>
-#include <eosio/chain/abi_serializer.hpp>
-#include <eosio/chain/wasm_eosio_constraints.hpp>
-#include <eosio/chain/resource_limits.hpp>
-#include <eosio/chain/exceptions.hpp>
-#include <eosio/chain/wast_to_wasm.hpp>
-#include <eosio/chain_plugin/chain_plugin.hpp>
+#include <dcd/testing/tester.hpp>
+#include <dcd/chain/abi_serializer.hpp>
+#include <dcd/chain/wasm_dcd_constraints.hpp>
+//#include <dcd/chain/resource_limits.hpp>
+#include <dcd/chain/exceptions.hpp>
+#include <dcd/chain/wast_to_wasm.hpp>
+#include <dcd/chain_plugin/chain_plugin.hpp>
 
 #include <contracts.hpp>
 
@@ -21,11 +21,11 @@
 #include <array>
 #include <utility>
 
-#include <eosio/testing/backing_store_tester_macros.hpp>
+#include <dcd/testing/backing_store_tester_macros.hpp>
 
-using namespace eosio;
-using namespace eosio::chain;
-using namespace eosio::testing;
+using namespace dcd;
+using namespace dcd::chain;
+using namespace dcd::testing;
 using namespace fc;
 
 BOOST_AUTO_TEST_SUITE(get_table_tests)
@@ -34,7 +34,7 @@ using backing_store_ts = boost::mpl::list<TESTER, ROCKSDB_TESTER>;
 
 transaction_trace_ptr
 issue_tokens( TESTER& t, account_name issuer, account_name to, const asset& amount,
-              std::string memo = "", account_name token_contract = "eosio.token"_n )
+              std::string memo = "", account_name token_contract = "dcd.token"_n )
 {
    signed_transaction trx;
 
@@ -64,41 +64,41 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( get_scope_test, TESTER_T, backing_store_ts) { try
    TESTER_T t;
    t.produce_blocks(2);
 
-   t.create_accounts({ "eosio.token"_n, "eosio.ram"_n, "eosio.ramfee"_n, "eosio.stake"_n,
-      "eosio.bpay"_n, "eosio.vpay"_n, "eosio.saving"_n, "eosio.names"_n });
+   t.create_accounts({ "dcd.token"_n, "dcd.ram"_n, "dcd.ramfee"_n, "dcd.stake"_n,
+      "dcd.bpay"_n, "dcd.vpay"_n, "dcd.saving"_n, "dcd.names"_n });
 
    std::vector<account_name> accs{"inita"_n, "initb"_n, "initc"_n, "initd"_n};
    t.create_accounts(accs);
    t.produce_block();
 
-   t.set_code( "eosio.token"_n, contracts::eosio_token_wasm() );
-   t.set_abi( "eosio.token"_n, contracts::eosio_token_abi().data() );
+   t.set_code( "dcd.token"_n, contracts::dcd_token_wasm() );
+   t.set_abi( "dcd.token"_n, contracts::dcd_token_abi().data() );
    t.produce_blocks(1);
 
    // create currency
    auto act = mutable_variant_object()
-         ("issuer",       "eosio")
-         ("maximum_supply", eosio::chain::asset::from_string("1000000000.0000 SYS"));
-   t.push_action("eosio.token"_n, "create"_n, "eosio.token"_n, act );
+         ("issuer",       "dcd")
+         ("maximum_supply", dcd::chain::asset::from_string("1000000000.0000 DCD"));
+   t.push_action("dcd.token"_n, "create"_n, "dcd.token"_n, act );
 
    // issue
    for (account_name a: accs) {
-      issue_tokens( t, config::system_account_name, a, eosio::chain::asset::from_string("999.0000 SYS") );
+      issue_tokens( t, config::system_account_name, a, dcd::chain::asset::from_string("999.0000 DCD") );
    }
    t.produce_blocks(1);
 
    // iterate over scope
-   eosio::chain_apis::read_only plugin(*(t.control), {}, fc::microseconds::maximum());
-   eosio::chain_apis::read_only::get_table_by_scope_params param{"eosio.token"_n, "accounts"_n, "inita", "", 10};
-   eosio::chain_apis::read_only::get_table_by_scope_result result = plugin.read_only::get_table_by_scope(param);
+   dcd::chain_apis::read_only plugin(*(t.control), {}, fc::microseconds::maximum());
+   dcd::chain_apis::read_only::get_table_by_scope_params param{"dcd.token"_n, "accounts"_n, "inita", "", 10};
+   dcd::chain_apis::read_only::get_table_by_scope_result result = plugin.read_only::get_table_by_scope(param);
 
    BOOST_REQUIRE_EQUAL(4u, result.rows.size());
    BOOST_REQUIRE_EQUAL("", result.more);
    if (result.rows.size() >= 4) {
-      BOOST_REQUIRE_EQUAL(name("eosio.token"_n), result.rows[0].code);
+      BOOST_REQUIRE_EQUAL(name("dcd.token"_n), result.rows[0].code);
       BOOST_REQUIRE_EQUAL(name("inita"_n), result.rows[0].scope);
       BOOST_REQUIRE_EQUAL(name("accounts"_n), result.rows[0].table);
-      BOOST_REQUIRE_EQUAL(name("eosio"_n), result.rows[0].payer);
+      BOOST_REQUIRE_EQUAL(name("dcd"_n), result.rows[0].payer);
       BOOST_REQUIRE_EQUAL(1u, result.rows[0].count);
 
       BOOST_REQUIRE_EQUAL(name("initb"_n), result.rows[1].scope);
@@ -153,78 +153,78 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( get_table_test, TESTER_T, backing_store_ts) { try
    TESTER_T t;
    t.produce_blocks(2);
 
-   t.create_accounts({ "eosio.token"_n, "eosio.ram"_n, "eosio.ramfee"_n, "eosio.stake"_n,
-      "eosio.bpay"_n, "eosio.vpay"_n, "eosio.saving"_n, "eosio.names"_n });
+   t.create_accounts({ "dcd.token"_n, "dcd.ram"_n, "dcd.ramfee"_n, "dcd.stake"_n,
+      "dcd.bpay"_n, "dcd.vpay"_n, "dcd.saving"_n, "dcd.names"_n });
 
    std::vector<account_name> accs{"inita"_n, "initb"_n};
    t.create_accounts(accs);
    t.produce_block();
 
-   t.set_code( "eosio.token"_n, contracts::eosio_token_wasm() );
-   t.set_abi( "eosio.token"_n, contracts::eosio_token_abi().data() );
+   t.set_code( "dcd.token"_n, contracts::dcd_token_wasm() );
+   t.set_abi( "dcd.token"_n, contracts::dcd_token_abi().data() );
    t.produce_blocks(1);
 
    // create currency
    auto act = mutable_variant_object()
-         ("issuer",       "eosio")
-         ("maximum_supply", eosio::chain::asset::from_string("1000000000.0000 SYS"));
-   t.push_action("eosio.token"_n, "create"_n, "eosio.token"_n, act );
+         ("issuer",       "dcd")
+         ("maximum_supply", dcd::chain::asset::from_string("1000000000.0000 DCD"));
+   t.push_action("dcd.token"_n, "create"_n, "dcd.token"_n, act );
 
    // issue
    for (account_name a: accs) {
-      issue_tokens( t, config::system_account_name, a, eosio::chain::asset::from_string("10000.0000 SYS") );
+      issue_tokens( t, config::system_account_name, a, dcd::chain::asset::from_string("10000.0000 DCD") );
    }
    t.produce_blocks(1);
 
    // create currency 2
    act = mutable_variant_object()
-         ("issuer",       "eosio")
-         ("maximum_supply", eosio::chain::asset::from_string("1000000000.0000 AAA"));
-   t.push_action("eosio.token"_n, "create"_n, "eosio.token"_n, act );
+         ("issuer",       "dcd")
+         ("maximum_supply", dcd::chain::asset::from_string("1000000000.0000 AAA"));
+   t.push_action("dcd.token"_n, "create"_n, "dcd.token"_n, act );
    // issue
    for (account_name a: accs) {
-      issue_tokens( t, config::system_account_name, a, eosio::chain::asset::from_string("9999.0000 AAA") );
+      issue_tokens( t, config::system_account_name, a, dcd::chain::asset::from_string("9999.0000 AAA") );
    }
    t.produce_blocks(1);
 
    // create currency 3
    act = mutable_variant_object()
-         ("issuer",       "eosio")
-         ("maximum_supply", eosio::chain::asset::from_string("1000000000.0000 CCC"));
-   t.push_action("eosio.token"_n, "create"_n, "eosio.token"_n, act );
+         ("issuer",       "dcd")
+         ("maximum_supply", dcd::chain::asset::from_string("1000000000.0000 CCC"));
+   t.push_action("dcd.token"_n, "create"_n, "dcd.token"_n, act );
    // issue
    for (account_name a: accs) {
-      issue_tokens( t, config::system_account_name, a, eosio::chain::asset::from_string("7777.0000 CCC") );
+      issue_tokens( t, config::system_account_name, a, dcd::chain::asset::from_string("7777.0000 CCC") );
    }
    t.produce_blocks(1);
 
    // create currency 3
    act = mutable_variant_object()
-         ("issuer",       "eosio")
-         ("maximum_supply", eosio::chain::asset::from_string("1000000000.0000 BBB"));
-   t.push_action("eosio.token"_n, "create"_n, "eosio.token"_n, act );
+         ("issuer",       "dcd")
+         ("maximum_supply", dcd::chain::asset::from_string("1000000000.0000 BBB"));
+   t.push_action("dcd.token"_n, "create"_n, "dcd.token"_n, act );
    // issue
    for (account_name a: accs) {
-      issue_tokens( t, config::system_account_name, a, eosio::chain::asset::from_string("8888.0000 BBB") );
+      issue_tokens( t, config::system_account_name, a, dcd::chain::asset::from_string("8888.0000 BBB") );
    }
    t.produce_blocks(1);
 
    // get table: normal case
-   eosio::chain_apis::read_only plugin(*(t.control), {}, fc::microseconds::maximum());
-   eosio::chain_apis::read_only::get_table_rows_params p;
-   p.code = "eosio.token"_n;
+   dcd::chain_apis::read_only plugin(*(t.control), {}, fc::microseconds::maximum());
+   dcd::chain_apis::read_only::get_table_rows_params p;
+   p.code = "dcd.token"_n;
    p.scope = "inita";
    p.table = "accounts"_n;
    p.json = true;
    p.index_position = "primary";
-   eosio::chain_apis::read_only::get_table_rows_result result = plugin.read_only::get_table_rows(p);
+   dcd::chain_apis::read_only::get_table_rows_result result = plugin.read_only::get_table_rows(p);
    BOOST_REQUIRE_EQUAL(4u, result.rows.size());
    BOOST_REQUIRE_EQUAL(false, result.more);
    if (result.rows.size() >= 4) {
       BOOST_REQUIRE_EQUAL("9999.0000 AAA", result.rows[0]["balance"].as_string());
       BOOST_REQUIRE_EQUAL("8888.0000 BBB", result.rows[1]["balance"].as_string());
       BOOST_REQUIRE_EQUAL("7777.0000 CCC", result.rows[2]["balance"].as_string());
-      BOOST_REQUIRE_EQUAL("10000.0000 SYS", result.rows[3]["balance"].as_string());
+      BOOST_REQUIRE_EQUAL("10000.0000 DCD", result.rows[3]["balance"].as_string());
    }
 
    // get table: reverse ordered
@@ -236,7 +236,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( get_table_test, TESTER_T, backing_store_ts) { try
       BOOST_REQUIRE_EQUAL("9999.0000 AAA", result.rows[3]["balance"].as_string());
       BOOST_REQUIRE_EQUAL("8888.0000 BBB", result.rows[2]["balance"].as_string());
       BOOST_REQUIRE_EQUAL("7777.0000 CCC", result.rows[1]["balance"].as_string());
-      BOOST_REQUIRE_EQUAL("10000.0000 SYS", result.rows[0]["balance"].as_string());
+      BOOST_REQUIRE_EQUAL("10000.0000 DCD", result.rows[0]["balance"].as_string());
    }
 
    // get table: reverse ordered, with ram payer
@@ -249,11 +249,11 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( get_table_test, TESTER_T, backing_store_ts) { try
       BOOST_REQUIRE_EQUAL("9999.0000 AAA", result.rows[3]["data"]["balance"].as_string());
       BOOST_REQUIRE_EQUAL("8888.0000 BBB", result.rows[2]["data"]["balance"].as_string());
       BOOST_REQUIRE_EQUAL("7777.0000 CCC", result.rows[1]["data"]["balance"].as_string());
-      BOOST_REQUIRE_EQUAL("10000.0000 SYS", result.rows[0]["data"]["balance"].as_string());
-      BOOST_REQUIRE_EQUAL("eosio", result.rows[0]["payer"].as_string());
-      BOOST_REQUIRE_EQUAL("eosio", result.rows[1]["payer"].as_string());
-      BOOST_REQUIRE_EQUAL("eosio", result.rows[2]["payer"].as_string());
-      BOOST_REQUIRE_EQUAL("eosio", result.rows[3]["payer"].as_string());
+      BOOST_REQUIRE_EQUAL("10000.0000 DCD", result.rows[0]["data"]["balance"].as_string());
+      BOOST_REQUIRE_EQUAL("dcd", result.rows[0]["payer"].as_string());
+      BOOST_REQUIRE_EQUAL("dcd", result.rows[1]["payer"].as_string());
+      BOOST_REQUIRE_EQUAL("dcd", result.rows[2]["payer"].as_string());
+      BOOST_REQUIRE_EQUAL("dcd", result.rows[3]["payer"].as_string());
    }
    p.show_payer = false;
 
@@ -300,7 +300,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( get_table_test, TESTER_T, backing_store_ts) { try
    BOOST_REQUIRE_EQUAL(1u, result.rows.size());
    BOOST_REQUIRE_EQUAL(true, result.more);
    if (result.rows.size() >= 1) {
-      BOOST_REQUIRE_EQUAL("10000.0000 SYS", result.rows[0]["balance"].as_string());
+      BOOST_REQUIRE_EQUAL("10000.0000 DCD", result.rows[0]["balance"].as_string());
    }
 
    // get table: normal case, with bound & limit
@@ -333,62 +333,62 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( get_table_by_seckey_test, TESTER_T, backing_store
    TESTER_T t;
    t.produce_blocks(2);
 
-   t.create_accounts({ "eosio.token"_n, "eosio.ram"_n, "eosio.ramfee"_n, "eosio.stake"_n,
-      "eosio.bpay"_n, "eosio.vpay"_n, "eosio.saving"_n, "eosio.names"_n });
+   t.create_accounts({ "dcd.token"_n, "dcd.ram"_n, "dcd.ramfee"_n, "dcd.stake"_n,
+      "dcd.bpay"_n, "dcd.vpay"_n, "dcd.saving"_n, "dcd.names"_n });
 
    std::vector<account_name> accs{"inita"_n, "initb"_n, "initc"_n, "initd"_n};
    t.create_accounts(accs);
    t.produce_block();
 
-   t.set_code( "eosio.token"_n, contracts::eosio_token_wasm() );
-   t.set_abi( "eosio.token"_n, contracts::eosio_token_abi().data() );
+   t.set_code( "dcd.token"_n, contracts::dcd_token_wasm() );
+   t.set_abi( "dcd.token"_n, contracts::dcd_token_abi().data() );
    t.produce_blocks(1);
 
    // create currency
    auto act = mutable_variant_object()
-         ("issuer",       "eosio")
-         ("maximum_supply", eosio::chain::asset::from_string("1000000000.0000 SYS"));
-   t.push_action("eosio.token"_n, "create"_n, "eosio.token"_n, act );
+         ("issuer",       "dcd")
+         ("maximum_supply", dcd::chain::asset::from_string("1000000000.0000 DCD"));
+   t.push_action("dcd.token"_n, "create"_n, "dcd.token"_n, act );
 
    // issue
    for (account_name a: accs) {
-      issue_tokens( t, config::system_account_name, a, eosio::chain::asset::from_string("10000.0000 SYS") );
+      issue_tokens( t, config::system_account_name, a, dcd::chain::asset::from_string("10000.0000 DCD") );
    }
    t.produce_blocks(1);
 
-   t.set_code( config::system_account_name, contracts::eosio_system_wasm() );
-   t.set_abi( config::system_account_name, contracts::eosio_system_abi().data() );
+   t.set_code( config::system_account_name, contracts::dcd_system_wasm() );
+   t.set_abi( config::system_account_name, contracts::dcd_system_abi().data() );
 
    t.push_action(config::system_account_name, "init"_n,
                  config::system_account_name,  mutable_variant_object()
                  ("version", 0)
-                 ("core", "4,SYS"));
+                 ("core", "4,DCD"));
 
    // bidname
    auto bidname = [&t]( const account_name& bidder, const account_name& newname, const asset& bid ) {
-      return t.push_action( "eosio"_n, "bidname"_n, bidder, fc::mutable_variant_object()
+      return t.push_action( "dcd"_n, "bidname"_n, bidder, fc::mutable_variant_object()
                            ("bidder",  bidder)
                            ("newname", newname)
                            ("bid", bid)
                             );
    };
 
-   bidname("inita"_n, "com"_n, eosio::chain::asset::from_string("10.0000 SYS"));
-   bidname("initb"_n, "org"_n, eosio::chain::asset::from_string("11.0000 SYS"));
-   bidname("initc"_n, "io"_n, eosio::chain::asset::from_string("12.0000 SYS"));
-   bidname("initd"_n, "html"_n, eosio::chain::asset::from_string("14.0000 SYS"));
+   bidname("inita"_n, "com"_n, dcd::chain::asset::from_string("10.0000 DCD"));
+   bidname("initb"_n, "org"_n, dcd::chain::asset::from_string("11.0000 DCD"));
+   bidname("initc"_n, "io"_n, dcd::chain::asset::from_string("12.0000 DCD"));
+   bidname("initd"_n, "html"_n, dcd::chain::asset::from_string("14.0000 DCD"));
    t.produce_blocks(1);
 
    // get table: normal case
-   eosio::chain_apis::read_only plugin(*(t.control), {}, fc::microseconds::maximum());
-   eosio::chain_apis::read_only::get_table_rows_params p;
-   p.code = "eosio"_n;
-   p.scope = "eosio";
+   dcd::chain_apis::read_only plugin(*(t.control), {}, fc::microseconds::maximum());
+   dcd::chain_apis::read_only::get_table_rows_params p;
+   p.code = "dcd"_n;
+   p.scope = "dcd";
    p.table = "namebids"_n;
    p.json = true;
    p.index_position = "secondary"; // ordered by high_bid
    p.key_type = "i64";
-   eosio::chain_apis::read_only::get_table_rows_result result = plugin.read_only::get_table_rows(p);
+   dcd::chain_apis::read_only::get_table_rows_result result = plugin.read_only::get_table_rows(p);
    BOOST_REQUIRE_EQUAL(4u, result.rows.size());
    BOOST_REQUIRE_EQUAL(false, result.more);
    if (result.rows.size() >= 4) {
@@ -466,15 +466,15 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( get_table_by_seckey_test, TESTER_T, backing_store
    // all digits name search
    const std::string all_digits_name_1 = "1234";
    const std::string all_digits_name_2 = "2345";
-   bidname("inita"_n, name(all_digits_name_1), eosio::chain::asset::from_string("1.0000 SYS"));
-   bidname("inita"_n, name(all_digits_name_2), eosio::chain::asset::from_string("1.0000 SYS"));
+   bidname("inita"_n, name(all_digits_name_1), dcd::chain::asset::from_string("1.0000 DCD"));
+   bidname("inita"_n, name(all_digits_name_2), dcd::chain::asset::from_string("1.0000 DCD"));
    t.produce_blocks(1);
    p.lower_bound = all_digits_name_1;
    p.upper_bound = all_digits_name_1;
    p.index_position = "primary";
    p.key_type = "name";
    p.limit = 10;
-   eosio::chain_apis::read_only::get_table_rows_result all_digits_result = plugin.read_only::get_table_rows(p);
+   dcd::chain_apis::read_only::get_table_rows_result all_digits_result = plugin.read_only::get_table_rows(p);
    BOOST_REQUIRE_EQUAL(1u, all_digits_result.rows.size());
    BOOST_REQUIRE_EQUAL(false, all_digits_result.more);
    BOOST_REQUIRE_EQUAL(all_digits_name_1, all_digits_result.rows[0]["newname"].as_string());

@@ -12,9 +12,9 @@ macro(mas_sign target) #optional argument that forces keygroup when MAS_KEYCHAIN
 # MAS_BASE_APPID=5A4683969Z.com.example.         <<note the trailing period on this
 # MAS_PROVISIONING_PROFILE="/Users/spoon/Library/MobileDevice/Provisioning Profiles/b1d57761-e5b8-4e58-b412-f1cd0f1924a1.provisionprofile"
 #Given the above, the executable will be signed via the certificate in the keystore matching the fingerprint and bundled with the
-# specified provisioning profile. The appid will the base plus the name of the target, 5A4683969Z.com.example.keosd for example.
+# specified provisioning profile. The appid will the base plus the name of the target, 5A4683969Z.com.example.dcdksd for example.
 #
-#Additionally, it is possible to specify a keychain group to place the keys in. By default this will be 5A4683969Z.com.example.keosd in
+#Additionally, it is possible to specify a keychain group to place the keys in. By default this will be 5A4683969Z.com.example.dcdksd in
 # the above example. But, it is possible to manually specify a different key group. Specifying a keychain group was required before 3.0 and
 # users who have keys created in the SE before 3.0 will need to continue using the manually specified keychain group to have access to those
 # keys. To specify a keychain group manually define MAS_KEYCHAIN_GROUP, for example:

@@ -1,7 +1,7 @@
 #include <boost/test/unit_test.hpp>
-#include <eosio/chain/name.hpp>
+#include <dcd/chain/name.hpp>
 
-using namespace eosio::chain;
+using namespace dcd::chain;
 
 BOOST_AUTO_TEST_SUITE(name_test)
 
@@ -116,17 +116,17 @@ try {
    BOOST_TEST( name{""}.to_string() == "" );
    BOOST_TEST( name{"e"}.to_string() == "e" );
    BOOST_TEST( name{"eo"}.to_string() == "eo" );
-   BOOST_TEST( name{"eos"}.to_string() == "eos" );
-   BOOST_TEST( name{"eosi"}.to_string() == "eosi" );
-   BOOST_TEST( name{"eosio"}.to_string() == "eosio" );
-   BOOST_TEST( name{"eosioa"}.to_string() == "eosioa" );
-   BOOST_TEST( name{"eosioac"}.to_string() == "eosioac" );
-   BOOST_TEST( name{"eosioacc"}.to_string() == "eosioacc" );
-   BOOST_TEST( name{"eosioacco"}.to_string() == "eosioacco" );
-   BOOST_TEST( name{"eosioaccou"}.to_string() == "eosioaccou" );
-   BOOST_TEST( name{"eosioaccoun"}.to_string() == "eosioaccoun" );
-   BOOST_TEST( name{"eosioaccount"}.to_string() == "eosioaccount" );
-   BOOST_TEST( name{"eosioaccountj"}.to_string() == "eosioaccountj" );
+   BOOST_TEST( name{"dcd"}.to_string() == "dcd" );
+   BOOST_TEST( name{"dcdi"}.to_string() == "dcdi" );
+   BOOST_TEST( name{"dcd"}.to_string() == "dcd" );
+   BOOST_TEST( name{"dcda"}.to_string() == "dcda" );
+   BOOST_TEST( name{"dcdac"}.to_string() == "dcdac" );
+   BOOST_TEST( name{"dcdacc"}.to_string() == "dcdacc" );
+   BOOST_TEST( name{"dcdacco"}.to_string() == "dcdacco" );
+   BOOST_TEST( name{"dcdaccou"}.to_string() == "dcdaccou" );
+   BOOST_TEST( name{"dcdaccoun"}.to_string() == "dcdaccoun" );
+   BOOST_TEST( name{"dcdaccount"}.to_string() == "dcdaccount" );
+   BOOST_TEST( name{"dcdaccountj"}.to_string() == "dcdaccountj" );
 
 } FC_LOG_AND_RETHROW() }
 

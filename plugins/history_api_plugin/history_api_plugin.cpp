@@ -1,11 +1,11 @@
-#include <eosio/history_api_plugin/history_api_plugin.hpp>
-#include <eosio/chain/exceptions.hpp>
+#include <dcd/history_api_plugin/history_api_plugin.hpp>
+#include <dcd/chain/exceptions.hpp>
 
 #include <fc/io/json.hpp>
 
-namespace eosio {
+namespace dcd {
 
-using namespace eosio;
+using namespace dcd;
 
 static appbase::abstract_plugin& _history_api_plugin = app().register_plugin<history_api_plugin>();
 
@@ -27,7 +27,20 @@ void history_api_plugin::plugin_initialize(const variables_map&) {}
           } \
        }}
 
+#define CALL_WITH_400_WSS(api_name, api_handle, api_namespace, call_name, params_type) \
+{std::string("/v1/" #api_name "/" #call_name), \
+   [api_handle](string, string body, url_response_callback cb) mutable { \
+          try { \
+             auto params = parse_params<api_namespace::call_name ## _params, params_type>(body);\
+             fc::variant result( api_handle.call_name( std::move(params) ) ); \
+             cb(200, std::move(result)); \
+          } catch (...) { \
+             ws_plugin::handle_exception(#api_name, #call_name, body, cb); \
+          } \
+       }}
+
 #define CHAIN_RO_CALL(call_name, params_type) CALL_WITH_400(history, ro_api, history_apis::read_only, call_name, params_type)
+#define CHAIN_RO_CALL_WSS(call_name, params_type) CALL_WITH_400_WSS(history, ro_api, history_apis::read_only, call_name, params_type)
 //#define CHAIN_RW_CALL(call_name) CALL(history, rw_api, history_apis::read_write, call_name)
 
 void history_api_plugin::plugin_startup() {
@@ -41,6 +54,14 @@ void history_api_plugin::plugin_startup() {
       CHAIN_RO_CALL(get_transaction, http_params_types::params_required),
       CHAIN_RO_CALL(get_key_accounts, http_params_types::params_required),
       CHAIN_RO_CALL(get_controlled_accounts, http_params_types::params_required)
+   });
+
+   app().get_plugin<ws_plugin>().add_api({
+//      CHAIN_RO_CALL(get_transaction),
+      CHAIN_RO_CALL_WSS(get_actions, http_params_types::params_required),
+      CHAIN_RO_CALL_WSS(get_transaction, http_params_types::params_required),
+      CHAIN_RO_CALL_WSS(get_key_accounts, http_params_types::params_required),
+      CHAIN_RO_CALL_WSS(get_controlled_accounts, http_params_types::params_required)
    });
 }
 

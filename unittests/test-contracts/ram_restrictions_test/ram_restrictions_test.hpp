@@ -1,41 +1,41 @@
 #pragma once
 
-#include <eosio/eosio.hpp>
+#include <dcd/dcd.hpp>
 
-class [[eosio::contract]] ram_restrictions_test : public eosio::contract {
+class [[dcd::contract]] ram_restrictions_test : public dcd::contract {
 public:
-   struct [[eosio::table]] data {
+   struct [[dcd::table]] data {
       uint64_t           key;
       std::vector<char>  value;
 
       uint64_t primary_key() const { return key; }
    };
 
-   typedef eosio::multi_index<"tablea"_n, data> tablea;
-   typedef eosio::multi_index<"tableb"_n, data> tableb;
+   typedef dcd::multi_index<"tablea"_n, data> tablea;
+   typedef dcd::multi_index<"tableb"_n, data> tableb;
 
 public:
-   using eosio::contract::contract;
+   using dcd::contract::contract;
 
-   [[eosio::action]]
+   [[dcd::action]]
    void noop();
 
-   [[eosio::action]]
-   void setdata( uint32_t len1, uint32_t len2, eosio::name payer );
+   [[dcd::action]]
+   void setdata( uint32_t len1, uint32_t len2, dcd::name payer );
 
-   [[eosio::action]]
-   void notifysetdat( eosio::name acctonotify, uint32_t len1, uint32_t len2, eosio::name payer );
+   [[dcd::action]]
+   void notifysetdat( dcd::name acctonotify, uint32_t len1, uint32_t len2, dcd::name payer );
 
-   [[eosio::on_notify("tester2::notifysetdat")]]
-   void on_notify_setdata( eosio::name acctonotify, uint32_t len1, uint32_t len2, eosio::name payer );
+   [[dcd::on_notify("tester2::notifysetdat")]]
+   void on_notify_setdata( dcd::name acctonotify, uint32_t len1, uint32_t len2, dcd::name payer );
 
-   [[eosio::action]]
-   void senddefer( uint64_t senderid, eosio::name payer );
+   [[dcd::action]]
+   void senddefer( uint64_t senderid, dcd::name payer );
 
-   [[eosio::action]]
-   void notifydefer( eosio::name acctonotify, uint64_t senderid, eosio::name payer );
+   [[dcd::action]]
+   void notifydefer( dcd::name acctonotify, uint64_t senderid, dcd::name payer );
 
-   [[eosio::on_notify("tester2::notifydefer")]]
-   void on_notifydefer( eosio::name acctonotify, uint64_t senderid, eosio::name payer );
+   [[dcd::on_notify("tester2::notifydefer")]]
+   void on_notifydefer( dcd::name acctonotify, uint64_t senderid, dcd::name payer );
 
 };

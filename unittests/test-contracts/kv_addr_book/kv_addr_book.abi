@@ -1,5 +1,5 @@
 {
-    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT ",
+    "____comment": "This file was generated with dcd-abigen. DO NOT EDIT ",
     "version": "eosio::abi/1.2",
     "types": [],
     "structs": [
@@ -281,13 +281,13 @@
                     "type": "pair_string_string"
                 },
                 "firstname": {
-                    "type": "non_unique<eosio::name, std::string>"
+                    "type": "non_unique<dcd::name, std::string>"
                 },
                 "lastname": {
-                    "type": "non_unique<eosio::name, std::string>"
+                    "type": "non_unique<dcd::name, std::string>"
                 },
                 "persid": {
-                    "type": "non_unique<eosio::name, std::string>"
+                    "type": "non_unique<dcd::name, std::string>"
                 },
                 "address": {
                     "type": "tuple_name_string_string_string_string"

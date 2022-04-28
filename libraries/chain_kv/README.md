@@ -1,7 +1,7 @@
 # Chain-KV aka Session API
 
 ### Table of contents
-1. [Enable ChainKV in Nodeos](#enable-chainkv-in-nodeos)
+1. [Enable ChainKV in dcdnode](#enable-chainkv-in-dcdnode)
 2. [ChainKV or Chainbase](#chainkv-or-chainbase)
 3. [Using a database table in a smart contract](#using-a-database-table-in-a-smart-contract)
 4. [Using a kv table in a smart contract](#using-a-kv-table-in-a-smart-contract)
@@ -9,11 +9,11 @@
 6. [Extending Session](#extending-session)
 7. [What is an Undo stack](#what-is-an-undo-stack)
 
-## Enable ChainKV in Nodeos
+## Enable ChainKV in dcdnode
 
-To enable the use of the RocksDB backing store in nodeos provide this argument when starting nodeos `--backing-store rocksdb`.
-By default Chainbase is the backing store of Nodeos.  So when this argument is not present when starting Nodeos, Chainbase will be used. You can also
-be explicit in setting the use of Chainbase by specifying `--backing-store chainbase` when starting Nodeos.
+To enable the use of the RocksDB backing store in dcdnode provide this argument when starting dcdnode `--backing-store rocksdb`.
+By default Chainbase is the backing store of dcdnode.  So when this argument is not present when starting dcdnode, Chainbase will be used. You can also
+be explicit in setting the use of Chainbase by specifying `--backing-store chainbase` when starting dcdnode.
 
 ## ChainKV or Chainbase
 
@@ -30,7 +30,7 @@ A Session is a lexicographically ordered (by key) in memory key-value datastore.
 
 Session was implemented with the assumption that once a Session instance has a child, that Session instance has become immutable and the child Session instance will contain delta changes that can either be committed up into the parent Session instance or discarded (undo) by either breaking the parent child relationship or by calling undo on the child session.  This abstraction allows for defining Session as either a block or a transaction within that block depending on the context.
 
-The Session type is templated to allow template specialization for introducing new permament data stores into the EOS system.  Currently there are only two types of Sessions implemented, a RocksDB specialization to allow for persisting key value pairs in RocksDB and the default template which represents the in memory key-value datastore.
+The Session type is templated to allow template specialization for introducing new permament data stores into the DCD system.  Currently there are only two types of Sessions implemented, a RocksDB specialization to allow for persisting key value pairs in RocksDB and the default template which represents the in memory key-value datastore.
 
 ## Extending Session
 
@@ -87,4 +87,4 @@ class session<my_datastore_> {
 
 ### What is an Undo stack
 
-The undo stack is a container used within the context of the EOS blockchain for managing sessions.  While this is termed a `stack`, the way this container works is closer to an `std::deque`.  The operations that are valid from the bottom of the stack would only be making the session irrevisible by committing it into the permament datastore.  The exception to this would be when the bottom and the top of the stack are the same in which case you can also perform the operations valid on the top of stack. The bottom of the stack is normally referred to as the `root` session. The operations that are valid from the top of the stack include squashing (combining the top 2 session on the stack), popping the top session which discards the changes in that session (an undo operation) and pushing a new session instance onto the stack.  The top of the stack is normally referred to as the `head` session.
+The undo stack is a container used within the context of the DCD blockchain for managing sessions.  While this is termed a `stack`, the way this container works is closer to an `std::deque`.  The operations that are valid from the bottom of the stack would only be making the session irrevisible by committing it into the permament datastore.  The exception to this would be when the bottom and the top of the stack are the same in which case you can also perform the operations valid on the top of stack. The bottom of the stack is normally referred to as the `root` session. The operations that are valid from the top of the stack include squashing (combining the top 2 session on the stack), popping the top session which discards the changes in that session (an undo operation) and pushing a new session instance onto the stack.  The top of the stack is normally referred to as the `head` session.

@@ -1,9 +1,9 @@
-#include <eosio/chain/webassembly/interface.hpp>
-#include <eosio/chain/authorization_manager.hpp>
-#include <eosio/chain/transaction_context.hpp>
-#include <eosio/chain/apply_context.hpp>
+#include <dcd/chain/webassembly/interface.hpp>
+#include <dcd/chain/authorization_manager.hpp>
+#include <dcd/chain/transaction_context.hpp>
+#include <dcd/chain/apply_context.hpp>
 
-namespace eosio { namespace chain { namespace webassembly {
+namespace dcd { namespace chain { namespace webassembly {
    void unpack_provided_keys( flat_set<public_key_type>& keys, const char* pubkeys_data, uint32_t pubkeys_size ) {
       keys.clear();
       if( pubkeys_size == 0 ) return;
@@ -36,7 +36,7 @@ namespace eosio { namespace chain { namespace webassembly {
                                       provided_keys,
                                       provided_permissions,
                                       fc::seconds(trx.delay_sec),
-                                      std::bind(&transaction_context::checktime, &context.trx_context),
+                                      //std::bind(&transaction_context::checktime, &context.trx_context),
                                       false
                                     );
          return true;
@@ -49,7 +49,7 @@ namespace eosio { namespace chain { namespace webassembly {
                                                    legacy_span<const char> pubkeys_data,
                                                    legacy_span<const char> perms_data,
                                                    uint64_t delay_us ) const {
-      EOS_ASSERT( delay_us <= static_cast<uint64_t>(std::numeric_limits<int64_t>::max()),
+      DCD_ASSERT( delay_us <= static_cast<uint64_t>(std::numeric_limits<int64_t>::max()),
                   action_validate_exception, "provided delay is too large" );
 
       flat_set<public_key_type> provided_keys;
@@ -66,7 +66,7 @@ namespace eosio { namespace chain { namespace webassembly {
                                       provided_keys,
                                       provided_permissions,
                                       fc::microseconds(delay_us),
-                                      std::bind(&transaction_context::checktime, &context.trx_context),
+                                      //std::bind(&transaction_context::checktime, &context.trx_context),
                                       false
                                     );
          return true;
@@ -82,8 +82,8 @@ namespace eosio { namespace chain { namespace webassembly {
 
    int64_t interface::get_account_creation_time( account_name account ) const {
       const auto* acct = context.db.find<account_object, by_name>(account);
-      EOS_ASSERT( acct != nullptr, action_validate_exception,
+      DCD_ASSERT( acct != nullptr, action_validate_exception,
                   "account '${account}' does not exist", ("account", account) );
       return time_point(acct->creation_date).time_since_epoch().count();
    }
-}}} // ns eosio::chain::webassembly
+}}} // ns dcd::chain::webassembly

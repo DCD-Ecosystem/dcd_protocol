@@ -1,15 +1,15 @@
-### Build contracts with cdt if EOSIO_COMPILE_TEST_CONTRACTS is on
+### Build contracts with cdt if DCD_COMPILE_TEST_CONTRACTS is on
 include(ExternalProject)
 
-if( EOSIO_COMPILE_TEST_CONTRACTS )
-   set(EOSIO_WASM_OLD_BEHAVIOR "Off")
-   find_package(eosio.cdt REQUIRED)
+if( DCD_COMPILE_TEST_CONTRACTS )
+   set(DCD_WASM_OLD_BEHAVIOR "Off")
+   find_package(dcd.cdt REQUIRED)
 
-   set(CMAKE_ARGS_VAL -DCMAKE_TOOLCHAIN_FILE=${EOSIO_CDT_ROOT}/lib/cmake/eosio.cdt/EosioWasmToolchain.cmake -DEOSIO_COMPILE_TEST_CONTRACTS=${EOSIO_COMPILE_TEST_CONTRACTS} )
-   if( USE_EOSIO_CDT_1_7_X)
-      list(APPEND CMAKE_ARGS_VAL -DUSE_EOSIO_CDT_1_7_X=${USE_EOSIO_CDT_1_7_X})
+   set(CMAKE_ARGS_VAL -DCMAKE_TOOLCHAIN_FILE=${DCD_CDT_ROOT}/lib/cmake/dcd.cdt/DcdWasmToolchain.cmake -DDCD_COMPILE_TEST_CONTRACTS=${DCD_COMPILE_TEST_CONTRACTS} )
+   if( USE_DCD_CDT_1_7_X)
+      list(APPEND CMAKE_ARGS_VAL -DUSE_DCD_CDT_1_7_X=${USE_DCD_CDT_1_7_X})
    endif()
-   message( STATUS "Building contracts in directory `eos/contracts/`" )
+   message( STATUS "Building contracts in directory `dcd/contracts/`" )
    ExternalProject_Add(
       bios_boot_contracts_project
       SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/contracts
@@ -22,6 +22,6 @@ if( EOSIO_COMPILE_TEST_CONTRACTS )
       BUILD_ALWAYS 1
    )
 else()
-  message( STATUS "Not building contracts in directory `eos/contracts/`" )
+  message( STATUS "Not building contracts in directory `dcd/contracts/`" )
   add_subdirectory(contracts)
 endif()

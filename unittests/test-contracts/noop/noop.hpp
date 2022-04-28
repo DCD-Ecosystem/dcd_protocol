@@ -1,13 +1,13 @@
 #pragma once
 
-#include <eosio/eosio.hpp>
+#include <dcd/dcd.hpp>
 
-class [[eosio::contract]] noop : public eosio::contract {
+class [[dcd::contract]] noop : public dcd::contract {
 public:
-   using eosio::contract::contract;
+   using dcd::contract::contract;
 
-   [[eosio::action]]
-   void anyaction( eosio::name                       from,
-                   const eosio::ignore<std::string>& type,
-                   const eosio::ignore<std::string>& data );
+   [[dcd::action]]
+   void anyaction( dcd::name                       from,
+                   const dcd::ignore<std::string>& type,
+                   const dcd::ignore<std::string>& data );
 };

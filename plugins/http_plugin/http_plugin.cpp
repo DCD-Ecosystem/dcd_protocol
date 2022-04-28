@@ -1,9 +1,9 @@
-#include <eosio/http_plugin/http_plugin.hpp>
+#include <dcd/http_plugin/http_plugin.hpp>
 #ifdef BOOST_ASIO_HAS_LOCAL_SOCKETS
-#include <eosio/http_plugin/local_endpoint.hpp>
+#include <dcd/http_plugin/local_endpoint.hpp>
 #endif
-#include <eosio/chain/exceptions.hpp>
-#include <eosio/chain/thread_utils.hpp>
+#include <dcd/chain/exceptions.hpp>
+#include <dcd/chain/thread_utils.hpp>
 
 #include <fc/network/ip.hpp>
 #include <fc/log/logger_config.hpp>
@@ -29,7 +29,7 @@
 const fc::string logger_name("http_plugin");
 fc::logger logger;
 
-namespace eosio {
+namespace dcd {
 
    static appbase::abstract_plugin& _http_plugin = app().register_plugin<http_plugin>();
 
@@ -220,7 +220,7 @@ class http_plugin_impl : public std::enable_shared_from_this<http_plugin_impl> {
          websocket_server_type    server;
 
          uint16_t                                       thread_pool_size = 2;
-         std::optional<eosio::chain::named_thread_pool> thread_pool;
+         std::optional<dcd::chain::named_thread_pool> thread_pool;
          std::atomic<size_t>                            bytes_in_flight{0};
          std::atomic<int32_t>                           requests_in_flight{0};
          size_t                                         max_bytes_in_flight = 0;
@@ -279,14 +279,14 @@ class http_plugin_impl : public std::enable_shared_from_this<http_plugin_impl> {
 
                fc::ec_key ecdh = EC_KEY_new_by_curve_name(https_ecdh_curve == SECP384R1 ? NID_secp384r1 : NID_X9_62_prime256v1);
                if (!ecdh)
-                  EOS_THROW(chain::http_exception, "Failed to set NID_secp384r1");
+                  DCD_THROW(chain::http_exception, "Failed to set NID_secp384r1");
                if(SSL_CTX_set_tmp_ecdh(ctx->native_handle(), (EC_KEY*)ecdh) != 1)
-                  EOS_THROW(chain::http_exception, "Failed to set ECDH PFS");
+                  DCD_THROW(chain::http_exception, "Failed to set ECDH PFS");
 
                if(SSL_CTX_set_cipher_list(ctx->native_handle(), \
                   "EECDH+ECDSA+AESGCM:EECDH+aRSA+AESGCM:EECDH+ECDSA+SHA384:EECDH+ECDSA+SHA256:AES256:" \
                   "!DHE:!RSA:!AES128:!RC4:!DES:!3DES:!DSS:!SRP:!PSK:!EXP:!MD5:!LOW:!aNULL:!eNULL") != 1)
-                  EOS_THROW(chain::http_exception, "Failed to set HTTPS cipher list");
+                  DCD_THROW(chain::http_exception, "Failed to set HTTPS cipher list");
             } catch (const fc::exception& e) {
                fc_elog( logger, "https server initialization error: ${w}", ("w", e.to_detail_string()) );
             } catch(std::exception& e) {
@@ -852,7 +852,7 @@ class http_plugin_impl : public std::enable_shared_from_this<http_plugin_impl> {
          verbose_http_errors = options.at( "verbose-http-errors" ).as<bool>();
 
          my->thread_pool_size = options.at( "http-threads" ).as<uint16_t>();
-         EOS_ASSERT( my->thread_pool_size > 0, chain::plugin_config_exception,
+         DCD_ASSERT( my->thread_pool_size > 0, chain::plugin_config_exception,
                      "http-threads ${num} must be greater than 0", ("num", my->thread_pool_size));
 
          my->max_bytes_in_flight = options.at( "http-max-bytes-in-flight-mb" ).as<uint32_t>() * 1024 * 1024;

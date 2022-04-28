@@ -14,9 +14,9 @@
 #include <fc/io/datastream.hpp>
 #include <fc/io/raw.hpp>
 
-#include <eosio/chain/exceptions.hpp>
+#include <dcd/chain/exceptions.hpp>
 
-namespace eosio::session {
+namespace dcd::session {
 
 class shared_bytes;
 
@@ -239,7 +239,7 @@ shared_bytes make_shared_bytes(std::array<StringView, N>&& data) {
 
 template <typename T>
 shared_bytes::shared_bytes(const T* data, size_t size)
-    : m_size{ size * sizeof(T) }, m_offset{ eosio::session::details::aligned_size(m_size) - m_size }, m_data{ [&]() {
+    : m_size{ size * sizeof(T) }, m_offset{ dcd::session::details::aligned_size(m_size) - m_size }, m_data{ [&]() {
          if (!data || size == 0) {
             return std::shared_ptr<char>{};
          }
@@ -256,7 +256,7 @@ shared_bytes::shared_bytes(const T* data, size_t size)
       }() } {}
 
 inline shared_bytes::shared_bytes(size_t size)
-    : m_size{ size }, m_offset{ eosio::session::details::aligned_size(m_size) - m_size }, m_data{ [&]() {
+    : m_size{ size }, m_offset{ dcd::session::details::aligned_size(m_size) - m_size }, m_data{ [&]() {
          if (size == 0) {
             return std::shared_ptr<char>{};
          }
@@ -279,12 +279,12 @@ inline shared_bytes shared_bytes::next() const {
       buffer.pop_back();
    }
 
-   EOS_ASSERT(!buffer.empty(), eosio::chain::chain_exception, "shared_bytes::next() result buffer is empty");
-   return eosio::session::shared_bytes(buffer.data(), buffer.size());
+   DCD_ASSERT(!buffer.empty(), dcd::chain::chain_exception, "shared_bytes::next() result buffer is empty");
+   return dcd::session::shared_bytes(buffer.data(), buffer.size());
 }
 
 inline size_t            shared_bytes::size() const { return m_size; }
-inline size_t            shared_bytes::aligned_size() const { return eosio::session::details::aligned_size(m_size); }
+inline size_t            shared_bytes::aligned_size() const { return dcd::session::details::aligned_size(m_size); }
 inline char*             shared_bytes::data() { return m_data.get(); }
 inline const char* const shared_bytes::data() const { return m_data.get(); }
 
@@ -355,7 +355,7 @@ inline shared_bytes::iterator shared_bytes::end() const {
 }
 
 inline shared_bytes shared_bytes::truncate_key(const shared_bytes &key) {
-   EOS_ASSERT(!key.empty(), eosio::chain::chain_exception, "chain_plugin::truncate_key() invalid key parameter: empty");
+   DCD_ASSERT(!key.empty(), dcd::chain::chain_exception, "chain_plugin::truncate_key() invalid key parameter: empty");
 
    return shared_bytes(key.data(), key.size() - 1);
 }
@@ -527,27 +527,27 @@ shared_bytes::shared_bytes_iterator<Iterator_traits>::operator[](size_t index) c
    return m_buffer[index];
 }
 
-} // namespace eosio::session
+} // namespace dcd::session
 
 namespace std {
 
 template <>
-struct less<eosio::session::shared_bytes> {
-   bool operator()(const eosio::session::shared_bytes& lhs, const eosio::session::shared_bytes& rhs) const {
+struct less<dcd::session::shared_bytes> {
+   bool operator()(const dcd::session::shared_bytes& lhs, const dcd::session::shared_bytes& rhs) const {
       return lhs < rhs;
    };
 };
 
 template <>
-struct greater<eosio::session::shared_bytes> {
-   bool operator()(const eosio::session::shared_bytes& lhs, const eosio::session::shared_bytes& rhs) const {
+struct greater<dcd::session::shared_bytes> {
+   bool operator()(const dcd::session::shared_bytes& lhs, const dcd::session::shared_bytes& rhs) const {
       return lhs > rhs;
    };
 };
 
 template <>
-struct hash<eosio::session::shared_bytes> {
-   size_t operator()(const eosio::session::shared_bytes& b) const {
+struct hash<dcd::session::shared_bytes> {
+   size_t operator()(const dcd::session::shared_bytes& b) const {
       if (b.size() == 0) {
          return 0;
       }
@@ -556,8 +556,8 @@ struct hash<eosio::session::shared_bytes> {
 };
 
 template <>
-struct equal_to<eosio::session::shared_bytes> {
-   bool operator()(const eosio::session::shared_bytes& lhs, const eosio::session::shared_bytes& rhs) const {
+struct equal_to<dcd::session::shared_bytes> {
+   bool operator()(const dcd::session::shared_bytes& lhs, const dcd::session::shared_bytes& rhs) const {
       return lhs == rhs;
    }
 };

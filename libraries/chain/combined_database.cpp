@@ -1,13 +1,13 @@
-#include <eosio/chain/backing_store/kv_context_rocksdb.hpp>
-#include <eosio/chain/backing_store/kv_context_chainbase.hpp>
-#include <eosio/chain/backing_store/db_combined.hpp>
-#include <eosio/chain/combined_database.hpp>
-#include <eosio/chain/kv_chainbase_objects.hpp>
-#include <eosio/chain/backing_store/db_context.hpp>
-#include <eosio/chain/backing_store/db_key_value_format.hpp>
+#include <dcd/chain/backing_store/kv_context_rocksdb.hpp>
+#include <dcd/chain/backing_store/kv_context_chainbase.hpp>
+#include <dcd/chain/backing_store/db_combined.hpp>
+#include <dcd/chain/combined_database.hpp>
+#include <dcd/chain/kv_chainbase_objects.hpp>
+#include <dcd/chain/backing_store/db_context.hpp>
+#include <dcd/chain/backing_store/db_key_value_format.hpp>
 
-namespace eosio { namespace chain {
-   combined_session::combined_session(chainbase::database& cb_database, eosio::session::undo_stack<rocks_db_type>* undo_stack)
+namespace dcd { namespace chain {
+   combined_session::combined_session(chainbase::database& cb_database, dcd::session::undo_stack<rocks_db_type>* undo_stack)
        : kv_undo_stack{ undo_stack } {
       cb_session = std::make_unique<chainbase::database::session>(cb_database.start_undo_session(true));
       try {
@@ -93,7 +93,7 @@ namespace eosio { namespace chain {
             using add_database_section_receiver = backing_store::add_database_receiver<std::decay_t < decltype(section)>>;
             add_database_section_receiver add_db_receiver(section, db);
             backing_store::rocksdb_contract_kv_table_writer<add_database_section_receiver> writer(add_db_receiver);
-            const auto begin_key = eosio::session::shared_bytes(&backing_store::rocksdb_contract_kv_prefix, 1);
+            const auto begin_key = dcd::session::shared_bytes(&backing_store::rocksdb_contract_kv_prefix, 1);
             const auto end_key = begin_key.next();
             backing_store::walk_rocksdb_entries_with_prefix(kv_undo_stack, begin_key, end_key, writer);
          } else {
@@ -108,7 +108,7 @@ namespace eosio { namespace chain {
       if (version < kv_object::minimum_snapshot_version)
          return;
       if (backing_store == backing_store_type::ROCKSDB) {
-         auto key_values = std::vector<std::pair<eosio::session::shared_bytes, eosio::session::shared_bytes>>{};
+         auto key_values = std::vector<std::pair<dcd::session::shared_bytes, dcd::session::shared_bytes>>{};
          constexpr std::size_t batch_size = 500;
          key_values.reserve(batch_size);
          snapshot->read_section<kv_object>([&key_values, &db, &kv_database](auto& section) {
@@ -120,7 +120,7 @@ namespace eosio { namespace chain {
                b1::chain_kv::bytes contract_as_bytes;
                b1::chain_kv::append_key(contract_as_bytes, move_to_rocks.contract.to_uint64_t());
                auto full_key =
-                     eosio::session::make_shared_bytes<std::string_view, 3>({prefix_key,
+                     dcd::session::make_shared_bytes<std::string_view, 3>({prefix_key,
                                                                              std::string_view{contract_as_bytes.data(),
                                                                                               contract_as_bytes.size()},
                                                                              std::string_view{move_to_rocks.kv_key.data.data(),
@@ -230,14 +230,14 @@ namespace eosio { namespace chain {
             if (!status.ok())
                throw std::runtime_error(std::string{ "database::database: rocksdb::DB::Open: " } + status.ToString());
             auto rdb        = std::shared_ptr<rocksdb::DB>{ p };
-            return std::make_unique<rocks_db_type>(eosio::session::make_session(std::move(rdb), 1024));
+            return std::make_unique<rocks_db_type>(dcd::session::make_session(std::move(rdb), 1024));
          }() },
-         kv_undo_stack(std::make_unique<eosio::session::undo_stack<rocks_db_type>>(*kv_database, cfg.state_dir)),
+         kv_undo_stack(std::make_unique<dcd::session::undo_stack<rocks_db_type>>(*kv_database, cfg.state_dir)),
          kv_snapshot_batch_threashold(cfg.persistent_storage_mbytes_batch * 1024 * 1024)  {}
 
    void combined_database::check_backing_store_setting(bool clean_startup) {
       if (backing_store != db.get<kv_db_config_object>().backing_store) {   
-         EOS_ASSERT(clean_startup, database_move_kv_disk_exception,
+         DCD_ASSERT(clean_startup, database_move_kv_disk_exception,
                    "Existing state indicates a different backing store is in use; use resync, replay, or restore from snapshot to switch backing store");
          db.modify(db.get<kv_db_config_object>(), [this](auto& cfg) { cfg.backing_store = backing_store; });
       }
@@ -337,7 +337,7 @@ namespace eosio { namespace chain {
          case backing_store_type::CHAINBASE:
             return create_kv_chainbase_context<kv_resource_manager>(db, receiver, resource_manager, limits);
       }
-      EOS_ASSERT(false, action_validate_exception, "Unknown backing store.");
+      DCD_ASSERT(false, action_validate_exception, "Unknown backing store.");
    }
 
    std::unique_ptr<db_context> combined_database::create_db_context(apply_context& context, name receiver) {
@@ -347,21 +347,20 @@ namespace eosio { namespace chain {
          case backing_store_type::CHAINBASE:
             return backing_store::create_db_chainbase_context(context, receiver);
          default:
-            EOS_ASSERT(false, action_validate_exception, "Unknown backing store.");
+            DCD_ASSERT(false, action_validate_exception, "Unknown backing store.");
       }
    }
 
    void combined_database::add_to_snapshot(
-         const eosio::chain::snapshot_writer_ptr& snapshot, const eosio::chain::block_state& head,
-         const eosio::chain::authorization_manager&                    authorization,
-         const eosio::chain::resource_limits::resource_limits_manager& resource_limits) const {
+         const dcd::chain::snapshot_writer_ptr& snapshot, const dcd::chain::block_state& head,
+         const dcd::chain::authorization_manager&                    authorization) const {
       snapshot->write_section<chain_snapshot_header>(
             [this](auto& section) { section.add_row(chain_snapshot_header(), db); });
 
       snapshot->write_section<block_state>(
             [this, &head](auto& section) { section.template add_row<block_header_state>(head, db); });
 
-      eosio::chain::controller_index_set::walk_indices([this, &snapshot](auto utils) {
+      dcd::chain::controller_index_set::walk_indices([this, &snapshot](auto utils) {
          using value_t = typename decltype(utils)::index_t::value_type;
 
          snapshot->write_section<value_t>([utils, this](auto& section) {
@@ -373,17 +372,15 @@ namespace eosio { namespace chain {
       add_contract_tables_to_snapshot(snapshot);
 
       authorization.add_to_snapshot(snapshot);
-      resource_limits.add_to_snapshot(snapshot);
    }
 
    void combined_database::read_from_snapshot(const snapshot_reader_ptr& snapshot,
                                               uint32_t blog_start,
                                               uint32_t blog_end,
-                                              eosio::chain::authorization_manager& authorization,
-                                              eosio::chain::resource_limits::resource_limits_manager& resource_limits,
-                                              eosio::chain::fork_database& fork_db, eosio::chain::block_state_ptr& head,
+                                              dcd::chain::authorization_manager& authorization,
+                                              dcd::chain::fork_database& fork_db, dcd::chain::block_state_ptr& head,
                                               uint32_t&                          snapshot_head_block,
-                                              const eosio::chain::chain_id_type& chain_id) {
+                                              const dcd::chain::chain_id_type& chain_id) {
       chain_snapshot_header header;
       snapshot->read_section<chain_snapshot_header>([this, &header](auto& section) {
          section.read_row(header, db);
@@ -409,7 +406,7 @@ namespace eosio { namespace chain {
          }
 
          snapshot_head_block = head_header_state.block_num;
-         EOS_ASSERT(blog_start <= (snapshot_head_block + 1) && snapshot_head_block <= blog_end, block_log_exception,
+         DCD_ASSERT(blog_start <= (snapshot_head_block + 1) && snapshot_head_block <= blog_end, block_log_exception,
                     "Block log is provided with snapshot but does not contain the head block from the snapshot nor a "
                     "block right after it",
                     ("snapshot_head_block", snapshot_head_block)("block_log_first_num",
@@ -446,7 +443,7 @@ namespace eosio { namespace chain {
 
             if (std::clamp(header.version, v2::minimum_version, v2::maximum_version) == header.version) {
                std::optional<genesis_state> genesis = extract_legacy_genesis_state(*snapshot, header.version);
-               EOS_ASSERT(genesis, snapshot_exception,
+               DCD_ASSERT(genesis, snapshot_exception,
                           "Snapshot indicates chain_snapshot_header version 2, but does not contain a genesis_state. "
                           "It must be corrupted.");
                snapshot->read_section<global_property_object>(
@@ -500,8 +497,7 @@ namespace eosio { namespace chain {
       read_kv_table_from_snapshot(snapshot, db, kv_database, header.version, backing_store);
       read_contract_tables_from_snapshot(snapshot);
 
-      authorization.read_from_snapshot(snapshot);
-      resource_limits.read_from_snapshot(snapshot, header.version);
+      authorization.read_from_snapshot(snapshot);      
 
       set_revision(head->block_num);
       db.create<database_header_object>([](const auto& header) {
@@ -509,7 +505,7 @@ namespace eosio { namespace chain {
       });
 
       const auto& gpo = db.get<global_property_object>();
-      EOS_ASSERT(gpo.chain_id == chain_id, chain_id_type_exception,
+      DCD_ASSERT(gpo.chain_id == chain_id, chain_id_type_exception,
                  "chain ID in snapshot (${snapshot_chain_id}) does not match the chain ID that controller was "
                  "constructed with (${controller_chain_id})",
                  ("snapshot_chain_id", gpo.chain_id)("controller_chain_id", chain_id));
@@ -549,7 +545,7 @@ namespace eosio { namespace chain {
             add_database_section_receiver add_db_receiver(section, db);
             table_collector table_collector_receiver(add_db_receiver);
             backing_store::rocksdb_contract_db_table_writer<table_collector> writer(table_collector_receiver);
-            const auto begin_key = eosio::session::shared_bytes(&backing_store::rocksdb_contract_db_prefix, 1);
+            const auto begin_key = dcd::session::shared_bytes(&backing_store::rocksdb_contract_db_prefix, 1);
             const auto end_key = begin_key.next();
             backing_store::walk_rocksdb_entries_with_prefix(kv_undo_stack, begin_key, end_key, writer);
          }
@@ -591,7 +587,7 @@ namespace eosio { namespace chain {
    template <typename Section>
    void rocksdb_read_contract_tables_from_snapshot(rocks_db_type& kv_database, chainbase::database& db,
                                                    Section& section, uint64_t snapshot_batch_threashold) {
-      std::vector<std::pair<eosio::session::shared_bytes, eosio::session::shared_bytes>> batch;
+      std::vector<std::pair<dcd::session::shared_bytes, dcd::session::shared_bytes>> batch;
       bool                more     = !section.empty();
       auto                read_row = [&section, &more, &db](auto& row) { more = section.read_row(row, db); };
       uint64_t            batch_mem_size = 0;
@@ -630,7 +626,7 @@ namespace eosio { namespace chain {
 
          auto write_secondary_index = [&put, &read_row](auto index) {
             using index_t = decltype(index);
-            static const eosio::session::shared_bytes  empty_payload;
+            static const dcd::session::shared_bytes  empty_payload;
             unsigned_int       size;
             read_row(size);
             for (uint32_t i = 0; i < size.value; ++i) {
@@ -666,14 +662,14 @@ namespace eosio { namespace chain {
       });
    }
 
-   std::optional<eosio::chain::genesis_state> extract_legacy_genesis_state(snapshot_reader& snapshot,
+   std::optional<dcd::chain::genesis_state> extract_legacy_genesis_state(snapshot_reader& snapshot,
                                                                            uint32_t         version) {
-      std::optional<eosio::chain::genesis_state> genesis;
+      std::optional<dcd::chain::genesis_state> genesis;
       using v2 = legacy::snapshot_global_property_object_v2;
 
       if (std::clamp(version, v2::minimum_version, v2::maximum_version) == version) {
          genesis.emplace();
-         snapshot.read_section<eosio::chain::genesis_state>(
+         snapshot.read_section<dcd::chain::genesis_state>(
                [&genesis = *genesis](auto& section) { section.read_row(genesis); });
       }
       return genesis;
@@ -683,6 +679,6 @@ namespace eosio { namespace chain {
    std::vector<char> make_rocksdb_contract_kv_prefix() { return std::vector<char> { backing_store::rocksdb_contract_kv_prefix }; }
    char make_rocksdb_contract_db_prefix() { return backing_store::rocksdb_contract_db_prefix; }
 
-}} // namespace eosio::chain
+}} // namespace dcd::chain
 
 

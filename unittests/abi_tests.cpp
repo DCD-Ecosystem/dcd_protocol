@@ -11,21 +11,21 @@
 #include <fc/log/logger.hpp>
 #include <fc/scoped_exit.hpp>
 
-#include <eosio/chain/contract_types.hpp>
-#include <eosio/chain/abi_serializer.hpp>
-#include <eosio/chain/eosio_contract.hpp>
-#include <eosio/testing/tester.hpp>
+#include <dcd/chain/contract_types.hpp>
+#include <dcd/chain/abi_serializer.hpp>
+#include <dcd/chain/dcd_contract.hpp>
+#include <dcd/testing/tester.hpp>
 
 #include <boost/test/framework.hpp>
 
 #include <deep_nested.abi.hpp>
 #include <large_nested.abi.hpp>
 
-using namespace eosio;
+using namespace dcd;
 using namespace chain;
 
 struct act_sig {
-   eosio::chain::signature_type sig;
+   dcd::chain::signature_type sig;
 
    static account_name get_account() {
       return "hello"_n;
@@ -77,7 +77,7 @@ void verify_round_trip_conversion( const abi_serializer& abis, const type_name& 
 auto get_resolver(const abi_def& abi = abi_def())
 {
    return [&abi](const account_name &name) -> std::optional<abi_serializer> {
-      return abi_serializer(eosio_contract_abi(abi), abi_serializer::create_yield_function( max_serialization_time ));
+      return abi_serializer(dcd_contract_abi(abi), abi_serializer::create_yield_function( max_serialization_time ));
    };
 }
 
@@ -529,7 +529,7 @@ BOOST_AUTO_TEST_CASE(uint_types)
 
    auto abi = fc::json::from_string(currency_abi).as<abi_def>();
 
-   abi_serializer abis(eosio_contract_abi(abi), abi_serializer::create_yield_function( max_serialization_time ));
+   abi_serializer abis(dcd_contract_abi(abi), abi_serializer::create_yield_function( max_serialization_time ));
 
    const char* test_data = R"=====(
    {
@@ -550,16 +550,16 @@ BOOST_AUTO_TEST_CASE(uint_types)
 BOOST_AUTO_TEST_CASE(general)
 { try {
 
-   auto abi = eosio_contract_abi(fc::json::from_string(my_abi).as<abi_def>());
+   auto abi = dcd_contract_abi(fc::json::from_string(my_abi).as<abi_def>());
 
    abi_serializer abis(abi, abi_serializer::create_yield_function( max_serialization_time ));
 
    const char *my_other = R"=====(
     {
-      "publickey"     :  "EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
-      "publickey_arr" :  ["EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV","EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV","EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"],
-      "asset"         : "100.0000 SYS",
-      "asset_arr"     : ["100.0000 SYS","100.0000 SYS"],
+      "publickey"     :  "DCD6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
+      "publickey_arr" :  ["DCD6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV","DCD6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV","DCD6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"],
+      "asset"         : "100.0000 DCD",
+      "asset_arr"     : ["100.0000 DCD","100.0000 DCD"],
 
       "string"            : "ola ke ase",
       "string_arr"        : ["ola ke ase","ola ke desi"],
@@ -693,22 +693,22 @@ BOOST_AUTO_TEST_CASE(general)
         "delay_sec":0,
         "transaction_extensions": []
       }],
-      "keyweight": {"key":"EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV", "weight":"100"},
-      "keyweight_arr": [{"key":"EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV", "weight":"100"},{"key":"EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV", "weight":"200"}],
+      "keyweight": {"key":"DCD6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV", "weight":"100"},
+      "keyweight_arr": [{"key":"DCD6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV", "weight":"100"},{"key":"DCD6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV", "weight":"200"}],
       "authority": {
          "threshold":"10",
-         "keys":[{"key":"EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV", "weight":100},{"key":"EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV", "weight":200}],
+         "keys":[{"key":"DCD6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV", "weight":100},{"key":"DCD6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV", "weight":200}],
          "accounts":[{"permission":{"actor":"acc1","permission":"permname1"},"weight":"1"},{"permission":{"actor":"acc2","permission":"permname2"},"weight":"2"}],
          "waits":[]
        },
       "authority_arr": [{
          "threshold":"10",
-         "keys":[{"key":"EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV", "weight":"100"},{"key":"EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV", "weight":"200"}],
+         "keys":[{"key":"DCD6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV", "weight":"100"},{"key":"DCD6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV", "weight":"200"}],
          "accounts":[{"permission":{"actor":"acc1","permission":"permname1"},"weight":"1"},{"permission":{"actor":"acc2","permission":"permname2"},"weight":"2"}],
          "waits":[]
        },{
          "threshold":"10",
-         "keys":[{"key":"EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV", "weight":"100"},{"key":"EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV", "weight":"200"}],
+         "keys":[{"key":"DCD6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV", "weight":"100"},{"key":"DCD6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV", "weight":"200"}],
          "accounts":[{"permission":{"actor":"acc1","permission":"permname1"},"weight":"1"},{"permission":{"actor":"acc2","permission":"permname2"},"weight":"2"}],
          "waits":[]
        }],
@@ -797,7 +797,7 @@ BOOST_AUTO_TEST_CASE(abi_cycle)
    }
    )=====";
 
-   auto abi = eosio_contract_abi(fc::json::from_string(typedef_cycle_abi).as<abi_def>());
+   auto abi = dcd_contract_abi(fc::json::from_string(typedef_cycle_abi).as<abi_def>());
 
    auto is_assert_exception = [](const auto& e) -> bool {
       wlog(e.to_string()); return true;
@@ -813,7 +813,7 @@ BOOST_AUTO_TEST_CASE(abi_cycle)
 BOOST_AUTO_TEST_CASE(linkauth_test)
 { try {
 
-   abi_serializer abis(eosio_contract_abi(abi_def()), abi_serializer::create_yield_function( max_serialization_time ));
+   abi_serializer abis(dcd_contract_abi(abi_def()), abi_serializer::create_yield_function( max_serialization_time ));
 
    BOOST_CHECK(true);
    const char* test_data = R"=====(
@@ -847,7 +847,7 @@ BOOST_AUTO_TEST_CASE(linkauth_test)
 BOOST_AUTO_TEST_CASE(unlinkauth_test)
 { try {
 
-   abi_serializer abis(eosio_contract_abi(abi_def()), abi_serializer::create_yield_function( max_serialization_time ));
+   abi_serializer abis(dcd_contract_abi(abi_def()), abi_serializer::create_yield_function( max_serialization_time ));
 
    BOOST_CHECK(true);
    const char* test_data = R"=====(
@@ -878,7 +878,7 @@ BOOST_AUTO_TEST_CASE(unlinkauth_test)
 BOOST_AUTO_TEST_CASE(updateauth_test)
 { try {
 
-   abi_serializer abis(eosio_contract_abi(abi_def()), abi_serializer::create_yield_function( max_serialization_time ));
+   abi_serializer abis(dcd_contract_abi(abi_def()), abi_serializer::create_yield_function( max_serialization_time ));
 
    BOOST_CHECK(true);
    const char* test_data = R"=====(
@@ -888,8 +888,8 @@ BOOST_AUTO_TEST_CASE(updateauth_test)
      "parent" : "updauth.prnt",
      "auth" : {
         "threshold" : "2147483145",
-        "keys" : [ {"key" : "EOS65rXebLhtk2aTTzP4e9x1AQZs7c5NNXJp89W8R3HyaA6Zyd4im", "weight" : 57005},
-                   {"key" : "EOS5eVr9TVnqwnUBNwf9kwMTbrHvX5aPyyEG97dz2b2TNeqWRzbJf", "weight" : 57605} ],
+        "keys" : [ {"key" : "DCD65rXebLhtk2aTTzP4e9x1AQZs7c5NNXJp89W8R3HyaA6Zyd4im", "weight" : 57005},
+                   {"key" : "DCD5eVr9TVnqwnUBNwf9kwMTbrHvX5aPyyEG97dz2b2TNeqWRzbJf", "weight" : 57605} ],
         "accounts" : [ {"permission" : {"actor" : "prm.acct1", "permission" : "prm.prm1"}, "weight" : 53005 },
                        {"permission" : {"actor" : "prm.acct2", "permission" : "prm.prm2"}, "weight" : 53405 } ],
         "waits" : []
@@ -906,9 +906,9 @@ BOOST_AUTO_TEST_CASE(updateauth_test)
    BOOST_TEST(2147483145u == updauth.auth.threshold);
 
    BOOST_TEST_REQUIRE(2u == updauth.auth.keys.size());
-   BOOST_TEST("EOS65rXebLhtk2aTTzP4e9x1AQZs7c5NNXJp89W8R3HyaA6Zyd4im" == updauth.auth.keys[0].key.to_string());
+   BOOST_TEST("DCD65rXebLhtk2aTTzP4e9x1AQZs7c5NNXJp89W8R3HyaA6Zyd4im" == updauth.auth.keys[0].key.to_string());
    BOOST_TEST(57005u == updauth.auth.keys[0].weight);
-   BOOST_TEST("EOS5eVr9TVnqwnUBNwf9kwMTbrHvX5aPyyEG97dz2b2TNeqWRzbJf" == updauth.auth.keys[1].key.to_string());
+   BOOST_TEST("DCD5eVr9TVnqwnUBNwf9kwMTbrHvX5aPyyEG97dz2b2TNeqWRzbJf" == updauth.auth.keys[1].key.to_string());
    BOOST_TEST(57605u == updauth.auth.keys[1].weight);
 
    BOOST_TEST_REQUIRE(2u == updauth.auth.accounts.size());
@@ -948,7 +948,7 @@ BOOST_AUTO_TEST_CASE(updateauth_test)
 BOOST_AUTO_TEST_CASE(deleteauth_test)
 { try {
 
-   abi_serializer abis(eosio_contract_abi(abi_def()), abi_serializer::create_yield_function( max_serialization_time ));
+   abi_serializer abis(dcd_contract_abi(abi_def()), abi_serializer::create_yield_function( max_serialization_time ));
 
    BOOST_CHECK(true);
    const char* test_data = R"=====(
@@ -976,7 +976,7 @@ BOOST_AUTO_TEST_CASE(deleteauth_test)
 BOOST_AUTO_TEST_CASE(newaccount_test)
 { try {
 
-   abi_serializer abis(eosio_contract_abi(abi_def()), abi_serializer::create_yield_function( max_serialization_time ));
+   abi_serializer abis(dcd_contract_abi(abi_def()), abi_serializer::create_yield_function( max_serialization_time ));
 
    BOOST_CHECK(true);
    const char* test_data = R"=====(
@@ -985,16 +985,16 @@ BOOST_AUTO_TEST_CASE(newaccount_test)
      "name" : "newacct.name",
      "owner" : {
         "threshold" : 2147483145,
-        "keys" : [ {"key" : "EOS65rXebLhtk2aTTzP4e9x1AQZs7c5NNXJp89W8R3HyaA6Zyd4im", "weight" : 57005},
-                   {"key" : "EOS5eVr9TVnqwnUBNwf9kwMTbrHvX5aPyyEG97dz2b2TNeqWRzbJf", "weight" : 57605} ],
+        "keys" : [ {"key" : "DCD65rXebLhtk2aTTzP4e9x1AQZs7c5NNXJp89W8R3HyaA6Zyd4im", "weight" : 57005},
+                   {"key" : "DCD5eVr9TVnqwnUBNwf9kwMTbrHvX5aPyyEG97dz2b2TNeqWRzbJf", "weight" : 57605} ],
         "accounts" : [ {"permission" : {"actor" : "prm.acct1", "permission" : "prm.prm1"}, "weight" : 53005 },
                        {"permission" : {"actor" : "prm.acct2", "permission" : "prm.prm2"}, "weight" : 53405 }],
         "waits" : []
      },
      "active" : {
         "threshold" : 2146483145,
-        "keys" : [ {"key" : "EOS65rXebLhtk2aTTzP4e9x1AQZs7c5NNXJp89W8R3HyaA6Zyd4im", "weight" : 57005},
-                   {"key" : "EOS5eVr9TVnqwnUBNwf9kwMTbrHvX5aPyyEG97dz2b2TNeqWRzbJf", "weight" : 57605} ],
+        "keys" : [ {"key" : "DCD65rXebLhtk2aTTzP4e9x1AQZs7c5NNXJp89W8R3HyaA6Zyd4im", "weight" : 57005},
+                   {"key" : "DCD5eVr9TVnqwnUBNwf9kwMTbrHvX5aPyyEG97dz2b2TNeqWRzbJf", "weight" : 57605} ],
         "accounts" : [ {"permission" : {"actor" : "prm.acct1", "permission" : "prm.prm1"}, "weight" : 53005 },
                        {"permission" : {"actor" : "prm.acct2", "permission" : "prm.prm2"}, "weight" : 53405 }],
         "waits" : []
@@ -1010,9 +1010,9 @@ BOOST_AUTO_TEST_CASE(newaccount_test)
    BOOST_TEST(2147483145u == newacct.owner.threshold);
 
    BOOST_TEST_REQUIRE(2u == newacct.owner.keys.size());
-   BOOST_TEST("EOS65rXebLhtk2aTTzP4e9x1AQZs7c5NNXJp89W8R3HyaA6Zyd4im" == newacct.owner.keys[0].key.to_string());
+   BOOST_TEST("DCD65rXebLhtk2aTTzP4e9x1AQZs7c5NNXJp89W8R3HyaA6Zyd4im" == newacct.owner.keys[0].key.to_string());
    BOOST_TEST(57005u == newacct.owner.keys[0].weight);
-   BOOST_TEST("EOS5eVr9TVnqwnUBNwf9kwMTbrHvX5aPyyEG97dz2b2TNeqWRzbJf" == newacct.owner.keys[1].key.to_string());
+   BOOST_TEST("DCD5eVr9TVnqwnUBNwf9kwMTbrHvX5aPyyEG97dz2b2TNeqWRzbJf" == newacct.owner.keys[1].key.to_string());
    BOOST_TEST(57605u == newacct.owner.keys[1].weight);
 
    BOOST_TEST_REQUIRE(2u == newacct.owner.accounts.size());
@@ -1026,9 +1026,9 @@ BOOST_AUTO_TEST_CASE(newaccount_test)
    BOOST_TEST(2146483145u == newacct.active.threshold);
 
    BOOST_TEST_REQUIRE(2u == newacct.active.keys.size());
-   BOOST_TEST("EOS65rXebLhtk2aTTzP4e9x1AQZs7c5NNXJp89W8R3HyaA6Zyd4im" == newacct.active.keys[0].key.to_string());
+   BOOST_TEST("DCD65rXebLhtk2aTTzP4e9x1AQZs7c5NNXJp89W8R3HyaA6Zyd4im" == newacct.active.keys[0].key.to_string());
    BOOST_TEST(57005u == newacct.active.keys[0].weight);
-   BOOST_TEST("EOS5eVr9TVnqwnUBNwf9kwMTbrHvX5aPyyEG97dz2b2TNeqWRzbJf" == newacct.active.keys[1].key.to_string());
+   BOOST_TEST("DCD5eVr9TVnqwnUBNwf9kwMTbrHvX5aPyyEG97dz2b2TNeqWRzbJf" == newacct.active.keys[1].key.to_string());
    BOOST_TEST(57605u == newacct.active.keys[1].weight);
 
    BOOST_TEST_REQUIRE(2u == newacct.active.accounts.size());
@@ -1086,7 +1086,7 @@ BOOST_AUTO_TEST_CASE(newaccount_test)
 BOOST_AUTO_TEST_CASE(setcode_test)
 { try {
 
-   abi_serializer abis(eosio_contract_abi(abi_def()), abi_serializer::create_yield_function( max_serialization_time ));
+   abi_serializer abis(dcd_contract_abi(abi_def()), abi_serializer::create_yield_function( max_serialization_time ));
 
    const char* test_data = R"=====(
    {
@@ -1249,7 +1249,7 @@ BOOST_AUTO_TEST_CASE(setabi_test)
 
    auto v = fc::json::from_string(abi_def_abi);
 
-   abi_serializer abis(eosio_contract_abi(v.as<abi_def>()), abi_serializer::create_yield_function( max_serialization_time ));
+   abi_serializer abis(dcd_contract_abi(v.as<abi_def>()), abi_serializer::create_yield_function( max_serialization_time ));
 
    const char* abi_string = R"=====(
       {
@@ -1413,7 +1413,7 @@ BOOST_AUTO_TEST_CASE(setabi_kv_tables_test)
    // mystruct doesn't exists in structs
    const char* abi_def_abi = R"=====(
    {
-    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT ",
+    "____comment": "This file was generated with dcd-abigen. DO NOT EDIT ",
     "version": "eosio::abi/1.2",
     "types": [],
     "structs": [],
@@ -1437,10 +1437,10 @@ BOOST_AUTO_TEST_CASE(setabi_kv_tables_test)
    auto var = fc::json::from_string(abi_def_abi);
    BOOST_CHECK_THROW( abi_serializer abis(fc::json::from_string(abi_def_abi).as<abi_def>(), abi_serializer::create_yield_function( max_serialization_time )), fc::exception );
 
-   // testtable1_INVALID_NAME is not a valid eosio::name
+   // testtable1_INVALID_NAME is not a valid dcd::name
    const char* abi_def_abi2 = R"=====(
    {
-    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT ",
+    "____comment": "This file was generated with dcd-abigen. DO NOT EDIT ",
     "version": "eosio::abi/1.2",
     "types": [],
     "structs": [],
@@ -1467,7 +1467,7 @@ BOOST_AUTO_TEST_CASE(setabi_kv_tables_test)
    // testtable1.type is empty
    const char *abi_def_abi3 = R"=====(
    {
-    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT ",
+    "____comment": "This file was generated with dcd-abigen. DO NOT EDIT ",
     "version": "eosio::abi/1.2",
     "types": [],
     "structs": [
@@ -1508,7 +1508,7 @@ BOOST_AUTO_TEST_CASE(setabi_kv_tables_test)
    // testtable1.primary_index is missing
    const char *abi_def_abi4 = R"=====(
    {
-    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT ",
+    "____comment": "This file was generated with dcd-abigen. DO NOT EDIT ",
     "version": "eosio::abi/1.2",
     "types": [],
     "structs": [
@@ -1546,7 +1546,7 @@ BOOST_AUTO_TEST_CASE(setabi_kv_tables_test)
    const char* abi_def_abi5 = R"=====(
 
    {
-    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT ",
+    "____comment": "This file was generated with dcd-abigen. DO NOT EDIT ",
     "version": "eosio::abi/1.2",
     "types": [],
     "structs": [],
@@ -1571,7 +1571,7 @@ BOOST_AUTO_TEST_CASE(setabi_test3)
       const char *abi_def_abi = R"=====(
 
    {
-    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT ",
+    "____comment": "This file was generated with dcd-abigen. DO NOT EDIT ",
     "version": "eosio::abi/1.2",
     "types": [],
     "structs": [
@@ -2039,7 +2039,7 @@ BOOST_AUTO_TEST_CASE(abi_type_repeat)
    }
    )=====";
 
-   auto abi = eosio_contract_abi(fc::json::from_string(repeat_abi).as<abi_def>());
+   auto abi = dcd_contract_abi(fc::json::from_string(repeat_abi).as<abi_def>());
    auto is_table_exception = [](fc::exception const & e) -> bool { return e.to_detail_string().find("type already exists") != std::string::npos; };
    BOOST_CHECK_EXCEPTION( abi_serializer abis(abi, abi_serializer::create_yield_function( max_serialization_time )), duplicate_abi_type_def_exception, is_table_exception );
 } FC_LOG_AND_RETHROW() }
@@ -2097,7 +2097,7 @@ BOOST_AUTO_TEST_CASE(abi_struct_repeat)
    }
    )=====";
 
-   auto abi = eosio_contract_abi(fc::json::from_string(repeat_abi).as<abi_def>());
+   auto abi = dcd_contract_abi(fc::json::from_string(repeat_abi).as<abi_def>());
    BOOST_CHECK_THROW( abi_serializer abis(abi, abi_serializer::create_yield_function( max_serialization_time )), duplicate_abi_struct_def_exception );
 } FC_LOG_AND_RETHROW() }
 
@@ -2157,7 +2157,7 @@ BOOST_AUTO_TEST_CASE(abi_action_repeat)
    }
    )=====";
 
-   auto abi = eosio_contract_abi(fc::json::from_string(repeat_abi).as<abi_def>());
+   auto abi = dcd_contract_abi(fc::json::from_string(repeat_abi).as<abi_def>());
    BOOST_CHECK_THROW( abi_serializer abis(abi, abi_serializer::create_yield_function( max_serialization_time )), duplicate_abi_action_def_exception );
 } FC_LOG_AND_RETHROW() }
 
@@ -2220,7 +2220,7 @@ BOOST_AUTO_TEST_CASE(abi_table_repeat)
    }
    )=====";
 
-   auto abi = eosio_contract_abi(fc::json::from_string(repeat_abi).as<abi_def>());
+   auto abi = dcd_contract_abi(fc::json::from_string(repeat_abi).as<abi_def>());
    BOOST_CHECK_THROW( abi_serializer abis(abi, abi_serializer::create_yield_function( max_serialization_time )), duplicate_abi_table_def_exception );
 } FC_LOG_AND_RETHROW() }
 
@@ -2410,7 +2410,7 @@ BOOST_AUTO_TEST_CASE(abi_type_nested_in_vector)
 
 } FC_LOG_AND_RETHROW() }
 
-BOOST_AUTO_TEST_CASE(abi_account_name_in_eosio_abi)
+BOOST_AUTO_TEST_CASE(abi_account_name_in_dcd_abi)
 { try {
    // inifinite loop in types
    const char* repeat_abi = R"=====(
@@ -2446,7 +2446,7 @@ BOOST_AUTO_TEST_CASE(abi_account_name_in_eosio_abi)
    }
    )=====";
 
-   auto abi = eosio_contract_abi(fc::json::from_string(repeat_abi).as<abi_def>());
+   auto abi = dcd_contract_abi(fc::json::from_string(repeat_abi).as<abi_def>());
    auto is_type_exception = [](fc::assert_exception const & e) -> bool { return e.to_detail_string().find("abi.types.size") != std::string::npos; };
 
 } FC_LOG_AND_RETHROW() }
@@ -2479,7 +2479,7 @@ BOOST_AUTO_TEST_CASE(abi_large_array)
 
       abi_serializer abis( fc::json::from_string( abi_str ).as<abi_def>(), abi_serializer::create_yield_function( max_serialization_time ) );
       // indicate a very large array, but don't actually provide a large array
-      // curl http://127.0.0.1:8888/v1/chain/abi_bin_to_json -X POST -d '{"code":"eosio", "action":"hi", "binargs":"ffffffff08"}'
+      // curl http://127.0.0.1:8888/v1/chain/abi_bin_to_json -X POST -d '{"code":"dcd", "action":"hi", "binargs":"ffffffff08"}'
       bytes bin = {static_cast<char>(0xff),
                    static_cast<char>(0xff),
                    static_cast<char>(0xff),
@@ -2597,7 +2597,7 @@ BOOST_AUTO_TEST_CASE(abi_recursive_structs)
       )=====";
 
       abi_serializer abis(fc::json::from_string(abi_str).as<abi_def>(), abi_serializer::create_yield_function( max_serialization_time ));
-      string hi_data = "{\"user\":\"eosio\"}";
+      string hi_data = "{\"user\":\"dcd\"}";
       auto bin = abis.variant_to_binary("hi2", fc::json::from_string(hi_data), abi_serializer::create_yield_function( max_serialization_time ));
       BOOST_CHECK_THROW( abis.binary_to_variant("hi", bin, abi_serializer::create_yield_function( max_serialization_time ));, fc::exception );
 
@@ -2708,7 +2708,7 @@ BOOST_AUTO_TEST_CASE(abi_large_signature)
 
 BOOST_AUTO_TEST_CASE(variants)
 {
-   using eosio::testing::fc_exception_message_starts_with;
+   using dcd::testing::fc_exception_message_starts_with;
 
    auto duplicate_variant_abi = R"({
       "version": "eosio::abi/1.1",
@@ -2781,7 +2781,7 @@ BOOST_AUTO_TEST_CASE(variants)
 
 BOOST_AUTO_TEST_CASE(aliased_variants)
 {
-   using eosio::testing::fc_exception_message_starts_with;
+   using dcd::testing::fc_exception_message_starts_with;
 
    auto aliased_variant = R"({
       "version": "eosio::abi/1.1",
@@ -2806,7 +2806,7 @@ BOOST_AUTO_TEST_CASE(aliased_variants)
 
 BOOST_AUTO_TEST_CASE(variant_of_aliases)
 {
-   using eosio::testing::fc_exception_message_starts_with;
+   using dcd::testing::fc_exception_message_starts_with;
 
    auto aliased_variant = R"({
       "version": "eosio::abi/1.1",
@@ -2879,7 +2879,7 @@ BOOST_AUTO_TEST_CASE(action_results)
 
 BOOST_AUTO_TEST_CASE(extend)
 {
-   using eosio::testing::fc_exception_message_starts_with;
+   using dcd::testing::fc_exception_message_starts_with;
 
    auto abi = R"({
       "version": "eosio::abi/1.1",
@@ -2945,7 +2945,7 @@ BOOST_AUTO_TEST_CASE(version)
 
 BOOST_AUTO_TEST_CASE(abi_serialize_incomplete_json_array)
 {
-   using eosio::testing::fc_exception_message_starts_with;
+   using dcd::testing::fc_exception_message_starts_with;
 
    auto abi = R"({
       "version": "eosio::abi/1.0",
@@ -2974,7 +2974,7 @@ BOOST_AUTO_TEST_CASE(abi_serialize_incomplete_json_array)
 
 BOOST_AUTO_TEST_CASE(abi_serialize_incomplete_json_object)
 {
-   using eosio::testing::fc_exception_message_starts_with;
+   using dcd::testing::fc_exception_message_starts_with;
 
    auto abi = R"({
       "version": "eosio::abi/1.0",
@@ -3006,7 +3006,7 @@ BOOST_AUTO_TEST_CASE(abi_serialize_incomplete_json_object)
 
 BOOST_AUTO_TEST_CASE(abi_serialize_json_mismatching_type)
 {
-   using eosio::testing::fc_exception_message_is;
+   using dcd::testing::fc_exception_message_is;
 
    auto abi = R"({
       "version": "eosio::abi/1.0",
@@ -3035,7 +3035,7 @@ BOOST_AUTO_TEST_CASE(abi_serialize_json_mismatching_type)
 // it is a bit odd to have an empty name for a field, but json seems to allow it
 BOOST_AUTO_TEST_CASE(abi_serialize_json_empty_name)
 {
-   using eosio::testing::fc_exception_message_is;
+   using dcd::testing::fc_exception_message_is;
 
    auto abi = R"({
       "version": "eosio::abi/1.0",
@@ -3058,7 +3058,7 @@ BOOST_AUTO_TEST_CASE(abi_serialize_json_empty_name)
 
 BOOST_AUTO_TEST_CASE(abi_serialize_detailed_error_messages)
 {
-   using eosio::testing::fc_exception_message_is;
+   using dcd::testing::fc_exception_message_is;
 
    auto abi = R"({
       "version": "eosio::abi/1.1",
@@ -3135,7 +3135,7 @@ BOOST_AUTO_TEST_CASE(abi_serialize_detailed_error_messages)
 
 BOOST_AUTO_TEST_CASE(abi_serialize_short_error_messages)
 {
-   using eosio::testing::fc_exception_message_is;
+   using dcd::testing::fc_exception_message_is;
 
    auto abi = R"({
       "version": "eosio::abi/1.1",
@@ -3215,7 +3215,7 @@ BOOST_AUTO_TEST_CASE(abi_serialize_short_error_messages)
 
 BOOST_AUTO_TEST_CASE(abi_deserialize_detailed_error_messages)
 {
-   using eosio::testing::fc_exception_message_is;
+   using dcd::testing::fc_exception_message_is;
 
    auto abi = R"({
       "version": "eosio::abi/1.1",
@@ -3323,9 +3323,9 @@ inline std::pair<action_trace, std::string> generate_action_trace(const std::opt
    at.closest_unnotified_ancestor_action_ordinal = 2;
    at.receipt = std::optional<action_receipt>{};
    at.receiver = action_name{"test"};
-   at.act = eosio::chain::action(
-      std::vector<eosio::chain::permission_level>{
-         eosio::chain::permission_level{
+   at.act = dcd::chain::action(
+      std::vector<dcd::chain::permission_level>{
+         dcd::chain::permission_level{
             account_name{"acctest"},
             permission_name{"active"}}},
       account_name{"acctest"},
@@ -3415,8 +3415,8 @@ BOOST_AUTO_TEST_CASE(abi_to_variant__add_action__good_return_value)
    abi_serializer abis(abidef, abi_serializer::create_yield_function(max_serialization_time));
 
    mutable_variant_object mvo;
-   eosio::chain::impl::abi_traverse_context ctx(abi_serializer::create_yield_function(max_serialization_time));
-   eosio::chain::impl::abi_to_variant::add(mvo, "action_traces", at, get_resolver(abidef), ctx);
+   dcd::chain::impl::abi_traverse_context ctx(abi_serializer::create_yield_function(max_serialization_time));
+   dcd::chain::impl::abi_to_variant::add(mvo, "action_traces", at, get_resolver(abidef), ctx);
    std::string res = fc::json::to_string(mvo, fc::time_point::now() + max_serialization_time);
 
    BOOST_CHECK_EQUAL(res, expected_json);
@@ -3440,8 +3440,8 @@ BOOST_AUTO_TEST_CASE(abi_to_variant__add_action__bad_return_value)
    abi_serializer abis(abidef, abi_serializer::create_yield_function(max_serialization_time));
 
    mutable_variant_object mvo;
-   eosio::chain::impl::abi_traverse_context ctx(abi_serializer::create_yield_function(max_serialization_time));
-   eosio::chain::impl::abi_to_variant::add(mvo, "action_traces", at, get_resolver(abidef), ctx);
+   dcd::chain::impl::abi_traverse_context ctx(abi_serializer::create_yield_function(max_serialization_time));
+   dcd::chain::impl::abi_to_variant::add(mvo, "action_traces", at, get_resolver(abidef), ctx);
    std::string res = fc::json::to_string(mvo, fc::time_point::now() + max_serialization_time);
 
    BOOST_CHECK_EQUAL(res, expected_json);
@@ -3475,8 +3475,8 @@ BOOST_AUTO_TEST_CASE(abi_to_variant__add_action__no_return_value)
    abi_serializer abis(abidef, abi_serializer::create_yield_function(max_serialization_time));
 
    mutable_variant_object mvo;
-   eosio::chain::impl::abi_traverse_context ctx(abi_serializer::create_yield_function(max_serialization_time));
-   eosio::chain::impl::abi_to_variant::add(mvo, "action_traces", at, get_resolver(abidef), ctx);
+   dcd::chain::impl::abi_traverse_context ctx(abi_serializer::create_yield_function(max_serialization_time));
+   dcd::chain::impl::abi_to_variant::add(mvo, "action_traces", at, get_resolver(abidef), ctx);
    std::string res = fc::json::to_string(mvo, fc::time_point::now() + max_serialization_time);
 
    BOOST_CHECK_EQUAL(res, expected_json);
@@ -3533,9 +3533,9 @@ BOOST_AUTO_TEST_CASE(transaction_extensions_tests)
 
    // create a variant from txn
    mutable_variant_object mvo;
-   eosio::chain::impl::abi_traverse_context ctx(abi_serializer::create_yield_function(max_serialization_time));
-   auto abi = eosio_contract_abi(fc::json::from_string(my_abi).as<abi_def>());
-   eosio::chain::impl::abi_to_variant::add(mvo, "test", txn, get_resolver(abi), ctx);
+   dcd::chain::impl::abi_traverse_context ctx(abi_serializer::create_yield_function(max_serialization_time));
+   auto abi = dcd_contract_abi(fc::json::from_string(my_abi).as<abi_def>());
+   dcd::chain::impl::abi_to_variant::add(mvo, "test", txn, get_resolver(abi), ctx);
    const std::string mvo_as_string = fc::json::to_string(mvo, fc::time_point::now() + max_serialization_time);
    // since this ends up using abi_serializer::add, we will have deferred_transaction_generation
    BOOST_REQUIRE(mvo_as_string.find("deferred_transaction_generation") != string::npos);
@@ -3546,7 +3546,7 @@ BOOST_AUTO_TEST_CASE(transaction_extensions_tests)
    BOOST_REQUIRE_EQUAL(txn_clone.transaction_extensions.size(), 1);
    BOOST_REQUIRE(txn_clone.transaction_extensions == txn.transaction_extensions);
    mutable_variant_object mvo2;
-   eosio::chain::impl::abi_to_variant::add(mvo2, "test", txn_clone, get_resolver(abi), ctx);
+   dcd::chain::impl::abi_to_variant::add(mvo2, "test", txn_clone, get_resolver(abi), ctx);
    const std::string mvo2_as_string = fc::json::to_string(mvo2, fc::time_point::now() + max_serialization_time);
    // verify that the variant created from the original txn and the variant from the clone match
    BOOST_REQUIRE_EQUAL(mvo_as_string, mvo2_as_string);
@@ -3561,7 +3561,7 @@ BOOST_AUTO_TEST_CASE(transaction_extensions_tests)
    chain::transaction txn_clone2;
    abi_serializer::from_variant(direct_var, txn_clone2, get_resolver(), abi_serializer::create_yield_function( max_serialization_time ));
    mutable_variant_object mvo3;
-   eosio::chain::impl::abi_to_variant::add(mvo3, "test", txn_clone2, get_resolver(abi), ctx);
+   dcd::chain::impl::abi_to_variant::add(mvo3, "test", txn_clone2, get_resolver(abi), ctx);
    const std::string mvo3_as_string = fc::json::to_string(mvo3, fc::time_point::now() + max_serialization_time);
    BOOST_REQUIRE_EQUAL(mvo_as_string, mvo3_as_string);
 
@@ -3590,7 +3590,7 @@ BOOST_AUTO_TEST_CASE(transaction_extensions_tests)
    BOOST_REQUIRE(incompatible_ext_as_string.find("deferred_transaction_generation") != string::npos);
    BOOST_REQUIRE(incompatible_ext_as_string.find("transaction_extensions") != string::npos);
    chain::transaction txn_clone4;
-   using eosio::testing::fc_exception_message_starts_with;
+   using dcd::testing::fc_exception_message_starts_with;
    BOOST_CHECK_EXCEPTION( abi_serializer::from_variant(mvo["test"], txn_clone4, get_resolver(), abi_serializer::create_yield_function( max_serialization_time )),
                           packed_transaction_type_exception,
                           fc_exception_message_starts_with("Transaction contained deferred_transaction_generation and transaction_extensions that did not match") );
@@ -3607,9 +3607,9 @@ BOOST_AUTO_TEST_CASE(signed_transaction_extensions_tests)
 
    // create a variant from txn
    mutable_variant_object mvo;
-   eosio::chain::impl::abi_traverse_context ctx(abi_serializer::create_yield_function(max_serialization_time));
-   auto abi = eosio_contract_abi(fc::json::from_string(my_abi).as<abi_def>());
-   eosio::chain::impl::abi_to_variant::add(mvo, "test", txn, get_resolver(abi), ctx);
+   dcd::chain::impl::abi_traverse_context ctx(abi_serializer::create_yield_function(max_serialization_time));
+   auto abi = dcd_contract_abi(fc::json::from_string(my_abi).as<abi_def>());
+   dcd::chain::impl::abi_to_variant::add(mvo, "test", txn, get_resolver(abi), ctx);
    const std::string mvo_as_string = fc::json::to_string(mvo, fc::time_point::now() + max_serialization_time);
    // since this ends up using abi_serializer::add, we will have deferred_transaction_generation
    BOOST_REQUIRE(mvo_as_string.find("deferred_transaction_generation") != string::npos);
@@ -3620,7 +3620,7 @@ BOOST_AUTO_TEST_CASE(signed_transaction_extensions_tests)
    BOOST_REQUIRE_EQUAL(txn_clone.transaction_extensions.size(), 1);
    BOOST_REQUIRE(txn_clone.transaction_extensions == txn.transaction_extensions);
    mutable_variant_object mvo2;
-   eosio::chain::impl::abi_to_variant::add(mvo2, "test", txn_clone, get_resolver(abi), ctx);
+   dcd::chain::impl::abi_to_variant::add(mvo2, "test", txn_clone, get_resolver(abi), ctx);
    const std::string mvo2_as_string = fc::json::to_string(mvo2, fc::time_point::now() + max_serialization_time);
    // verify that the variant created from the original txn and the variant from the clone match
    BOOST_REQUIRE_EQUAL(mvo_as_string, mvo2_as_string);
@@ -3635,7 +3635,7 @@ BOOST_AUTO_TEST_CASE(signed_transaction_extensions_tests)
    chain::signed_transaction txn_clone2;
    abi_serializer::from_variant(direct_var, txn_clone2, get_resolver(), abi_serializer::create_yield_function( max_serialization_time ));
    mutable_variant_object mvo3;
-   eosio::chain::impl::abi_to_variant::add(mvo3, "test", txn_clone2, get_resolver(abi), ctx);
+   dcd::chain::impl::abi_to_variant::add(mvo3, "test", txn_clone2, get_resolver(abi), ctx);
    const std::string mvo3_as_string = fc::json::to_string(mvo3, fc::time_point::now() + max_serialization_time);
    BOOST_REQUIRE_EQUAL(mvo_as_string, mvo3_as_string);
 
@@ -3664,7 +3664,7 @@ BOOST_AUTO_TEST_CASE(signed_transaction_extensions_tests)
    BOOST_REQUIRE(incompatible_ext_as_string.find("deferred_transaction_generation") != string::npos);
    BOOST_REQUIRE(incompatible_ext_as_string.find("transaction_extensions") != string::npos);
    chain::signed_transaction txn_clone4;
-   using eosio::testing::fc_exception_message_starts_with;
+   using dcd::testing::fc_exception_message_starts_with;
    BOOST_CHECK_EXCEPTION( abi_serializer::from_variant(mvo["test"], txn_clone4, get_resolver(), abi_serializer::create_yield_function( max_serialization_time )),
                           packed_transaction_type_exception,
                           fc_exception_message_starts_with("Transaction contained deferred_transaction_generation and transaction_extensions that did not match") );

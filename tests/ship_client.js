@@ -1,5 +1,5 @@
 const { TextDecoder, TextEncoder } = require('util');
-const { Serialize } = require('eosjs');
+const { Serialize } = require('dcdjs');
 const commander = require('commander');
 const fetch = require('node-fetch');
 const zlib = require('zlib');

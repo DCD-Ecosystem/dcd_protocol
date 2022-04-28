@@ -1,18 +1,18 @@
 #include "block_vault_impl.hpp"
 #include "zlib_compressor.hpp"
 #include <boost/algorithm/string/predicate.hpp>
-#include <eosio/blockvault_client_plugin/blockvault_client_plugin.hpp> // eosio::blockvault_client_plugin
+#include <dcd/blockvault_client_plugin/blockvault_client_plugin.hpp> // dcd::blockvault_client_plugin
 #include <fc/log/log_message.hpp>                                      // FC_LOG_MESSAGE
 #include <vector>                                                      // std::vector
 #if HAS_PQXX
 #include "postgres_backend.hpp"
 #endif
 
-namespace eosio {
+namespace dcd {
 
 static appbase::abstract_plugin& _blockvault_client_plugin = app().register_plugin<blockvault_client_plugin>();
 
-using vault_impl = eosio::blockvault::block_vault_impl<eosio::blockvault::zlib_compressor>;
+using vault_impl = dcd::blockvault::block_vault_impl<dcd::blockvault::zlib_compressor>;
 class blockvault_client_plugin_impl : public vault_impl {
  public:
    blockvault_client_plugin_impl(std::unique_ptr<blockvault::backend>&& be)
@@ -60,11 +60,11 @@ void blockvault_client_plugin::plugin_shutdown() {
       my->stop();
 }
 
-eosio::blockvault::block_vault_interface* blockvault_client_plugin::get() { return my.get(); }
+dcd::blockvault::block_vault_interface* blockvault_client_plugin::get() { return my.get(); }
 
 void blockvault_client_plugin::handle_sighup() {
    if (my.get())
       my->set_logger_name("blockvault_client_plugin");
 }
 
-} // namespace eosio
+} // namespace dcd

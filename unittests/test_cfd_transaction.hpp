@@ -1,13 +1,13 @@
 #pragma once
-#include <eosio/testing/tester.hpp>
+#include <dcd/testing/tester.hpp>
 
 struct dummy_action {
-   static eosio::chain::name get_name() {
-      using namespace eosio::chain::literals;
+   static dcd::chain::name get_name() {
+      using namespace dcd::chain::literals;
       return "dummyaction"_n;
    }
-   static eosio::chain::name get_account() {
-      using namespace eosio::chain::literals;
+   static dcd::chain::name get_account() {
+      using namespace dcd::chain::literals;
       return "testapi"_n;
    }
 
@@ -17,12 +17,12 @@ struct dummy_action {
 };
 
 struct cf_action {
-   static eosio::chain::name get_name() {
-      using namespace eosio::chain::literals;
+   static dcd::chain::name get_name() {
+      using namespace dcd::chain::literals;
       return "cfaction"_n;
    }
-   static eosio::chain::name get_account() {
-      using namespace eosio::chain::literals;
+   static dcd::chain::name get_account() {
+      using namespace dcd::chain::literals;
       return "testapi"_n;
    }
 
@@ -37,8 +37,8 @@ FC_REFLECT(cf_action, (payload)(cfd_idx))
 #define DUMMY_ACTION_DEFAULT_B 0xab11cd1244556677
 #define DUMMY_ACTION_DEFAULT_C 0x7451ae12
 
-std::vector<eosio::chain::signed_block_ptr> deploy_test_api(eosio::testing::tester& chain);
-eosio::chain::transaction_trace_ptr push_test_cfd_transaction(eosio::testing::tester& chain);
+std::vector<dcd::chain::signed_block_ptr> deploy_test_api(dcd::testing::tester& chain);
+dcd::chain::transaction_trace_ptr push_test_cfd_transaction(dcd::testing::tester& chain);
 
 struct scoped_temp_path {
    boost::filesystem::path path;

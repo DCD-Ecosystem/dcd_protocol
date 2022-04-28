@@ -1,18 +1,18 @@
 ---
-content_title: EOSIO Software Installation
+content_title: DCD Software Installation
 ---
 
-There are various ways to install and use the EOSIO software:
+There are various ways to install and use the DCD software:
 
-* [Install EOSIO Prebuilt Binaries](00_install-prebuilt-binaries.md)
-* [Build EOSIO from Source](01_build-from-source/index.md)
+* [Install DCD Prebuilt Binaries](00_install-prebuilt-binaries.md)
+* [Build DCD from Source](01_build-from-source/index.md)
 
 [[info]]
-| If you are new to EOSIO, it is recommended that you install the [EOSIO Prebuilt Binaries](00_install-prebuilt-binaries.md), then proceed to the [Getting Started](https://developers.eos.io/eosio-home/docs/) section of the [EOSIO Developer Portal](https://developers.eos.io/). If you are an advanced developer, a block producer, or no binaries are available for your platform, you may need to [Build EOSIO from source](01_build-from-source/index.md) instead.
+| If you are new to DCD, it is recommended that you install the [DCD Prebuilt Binaries](00_install-prebuilt-binaries.md), then proceed to the [Getting Started](https://developers.dcd.io/dcd-home/docs/) section of the [DCD Developer Portal](https://developers.dcd.io/). If you are an advanced developer, a block producer, or no binaries are available for your platform, you may need to [Build DCD from source](01_build-from-source/index.md) instead.
 
 ## Supported Operating Systems
 
-The EOSIO software supports the following environments for development and/or deployment:
+The DCD software supports the following environments for development and/or deployment:
 
 **Linux Distributions**
 * Amazon Linux 2
@@ -26,4 +26,4 @@ The EOSIO software supports the following environments for development and/or de
 * macOS 10.14 (Mojave) or later
 
 [[info | Note]]
-| It may be possible to install EOSIO on other Unix-based operating systems. This is not officially supported, though.
+| It may be possible to install DCD on other Unix-based operating systems. This is not officially supported, though.

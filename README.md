@@ -1,159 +1,71 @@
 
-# EOSIO - The Most Powerful Infrastructure for Decentralized Applications
+# DCD - The Most Powerful DCD protocol - Divide trust. Unite players
+Welcome to the DCD source code repository! This software is actively developed by the Graphene Lab team based on previous internal developments, as well as using a number of public technologies, including EOSIO, Ethereum and others.
 
-[![Build status](https://badge.buildkite.com/370fe5c79410f7d695e4e34c500b4e86e3ac021c6b1f739e20.svg?branch=master)](https://buildkite.com/EOSIO/eosio)
 
-Welcome to the EOSIO source code repository! This software enables businesses to rapidly build and deploy high-performance and high-security blockchain-based applications.
-
-Some of the groundbreaking features of EOSIO include:
-
-1. Free Rate Limited Transactions
-1. Low Latency Block confirmation (0.5 seconds)
-1. Low-overhead Byzantine Fault Tolerant Finality
-1. Designed for optional high-overhead, low-latency BFT finality
-1. Smart contract platform powered by WebAssembly
-1. Designed for Sparse Header Light Client Validation
-1. Scheduled Recurring Transactions
-1. Time Delay Security
-1. Hierarchical Role Based Permissions
-1. Support for Biometric Hardware Secured Keys (e.g. Apple Secure Enclave)
-1. Designed for Parallel Execution of Context Free Validation Logic
-1. Designed for Inter Blockchain Communication
-
-## Disclaimer
-
-Block.one is neither launching nor operating any initial public blockchains based upon the EOSIO software. This release refers only to version 1.0 of our open source software. We caution those who wish to use blockchains built on EOSIO to carefully vet the companies and organizations launching blockchains based on EOSIO before disclosing any private keys to their derivative software.
-
-## Official Testnet
-
-[testnet.eos.io](https://testnet.eos.io/)
-
-## Supported Operating Systems
-
-EOSIO currently supports the following operating systems:  
-
-1. Amazon Linux 2
-2. CentOS 7
-2. CentOS 7.x
-2. CentOS 8
-3. Ubuntu 16.04
-4. Ubuntu 18.04
-4. Ubuntu 20.04
-5. MacOS 10.14 (Mojave)
-6. MacOS 10.15 (Catalina)
-
----
-
-**Note: It may be possible to install EOSIO on other Unix-based operating systems. This is not officially supported, though.**
-
----
-
-## Software Installation
-
-If you are new to EOSIO, it is recommended that you install the [EOSIO Prebuilt Binaries](#prebuilt-binaries), then proceed to the [Getting Started](https://developers.eos.io/eosio-home/docs) walkthrough. If you are an advanced developer, a block producer, or no binaries are available for your platform, you may need to [Build EOSIO from source](https://eosio.github.io/eos/latest/install/build-from-source).
-
----
-
-**Note: If you used our scripts to build/install EOSIO, please run the [Uninstall Script](#uninstall-script) before using our prebuilt binary packages.**
-
----
-
-## Prebuilt Binaries
-
-Prebuilt EOSIO software packages are available for the operating systems below. Find and follow the instructions for your OS:
-
-### Mac OS X:
-
-#### Mac OS X Brew Install
-```sh
-brew tap eosio/eosio
-brew install eosio
+## Software Installation From Scratch Ubuntu 18.04
+### Install the pre-requisite packages
 ```
-#### Mac OS X Brew Uninstall
-```sh
-brew remove eosio
+apt-get update &&  apt-get upgrade -y && apt-get install -y git make  bzip2 automake libbz2-dev libssl-dev doxygen graphviz libgmp3-dev autotools-dev libicu-dev python2.7 python2.7-dev python3 python3-dev python-configparser python-requests python-pip  autoconf libtool g++ gcc curl zlib1g-dev sudo ruby libusb-1.0-0-dev    libcurl4-gnutls-dev pkg-config patch vim-common jq net-tools
 ```
 
-### Ubuntu Linux:
-
-#### Ubuntu 20.04 Package Install
-```sh
-wget https://github.com/eosio/eos/releases/download/v2.1.0/eosio_2.1.0-1-ubuntu-20.04_amd64.deb
-sudo apt install ./eosio_2.1.0-1-ubuntu-20.04_amd64.deb
+### Install cmake
 ```
-#### Ubuntu 18.04 Package Install
-```sh
-wget https://github.com/eosio/eos/releases/download/v2.1.0/eosio_2.1.0-1-ubuntu-18.04_amd64.deb
-sudo apt install ./eosio_2.1.0-1-ubuntu-18.04_amd64.deb
-```
-#### Ubuntu 16.04 Package Install
-```sh
-wget https://github.com/eosio/eos/releases/download/v2.1.0/eosio_2.1.0-1-ubuntu-16.04_amd64.deb
-sudo apt install ./eosio_2.1.0-1-ubuntu-16.04_amd64.deb
-```
-#### Ubuntu Package Uninstall
-```sh
-sudo apt remove eosio
+curl -LO https://cmake.org/files/v3.16/cmake-3.16.2.tar.gz &&  tar -xzf cmake-3.16.2.tar.gz &&  cd cmake-3.16.2 &&  ./bootstrap --prefix=/usr/local &&  make -j$(nproc) &&  make install 
 ```
 
-### RPM-based (CentOS, Amazon Linux, etc.):
-
-#### RPM Package Install CentOS 7
-```sh
-wget https://github.com/eosio/eos/releases/download/v2.1.0/eosio-2.1.0-1.el7.x86_64.rpm
-sudo yum install ./eosio-2.1.0-1.el7.x86_64.rpm
+### Build clang and modules
 ```
-#### RPM Package Install CentOS 8
-```sh
-wget https://github.com/eosio/eos/releases/download/v2.1.0/eosio-2.1.0-1.el8.x86_64.rpm
-sudo yum install ./eosio-2.1.0-1.el8.x86_64.rpm
+git clone --single-branch --branch llvmorg-10.0.0 https://github.com/llvm/llvm-project clang10 &&  mkdir -p clang10/build && cd clang10/build &&  cmake -G 'Unix Makefiles' -DCMAKE_INSTALL_PREFIX='/usr/local' -DLLVM_ENABLE_PROJECTS='lld;polly;clang;clang-tools-extra;libcxx;libcxxabi;libunwind;compiler-rt' -DLLVM_BUILD_LLVM_DYLIB=ON -DLLVM_ENABLE_RTTI=ON -DLLVM_INCLUDE_DOCS=OFF -DLLVM_TARGETS_TO_BUILD=host -DCMAKE_BUILD_TYPE=Release ../llvm && make -j $(nproc) &&  make install
 ```
 
-#### RPM Package Uninstall
-```sh
-sudo yum remove eosio
+### Add the required config file
+```
+cp docker/clang.make /tmp/clang.cmake
 ```
 
-## Uninstall Script
-To uninstall the EOSIO built/installed binaries and dependencies, run:
-```sh
-./scripts/eosio_uninstall.sh
+###  Build and install llvm using required config
+```
+git clone --depth 1 --single-branch --branch llvmorg-10.0.0 https://github.com/llvm/llvm-project llvm && cd llvm/llvm && mkdir build && cd build &&  cmake -G 'Unix Makefiles' -DLLVM_TARGETS_TO_BUILD=host -DLLVM_BUILD_TOOLS=false -DLLVM_ENABLE_RTTI=1 -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_TOOLCHAIN_FILE=/tmp/clang.cmake -DCMAKE_EXE_LINKER_FLAGS=-pthread -DCMAKE_SHARED_LINKER_FLAGS=-pthread -DLLVM_ENABLE_PIC=NO -DLLVM_ENABLE_TERMINFO=OFF .. &&     make -j$(nproc) &&      make install
 ```
 
-## Documentation
-1. [Nodeos](http://eosio.github.io/eos/latest/nodeos/)
-    - [Usage](http://eosio.github.io/eos/latest/nodeos/usage/index)
-    - [Replays](http://eosio.github.io/eos/latest/nodeos/replays/index)
-    - [Chain API Reference](http://eosio.github.io/eos/latest/nodeos/plugins/chain_api_plugin/api-reference/index)
-    - [Troubleshooting](http://eosio.github.io/eos/latest/nodeos/troubleshooting/index)
-1. [Cleos](http://eosio.github.io/eos/latest/cleos/)
-1. [Keosd](http://eosio.github.io/eos/latest/keosd/)
+### Install boost
+```
+curl -LO https://boostorg.jfrog.io/artifactory/main/release/1.72.0/source/boost_1_72_0.tar.bz2 &&  tar -xjf boost_1_72_0.tar.bz2 &&  cd boost_1_72_0 &&  ./bootstrap.sh --with-toolset=clang --prefix=/usr/local && ./b2 toolset=clang cxxflags='-stdlib=libc++ -D__STRICT_ANSI__ -nostdinc++ -I/usr/local/include/c++/v1 -D_FORTIFY_SOURCE=2 -fstack-protector-strong -fpie' linkflags='-stdlib=libc++ -pie' link=static threading=multi --with-iostreams --with-date_time --with-filesystem --with-system --with-program_options --with-chrono --with-test -q -j$(nproc) install 
+```
 
-## Resources
-1. [Website](https://eos.io)
-1. [Blog](https://medium.com/eosio)
-1. [Developer Portal](https://developers.eos.io)
-1. [StackExchange for Q&A](https://eosio.stackexchange.com/)
-1. [Community Telegram Group](https://t.me/EOSProject)
-1. [Developer Telegram Group](https://t.me/joinchat/EaEnSUPktgfoI-XPfMYtcQ)
-1. [White Paper](https://github.com/EOSIO/Documentation/blob/master/TechnicalWhitePaper.md)
-1. [Roadmap](https://github.com/EOSIO/Documentation/blob/master/Roadmap.md)
+### Install postgresql
+```
+export TZ=Europe/Amsterdam
+ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone &&  echo "deb http://apt.postgresql.org/pub/repos/apt bionic-pgdg main" > /etc/apt/sources.list.d/pgdg.list &&  curl -sL https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - && apt-get update && apt-get -y install libpq-dev postgresql-13 &&    apt-get clean
 
-## Getting Started
-Instructions detailing the process of getting the software, building it, running a simple test network that produces blocks, account creation and uploading a sample contract to the blockchain can be found in the [Getting Started](https://developers.eos.io/welcome/v2.1/getting-started-guide) walkthrough.
+```
+### Install libpqxx
+curl -L https://github.com/jtv/libpqxx/archive/7.2.1.tar.gz | tar zxvf - && cd  libpqxx-7.2.1  &&  cmake -DCMAKE_TOOLCHAIN_FILE=/tmp/clang.cmake -DSKIP_BUILD_TEST=ON -DPostgreSQL_TYPE_INCLUDE_DIR=/usr/include/postgresql -DCMAKE_BUILD_TYPE=Release -S . -B build &&  cmake --build build && cmake --install build
 
-## Contributing
+### Install nvm
 
-[Contributing Guide](./CONTRIBUTING.md)
+```
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.0/install.sh | bash
+cp ~/.bashrc ~/.bashrc.bak && \ cat ~/.bashrc.bak | tail -3 > ~/.bashrc && \  cat ~/.bashrc.bak | head -n '-3' >> ~/.bashrc && \  rm ~/.bashrc.bak 
+bash -c '. ~/.bashrc; nvm install --lts=dubnium' && ln -s "/root/.nvm/versions/node/$(ls -p /root/.nvm/versions/node | sort -Vr | head -1)bin/node" /usr/local/bin/node 
+```
 
-[Code of Conduct](./CONTRIBUTING.md#conduct)
+### Install nodejs
+```
+curl -sL https://deb.nodesource.com/setup_13.x | sudo -E bash -
+apt-get update && apt-get install -y nodejs 
+```
+
+### Build dcd_protocol 
+```
+git clone https://github.com/DCD-Ecosystem/dcd_protocol.git && cd dcd_protocol && mkdir -p build && cd build && cmake -G 'Unix Makefiles' -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local/dcd_protocol -DCMAKE_TOOLCHAIN_FILE='/tmp/clang.cmake' -DCMAKE_EXE_LINKER_FLAGS=-pthread -DCMAKE_SHARED_LINKER_FLAGS=-pthread .. && make -j10 && make install
+```
+
+
+## Software Installation Using Docker
+Proceed to the provided docker folder and follow the instructions in the README included
 
 ## License
 
-EOSIO is released under the open source [MIT](./LICENSE) license and is offered “AS IS” without warranty of any kind, express or implied. Any security provided by the EOSIO software depends in part on how it is used, configured, and deployed. EOSIO is built upon many third-party libraries such as WABT (Apache License) and WAVM (BSD 3-clause) which are also provided “AS IS” without warranty of any kind. Without limiting the generality of the foregoing, Block.one makes no representation or guarantee that EOSIO or any third-party libraries will perform as intended or will be free of errors, bugs or faulty code. Both may fail in large or small ways that could completely or partially limit functionality or compromise computer systems. If you use or implement EOSIO, you do so at your own risk. In no event will Block.one be liable to any party for any damages whatsoever, even if it had been advised of the possibility of damage.  
-
-## Important
-
-See [LICENSE](./LICENSE) for copyright and license terms.
-
-All repositories and other materials are provided subject to the terms of this [IMPORTANT](./IMPORTANT.md) notice and you must familiarize yourself with its terms.  The notice contains important information, limitations and restrictions relating to our software, publications, trademarks, third-party resources, and forward-looking statements.  By accessing any of our repositories and other materials, you accept and agree to the terms of the notice.
+DCD is released under the open source [MIT](./LICENSE) license and is offered “AS IS” without warranty of any kind, express or implied. Any security provided by the DCD software depends in part on how it is used, configured, and deployed. DCD is built upon many third-party libraries such as WABT (Apache License) and WAVM (BSD 3-clause) which are also provided “AS IS” without warranty of any kind. Without limiting the generality of the foregoing, Block.one makes no representation or guarantee that DCD or any third-party libraries will perform as intended or will be free of errors, bugs or faulty code. Both may fail in large or small ways that could completely or partially limit functionality or compromise computer systems. If you use or implement DCD, you do so at your own risk. In no event will Block.one be liable to any party for any damages whatsoever, even if it had been advised of the possibility of damage.  

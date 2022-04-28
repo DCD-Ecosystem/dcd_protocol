@@ -1,11 +1,11 @@
-#include <eosio/trace_api/request_handler.hpp>
+#include <dcd/trace_api/request_handler.hpp>
 
 #include <algorithm>
 
 #include <fc/variant_object.hpp>
 
 namespace {
-   using namespace eosio::trace_api;
+   using namespace dcd::trace_api;
 
    std::string to_iso8601_datetime( const fc::time_point& t) {
       return (std::string)t + "Z";
@@ -119,7 +119,7 @@ namespace {
    }
 }
 
-namespace eosio::trace_api::detail {
+namespace dcd::trace_api::detail {
     fc::variant response_formatter::process_block( const data_log_entry& trace, bool irreversible, const data_handler_function& data_handler, const yield_function& yield ) {
        auto common_mvo  = std::visit([&](auto&& arg) -> fc::mutable_variant_object {
           return fc::mutable_variant_object()

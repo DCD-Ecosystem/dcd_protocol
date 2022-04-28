@@ -1,12 +1,12 @@
-#include <eosio/chain/block.hpp>
-#include <eosio/chain/types.hpp>
+#include <dcd/chain/block.hpp>
+#include <dcd/chain/types.hpp>
 
-namespace eosio { namespace chain {
+namespace dcd { namespace chain {
    void additional_block_signatures_extension::reflector_init() {
       static_assert( fc::raw::has_feature_reflector_init_on_unpacked_reflected_types,
                      "additional_block_signatures_extension expects FC to support reflector_init" );
 
-      EOS_ASSERT( signatures.size() > 0, ill_formed_additional_block_signatures_extension,
+      DCD_ASSERT( signatures.size() > 0, ill_formed_additional_block_signatures_extension,
                   "Additional block signatures extension must contain at least one signature",
       );
 
@@ -14,7 +14,7 @@ namespace eosio { namespace chain {
 
       for( const auto& s : signatures ) {
          auto res = unique_sigs.insert( s );
-         EOS_ASSERT( res.second, ill_formed_additional_block_signatures_extension,
+         DCD_ASSERT( res.second, ill_formed_additional_block_signatures_extension,
                      "Signature ${s} was repeated in the additional block signatures extension",
                      ("s", s)
          );
@@ -55,7 +55,7 @@ namespace eosio { namespace chain {
          const auto& e = block_extensions[i];
          auto id = e.first;
 
-         EOS_ASSERT( id >= id_type_lower_bound, invalid_block_extension,
+         DCD_ASSERT( id >= id_type_lower_bound, invalid_block_extension,
                      "Block extensions are not in the correct order (ascending id types required)"
          );
 
@@ -65,13 +65,13 @@ namespace eosio { namespace chain {
          );
 
          auto match = decompose_t::extract<block_extension>( id, e.second, iter->second );
-         EOS_ASSERT( match, invalid_block_extension,
+         DCD_ASSERT( match, invalid_block_extension,
                      "Block extension with id type ${id} is not supported",
                      ("id", id)
          );
 
          if( match->enforce_unique ) {
-            EOS_ASSERT( i == 0 || id > id_type_lower_bound, invalid_block_header_extension,
+            DCD_ASSERT( i == 0 || id > id_type_lower_bound, invalid_block_header_extension,
                         "Block extension with id type ${id} is not allowed to repeat",
                         ("id", id)
             );
@@ -152,4 +152,4 @@ namespace eosio { namespace chain {
       }
       return result;
    }
-} } /// namespace eosio::chain
+} } /// namespace dcd::chain

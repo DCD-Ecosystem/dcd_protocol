@@ -1,7 +1,7 @@
 #include <b1/session/shared_bytes.hpp>
 #include <boost/test/unit_test.hpp>
 
-using namespace eosio::session;
+using namespace dcd::session;
 
 BOOST_AUTO_TEST_SUITE(shared_bytes_tests)
 
@@ -65,13 +65,13 @@ BOOST_AUTO_TEST_CASE(make_shared_bytes_test) {
 
 BOOST_AUTO_TEST_CASE(iterator_test) {
    auto s      = std::string{ "Hello world foobar" };
-   auto bytes  = eosio::session::shared_bytes{ s.data(), s.size() };
+   auto bytes  = dcd::session::shared_bytes{ s.data(), s.size() };
    auto result = std::string{ std::begin(bytes), std::end(bytes) };
    BOOST_REQUIRE(s == result);
 }
 
 BOOST_AUTO_TEST_CASE(std_copy) {
-   auto bytes  = eosio::session::shared_bytes{ 18 };
+   auto bytes  = dcd::session::shared_bytes{ 18 };
    auto parts  = std::vector<std::string>{ "Hello ", "world ", "foobar" };
    auto offset = size_t{ 0 };
    for (const auto& part : parts) {
@@ -124,16 +124,16 @@ BOOST_AUTO_TEST_CASE(next_test) {
 
    static constexpr auto* empty_value  = "";
    auto empty = shared_bytes(empty_value, 0);
-   BOOST_CHECK_THROW(empty.next().size(), eosio::chain::chain_exception);
+   BOOST_CHECK_THROW(empty.next().size(), dcd::chain::chain_exception);
 
    // next of a sequence of 0xFFs is empty
    char single_last_value[1] = {static_cast<char>(0xFF)};
    auto single_last = shared_bytes(single_last_value, 1);
-   BOOST_CHECK_THROW(single_last.next().size(), eosio::chain::chain_exception);
+   BOOST_CHECK_THROW(single_last.next().size(), dcd::chain::chain_exception);
 
    char double_last_value[2] = {static_cast<char>(0xFF), static_cast<char>(0xFF)};
    auto double_last = shared_bytes(double_last_value, 2);
-   BOOST_CHECK_THROW(double_last.next().size(), eosio::chain::chain_exception);
+   BOOST_CHECK_THROW(double_last.next().size(), dcd::chain::chain_exception);
 
    char mixed_last_value[2] = {static_cast<char>(0xFE), static_cast<char>(0xFF)};
    char mixed_last_next_expected[1] = {static_cast<char>(0xFF)};
@@ -157,7 +157,7 @@ BOOST_AUTO_TEST_CASE(truncate_key_test) {
 
    static constexpr auto* empty_value  = "";
    auto empty = shared_bytes(empty_value, 0);
-   BOOST_CHECK_THROW(shared_bytes::truncate_key(empty), eosio::chain::chain_exception);
+   BOOST_CHECK_THROW(shared_bytes::truncate_key(empty), dcd::chain::chain_exception);
 }
 
 BOOST_AUTO_TEST_SUITE_END();

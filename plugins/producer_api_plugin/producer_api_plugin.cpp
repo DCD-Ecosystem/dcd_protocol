@@ -1,24 +1,24 @@
-#include <eosio/producer_api_plugin/producer_api_plugin.hpp>
-#include <eosio/chain/exceptions.hpp>
+#include <dcd/producer_api_plugin/producer_api_plugin.hpp>
+#include <dcd/chain/exceptions.hpp>
 
 #include <fc/variant.hpp>
 #include <fc/io/json.hpp>
 
 #include <chrono>
 
-namespace eosio { namespace detail {
+namespace dcd { namespace detail {
   struct producer_api_plugin_response {
      std::string result;
   };
 }}
 
-FC_REFLECT(eosio::detail::producer_api_plugin_response, (result));
+FC_REFLECT(dcd::detail::producer_api_plugin_response, (result));
 
-namespace eosio {
+namespace dcd {
 
 static appbase::abstract_plugin& _producer_api_plugin = app().register_plugin<producer_api_plugin>();
 
-using namespace eosio;
+using namespace dcd;
 
 struct async_result_visitor : public fc::visitor<fc::variant> {
    template<typename T>
@@ -75,12 +75,12 @@ struct async_result_visitor : public fc::visitor<fc::variant> {
 #define INVOKE_V_R(api_handle, call_name, in_param) \
      auto params = parse_params<in_param, http_params_types::params_required>(body);\
      api_handle.call_name(std::move(params)); \
-     eosio::detail::producer_api_plugin_response result{"ok"};
+     dcd::detail::producer_api_plugin_response result{"ok"};
 
 #define INVOKE_V_V(api_handle, call_name) \
      body = parse_params<std::string, http_params_types::no_params_required>(body); \
      api_handle.call_name(); \
-     eosio::detail::producer_api_plugin_response result{"ok"};
+     dcd::detail::producer_api_plugin_response result{"ok"};
 
 
 void producer_api_plugin::plugin_startup() {
@@ -99,12 +99,12 @@ void producer_api_plugin::plugin_startup() {
             INVOKE_R_V(producer, get_runtime_options), 201),
        CALL_WITH_400(producer, producer, update_runtime_options,
             INVOKE_V_R(producer, update_runtime_options, producer_plugin::runtime_options), 201),
-       CALL_WITH_400(producer, producer, add_greylist_accounts,
-            INVOKE_V_R(producer, add_greylist_accounts, producer_plugin::greylist_params), 201),
-       CALL_WITH_400(producer, producer, remove_greylist_accounts,
-            INVOKE_V_R(producer, remove_greylist_accounts, producer_plugin::greylist_params), 201),
-       CALL_WITH_400(producer, producer, get_greylist,
-            INVOKE_R_V(producer, get_greylist), 201),
+//       CALL_WITH_400(producer, producer, add_greylist_accounts,
+//            INVOKE_V_R(producer, add_greylist_accounts, producer_plugin::greylist_params), 201),
+//       CALL_WITH_400(producer, producer, remove_greylist_accounts,
+//            INVOKE_V_R(producer, remove_greylist_accounts, producer_plugin::greylist_params), 201),
+//       CALL_WITH_400(producer, producer, get_greylist,
+//            INVOKE_R_V(producer, get_greylist), 201),
        CALL_WITH_400(producer, producer, get_whitelist_blacklist,
             INVOKE_R_V(producer, get_whitelist_blacklist), 201),
        CALL_WITH_400(producer, producer, set_whitelist_blacklist,
@@ -120,8 +120,8 @@ void producer_api_plugin::plugin_startup() {
        CALL_WITH_400(producer, producer, get_supported_protocol_features,
             INVOKE_R_R_II(producer, get_supported_protocol_features,
                                  producer_plugin::get_supported_protocol_features_params), 201),
-       CALL_WITH_400(producer, producer, get_account_ram_corrections,
-            INVOKE_R_R(producer, get_account_ram_corrections, producer_plugin::get_account_ram_corrections_params), 201),
+//       CALL_WITH_400(producer, producer, get_account_ram_corrections,
+//            INVOKE_R_R(producer, get_account_ram_corrections, producer_plugin::get_account_ram_corrections_params), 201),
    }, appbase::priority::medium_high);
 }
 

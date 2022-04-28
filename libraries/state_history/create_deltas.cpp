@@ -1,10 +1,10 @@
-#include <eosio/state_history/create_deltas.hpp>
-#include <eosio/state_history/rocksdb_receiver.hpp>
-#include <eosio/state_history/serialization.hpp>
-#include <eosio/chain/backing_store/db_combined.hpp>
+#include <dcd/state_history/create_deltas.hpp>
+#include <dcd/state_history/rocksdb_receiver.hpp>
+#include <dcd/state_history/serialization.hpp>
+#include <dcd/chain/backing_store/db_combined.hpp>
 #include <b1/session/rocks_session.hpp>
 
-namespace eosio {
+namespace dcd {
 namespace state_history {
 
 template <typename T>
@@ -16,29 +16,29 @@ bool include_delta(const chain::table_id_object& old, const chain::table_id_obje
    return old.payer != curr.payer;
 }
 
-bool include_delta(const chain::resource_limits::resource_limits_object& old,
-                   const chain::resource_limits::resource_limits_object& curr) {
-   return                                   //
-       old.net_weight != curr.net_weight || //
-       old.cpu_weight != curr.cpu_weight || //
-       old.ram_bytes != curr.ram_bytes;
-}
+//bool include_delta(const chain::resource_limits::resource_limits_object& old,
+//                   const chain::resource_limits::resource_limits_object& curr) {
+//   return                                   //
+//       old.net_weight != curr.net_weight || //
+//       old.cpu_weight != curr.cpu_weight || //
+//       old.ram_bytes != curr.ram_bytes;
+//}
 
-bool include_delta(const chain::resource_limits::resource_limits_state_object& old,
-                   const chain::resource_limits::resource_limits_state_object& curr) {
-   return                                                                                       //
-       old.average_block_net_usage.last_ordinal != curr.average_block_net_usage.last_ordinal || //
-       old.average_block_net_usage.value_ex != curr.average_block_net_usage.value_ex ||         //
-       old.average_block_net_usage.consumed != curr.average_block_net_usage.consumed ||         //
-       old.average_block_cpu_usage.last_ordinal != curr.average_block_cpu_usage.last_ordinal || //
-       old.average_block_cpu_usage.value_ex != curr.average_block_cpu_usage.value_ex ||         //
-       old.average_block_cpu_usage.consumed != curr.average_block_cpu_usage.consumed ||         //
-       old.total_net_weight != curr.total_net_weight ||                                         //
-       old.total_cpu_weight != curr.total_cpu_weight ||                                         //
-       old.total_ram_bytes != curr.total_ram_bytes ||                                           //
-       old.virtual_net_limit != curr.virtual_net_limit ||                                       //
-       old.virtual_cpu_limit != curr.virtual_cpu_limit;
-}
+//bool include_delta(const chain::resource_limits::resource_limits_state_object& old,
+//                   const chain::resource_limits::resource_limits_state_object& curr) {
+//   return                                                                                       //
+//       old.average_block_net_usage.last_ordinal != curr.average_block_net_usage.last_ordinal || //
+//       old.average_block_net_usage.value_ex != curr.average_block_net_usage.value_ex ||         //
+//       old.average_block_net_usage.consumed != curr.average_block_net_usage.consumed ||         //
+//       old.average_block_cpu_usage.last_ordinal != curr.average_block_cpu_usage.last_ordinal || //
+//       old.average_block_cpu_usage.value_ex != curr.average_block_cpu_usage.value_ex ||         //
+//       old.average_block_cpu_usage.consumed != curr.average_block_cpu_usage.consumed ||         //
+//       old.total_net_weight != curr.total_net_weight ||                                         //
+//       old.total_cpu_weight != curr.total_cpu_weight ||                                         //
+//       old.total_ram_bytes != curr.total_ram_bytes ||                                           //
+//       old.virtual_net_limit != curr.virtual_net_limit ||                                       //
+//       old.virtual_cpu_limit != curr.virtual_cpu_limit;
+//}
 
 bool include_delta(const chain::account_metadata_object& old, const chain::account_metadata_object& curr) {
    return                                               //
@@ -70,7 +70,7 @@ std::vector<table_delta> create_deltas(const chainbase::database& db, bool full_
       if (obj)
          return *obj;
       auto it = removed_table_id.find(tid);
-      EOS_ASSERT(it != removed_table_id.end(), chain::plugin_exception, "can not found table id ${tid}", ("tid", tid));
+      DCD_ASSERT(it != removed_table_id.end(), chain::plugin_exception, "can not found table id ${tid}", ("tid", tid));
       return *it->second;
    };
 
@@ -133,17 +133,17 @@ std::vector<table_delta> create_deltas(const chainbase::database& db, bool full_
    process_table("permission", db.get_index<chain::permission_index>(), pack_row);
    process_table("permission_link", db.get_index<chain::permission_link_index>(), pack_row);
 
-   process_table("resource_limits", db.get_index<chain::resource_limits::resource_limits_index>(), pack_row);
-   process_table("resource_usage", db.get_index<chain::resource_limits::resource_usage_index>(), pack_row);
-   process_table("resource_limits_state", db.get_index<chain::resource_limits::resource_limits_state_index>(),
-                 pack_row);
-   process_table("resource_limits_config", db.get_index<chain::resource_limits::resource_limits_config_index>(),
-                 pack_row);
+//   process_table("resource_limits", db.get_index<chain::resource_limits::resource_limits_index>(), pack_row);
+//   process_table("resource_usage", db.get_index<chain::resource_limits::resource_usage_index>(), pack_row);
+//   process_table("resource_limits_state", db.get_index<chain::resource_limits::resource_limits_state_index>(),
+//                 pack_row);
+//   process_table("resource_limits_config", db.get_index<chain::resource_limits::resource_limits_config_index>(),
+//                 pack_row);
 
    return deltas;
 }
 
-std::vector<table_delta> create_deltas_rocksdb(const chainbase::database& db, const eosio::chain::kv_undo_stack_ptr &kv_undo_stack, bool full_snapshot) {
+std::vector<table_delta> create_deltas_rocksdb(const chainbase::database& db, const dcd::chain::kv_undo_stack_ptr &kv_undo_stack, bool full_snapshot) {
    std::vector<table_delta> deltas;
 
    if(full_snapshot) {
@@ -151,7 +151,7 @@ std::vector<table_delta> create_deltas_rocksdb(const chainbase::database& db, co
       rocksdb_receiver_whole_db kv_receiver(deltas, db);
       chain::backing_store::rocksdb_contract_kv_table_writer kv_writer(kv_receiver);
 
-      auto begin_key = eosio::session::shared_bytes(&chain::backing_store::rocksdb_contract_kv_prefix, 1);
+      auto begin_key = dcd::session::shared_bytes(&chain::backing_store::rocksdb_contract_kv_prefix, 1);
       auto end_key = begin_key.next();
       chain::backing_store::walk_rocksdb_entries_with_prefix(kv_undo_stack, begin_key, end_key, kv_writer);
 
@@ -161,16 +161,16 @@ std::vector<table_delta> create_deltas_rocksdb(const chainbase::database& db, co
       table_collector table_collector_receiver(db_receiver);
       chain::backing_store::rocksdb_contract_db_table_writer writer(table_collector_receiver);
 
-      begin_key = eosio::session::shared_bytes(&chain::backing_store::rocksdb_contract_db_prefix, 1);
+      begin_key = dcd::session::shared_bytes(&chain::backing_store::rocksdb_contract_db_prefix, 1);
       end_key = begin_key.next();
       chain::backing_store::walk_rocksdb_entries_with_prefix(kv_undo_stack, begin_key, end_key, writer);
    } else {
-      auto* session = std::visit(eosio::session::overloaded{
-        [](eosio::chain::kv_undo_stack_ptr::element_type::session_type* session){
+      auto* session = std::visit(dcd::session::overloaded{
+        [](dcd::chain::kv_undo_stack_ptr::element_type::session_type* session){
           return session;
         }, [](auto*){
-          EOS_ASSERT(false, eosio::chain::chain_exception, "undo_stack is empty");
-          static eosio::chain::kv_undo_stack_ptr::element_type::session_type* invalid = nullptr;
+          DCD_ASSERT(false, dcd::chain::chain_exception, "undo_stack is empty");
+          static dcd::chain::kv_undo_stack_ptr::element_type::session_type* invalid = nullptr;
           return invalid;
         }}, kv_undo_stack->top().holder());
         
@@ -210,4 +210,4 @@ std::vector<table_delta> create_deltas(const chain::combined_database& db, bool 
 }
 
 } // namespace state_history
-} // namespace eosio
+} // namespace dcd

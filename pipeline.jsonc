@@ -1,11 +1,11 @@
 {
-    "eosio-code-coverage":
+    "dcd-code-coverage":
     {
         "exclude": [ // ignore coverage reports from source filenames matching these PCREs
             "^/build/",
             "^/coverage/",
             "^/.git/",
-            "^/libraries/eos-vm/",
+            "^/libraries/dcd-vm/",
             "^/libraries/wasm-jit/",
             "^/node_modules/",
             "^/unittests/"
@@ -15,14 +15,14 @@
             "[.]h(pp)?([.]in)?$"
         ]
     },
-    "eosio-docker-builds":
+    "dcd-docker-builds":
     {
         "environment":
         {
             "BUILDER_TAG": "v2.0.0"
         }
     },
-    "eos-multiversion-tests":
+    "dcd-multiversion-tests":
     {
         "environment":
         {
@@ -33,8 +33,8 @@
             "170=v1.7.0"
         ]
     },
-    // eosio-resume-from-state documentation: https://github.com/EOSIO/auto-eks-sync-nodes/blob/master/pipelines/eosio-resume-from-state/README.md
-    "eosio-resume-from-state":
+    // dcd-resume-from-state documentation: https://github.com/DCD/auto-eks-sync-nodes/blob/master/pipelines/dcd-resume-from-state/README.md
+    "dcd-resume-from-state":
     {
         "test":
         [

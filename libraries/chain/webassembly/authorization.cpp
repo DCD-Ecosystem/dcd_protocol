@@ -1,7 +1,7 @@
-#include <eosio/chain/webassembly/interface.hpp>
-#include <eosio/chain/apply_context.hpp>
+#include <dcd/chain/webassembly/interface.hpp>
+#include <dcd/chain/apply_context.hpp>
 
-namespace eosio { namespace chain { namespace webassembly {
+namespace dcd { namespace chain { namespace webassembly {
    void interface::require_auth( account_name account ) const {
       context.require_authorization( account );
    }
@@ -22,4 +22,4 @@ namespace eosio { namespace chain { namespace webassembly {
    bool interface::is_account( account_name account ) const {
       return context.is_account( account );
    }
-}}} // ns eosio::chain::webassembly
+}}} // ns dcd::chain::webassembly

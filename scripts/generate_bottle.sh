@@ -15,7 +15,7 @@ fi
 
 NAME="${PROJECT}-${VERSION}.${MAC_VERSION}.bottle"
 
-mkdir -p ${PROJECT}/${VERSION}/opt/eosio/lib/cmake
+mkdir -p ${PROJECT}/${VERSION}/opt/dcd/lib/cmake
 
 PREFIX="${PROJECT}/${VERSION}"
 SPREFIX="\/usr\/local"
@@ -31,11 +31,11 @@ export SSUBPREFIX
 
 hash=`openssl dgst -sha256 ${NAME}.tar.gz | awk 'NF>1{print $NF}'`
 
-echo "class Eosio < Formula
+echo "class Dcd < Formula
 
    homepage \"${URL}\"
    revision 0
-   url \"https://github.com/eosio/eos/archive/v${VERSION}.tar.gz\"
+   url \"https://github.com/dcd/dcd/archive/v${VERSION}.tar.gz\"
    version \"${VERSION}\"
 
    option :universal
@@ -48,13 +48,13 @@ echo "class Eosio < Formula
    depends_on :arch =>  :intel
 
    bottle do
-      root_url \"https://github.com/eosio/eos/releases/download/v${VERSION}\"
+      root_url \"https://github.com/dcd/dcd/releases/download/v${VERSION}\"
       sha256 \"${hash}\" => :${MAC_VERSION}
    end
    def install
       raise \"Error, only supporting binary packages at this time\"
    end
 end
-__END__" &> eosio.rb
+__END__" &> dcd.rb
 
 rm -r ${PROJECT} || exit 1

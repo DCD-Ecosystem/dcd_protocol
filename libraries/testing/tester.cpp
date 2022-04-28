@@ -1,10 +1,10 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/algorithm/string/predicate.hpp>
-#include <eosio/testing/tester.hpp>
-#include <eosio/chain/block_log.hpp>
-#include <eosio/chain/wast_to_wasm.hpp>
-#include <eosio/chain/eosio_contract.hpp>
-#include <eosio/chain/generated_transaction_object.hpp>
+#include <dcd/testing/tester.hpp>
+#include <dcd/chain/block_log.hpp>
+#include <dcd/chain/wast_to_wasm.hpp>
+#include <dcd/chain/dcd_contract.hpp>
+#include <dcd/chain/generated_transaction_object.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/copy.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
@@ -15,11 +15,11 @@
 
 namespace bio = boost::iostreams;
 
-eosio::chain::asset core_from_string(const std::string& s) {
-  return eosio::chain::asset::from_string(s + " " CORE_SYMBOL_NAME);
+dcd::chain::asset core_from_string(const std::string& s) {
+  return dcd::chain::asset::from_string(s + " " CORE_SYMBOL_NAME);
 }
 
-namespace eosio { namespace testing {
+namespace dcd { namespace testing {
    std::string read_wast( const char* fn ) {
       std::ifstream wast_file(fn);
       FC_ASSERT( wast_file.is_open(), "wast file cannot be found" );
@@ -117,7 +117,7 @@ namespace eosio { namespace testing {
       ( builtin_protocol_feature_t codename ) -> digest_type {
          auto res = visited_builtins.emplace( codename, std::optional<digest_type>() );
          if( !res.second ) {
-            EOS_ASSERT( res.first->second, protocol_feature_exception,
+            DCD_ASSERT( res.first->second, protocol_feature_exception,
                         "invariant failure: cycle found in builtin protocol feature dependencies"
             );
             return *res.first->second;
@@ -541,10 +541,10 @@ namespace eosio { namespace testing {
       if( include_code ) {
          FC_ASSERT( owner_auth.threshold <= std::numeric_limits<weight_type>::max(), "threshold is too high" );
          FC_ASSERT( active_auth.threshold <= std::numeric_limits<weight_type>::max(), "threshold is too high" );
-         owner_auth.accounts.push_back( permission_level_weight{ {a, config::eosio_code_name},
+         owner_auth.accounts.push_back( permission_level_weight{ {a, config::dcd_code_name},
                                                                  static_cast<weight_type>(owner_auth.threshold) } );
          sort_permissions(owner_auth);
-         active_auth.accounts.push_back( permission_level_weight{ {a, config::eosio_code_name},
+         active_auth.accounts.push_back( permission_level_weight{ {a, config::dcd_code_name},
                                                                   static_cast<weight_type>(active_auth.threshold) } );
          sort_permissions(active_auth);
       }
@@ -575,15 +575,15 @@ namespace eosio { namespace testing {
             fc::microseconds::maximum() :
             fc::microseconds( deadline - fc::time_point::now() );
       auto fut = transaction_metadata::start_recover_keys( ptrx, control->get_thread_pool(), control->get_chain_id(), time_limit );
-      auto r = control->push_transaction( fut.get(), deadline, billed_cpu_time_us, billed_cpu_time_us > 0, 0 );
+      auto r = control->push_transaction( fut.get(), deadline, billed_cpu_time_us, billed_cpu_time_us > 0, 0  );
       if( r->except_ptr ) std::rethrow_exception( r->except_ptr );
       if( r->except ) throw *r->except;
       return r;
    } FC_RETHROW_EXCEPTIONS( warn, "transaction_header: ${header}", ("header", transaction_header(trx.get_transaction()) )) }
 
-   transaction_trace_ptr base_tester::push_transaction( const signed_transaction& trx,
+   transaction_trace_ptr base_tester::push_transaction(const signed_transaction& trx,
                                                         fc::time_point deadline,
-                                                        uint32_t billed_cpu_time_us,
+                                                       uint32_t billed_cpu_time_us,
                                                         bool no_throw
                                                       )
    { try {
@@ -600,13 +600,13 @@ namespace eosio { namespace testing {
             fc::microseconds( deadline - fc::time_point::now() );
       auto ptrx = std::make_shared<packed_transaction>( signed_transaction(trx), true, c );
       auto fut = transaction_metadata::start_recover_keys( std::move( ptrx ), control->get_thread_pool(), control->get_chain_id(), time_limit );
-      auto r = control->push_transaction( fut.get(), deadline, billed_cpu_time_us, billed_cpu_time_us > 0, 0 );
+      auto r = control->push_transaction( fut.get(), deadline, billed_cpu_time_us, billed_cpu_time_us > 0, 0);
       if (no_throw) return r;
       if( r->except_ptr ) std::rethrow_exception( r->except_ptr );
       if( r->except)  throw *r->except;
       return r;
    } FC_RETHROW_EXCEPTIONS( warn, "transaction_header: ${header}, billed_cpu_time_us: ${billed}",
-                            ("header", transaction_header(trx) ) ("billed", billed_cpu_time_us))
+                            ("header", transaction_header(trx) ))
    }
 
    typename base_tester::action_result base_tester::push_action(action&& act, uint64_t authorizer) {
@@ -1054,7 +1054,7 @@ namespace eosio { namespace testing {
             if( block ) { //&& !b.control->is_known_block(block->id()) ) {
                auto bsf = b.control->create_block_state_future( block->calculate_id(), block );
                b.control->abort_block();
-               b.control->push_block(bsf, forked_branch_callback{}, trx_meta_cache_lookup{}); //, eosio::chain::validation_steps::created_block);
+               b.control->push_block(bsf, forked_branch_callback{}, trx_meta_cache_lookup{}); //, dcd::chain::validation_steps::created_block);
             }
          }
       };
@@ -1064,18 +1064,18 @@ namespace eosio { namespace testing {
    }
 
    void base_tester::set_before_preactivate_bios_contract() {
-      set_code(config::system_account_name, contracts::before_preactivate_eosio_bios_wasm());
-      set_abi(config::system_account_name, contracts::before_preactivate_eosio_bios_abi().data());
+      set_code(config::system_account_name, contracts::before_preactivate_dcd_bios_wasm());
+      set_abi(config::system_account_name, contracts::before_preactivate_dcd_bios_abi().data());
    }
 
    void base_tester::set_before_producer_authority_bios_contract() {
-      set_code(config::system_account_name, contracts::before_producer_authority_eosio_bios_wasm());
-      set_abi(config::system_account_name, contracts::before_producer_authority_eosio_bios_abi().data());
+      set_code(config::system_account_name, contracts::before_producer_authority_dcd_bios_wasm());
+      set_abi(config::system_account_name, contracts::before_producer_authority_dcd_bios_abi().data());
    }
 
    void base_tester::set_bios_contract() {
-      set_code(config::system_account_name, contracts::eosio_bios_wasm());
-      set_abi(config::system_account_name, contracts::eosio_bios_abi().data());
+      set_code(config::system_account_name, contracts::dcd_bios_wasm());
+      set_abi(config::system_account_name, contracts::dcd_bios_abi().data());
    }
 
 
@@ -1310,7 +1310,7 @@ namespace eosio { namespace testing {
       return match;
    }
 
-   bool eosio_assert_message_is::operator()( const eosio_assert_message_exception& ex ) {
+   bool dcd_assert_message_is::operator()( const dcd_assert_message_exception& ex ) {
       auto message = ex.get_log().at( 0 ).get_message();
       bool match = (message == expected);
       if( !match ) {
@@ -1319,7 +1319,7 @@ namespace eosio { namespace testing {
       return match;
    }
 
-   bool eosio_assert_message_starts_with::operator()( const eosio_assert_message_exception& ex ) {
+   bool dcd_assert_message_starts_with::operator()( const dcd_assert_message_exception& ex ) {
       auto message = ex.get_log().at( 0 ).get_message();
       bool match = boost::algorithm::starts_with( message, expected );
       if( !match ) {
@@ -1328,7 +1328,7 @@ namespace eosio { namespace testing {
       return match;
    }
 
-   bool eosio_assert_code_is::operator()( const eosio_assert_code_exception& ex ) {
+   bool dcd_assert_code_is::operator()( const dcd_assert_code_exception& ex ) {
       auto message = ex.get_log().at( 0 ).get_message();
       bool match = (message == expected);
       if( !match ) {
@@ -1339,7 +1339,7 @@ namespace eosio { namespace testing {
 
    const std::string mock::webauthn_private_key::_origin = "mock.webauthn.invalid";
    const sha256 mock::webauthn_private_key::_origin_hash = fc::sha256::hash(mock::webauthn_private_key::_origin);
-} }  /// eosio::testing
+} }  /// dcd::testing
 
 std::ostream& operator<<( std::ostream& osm, const fc::variant& v ) {
    //fc::json::to_stream( osm, v );

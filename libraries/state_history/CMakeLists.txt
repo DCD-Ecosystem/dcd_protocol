@@ -1,4 +1,4 @@
-file(GLOB HEADERS "include/eosio/state-history/*.hpp")
+file(GLOB HEADERS "include/dcd/state-history/*.hpp")
 
 add_library( state_history
              abi.cpp
@@ -9,7 +9,7 @@ add_library( state_history
            )
 
 target_link_libraries( state_history 
-                       PUBLIC eosio_chain fc chainbase softfloat
+                       PUBLIC dcd_chain fc chainbase softfloat
                      )
 
 target_include_directories( state_history

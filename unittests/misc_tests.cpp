@@ -1,10 +1,10 @@
-#include <eosio/chain/asset.hpp>
-#include <eosio/chain/authority.hpp>
-#include <eosio/chain/authority_checker.hpp>
-#include <eosio/chain/types.hpp>
-#include <eosio/chain/thread_utils.hpp>
-#include <eosio/chain/block_log.hpp>
-#include <eosio/testing/tester.hpp>
+#include <dcd/chain/asset.hpp>
+#include <dcd/chain/authority.hpp>
+#include <dcd/chain/authority_checker.hpp>
+#include <dcd/chain/types.hpp>
+#include <dcd/chain/thread_utils.hpp>
+#include <dcd/chain/block_log.hpp>
+#include <dcd/testing/tester.hpp>
 
 #include <fc/io/json.hpp>
 #include <fc/log/logger_config.hpp>
@@ -21,8 +21,8 @@
 #define TESTER validating_tester
 #endif
 
-using namespace eosio::chain;
-using namespace eosio::testing;
+using namespace dcd::chain;
+using namespace dcd::testing;
 
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_int_distribution.hpp>
@@ -81,7 +81,7 @@ FC_REFLECT( base_reflect, (bv) )
 FC_REFLECT_DERIVED( derived_reflect, (base_reflect), (dv) )
 FC_REFLECT_DERIVED( final_reflect, (derived_reflect), (fv) )
 
-namespace eosio
+namespace dcd
 {
 using namespace chain;
 using namespace std;
@@ -713,22 +713,22 @@ BOOST_AUTO_TEST_CASE(transaction_test) { try {
    fc::variant pretty_trx = fc::mutable_variant_object()
       ("actions", fc::variants({
          fc::mutable_variant_object()
-            ("account", "eosio")
+            ("account", "dcd")
             ("name", "reqauth")
             ("authorization", fc::variants({
                fc::mutable_variant_object()
-                  ("actor", "eosio")
+                  ("actor", "dcd")
                   ("permission", "active")
             }))
             ("data", fc::mutable_variant_object()
-               ("from", "eosio")
+               ("from", "dcd")
             )
          })
       )
       // lets also push a context free action, the multi chain test will then also include a context free action
       ("context_free_actions", fc::variants({
          fc::mutable_variant_object()
-            ("account", "eosio")
+            ("account", "dcd")
             ("name", "nonce")
             ("data", fc::raw::pack(std::string("dummy")))
          })
@@ -858,10 +858,10 @@ BOOST_AUTO_TEST_CASE(transaction_test) { try {
    // Round trip from v0 to v1 to v0 (packed_transaction_v0 to
    // packed_transaction_v0) with empty context free data
    signed_transaction empty_cfd_trx;
-   empty_cfd_trx.context_free_actions.push_back({ {}, "eosio"_n, ""_n, bytes() });
+   empty_cfd_trx.context_free_actions.push_back({ {}, "dcd"_n, ""_n, bytes() });
    empty_cfd_trx.context_free_data.push_back(bytes());
    test.set_transaction_headers(empty_cfd_trx);
-   empty_cfd_trx.sign( test.get_private_key( "eosio"_n, "active" ), test.control->get_chain_id() );
+   empty_cfd_trx.sign( test.get_private_key( "dcd"_n, "active" ), test.control->get_chain_id() );
    packed_transaction_v0 pkt_v0_empty_cfd_original(empty_cfd_trx);
    packed_transaction pkt_v0_to_v1_empty_cfd(pkt_v0_empty_cfd_original, true);
    auto pkt_v0_empty_cfd_final = pkt_v0_to_v1_empty_cfd.to_packed_transaction_v0();
@@ -919,21 +919,21 @@ BOOST_AUTO_TEST_CASE(transaction_metadata_test) { try {
    fc::variant pretty_trx = fc::mutable_variant_object()
       ("actions", fc::variants({
          fc::mutable_variant_object()
-            ("account", "eosio")
+            ("account", "dcd")
             ("name", "reqauth")
             ("authorization", fc::variants({
                fc::mutable_variant_object()
-                  ("actor", "eosio")
+                  ("actor", "dcd")
                   ("permission", "active")
             }))
             ("data", fc::mutable_variant_object()
-               ("from", "eosio")
+               ("from", "dcd")
             )
          })
       )
       ("context_free_actions", fc::variants({
          fc::mutable_variant_object()
-            ("account", "eosio")
+            ("account", "dcd")
             ("name", "nonce")
             ("data", fc::raw::pack(std::string("dummy data")))
          })
@@ -1035,10 +1035,10 @@ BOOST_AUTO_TEST_CASE(prunable_transaction_data_test) {
 BOOST_AUTO_TEST_CASE(pruned_transaction_test) {
    tester t;
    signed_transaction trx;
-   trx.context_free_actions.push_back({ {}, "eosio"_n, ""_n, bytes() });
+   trx.context_free_actions.push_back({ {}, "dcd"_n, ""_n, bytes() });
    trx.context_free_data.push_back(bytes());
    t.set_transaction_headers(trx);
-   trx.sign( t.get_private_key( "eosio"_n, "active" ), t.control->get_chain_id() );
+   trx.sign( t.get_private_key( "dcd"_n, "active" ), t.control->get_chain_id() );
 
    packed_transaction_v0 packed(trx);
    packed_transaction pruned(std::move(trx), true);
@@ -1075,13 +1075,13 @@ static checksum256_type calculate_trx_merkle( const deque<transaction_receipt>& 
    return merkle( move( trx_digests ) );
 }
 
-eosio::chain::transaction_trace_ptr push_cfd_transaction(eosio::testing::tester& t) {
+dcd::chain::transaction_trace_ptr push_cfd_transaction(dcd::testing::tester& t) {
     signed_transaction trx;
-    trx.actions.push_back({ { permission_level{ "eosio"_n, "active"_n } }, "eosio"_n, ""_n, bytes() } );
-    trx.context_free_actions.push_back({ {}, "eosio"_n, ""_n, bytes() });
+    trx.actions.push_back({ { permission_level{ "dcd"_n, "active"_n } }, "dcd"_n, ""_n, bytes() } );
+    trx.context_free_actions.push_back({ {}, "dcd"_n, ""_n, bytes() });
     trx.context_free_data.push_back(bytes());
     t.set_transaction_headers(trx);
-    trx.sign( t.get_private_key( "eosio"_n, "active" ), t.control->get_chain_id() );
+    trx.sign( t.get_private_key( "dcd"_n, "active" ), t.control->get_chain_id() );
     return t.push_transaction(trx);
 }
 
@@ -1125,7 +1125,7 @@ BOOST_AUTO_TEST_CASE(pruned_block_test) {
 
 BOOST_AUTO_TEST_CASE(block_prune_state_test) {
    tester t;
-   eosio::chain::transaction_trace_ptr trace;
+   dcd::chain::transaction_trace_ptr trace;
    trace = push_cfd_transaction(t);
    signed_block_ptr produced = t.produce_block();
    BOOST_TEST(trace->block_num == produced->block_num());
@@ -1400,4 +1400,4 @@ BOOST_AUTO_TEST_CASE(bad_alloc_test) {
 
 BOOST_AUTO_TEST_SUITE_END()
 
-} // namespace eosio
+} // namespace dcd

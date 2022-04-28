@@ -1,11 +1,12 @@
-#include <eosio/chain/apply_context.hpp>
-#include <eosio/chain/transaction_context.hpp>
-#include <eosio/chain/authorization_manager.hpp>
-#include <eosio/chain/exceptions.hpp>
-#include <eosio/chain/resource_limits.hpp>
-#include <eosio/chain/generated_transaction_object.hpp>
-#include <eosio/chain/transaction_object.hpp>
-#include <eosio/chain/global_property_object.hpp>
+#include <dcd/chain/apply_context.hpp>
+#include <dcd/chain/transaction_context.hpp>
+#include <dcd/chain/authorization_manager.hpp>
+#include <dcd/chain/exceptions.hpp>
+//#include <dcd/chain/resource_limits.hpp>
+#include <dcd/chain/generated_transaction_object.hpp>
+#include <dcd/chain/transaction_object.hpp>
+#include <dcd/chain/global_property_object.hpp>
+#include <dcd/chain/transaction_fee_manager.hpp>
 
 #pragma push_macro("N")
 #undef N
@@ -19,7 +20,10 @@
 
 #include <chrono>
 
-namespace eosio { namespace chain {
+//TODO: Remove later
+#include <iostream>
+
+namespace dcd { namespace chain {
 
    transaction_checktime_timer::transaction_checktime_timer(platform_timer& timer)
          : expired(timer.expired), _timer(timer) {
@@ -64,123 +68,123 @@ namespace eosio { namespace chain {
 
    void transaction_context::disallow_transaction_extensions( const char* error_msg )const {
       if( control.is_producing_block() ) {
-         EOS_THROW( subjective_block_production_exception, error_msg );
+         DCD_THROW( subjective_block_production_exception, error_msg );
       } else {
-         EOS_THROW( disallowed_transaction_extensions_bad_block_exception, error_msg );
+         DCD_THROW( disallowed_transaction_extensions_bad_block_exception, error_msg );
       }
    }
 
    void transaction_context::init( uint64_t initial_net_usage )
    {
-      EOS_ASSERT( !is_initialized, transaction_exception, "cannot initialize twice" );
+      DCD_ASSERT( !is_initialized, transaction_exception, "cannot initialize twice" );
 
       const auto& cfg = control.get_global_properties().configuration;
-      auto& rl = control.get_mutable_resource_limits_manager();
+//      auto& rl = control.get_mutable_resource_limits_manager();
 
-      net_limit = rl.get_block_net_limit();
+//      net_limit = rl.get_block_net_limit();
 
-      objective_duration_limit = fc::microseconds( rl.get_block_cpu_limit() );
-      _deadline = start + objective_duration_limit;
+//      objective_duration_limit = fc::microseconds( rl.get_block_cpu_limit() );
+//      _deadline = start /*+ objective_duration_limit*/;
 
       // Possibly lower net_limit to the maximum net usage a transaction is allowed to be billed
-      if( cfg.max_transaction_net_usage <= net_limit ) {
-         net_limit = cfg.max_transaction_net_usage;
-         net_limit_due_to_block = false;
-      }
+//      if( cfg.max_transaction_net_usage <= net_limit ) {
+//         net_limit = cfg.max_transaction_net_usage;
+//         net_limit_due_to_block = false;
+//      }
 
       // Possibly lower objective_duration_limit to the maximum cpu usage a transaction is allowed to be billed
-      if( cfg.max_transaction_cpu_usage <= objective_duration_limit.count() ) {
-         objective_duration_limit = fc::microseconds(cfg.max_transaction_cpu_usage);
-         billing_timer_exception_code = tx_cpu_usage_exceeded::code_value;
-         _deadline = start + objective_duration_limit;
-      }
+//      if( cfg.max_transaction_cpu_usage <= objective_duration_limit.count() ) {
+//         objective_duration_limit = fc::microseconds(cfg.max_transaction_cpu_usage);
+//         billing_timer_exception_code = tx_cpu_usage_exceeded::code_value;
+//         _deadline = start + objective_duration_limit;
+//      }
 
       const transaction& trx = packed_trx.get_transaction();
       // Possibly lower net_limit to optional limit set in the transaction header
-      uint64_t trx_specified_net_usage_limit = static_cast<uint64_t>(trx.max_net_usage_words.value) * 8;
-      if( trx_specified_net_usage_limit > 0 && trx_specified_net_usage_limit <= net_limit ) {
-         net_limit = trx_specified_net_usage_limit;
-         net_limit_due_to_block = false;
-      }
+//      uint64_t trx_specified_net_usage_limit = static_cast<uint64_t>(trx.max_net_usage_words.value) * 8;
+//      if( trx_specified_net_usage_limit > 0 && trx_specified_net_usage_limit <= net_limit ) {
+//         net_limit = trx_specified_net_usage_limit;
+//         net_limit_due_to_block = false;
+//      }
 
       // Possibly lower objective_duration_limit to optional limit set in transaction header
-      if( trx.max_cpu_usage_ms > 0 ) {
-         auto trx_specified_cpu_usage_limit = fc::milliseconds(trx.max_cpu_usage_ms);
-         if( trx_specified_cpu_usage_limit <= objective_duration_limit ) {
-            objective_duration_limit = trx_specified_cpu_usage_limit;
-            billing_timer_exception_code = tx_cpu_usage_exceeded::code_value;
-            _deadline = start + objective_duration_limit;
-         }
-      }
+//      if( trx.max_cpu_usage_ms > 0 ) {
+//         auto trx_specified_cpu_usage_limit = fc::milliseconds(trx.max_cpu_usage_ms);
+//         if( trx_specified_cpu_usage_limit <= objective_duration_limit ) {
+//            objective_duration_limit = trx_specified_cpu_usage_limit;
+//            billing_timer_exception_code = tx_cpu_usage_exceeded::code_value;
+//            _deadline = start + objective_duration_limit;
+//         }
+//      }
 
-      initial_objective_duration_limit = objective_duration_limit;
+//      initial_objective_duration_limit = objective_duration_limit;
 
-      if( explicit_billed_cpu_time )
-         validate_cpu_usage_to_bill( billed_cpu_time_us, std::numeric_limits<int64_t>::max(), false ); // Fail early if the amount to be billed is too high
+//      if( explicit_billed_cpu_time )
+//         validate_cpu_usage_to_bill( billed_cpu_time_us, std::numeric_limits<int64_t>::max(), false ); // Fail early if the amount to be billed is too high
 
       // Record accounts to be billed for network and CPU usage
-      if( control.is_builtin_activated(builtin_protocol_feature_t::only_bill_first_authorizer) ) {
-         bill_to_accounts.insert( trx.first_authorizer() );
-      } else {
-         for( const auto& act : trx.actions ) {
-            for( const auto& auth : act.authorization ) {
-               bill_to_accounts.insert( auth.actor );
-            }
-         }
-      }
-      validate_ram_usage.reserve( bill_to_accounts.size() );
+      //if( control.is_builtin_activated(builtin_protocol_feature_t::only_bill_first_authorizer) ) {
+      //   bill_to_accounts.insert( trx.first_authorizer() );
+      //} else {
+      //   for( const auto& act : trx.actions ) {
+      //      for( const auto& auth : act.authorization ) {
+      //         bill_to_accounts.insert( auth.actor );
+      //      }
+      //   }
+      //}
+//      validate_ram_usage.reserve( bill_to_accounts.size() );
 
       // Update usage values of accounts to reflect new time
-      rl.update_account_usage( bill_to_accounts, block_timestamp_type(control.pending_block_time()).slot );
+//      rl.update_account_usage( bill_to_accounts, block_timestamp_type(control.pending_block_time()).slot );
 
       // Calculate the highest network usage and CPU time that all of the billed accounts can afford to be billed
-      int64_t account_net_limit = 0;
-      int64_t account_cpu_limit = 0;
-      bool greylisted_net = false, greylisted_cpu = false;
-      std::tie( account_net_limit, account_cpu_limit, greylisted_net, greylisted_cpu) = max_bandwidth_billed_accounts_can_pay();
-      net_limit_due_to_greylist |= greylisted_net;
-      cpu_limit_due_to_greylist |= greylisted_cpu;
+//      int64_t account_net_limit = 0;
+//      int64_t account_cpu_limit = 0;
+//      bool greylisted_net = false, greylisted_cpu = false;
+//      std::tie( account_net_limit, account_cpu_limit, greylisted_net, greylisted_cpu) = max_bandwidth_billed_accounts_can_pay();
+//      net_limit_due_to_greylist |= greylisted_net;
+//      cpu_limit_due_to_greylist |= greylisted_cpu;
 
-      eager_net_limit = net_limit;
+//      eager_net_limit = net_limit;
 
       // Possibly lower eager_net_limit to what the billed accounts can pay plus some (objective) leeway
-      auto new_eager_net_limit = std::min( eager_net_limit, static_cast<uint64_t>(account_net_limit + cfg.net_usage_leeway) );
-      if( new_eager_net_limit < eager_net_limit ) {
-         eager_net_limit = new_eager_net_limit;
-         net_limit_due_to_block = false;
-      }
+//      auto new_eager_net_limit = std::min( eager_net_limit, static_cast<uint64_t>(account_net_limit + cfg.net_usage_leeway) );
+//      if( new_eager_net_limit < eager_net_limit ) {
+//         eager_net_limit = new_eager_net_limit;
+//         net_limit_due_to_block = false;
+//      }
 
       // Possibly limit deadline if the duration accounts can be billed for (+ a subjective leeway) does not exceed current delta
-      if( (fc::microseconds(account_cpu_limit) + leeway) <= (_deadline - start) ) {
-         _deadline = start + fc::microseconds(account_cpu_limit) + leeway;
-         billing_timer_exception_code = leeway_deadline_exception::code_value;
-      }
+//      if( (fc::microseconds(account_cpu_limit) + leeway) <= (_deadline - start) ) {
+//         _deadline = start + fc::microseconds(account_cpu_limit) + leeway;
+//         billing_timer_exception_code = leeway_deadline_exception::code_value;
+//      }
 
-      billing_timer_duration_limit = _deadline - start;
+//      billing_timer_duration_limit = _deadline - start;
 
       // Check if deadline is limited by caller-set deadline (only change deadline if billed_cpu_time_us is not set)
-      if( explicit_billed_cpu_time || deadline < _deadline ) {
-         _deadline = deadline;
-         deadline_exception_code = deadline_exception::code_value;
-      } else {
-         deadline_exception_code = billing_timer_exception_code;
-      }
+//      if( explicit_billed_cpu_time || deadline < _deadline ) {
+//         _deadline = deadline;
+//         deadline_exception_code = deadline_exception::code_value;
+//      } else {
+//         deadline_exception_code = billing_timer_exception_code;
+//      }
 
-      if( !explicit_billed_cpu_time ) {
-         // Fail early if amount of the previous speculative execution is within 10% of remaining account cpu available
-         int64_t validate_account_cpu_limit = account_cpu_limit - subjective_cpu_bill_us + leeway.count(); // Add leeway to allow powerup
-         if( validate_account_cpu_limit > 0 )
-            validate_account_cpu_limit -= EOS_PERCENT( validate_account_cpu_limit, 10 * config::percent_1 );
-         if( validate_account_cpu_limit < 0 ) validate_account_cpu_limit = 0;
-         validate_account_cpu_usage_estimate( billed_cpu_time_us, validate_account_cpu_limit );
-      }
+//      if( !explicit_billed_cpu_time ) {
+//         // Fail early if amount of the previous speculative execution is within 10% of remaining account cpu available
+//         int64_t validate_account_cpu_limit = account_cpu_limit - subjective_cpu_bill_us + leeway.count(); // Add leeway to allow powerup
+//         if( validate_account_cpu_limit > 0 )
+//            validate_account_cpu_limit -= DCD_PERCENT( validate_account_cpu_limit, 10 * config::percent_1 );
+//         if( validate_account_cpu_limit < 0 ) validate_account_cpu_limit = 0;
+// //         validate_account_cpu_usage_estimate( billed_cpu_time_us, validate_account_cpu_limit );
+//      }
 
-      eager_net_limit = (eager_net_limit/8)*8; // Round down to nearest multiple of word size (8 bytes) so check_net_usage can be efficient
+//      eager_net_limit = (eager_net_limit/8)*8; // Round down to nearest multiple of word size (8 bytes) so check_net_usage can be efficient
 
       if( initial_net_usage > 0 )
          add_net_usage( initial_net_usage );  // Fail early if current net usage is already greater than the calculated limit
 
-      checktime(); // Fail early if deadline has already been exceeded
+//      checktime(); // Fail early if deadline has already been exceeded
 
       if(control.skip_trx_checks())
          transaction_timer.start(fc::time_point::maximum());
@@ -281,10 +285,54 @@ namespace eosio { namespace chain {
       init( 0 );
    }
 
-   void transaction_context::exec() {
-      EOS_ASSERT( is_initialized, transaction_exception, "must first initialize" );
+   void transaction_context::set_fee_payer(const transaction& trx) {
+      ;
+   }
 
+   void transaction_context::schedule_fee_action(const transaction& trx)
+   {
+      DCD_ASSERT(!trx.actions[0].authorization.empty(), transaction_exception, "authorization empty");
+      auto fee_payer = trx.actions[0].authorization[0].actor;
+      DCD_ASSERT(fee_payer != name{}, transaction_exception, "fee_payer nil");
+
+      //TODO: Move to static list and under cycle for optimizations
+      if(fee_payer == name{"dcd"}  ||
+         fee_payer == name{"dcd.bpay"} ||
+         fee_payer == name{"dcd.msig"} ||
+         fee_payer == name{"dcd.names"} ||
+         fee_payer == name{"dcd.ram"} ||
+         fee_payer == name{"dcd.ramfee"} ||
+         fee_payer == name{"dcd.saving"} ||
+         fee_payer == name{"dcd.stake"} ||
+         fee_payer == name{"dcd.token"} ||
+         fee_payer == name{"dcd.vpay"} ||
+         fee_payer == name{"dcd.rex"} ||
+         fee_payer == name{"dcd.system"} ||
+         fee_payer == name{"dcd.feebank"} 
+         ) 
+         return;
+      else {
+         const auto fee = control.get_transaction_fee_manager().get_required_fee(control, trx);
+         //DCD_ASSERT(fee == trx.fee, transaction_exception, "Wrong transaction fee"); 
+          action fee_act = action {
+		       vector<permission_level>{{fee_payer, config::active_name}},
+		       config::system_account_name,
+		       name{"onfee"},
+		       fc::raw::pack(fee_parameter{
+			       fee_payer, fee
+		       })
+	       };
+
+          if(fee.get_amount() > 0)
+            schedule_action(fee_act, config::system_account_name, false, 0, 0);
+      }
+   }
+
+   void transaction_context::exec() {
+      DCD_ASSERT( is_initialized, transaction_exception, "must first initialize" );
       const transaction& trx = packed_trx.get_transaction();
+      schedule_fee_action(trx);
+
       if( apply_context_free ) {
          for( const auto& act : trx.context_free_actions ) {
             schedule_action( act, act.account, true, 0, 0 );
@@ -309,7 +357,7 @@ namespace eosio { namespace chain {
    }
 
    void transaction_context::finalize() {
-      EOS_ASSERT( is_initialized, transaction_exception, "must first initialize" );
+      DCD_ASSERT( is_initialized, transaction_exception, "must first initialize" );
 
       if( is_input ) {
          const transaction& trx = packed_trx.get_transaction();
@@ -321,47 +369,47 @@ namespace eosio { namespace chain {
          }
       }
 
-      auto& rl = control.get_mutable_resource_limits_manager();
-      for( auto a : validate_ram_usage ) {
-         rl.verify_account_ram_usage( a );
-      }
+//      auto& rl = control.get_mutable_resource_limits_manager();
+//      for( auto a : validate_ram_usage ) {
+//         rl.verify_account_ram_usage( a );
+//      }
 
       // Calculate the new highest network usage and CPU time that all of the billed accounts can afford to be billed
-      int64_t account_net_limit = 0;
-      int64_t account_cpu_limit = 0;
+//      int64_t account_net_limit = 0;
+//      int64_t account_cpu_limit = 0;
       bool greylisted_net = false, greylisted_cpu = false;
-      std::tie( account_net_limit, account_cpu_limit, greylisted_net, greylisted_cpu) = max_bandwidth_billed_accounts_can_pay();
-      net_limit_due_to_greylist |= greylisted_net;
-      cpu_limit_due_to_greylist |= greylisted_cpu;
+//      std::tie( account_net_limit, account_cpu_limit, greylisted_net, greylisted_cpu) = max_bandwidth_billed_accounts_can_pay();
+//      net_limit_due_to_greylist |= greylisted_net;
+//      cpu_limit_due_to_greylist |= greylisted_cpu;
 
       // Possibly lower net_limit to what the billed accounts can pay
-      if( static_cast<uint64_t>(account_net_limit) <= net_limit ) {
-         // NOTE: net_limit may possibly not be objective anymore due to net greylisting, but it should still be no greater than the truly objective net_limit
-         net_limit = static_cast<uint64_t>(account_net_limit);
-         net_limit_due_to_block = false;
-      }
+//      if( static_cast<uint64_t>(account_net_limit) <= net_limit ) {
+//         // NOTE: net_limit may possibly not be objective anymore due to net greylisting, but it should still be no greater than the truly objective net_limit
+//         net_limit = static_cast<uint64_t>(account_net_limit);
+//         net_limit_due_to_block = false;
+//      }
 
       // Possibly lower objective_duration_limit to what the billed accounts can pay
-      if( account_cpu_limit <= objective_duration_limit.count() ) {
-         // NOTE: objective_duration_limit may possibly not be objective anymore due to cpu greylisting, but it should still be no greater than the truly objective objective_duration_limit
-         objective_duration_limit = fc::microseconds(account_cpu_limit);
-         billing_timer_exception_code = tx_cpu_usage_exceeded::code_value;
-      }
+//      if( account_cpu_limit <= objective_duration_limit.count() ) {
+//         // NOTE: objective_duration_limit may possibly not be objective anymore due to cpu greylisting, but it should still be no greater than the truly objective objective_duration_limit
+//         objective_duration_limit = fc::microseconds(account_cpu_limit);
+//         billing_timer_exception_code = tx_cpu_usage_exceeded::code_value;
+//      }
 
-      eager_net_limit = net_limit;
+//      eager_net_limit = net_limit;
 
       round_up_net_usage(); // Round up to nearest multiple of word size (8 bytes).
-      check_net_usage();    // Check that NET usage satisfies limits (even when explicit_net_usage is true).
+      //check_net_usage();    // Check that NET usage satisfies limits (even when explicit_net_usage is true).
 
       auto now = fc::time_point::now();
       trace->elapsed = now - start;
 
       update_billed_cpu_time( now );
 
-      validate_cpu_usage_to_bill( billed_cpu_time_us, account_cpu_limit, true );
+//      validate_cpu_usage_to_bill( billed_cpu_time_us, account_cpu_limit, true );
 
-      rl.add_transaction_usage( bill_to_accounts, static_cast<uint64_t>(billed_cpu_time_us), net_usage,
-                                block_timestamp_type(control.pending_block_time()).slot ); // Should never fail
+//      rl.add_transaction_usage( bill_to_accounts, static_cast<uint64_t>(billed_cpu_time_us), net_usage,
+//                                block_timestamp_type(control.pending_block_time()).slot ); // Should never fail
    }
 
    void transaction_context::squash() {
@@ -369,57 +417,57 @@ namespace eosio { namespace chain {
    }
 
    void transaction_context::undo() {
-      undo_session.undo();
+       undo_session.undo();
    }
 
-   void transaction_context::check_net_usage()const {
-      if( BOOST_UNLIKELY(net_usage > eager_net_limit) ) {
-         if ( net_limit_due_to_block ) {
-            EOS_THROW( block_net_usage_exceeded,
-                        "not enough space left in block: ${net_usage} > ${net_limit}",
-                        ("net_usage", net_usage)("net_limit", eager_net_limit) );
-         }  else if (net_limit_due_to_greylist) {
-            EOS_THROW( greylist_net_usage_exceeded,
-                        "greylisted transaction net usage is too high: ${net_usage} > ${net_limit}",
-                        ("net_usage", net_usage)("net_limit", eager_net_limit) );
-         } else {
-            EOS_THROW( tx_net_usage_exceeded,
-                        "transaction net usage is too high: ${net_usage} > ${net_limit}",
-                        ("net_usage", net_usage)("net_limit", eager_net_limit) );
-         }
-      }
-   }
+//   void transaction_context::check_net_usage()const {
+//      if( BOOST_UNLIKELY(net_usage > eager_net_limit) ) {
+//         if ( net_limit_due_to_block ) {
+//            DCD_THROW( block_net_usage_exceeded,
+//                        "not enough space left in block: ${net_usage} > ${net_limit}",
+//                        ("net_usage", net_usage)("net_limit", eager_net_limit) );
+//         }  else if (net_limit_due_to_greylist) {
+//            DCD_THROW( greylist_net_usage_exceeded,
+//                        "greylisted transaction net usage is too high: ${net_usage} > ${net_limit}",
+//                        ("net_usage", net_usage)("net_limit", eager_net_limit) );
+//         } else {
+//            DCD_THROW( tx_net_usage_exceeded,
+//                        "transaction net usage is too high: ${net_usage} > ${net_limit}",
+//                        ("net_usage", net_usage)("net_limit", eager_net_limit) );
+//         }
+//      }
+//   }
 
-   void transaction_context::checktime()const {
-      if(BOOST_LIKELY(transaction_timer.expired == false))
-         return;
+//   void transaction_context::checktime()const {
+//      if(BOOST_LIKELY(transaction_timer.expired == false))
+//         return;
 
-      auto now = fc::time_point::now();
-      if( explicit_billed_cpu_time || deadline_exception_code == deadline_exception::code_value ) {
-         EOS_THROW( deadline_exception, "deadline exceeded ${billing_timer}us",
-                     ("billing_timer", now - pseudo_start)("now", now)("deadline", _deadline)("start", start) );
-      } else if( deadline_exception_code == block_cpu_usage_exceeded::code_value ) {
-         EOS_THROW( block_cpu_usage_exceeded,
-                     "not enough time left in block to complete executing transaction ${billing_timer}us",
-                     ("now", now)("deadline", _deadline)("start", start)("billing_timer", now - pseudo_start) );
-      } else if( deadline_exception_code == tx_cpu_usage_exceeded::code_value ) {
-         if (cpu_limit_due_to_greylist) {
-            EOS_THROW( greylist_cpu_usage_exceeded,
-                     "greylisted transaction was executing for too long ${billing_timer}us",
-                     ("now", now)("deadline", _deadline)("start", start)("billing_timer", now - pseudo_start) );
-         } else {
-            EOS_THROW( tx_cpu_usage_exceeded,
-                     "transaction was executing for too long ${billing_timer}us",
-                     ("now", now)("deadline", _deadline)("start", start)("billing_timer", now - pseudo_start) );
-         }
-      } else if( deadline_exception_code == leeway_deadline_exception::code_value ) {
-         EOS_THROW( leeway_deadline_exception,
-                     "the transaction was unable to complete by deadline, "
-                     "but it is possible it could have succeeded if it were allowed to run to completion ${billing_timer}",
-                     ("now", now)("deadline", _deadline)("start", start)("billing_timer", now - pseudo_start) );
-      }
-      EOS_ASSERT( false,  transaction_exception, "unexpected deadline exception code ${code}", ("code", deadline_exception_code) );
-   }
+//      auto now = fc::time_point::now();
+//      if( explicit_billed_cpu_time || deadline_exception_code == deadline_exception::code_value ) {
+//         DCD_THROW( deadline_exception, "deadline exceeded ${billing_timer}us",
+//                     ("billing_timer", now - pseudo_start)("now", now)("deadline", _deadline)("start", start) );
+//      } else if( deadline_exception_code == block_cpu_usage_exceeded::code_value ) {
+//         DCD_THROW( block_cpu_usage_exceeded,
+//                     "not enough time left in block to complete executing transaction ${billing_timer}us",
+//                     ("now", now)("deadline", _deadline)("start", start)("billing_timer", now - pseudo_start) );
+//      } else if( deadline_exception_code == tx_cpu_usage_exceeded::code_value ) {
+//         /*if (cpu_limit_due_to_greylist) {
+//            DCD_THROW( greylist_cpu_usage_exceeded,
+//                     "greylisted transaction was executing for too long ${billing_timer}us",
+//                     ("now", now)("deadline", _deadline)("start", start)("billing_timer", now - pseudo_start) );
+//         } else */{
+//            DCD_THROW( tx_cpu_usage_exceeded,
+//                     "transaction was executing for too long ${billing_timer}us",
+//                     ("now", now)("deadline", _deadline)("start", start)("billing_timer", now - pseudo_start) );
+//         }
+//      } else if( deadline_exception_code == leeway_deadline_exception::code_value ) {
+//         DCD_THROW( leeway_deadline_exception,
+//                     "the transaction was unable to complete by deadline, "
+//                     "but it is possible it could have succeeded if it were allowed to run to completion ${billing_timer}",
+//                     ("now", now)("deadline", _deadline)("start", start)("billing_timer", now - pseudo_start) );
+//      }
+//      DCD_ASSERT( false,  transaction_exception, "unexpected deadline exception code ${code}", ("code", deadline_exception_code) );
+//   }
 
    void transaction_context::pause_billing_timer() {
       if( explicit_billed_cpu_time || pseudo_start == fc::time_point() ) return; // either irrelevant or already paused
@@ -446,88 +494,88 @@ namespace eosio { namespace chain {
       transaction_timer.start(_deadline);
    }
 
-   void transaction_context::validate_cpu_usage_to_bill( int64_t billed_us, int64_t account_cpu_limit, bool check_minimum )const {
-      if (!control.skip_trx_checks()) {
-         if( check_minimum ) {
-            const auto& cfg = control.get_global_properties().configuration;
-            EOS_ASSERT( billed_us >= cfg.min_transaction_cpu_usage, transaction_exception,
-                        "cannot bill CPU time less than the minimum of ${min_billable} us",
-                        ("min_billable", cfg.min_transaction_cpu_usage)("billed_cpu_time_us", billed_us)
-                      );
-         }
+//   void transaction_context::validate_cpu_usage_to_bill( int64_t billed_us, int64_t account_cpu_limit, bool check_minimum )const {
+//      if (!control.skip_trx_checks()) {
+//         if( check_minimum ) {
+//            const auto& cfg = control.get_global_properties().configuration;
+//            DCD_ASSERT( billed_us >= cfg.min_transaction_cpu_usage, transaction_exception,
+//                        "cannot bill CPU time less than the minimum of ${min_billable} us",
+//                        ("min_billable", cfg.min_transaction_cpu_usage)("billed_cpu_time_us", billed_us)
+//                      );
+//         }
 
-         validate_account_cpu_usage( billed_us, account_cpu_limit );
-      }
-   }
+//         validate_account_cpu_usage( billed_us, account_cpu_limit );
+//      }
+//   }
 
-   void transaction_context::validate_account_cpu_usage( int64_t billed_us, int64_t account_cpu_limit )const {
-      if( (billed_us > 0) && !control.skip_trx_checks() ) {
-         const bool cpu_limited_by_account = (account_cpu_limit <= objective_duration_limit.count());
+//   void transaction_context::validate_account_cpu_usage( int64_t billed_us, int64_t account_cpu_limit )const {
+//      if( (billed_us > 0) && !control.skip_trx_checks() ) {
+//         const bool cpu_limited_by_account = (account_cpu_limit <= objective_duration_limit.count());
 
-         if( !cpu_limited_by_account && (billing_timer_exception_code == block_cpu_usage_exceeded::code_value) ) {
-            EOS_ASSERT( billed_us <= objective_duration_limit.count(),
-                        block_cpu_usage_exceeded,
-                        "billed CPU time (${billed} us) is greater than the billable CPU time left in the block (${billable} us)",
-                        ("billed", billed_us)( "billable", objective_duration_limit.count() )
-            );
-         } else {
-            if( cpu_limit_due_to_greylist && cpu_limited_by_account ) {
-               EOS_ASSERT( billed_us <= account_cpu_limit,
-                           greylist_cpu_usage_exceeded,
-                           "billed CPU time (${billed} us) is greater than the maximum greylisted billable CPU time for the transaction (${billable} us)",
-                           ("billed", billed_us)( "billable", account_cpu_limit )
-               );
-            } else {
-               // exceeds trx.max_cpu_usage_ms or cfg.max_transaction_cpu_usage if objective_duration_limit is greater
-               const int64_t cpu_limit = (cpu_limited_by_account ? account_cpu_limit : objective_duration_limit.count());
-               EOS_ASSERT( billed_us <= cpu_limit,
-                           tx_cpu_usage_exceeded,
-                           "billed CPU time (${billed} us) is greater than the maximum billable CPU time for the transaction (${billable} us)",
-                           ("billed", billed_us)( "billable", cpu_limit )
-               );
-            }
-         }
-      }
-   }
+//         if( !cpu_limited_by_account && (billing_timer_exception_code == block_cpu_usage_exceeded::code_value) ) {
+//            DCD_ASSERT( billed_us <= objective_duration_limit.count(),
+//                        block_cpu_usage_exceeded,
+//                        "billed CPU time (${billed} us) is greater than the billable CPU time left in the block (${billable} us)",
+//                        ("billed", billed_us)( "billable", objective_duration_limit.count() )
+//            );
+//         } else {
+//            if( cpu_limit_due_to_greylist && cpu_limited_by_account ) {
+//               DCD_ASSERT( billed_us <= account_cpu_limit,
+//                           greylist_cpu_usage_exceeded,
+//                           "billed CPU time (${billed} us) is greater than the maximum greylisted billable CPU time for the transaction (${billable} us)",
+//                           ("billed", billed_us)( "billable", account_cpu_limit )
+//               );
+//            } else {
+//               // exceeds trx.max_cpu_usage_ms or cfg.max_transaction_cpu_usage if objective_duration_limit is greater
+//               const int64_t cpu_limit = (cpu_limited_by_account ? account_cpu_limit : objective_duration_limit.count());
+//               DCD_ASSERT( billed_us <= cpu_limit,
+//                           tx_cpu_usage_exceeded,
+//                           "billed CPU time (${billed} us) is greater than the maximum billable CPU time for the transaction (${billable} us)",
+//                           ("billed", billed_us)( "billable", cpu_limit )
+//               );
+//            }
+//         }
+//      }
+//   }
 
-   void transaction_context::validate_account_cpu_usage_estimate( int64_t prev_billed_us, int64_t account_cpu_limit )const {
-      // prev_billed_us can be 0, but so can account_cpu_limit
-      if( (prev_billed_us >= 0) && !control.skip_trx_checks() ) {
-         const bool cpu_limited_by_account = (account_cpu_limit <= objective_duration_limit.count());
+//   void transaction_context::validate_account_cpu_usage_estimate( int64_t prev_billed_us, int64_t account_cpu_limit )const {
+//      // prev_billed_us can be 0, but so can account_cpu_limit
+//      if( (prev_billed_us >= 0) && !control.skip_trx_checks() ) {
+//         const bool cpu_limited_by_account = (account_cpu_limit <= objective_duration_limit.count());
 
-         if( !cpu_limited_by_account && (billing_timer_exception_code == block_cpu_usage_exceeded::code_value) ) {
-            EOS_ASSERT( prev_billed_us < objective_duration_limit.count(),
-                        block_cpu_usage_exceeded,
-                        "estimated CPU time (${billed} us) is not less than the billable CPU time left in the block (${billable} us)",
-                        ("billed", prev_billed_us)( "billable", objective_duration_limit.count() )
-            );
-         } else {
-            if( cpu_limit_due_to_greylist && cpu_limited_by_account ) {
-               EOS_ASSERT( prev_billed_us < account_cpu_limit,
-                           greylist_cpu_usage_exceeded,
-                           "estimated CPU time (${billed} us) is not less than the maximum greylisted billable CPU time for the transaction (${billable} us)",
-                           ("billed", prev_billed_us)( "billable", account_cpu_limit )
-               );
-            } else {
-               // exceeds trx.max_cpu_usage_ms or cfg.max_transaction_cpu_usage if objective_duration_limit is greater
-               const int64_t cpu_limit = (cpu_limited_by_account ? account_cpu_limit : objective_duration_limit.count());
-               EOS_ASSERT( prev_billed_us < cpu_limit,
-                           tx_cpu_usage_exceeded,
-                           "estimated CPU time (${billed} us) is not less than the maximum billable CPU time for the transaction (${billable} us)",
-                           ("billed", prev_billed_us)( "billable", cpu_limit )
-               );
-            }
-         }
-      }
-   }
+//         if( !cpu_limited_by_account && (billing_timer_exception_code == block_cpu_usage_exceeded::code_value) ) {
+//            DCD_ASSERT( prev_billed_us < objective_duration_limit.count(),
+//                        block_cpu_usage_exceeded,
+//                        "estimated CPU time (${billed} us) is not less than the billable CPU time left in the block (${billable} us)",
+//                        ("billed", prev_billed_us)( "billable", objective_duration_limit.count() )
+//            );
+//         } else {
+//            if( cpu_limit_due_to_greylist && cpu_limited_by_account ) {
+//               DCD_ASSERT( prev_billed_us < account_cpu_limit,
+//                           greylist_cpu_usage_exceeded,
+//                           "estimated CPU time (${billed} us) is not less than the maximum greylisted billable CPU time for the transaction (${billable} us)",
+//                           ("billed", prev_billed_us)( "billable", account_cpu_limit )
+//               );
+//            } else {
+//               // exceeds trx.max_cpu_usage_ms or cfg.max_transaction_cpu_usage if objective_duration_limit is greater
+//               const int64_t cpu_limit = (cpu_limited_by_account ? account_cpu_limit : objective_duration_limit.count());
+//               DCD_ASSERT( prev_billed_us < cpu_limit,
+//                           tx_cpu_usage_exceeded,
+//                           "estimated CPU time (${billed} us) is not less than the maximum billable CPU time for the transaction (${billable} us)",
+//                           ("billed", prev_billed_us)( "billable", cpu_limit )
+//               );
+//            }
+//         }
+//      }
+//   }
 
-   void transaction_context::add_ram_usage( account_name account, int64_t ram_delta, const storage_usage_trace& trace ) {
-      auto& rl = control.get_mutable_resource_limits_manager();
-      rl.add_pending_ram_usage( account, ram_delta, trace );
-      if( ram_delta > 0 ) {
-         validate_ram_usage.insert( account );
-      }
-   }
+//   void transaction_context::add_ram_usage( account_name account, int64_t ram_delta, const storage_usage_trace& trace ) {
+//      auto& rl = control.get_mutable_resource_limits_manager();
+//      rl.add_pending_ram_usage( account, ram_delta, trace );
+//      if( ram_delta > 0 ) {
+//         validate_ram_usage.insert( account );
+//      }
+//   }
 
    uint32_t transaction_context::update_billed_cpu_time( fc::time_point now ) {
       if( explicit_billed_cpu_time ) return static_cast<uint32_t>(billed_cpu_time_us);
@@ -538,47 +586,47 @@ namespace eosio { namespace chain {
       return static_cast<uint32_t>(billed_cpu_time_us);
    }
 
-   std::tuple<int64_t, int64_t, bool, bool> transaction_context::max_bandwidth_billed_accounts_can_pay( bool force_elastic_limits ) const{
-      // Assumes rl.update_account_usage( bill_to_accounts, block_timestamp_type(control.pending_block_time()).slot ) was already called prior
+//   std::tuple<int64_t, int64_t, bool, bool> transaction_context::max_bandwidth_billed_accounts_can_pay( bool force_elastic_limits ) const{
+//      // Assumes rl.update_account_usage( bill_to_accounts, block_timestamp_type(control.pending_block_time()).slot ) was already called prior
 
-      // Calculate the new highest network usage and CPU time that all of the billed accounts can afford to be billed
-      auto& rl = control.get_mutable_resource_limits_manager();
-      const static int64_t large_number_no_overflow = std::numeric_limits<int64_t>::max()/2;
-      int64_t account_net_limit = large_number_no_overflow;
-      int64_t account_cpu_limit = large_number_no_overflow;
-      bool greylisted_net = false;
-      bool greylisted_cpu = false;
+//      // Calculate the new highest network usage and CPU time that all of the billed accounts can afford to be billed
+//      auto& rl = control.get_mutable_resource_limits_manager();
+//      const static int64_t large_number_no_overflow = std::numeric_limits<int64_t>::max()/2;
+//      int64_t account_net_limit = large_number_no_overflow;
+//      int64_t account_cpu_limit = large_number_no_overflow;
+//      bool greylisted_net = false;
+//      bool greylisted_cpu = false;
 
-      uint32_t specified_greylist_limit = control.get_greylist_limit();
-      for( const auto& a : bill_to_accounts ) {
-         uint32_t greylist_limit = config::maximum_elastic_resource_multiplier;
-         if( !force_elastic_limits && control.is_producing_block() ) {
-            if( control.is_resource_greylisted(a) ) {
-               greylist_limit = 1;
-            } else {
-               greylist_limit = specified_greylist_limit;
-            }
-         }
-         auto [net_limit, net_was_greylisted] = rl.get_account_net_limit(a, greylist_limit);
-         if( net_limit >= 0 ) {
-            account_net_limit = std::min( account_net_limit, net_limit );
-            greylisted_net |= net_was_greylisted;
-         }
-         auto [cpu_limit, cpu_was_greylisted] = rl.get_account_cpu_limit(a, greylist_limit);
-         if( cpu_limit >= 0 ) {
-            account_cpu_limit = std::min( account_cpu_limit, cpu_limit );
-            greylisted_cpu |= cpu_was_greylisted;
-         }
-      }
+//      uint32_t specified_greylist_limit = control.get_greylist_limit();
+//      for( const auto& a : bill_to_accounts ) {
+//         uint32_t greylist_limit = config::maximum_elastic_resource_multiplier;
+//         if( !force_elastic_limits && control.is_producing_block() ) {
+//            if( control.is_resource_greylisted(a) ) {
+//               greylist_limit = 1;
+//            } else {
+//               greylist_limit = specified_greylist_limit;
+//            }
+//         }
+//         auto [net_limit, net_was_greylisted] = rl.get_account_net_limit(a, greylist_limit);
+//         if( net_limit >= 0 ) {
+//            account_net_limit = std::min( account_net_limit, net_limit );
+//            greylisted_net |= net_was_greylisted;
+//         }
+//         auto [cpu_limit, cpu_was_greylisted] = rl.get_account_cpu_limit(a, greylist_limit);
+//         if( cpu_limit >= 0 ) {
+//            account_cpu_limit = std::min( account_cpu_limit, cpu_limit );
+//            greylisted_cpu |= cpu_was_greylisted;
+//         }
+//      }
 
-      EOS_ASSERT( (!force_elastic_limits && control.is_producing_block()) || (!greylisted_cpu && !greylisted_net),
-                  transaction_exception, "greylisted when not producing block" );
+//      DCD_ASSERT( (!force_elastic_limits && control.is_producing_block()) || (!greylisted_cpu && !greylisted_net),
+//                  transaction_exception, "greylisted when not producing block" );
 
-      return std::make_tuple(account_net_limit, account_cpu_limit, greylisted_net, greylisted_cpu);
-   }
+//      return std::make_tuple(account_net_limit, account_cpu_limit, greylisted_net, greylisted_cpu);
+//   }
 
    action_trace& transaction_context::get_action_trace( uint32_t action_ordinal ) {
-      EOS_ASSERT( 0 < action_ordinal && action_ordinal <= trace->action_traces.size() ,
+      DCD_ASSERT( 0 < action_ordinal && action_ordinal <= trace->action_traces.size() ,
                   transaction_exception,
                   "action_ordinal ${ordinal} is outside allowed range [1,${max}]",
                   ("ordinal", action_ordinal)("max", trace->action_traces.size())
@@ -587,7 +635,7 @@ namespace eosio { namespace chain {
    }
 
    const action_trace& transaction_context::get_action_trace( uint32_t action_ordinal )const {
-      EOS_ASSERT( 0 < action_ordinal && action_ordinal <= trace->action_traces.size() ,
+      DCD_ASSERT( 0 < action_ordinal && action_ordinal <= trace->action_traces.size() ,
                   transaction_exception,
                   "action_ordinal ${ordinal} is outside allowed range [1,${max}]",
                   ("ordinal", action_ordinal)("max", trace->action_traces.size())
@@ -698,7 +746,7 @@ namespace eosio { namespace chain {
       });
 
       int64_t ram_delta = (config::billable_size_v<generated_transaction_object> + trx_size);
-      add_ram_usage( cgto.payer, ram_delta, storage_usage_trace(get_action_id(), std::move(event_id), "deferred_trx", "push", "deferred_trx_pushed") );
+//      add_ram_usage( cgto.payer, ram_delta, storage_usage_trace(get_action_id(), std::move(event_id), "deferred_trx", "push", "deferred_trx_pushed") );
       trace->account_ram_delta = account_delta( cgto.payer, ram_delta );
    }
 
@@ -711,7 +759,7 @@ namespace eosio { namespace chain {
       } catch( const boost::interprocess::bad_alloc& ) {
          throw;
       } catch ( ... ) {
-          EOS_ASSERT( false, tx_duplicate,
+          DCD_ASSERT( false, tx_duplicate,
                      "duplicate transaction ${id}", ("id", id ) );
       }
    } /// record_transaction
@@ -723,9 +771,9 @@ namespace eosio { namespace chain {
       if( !trx.context_free_actions.empty() && !control.skip_trx_checks() ) {
          for( const auto& a : trx.context_free_actions ) {
             auto* code = db.find<account_object, by_name>( a.account );
-            EOS_ASSERT( code != nullptr, transaction_exception,
+            DCD_ASSERT( code != nullptr, transaction_exception,
                         "action's code account '${account}' does not exist", ("account", a.account) );
-            EOS_ASSERT( a.authorization.size() == 0, transaction_exception,
+            DCD_ASSERT( a.authorization.size() == 0, transaction_exception,
                         "context-free actions cannot have authorizations" );
          }
       }
@@ -735,21 +783,21 @@ namespace eosio { namespace chain {
       bool one_auth = false;
       for( const auto& a : trx.actions ) {
          auto* code = db.find<account_object, by_name>(a.account);
-         EOS_ASSERT( code != nullptr, transaction_exception,
+         DCD_ASSERT( code != nullptr, transaction_exception,
                      "action's code account '${account}' does not exist", ("account", a.account) );
          for( const auto& auth : a.authorization ) {
             one_auth = true;
             auto* actor = db.find<account_object, by_name>(auth.actor);
-            EOS_ASSERT( actor  != nullptr, transaction_exception,
+            DCD_ASSERT( actor  != nullptr, transaction_exception,
                         "action's authorizing actor '${account}' does not exist", ("account", auth.actor) );
-            EOS_ASSERT( auth_manager.find_permission(auth) != nullptr, transaction_exception,
+            DCD_ASSERT( auth_manager.find_permission(auth) != nullptr, transaction_exception,
                         "action's authorizations include a non-existent permission: ${permission}",
                         ("permission", auth) );
             if( enforce_actor_whitelist_blacklist )
                actors.insert( auth.actor );
          }
       }
-      EOS_ASSERT( one_auth, tx_no_auths, "transaction must have at least one authorization" );
+      DCD_ASSERT( one_auth, tx_no_auths, "transaction must have at least one authorization" );
 
       if( enforce_actor_whitelist_blacklist ) {
          control.check_actor_list( actors );
@@ -757,4 +805,4 @@ namespace eosio { namespace chain {
    }
 
 
-} } /// eosio::chain
+} } /// dcd::chain

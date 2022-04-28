@@ -1,9 +1,9 @@
 #include <sstream>
 
-#include <eosio/chain/block_log.hpp>
-#include <eosio/chain/global_property_object.hpp>
-#include <eosio/chain/snapshot.hpp>
-#include <eosio/testing/tester.hpp>
+#include <dcd/chain/block_log.hpp>
+#include <dcd/chain/global_property_object.hpp>
+#include <dcd/chain/snapshot.hpp>
+#include <dcd/testing/tester.hpp>
 
 #include <boost/mpl/list.hpp>
 #include <boost/test/unit_test.hpp>
@@ -14,7 +14,7 @@
 #include <fc/io/cfile.hpp>
 #include "test_cfd_transaction.hpp"
 
-using namespace eosio;
+using namespace dcd;
 using namespace testing;
 using namespace chain;
 
@@ -105,7 +105,7 @@ void  light_validation_restart_from_block_log_test_case(bool do_prune, uint32_t 
    tester chain(config, gen);
    chain.execute_setup_policy(setup_policy::full);
 
-   eosio::chain::transaction_trace_ptr trace;
+   dcd::chain::transaction_trace_ptr trace;
 
    deploy_test_api(chain);
    chain.produce_blocks(10);
@@ -222,7 +222,7 @@ BOOST_AUTO_TEST_CASE(test_restart_with_different_chain_id) {
    other.close();
    genesis_state genesis;
    genesis.initial_timestamp = fc::time_point::from_iso_string("2020-01-01T00:00:01.000");
-   genesis.initial_key       = eosio::testing::base_tester::get_public_key(config::system_account_name, "active");
+   genesis.initial_key       = dcd::testing::base_tester::get_public_key(config::system_account_name, "active");
    std::optional<chain_id_type> chain_id = genesis.compute_chain_id();
    BOOST_REQUIRE_EXCEPTION(other.open(chain_id), chain_id_type_exception,
                            fc_exception_message_starts_with("chain ID in state "));

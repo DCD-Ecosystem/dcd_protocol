@@ -23,7 +23,7 @@ template <typename Backend>
 struct backend_reset;
 
 template <>
-struct backend_reset<eosio::blockvault::postgres_backend> {
+struct backend_reset<dcd::blockvault::postgres_backend> {
    backend_reset() {
       pqxx::connection conn;
       pqxx::work       w(conn);
@@ -69,7 +69,7 @@ struct backend_test_fixture : backend_reset<Backend> {
       return backend.propose_snapshot({watermark_bn, watermark_ts}, tmp_file.path().string().c_str());
    }
 
-   void sync(std::optional<mock_block_id> previous_block_id, eosio::blockvault::backend::sync_callback& callback) {
+   void sync(std::optional<mock_block_id> previous_block_id, dcd::blockvault::backend::sync_callback& callback) {
       if (previous_block_id) {
          backend.sync(*previous_block_id, callback);
       } else
@@ -77,7 +77,7 @@ struct backend_test_fixture : backend_reset<Backend> {
    }
 };
 
-typedef boost::mpl::list<eosio::blockvault::postgres_backend> test_types;
+typedef boost::mpl::list<dcd::blockvault::postgres_backend> test_types;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_propose_constructed_block, T, test_types) {
    backend_test_fixture<T> fixture;
@@ -152,7 +152,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_propose_snapshot, T, test_types) {
    BOOST_REQUIRE(!fixture.propose_snapshot(12, 2));
 }
 
-struct mock_sync_callback : eosio::blockvault::backend::sync_callback {
+struct mock_sync_callback : dcd::blockvault::backend::sync_callback {
 
    std::vector<char> expected_snapshot_content;
    std::vector<char> reverse_expected_block_first_bytes;

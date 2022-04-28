@@ -112,24 +112,24 @@ class Utils:
     Debug=False
     FNull = open(os.devnull, 'w')
 
-    EosClientPath="programs/cleos/cleos"
-    MiscEosClientArgs="--no-auto-keosd"
+    DcdClientPath="programs/dcdcli/dcdcli"
+    MiscDcdClientArgs="--no-auto-dcdksd"
 
-    EosWalletName="keosd"
-    EosWalletPath="programs/keosd/"+ EosWalletName
+    DcdWalletName="dcdksd"
+    DcdWalletPath="programs/dcdksd/"+ DcdWalletName
 
-    EosServerName="nodeos"
-    EosServerPath="programs/nodeos/"+ EosServerName
+    DcdServerName="dcdnode"
+    DcdServerPath="programs/dcdnode/"+ DcdServerName
 
-    EosLauncherPath="programs/eosio-launcher/eosio-launcher"
+    DcdLauncherPath="programs/dcd-launcher/dcd-launcher"
     ShuttingDown=False
 
-    EosBlockLogPath="programs/eosio-blocklog/eosio-blocklog"
+    DcdBlockLogPath="programs/dcd-blocklog/dcd-blocklog"
 
     FileDivider="================================================================="
     DataRoot="var"
     DataDir="%s/lib/" % (DataRoot)
-    ConfigDir="etc/eosio/"
+    ConfigDir="etc/dcd/"
 
     TimeFmt='%Y-%m-%dT%H:%M:%S.%f'
 
@@ -434,7 +434,7 @@ class Utils:
         else:
             unhandledEnumType(blockLogAction)
 
-        cmd="%s --blocks-dir %s --as-json-array %s%s%s%s %s" % (Utils.EosBlockLogPath, blockLogLocation, outputFileStr, firstStr, lastStr, blockLogActionStr, extraArgs)
+        cmd="%s --blocks-dir %s --as-json-array %s%s%s%s %s" % (Utils.DcdBlockLogPath, blockLogLocation, outputFileStr, firstStr, lastStr, blockLogActionStr, extraArgs)
         if Utils.Debug: Utils.Print("cmd: %s" % (cmd))
         rtn=None
         try:

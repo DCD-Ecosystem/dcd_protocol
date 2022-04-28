@@ -35,8 +35,8 @@ import glob
 # Overview:
 #   The script creates a cluster with a bios and 3 additional node.
 #    
-#   node 0 : a nodeos with 21 producers 'defproducera', 'defproducerb', ...., 'defproduceru'
-#   node 1 : a nodeos with one producer 'vltproducera' and configured to connect to a block vault.
+#   node 0 : a dcdnode with 21 producers 'defproducera', 'defproducerb', ...., 'defproduceru'
+#   node 1 : a dcdnode with one producer 'vltproducera' and configured to connect to a block vault.
 #   node 2 : initially without any producer configured. After it is killed in scenario 3, it is relaunched with
 #            one producer 'vltproducera' and uses the same producer key in node 1. 
 #
@@ -182,11 +182,11 @@ walletPort=args.wallet_port
 
 walletMgr=WalletMgr(True, port=walletPort)
 testSuccessful=False
-killEosInstances=not dontKill
+killDcdInstances=not dontKill
 killWallet=not dontKill
 
-WalletdName=Utils.EosWalletName
-ClientName="cleos"
+WalletdName=Utils.DcdWalletName
+ClientName="dcdcli"
 
 try:
     TestHelper.printSystemInfo("BEGIN")
@@ -207,12 +207,12 @@ try:
     Print("Stand up cluster")
     if cluster.launch(onlyBios=False, pnodes=1, totalNodes=totalNodes,
                     useBiosBootFile=False, onlySetProds=False,
-                    extraNodeosArgs=" --blocks-log-stride 20 --max-retained-block-files 3 --logconf %s" % loggingFile,
-                    specificExtraNodeosArgs={
-                        1:"--plugin eosio::blockvault_client_plugin --block-vault-backend postgresql://postgres:password@localhost"},
+                    extradcdnodeArgs=" --blocks-log-stride 20 --max-retained-block-files 3 --logconf %s" % loggingFile,
+                    specificExtradcdnodeArgs={
+                        1:"--plugin dcd::blockvault_client_plugin --block-vault-backend postgresql://postgres:password@localhost"},
                     manualProducerNodeConf={ 1: { 'key': vltproducerAccount, 'names': ['vltproducera']}}) is False:
         Utils.cmdError("launcher")
-        Utils.errorExit("Failed to stand up eos cluster.")
+        Utils.errorExit("Failed to stand up dcd cluster.")
 
     Print("Validating system accounts after bootstrap")
     cluster.validateAccounts(None)
@@ -223,7 +223,7 @@ try:
     Print("Wait for blocks produced by vltproducera(node 1) seen by node 0")
     assert node0.waitForIrreversibleBlockProducedBy("vltproducera"), "failed to see blocks produced by vltproducera"
 
-    Print("Wait until block 1 is no longer retrievable, this ensures newly joined nodeos cannot sync from net plugin")
+    Print("Wait until block 1 is no longer retrievable, this ensures newly joined dcdnode cannot sync from net plugin")
     while os.path.exists('var/lib/node_00/archive/blocks-1-20.log'):
         time.sleep(2)
 
@@ -247,7 +247,7 @@ try:
     node2 = cluster.getNode(2)
     time.sleep(10)
     testFailOver(cluster, nodeToKill=node2, addSwapFlags={
-        "--plugin": "eosio::blockvault_client_plugin",
+        "--plugin": "dcd::blockvault_client_plugin",
         "--block-vault-backend": "postgresql://postgres:password@localhost",
         "--producer-name": "vltproducera",
         "--signature-provider": "{}=KEY:{}".format(vltproducerAccount.ownerPublicKey, vltproducerAccount.ownerPrivateKey)
@@ -276,6 +276,6 @@ try:
 
     testSuccessful=True
 finally:
-    TestHelper.shutdown(cluster, walletMgr, testSuccessful=testSuccessful, killEosInstances=killEosInstances, killWallet=killWallet, keepLogs=keepLogs, cleanRun=killAll, dumpErrorDetails=dumpErrorDetails)
+    TestHelper.shutdown(cluster, walletMgr, testSuccessful=testSuccessful, killDcdInstances=killDcdInstances, killWallet=killWallet, keepLogs=keepLogs, cleanRun=killAll, dumpErrorDetails=dumpErrorDetails)
 
 exit(0)

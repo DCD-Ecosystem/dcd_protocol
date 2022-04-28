@@ -1,5 +1,5 @@
-#include <eosio/chain/global_property_object.hpp>
-#include <eosio/testing/tester.hpp>
+#include <dcd/chain/global_property_object.hpp>
+#include <dcd/testing/tester.hpp>
 
 #include <boost/test/unit_test.hpp>
 
@@ -11,8 +11,8 @@
 #define TESTER validating_tester
 #endif
 
-using namespace eosio::testing;
-using namespace eosio::chain;
+using namespace dcd::testing;
+using namespace dcd::chain;
 using mvo = fc::mutable_variant_object;
 
 BOOST_AUTO_TEST_SUITE(producer_schedule_tests)
@@ -687,7 +687,7 @@ BOOST_AUTO_TEST_CASE( extra_signatures_test ) try {
    main.block_signing_private_keys.emplace(get_public_key("alice"_n, "bs1"), get_private_key("alice"_n, "bs1"));
    main.block_signing_private_keys.emplace(get_public_key("alice"_n, "bs2"), get_private_key("alice"_n, "bs2"));
 
-   BOOST_REQUIRE( main.control->pending_block_producer() == "eosio"_n );
+   BOOST_REQUIRE( main.control->pending_block_producer() == "dcd"_n );
    main.produce_blocks(3);
    BOOST_REQUIRE( main.control->pending_block_producer() == "alice"_n );
 

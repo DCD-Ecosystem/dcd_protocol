@@ -1,15 +1,15 @@
-#include <eosio/producer_plugin/producer_plugin.hpp>
-#include <eosio/producer_plugin/pending_snapshot.hpp>
-#include <eosio/producer_plugin/subjective_billing.hpp>
-#include <eosio/chain/plugin_interface.hpp>
-#include <eosio/chain/global_property_object.hpp>
-#include <eosio/chain/generated_transaction_object.hpp>
-#include <eosio/chain/snapshot.hpp>
-#include <eosio/chain/transaction_object.hpp>
-#include <eosio/chain/thread_utils.hpp>
-#include <eosio/chain/unapplied_transaction_queue.hpp>
-#include <eosio/resource_monitor_plugin/resource_monitor_plugin.hpp>
-#include <eosio/blockvault_client_plugin/blockvault_client_plugin.hpp>
+#include <dcd/producer_plugin/producer_plugin.hpp>
+#include <dcd/producer_plugin/pending_snapshot.hpp>
+//#include <dcd/producer_plugin/subjective_billing.hpp>
+#include <dcd/chain/plugin_interface.hpp>
+#include <dcd/chain/global_property_object.hpp>
+#include <dcd/chain/generated_transaction_object.hpp>
+#include <dcd/chain/snapshot.hpp>
+#include <dcd/chain/transaction_object.hpp>
+#include <dcd/chain/thread_utils.hpp>
+#include <dcd/chain/unapplied_transaction_queue.hpp>
+#include <dcd/resource_monitor_plugin/resource_monitor_plugin.hpp>
+#include <dcd/blockvault_client_plugin/blockvault_client_plugin.hpp>
 
 #include <fc/io/json.hpp>
 #include <fc/log/logger_config.hpp>
@@ -74,12 +74,12 @@ fc::logger       _trx_successful_trace_log;
 const fc::string trx_failed_trace_logger_name("transaction_failure_tracing");
 fc::logger       _trx_failed_trace_log;
 
-namespace eosio {
+namespace dcd {
 
 static appbase::abstract_plugin& _producer_plugin = app().register_plugin<producer_plugin>();
 
-using namespace eosio::chain;
-using namespace eosio::chain::plugin_interface;
+using namespace dcd::chain;
+using namespace dcd::chain::plugin_interface;
 
 namespace {
    bool exception_is_exhausted(const fc::exception& e, bool deadline_is_subjective) {
@@ -135,7 +135,7 @@ class block_only_sync : public blockvault::sync_callback {
    void cancel() { _start_sync_timer.cancel(); }
    void schedule();
    void on_snapshot(const char* snapshot_filename) override;
-   void on_block(eosio::chain::signed_block_ptr block) override;
+   void on_block(dcd::chain::signed_block_ptr block) override;
 };
 
 class producer_plugin_impl : public std::enable_shared_from_this<producer_plugin_impl> {
@@ -182,15 +182,15 @@ class producer_plugin_impl : public std::enable_shared_from_this<producer_plugin
       uint32_t                                                  _max_block_net_usage_threshold_bytes = 0;
       int32_t                                                   _max_scheduled_transaction_time_per_block_ms = 0;
       bool                                                      _disable_persist_until_expired = false;
-      bool                                                      _disable_subjective_p2p_billing = true;
-      bool                                                      _disable_subjective_api_billing = true;
+      //bool                                                      _disable_subjective_p2p_billing = true;
+      //bool                                                      _disable_subjective_api_billing = true;
       fc::time_point                                            _irreversible_block_time;
 
       std::vector<chain::digest_type>                           _protocol_features_to_activate;
       bool                                                      _protocol_features_signaled = false; // to mark whether it has been signaled in start_block
 
       chain_plugin*                                             chain_plug = nullptr;
-      eosio::blockvault::block_vault_interface*                 blockvault = nullptr;
+      dcd::blockvault::block_vault_interface*                 blockvault = nullptr;
       uint32_t                                                  _latest_rejected_block_num = 0;
 
       incoming::channels::block::channel_type::handle           _incoming_block_subscription;
@@ -204,7 +204,7 @@ class producer_plugin_impl : public std::enable_shared_from_this<producer_plugin
 
       transaction_id_with_expiry_index                          _blacklisted_transactions;
       pending_snapshot_index                                    _pending_snapshot_index;
-      subjective_billing                                        _subjective_billing;
+      //subjective_billing                                        _subjective_billing;
 
       std::optional<scoped_connection>                          _accepted_block_connection;
       std::optional<scoped_connection>                          _accepted_block_header_connection;
@@ -249,7 +249,7 @@ class producer_plugin_impl : public std::enable_shared_from_this<producer_plugin
       void on_block( const block_state_ptr& bsp ) {
          auto before = _unapplied_transactions.size();
          _unapplied_transactions.clear_applied( bsp );
-         _subjective_billing.on_block( bsp, fc::time_point::now() );
+         //_subjective_billing.on_block( bsp, fc::time_point::now() );
          fc_dlog( _log, "Removed applied transactions before: ${before}, after: ${after}",
                   ("before", before)("after", _unapplied_transactions.size()) );
       }
@@ -282,7 +282,7 @@ class producer_plugin_impl : public std::enable_shared_from_this<producer_plugin
          auto& chain = chain_plug->chain();
 
          _unapplied_transactions.add_aborted( chain.abort_block() );
-         _subjective_billing.abort_block();
+         //_subjective_billing.abort_block();
       }
 
       bool on_sync_block(const signed_block_ptr& block, bool check_connectivity) {
@@ -353,7 +353,7 @@ class producer_plugin_impl : public std::enable_shared_from_this<producer_plugin
 
          fc_dlog(_log, "received incoming block ${n} ${id}", ("n", blk_num)("id", id));
 
-         EOS_ASSERT( block->timestamp < (fc::time_point::now() + fc::seconds( 7 )), block_from_the_future,
+         DCD_ASSERT( block->timestamp < (fc::time_point::now() + fc::seconds( 7 )), block_from_the_future,
                      "received a block from the future, ignoring it: ${id}", ("id", id) );
 
          /* de-dupe here... no point in aborting block if we already know the block */
@@ -541,16 +541,16 @@ class producer_plugin_impl : public std::enable_shared_from_this<producer_plugin
                deadline = block_deadline;
             }
 
-            bool disable_subjective_billing = ( _pending_block_mode == pending_block_mode::producing )
-                                              || ( persist_until_expired && _disable_subjective_api_billing )
-                                              || ( !persist_until_expired && _disable_subjective_p2p_billing );
+            //bool disable_subjective_billing = ( _pending_block_mode == pending_block_mode::producing )
+            //                                  || ( persist_until_expired && _disable_subjective_api_billing )
+            //                                  || ( !persist_until_expired && _disable_subjective_p2p_billing );
 
             auto first_auth = trx->packed_trx()->get_transaction().first_authorizer();
             uint32_t sub_bill = 0;
-            if( !disable_subjective_billing )
-               sub_bill = _subjective_billing.get_subjective_bill( first_auth, fc::time_point::now() );
+//            if( !disable_subjective_billing )
+//               sub_bill = _subjective_billing.get_subjective_bill( first_auth, fc::time_point::now() );
 
-            auto trace = chain.push_transaction( trx, deadline, trx->billed_cpu_time_us, false, sub_bill );
+            auto trace = chain.push_transaction(trx, deadline, trx->billed_cpu_time_us, false, sub_bill );
             fc_dlog( _trx_failed_trace_log, "Subjective bill for ${a}: ${b} elapsed ${t}us", ("a",first_auth)("b",sub_bill)("t",trace->elapsed));
             if( trace->except ) {
                if( exception_is_exhausted( *trace->except, deadline_is_subjective )) {
@@ -566,7 +566,7 @@ class producer_plugin_impl : public std::enable_shared_from_this<producer_plugin
                   }
                   exhausted = block_is_exhausted();
                } else {
-                  _subjective_billing.subjective_bill_failure( first_auth, trace->elapsed, fc::time_point::now() );
+                  //_subjective_billing.subjective_bill_failure( first_auth, trace->elapsed, fc::time_point::now() );
                   auto e_ptr = trace->except->dynamic_copy_exception();
                   send_response( e_ptr );
                }
@@ -576,11 +576,11 @@ class producer_plugin_impl : public std::enable_shared_from_this<producer_plugin
                   // ensure its applied to all future speculative blocks as well.
                   // No need to subjective bill since it will be re-applied
                   _unapplied_transactions.add_persisted( trx );
-               } else {
-                  // if db_read_mode SPECULATIVE then trx is in the pending block and not immediately reverted
-                  _subjective_billing.subjective_bill( trx->id(), expire, first_auth, trace->elapsed,
-                                                       chain.get_read_mode() == chain::db_read_mode::SPECULATIVE );
-               }
+               }// else {
+               //   // if db_read_mode SPECULATIVE then trx is in the pending block and not immediately reverted
+               //   _subjective_billing.subjective_bill( trx->id(), expire, first_auth, trace->elapsed,
+               //                                        chain.get_read_mode() == chain::db_read_mode::SPECULATIVE );
+               //}
                send_response( trace );
             }
 
@@ -635,13 +635,13 @@ class producer_plugin_impl : public std::enable_shared_from_this<producer_plugin
 
 };
 
-void new_chain_banner(const eosio::chain::controller& db)
+void new_chain_banner(const dcd::chain::controller& db)
 {
    std::cerr << "\n"
       "*******************************\n"
       "*                             *\n"
       "*   ------ NEW CHAIN ------   *\n"
-      "*   -  Welcome to EOSIO!  -   *\n"
+      "*   -  Welcome to DCD!  -   *\n"
       "*   -----------------------   *\n"
       "*                             *\n"
       "*******************************\n"
@@ -741,7 +741,7 @@ chain::signature_type producer_plugin::sign_compact(const chain::public_key_type
 {
   if(key != chain::public_key_type()) {
     auto private_key_itr = my->_signature_providers.find(key);
-    EOS_ASSERT(private_key_itr != my->_signature_providers.end(), producer_priv_key_not_found, "Local producer has no private key in config.ini corresponding to public key ${key}", ("key", key));
+    DCD_ASSERT(private_key_itr != my->_signature_providers.end(), producer_priv_key_not_found, "Local producer has no private key in config.ini corresponding to public key ${key}", ("key", key));
 
     return private_key_itr->second(digest);
   }
@@ -759,7 +759,7 @@ T dejsonify(const string& s) {
 if( options.count(op_name) ) { \
    const std::vector<std::string>& ops = options[op_name].as<std::vector<std::string>>(); \
    for( const auto& v : ops ) { \
-      container.emplace( eosio::chain::name( v ) ); \
+      container.emplace( dcd::chain::name( v ) ); \
    } \
 }
 
@@ -769,7 +769,7 @@ void producer_plugin::plugin_initialize(const boost::program_options::variables_
    my->blockvault = blockvault_plug ? blockvault_plug->get() : nullptr;
 
    my->chain_plug = app().find_plugin<chain_plugin>();
-   EOS_ASSERT( my->chain_plug, plugin_config_exception, "chain_plugin not found" );
+   DCD_ASSERT( my->chain_plug, plugin_config_exception, "chain_plugin not found" );
    my->_options = &options;
    LOAD_VALUE_SET(options, "producer-name", my->_producers)
 
@@ -806,32 +806,32 @@ void producer_plugin::plugin_initialize(const boost::program_options::variables_
    }
 
    my->_produce_time_offset_us = options.at("produce-time-offset-us").as<int32_t>();
-   EOS_ASSERT( my->_produce_time_offset_us <= 0 && my->_produce_time_offset_us >= -config::block_interval_us, plugin_config_exception,
+   DCD_ASSERT( my->_produce_time_offset_us <= 0 && my->_produce_time_offset_us >= -config::block_interval_us, plugin_config_exception,
                "produce-time-offset-us ${o} must be 0 .. -${bi}", ("bi", config::block_interval_us)("o", my->_produce_time_offset_us) );
 
    my->_last_block_time_offset_us = options.at("last-block-time-offset-us").as<int32_t>();
-   EOS_ASSERT( my->_last_block_time_offset_us <= 0 && my->_last_block_time_offset_us >= -config::block_interval_us, plugin_config_exception,
+   DCD_ASSERT( my->_last_block_time_offset_us <= 0 && my->_last_block_time_offset_us >= -config::block_interval_us, plugin_config_exception,
                "last-block-time-offset-us ${o} must be 0 .. -${bi}", ("bi", config::block_interval_us)("o", my->_last_block_time_offset_us) );
 
    uint32_t cpu_effort_pct = options.at("cpu-effort-percent").as<uint32_t>();
-   EOS_ASSERT( cpu_effort_pct >= 0 && cpu_effort_pct <= 100, plugin_config_exception,
+   DCD_ASSERT( cpu_effort_pct >= 0 && cpu_effort_pct <= 100, plugin_config_exception,
                "cpu-effort-percent ${pct} must be 0 - 100", ("pct", cpu_effort_pct) );
       cpu_effort_pct *= config::percent_1;
    int32_t cpu_effort_offset_us =
-         -EOS_PERCENT( config::block_interval_us, chain::config::percent_100 - cpu_effort_pct );
+         -DCD_PERCENT( config::block_interval_us, chain::config::percent_100 - cpu_effort_pct );
 
    uint32_t last_block_cpu_effort_pct = options.at("last-block-cpu-effort-percent").as<uint32_t>();
-   EOS_ASSERT( last_block_cpu_effort_pct >= 0 && last_block_cpu_effort_pct <= 100, plugin_config_exception,
+   DCD_ASSERT( last_block_cpu_effort_pct >= 0 && last_block_cpu_effort_pct <= 100, plugin_config_exception,
                "last-block-cpu-effort-percent ${pct} must be 0 - 100", ("pct", last_block_cpu_effort_pct) );
       last_block_cpu_effort_pct *= config::percent_1;
    int32_t last_block_cpu_effort_offset_us =
-         -EOS_PERCENT( config::block_interval_us, chain::config::percent_100 - last_block_cpu_effort_pct );
+         -DCD_PERCENT( config::block_interval_us, chain::config::percent_100 - last_block_cpu_effort_pct );
 
    my->_produce_time_offset_us = std::min( my->_produce_time_offset_us, cpu_effort_offset_us );
    my->_last_block_time_offset_us = std::min( my->_last_block_time_offset_us, last_block_cpu_effort_offset_us );
 
    my->_max_block_cpu_usage_threshold_us = options.at( "max-block-cpu-usage-threshold-us" ).as<uint32_t>();
-   EOS_ASSERT( my->_max_block_cpu_usage_threshold_us < config::block_interval_us, plugin_config_exception,
+   DCD_ASSERT( my->_max_block_cpu_usage_threshold_us < config::block_interval_us, plugin_config_exception,
                "max-block-cpu-usage-threshold-us ${t} must be 0 .. ${bi}", ("bi", config::block_interval_us)("t", my->_max_block_cpu_usage_threshold_us) );
 
    my->_max_block_net_usage_threshold_bytes = options.at( "max-block-net-usage-threshold-bytes" ).as<uint32_t>();
@@ -848,7 +848,7 @@ void producer_plugin::plugin_initialize(const boost::program_options::variables_
 
    auto max_incoming_transaction_queue_size = options.at("incoming-transaction-queue-size-mb").as<uint16_t>() * 1024*1024;
 
-   EOS_ASSERT( max_incoming_transaction_queue_size > 0, plugin_config_exception,
+   DCD_ASSERT( max_incoming_transaction_queue_size > 0, plugin_config_exception,
                "incoming-transaction-queue-size-mb ${mb} must be greater than 0", ("mb", max_incoming_transaction_queue_size) );
 
    my->_unapplied_transactions.set_max_transaction_queue_size( max_incoming_transaction_queue_size );
@@ -856,28 +856,28 @@ void producer_plugin::plugin_initialize(const boost::program_options::variables_
    my->_incoming_defer_ratio = options.at("incoming-defer-ratio").as<double>();
 
    my->_disable_persist_until_expired = options.at("disable-api-persisted-trx").as<bool>();
-   bool disable_subjective_billing = options.at("disable-subjective-billing").as<bool>();
-   my->_disable_subjective_p2p_billing = options.at("disable-subjective-p2p-billing").as<bool>();
-   my->_disable_subjective_api_billing = options.at("disable-subjective-api-billing").as<bool>();
-   dlog( "disable-subjective-billing: ${s}, disable-subjective-p2p-billing: ${p2p}, disable-subjective-api-billing: ${api}",
-         ("s", disable_subjective_billing)("p2p", my->_disable_subjective_p2p_billing)("api", my->_disable_subjective_api_billing) );
-   if( !disable_subjective_billing ) {
-       my->_disable_subjective_p2p_billing = my->_disable_subjective_api_billing = false;
-   } else if( !my->_disable_subjective_p2p_billing || !my->_disable_subjective_api_billing ) {
-       disable_subjective_billing = false;
-   }
-   if( disable_subjective_billing ) {
-       my->_subjective_billing.disable();
-       ilog( "Subjective CPU billing disabled" );
-   } else if( !my->_disable_subjective_p2p_billing && !my->_disable_subjective_api_billing ) {
-       ilog( "Subjective CPU billing enabled" );
-   } else {
-       if( my->_disable_subjective_p2p_billing ) ilog( "Subjective CPU billing of P2P trxs disabled " );
-       if( my->_disable_subjective_api_billing ) ilog( "Subjective CPU billing of API trxs disabled " );
-   }
+   //bool disable_subjective_billing = options.at("disable-subjective-billing").as<bool>();
+   //my->_disable_subjective_p2p_billing = options.at("disable-subjective-p2p-billing").as<bool>();
+   //my->_disable_subjective_api_billing = options.at("disable-subjective-api-billing").as<bool>();
+  // dlog( "disable-subjective-billing: ${s}, disable-subjective-p2p-billing: ${p2p}, disable-subjective-api-billing: ${api}",
+  //       ("s", disable_subjective_billing)("p2p", my->_disable_subjective_p2p_billing)("api", my->_disable_subjective_api_billing) );
+   //if( !disable_subjective_billing ) {
+  //     my->_disable_subjective_p2p_billing = my->_disable_subjective_api_billing = false;
+  // } else if( !my->_disable_subjective_p2p_billing || !my->_disable_subjective_api_billing ) {
+  //     disable_subjective_billing = false;
+  // }
+  // if( disable_subjective_billing ) {
+ //      my->_subjective_billing.disable();
+  //     ilog( "Subjective CPU billing disabled" );
+  // } else if( !my->_disable_subjective_p2p_billing && !my->_disable_subjective_api_billing ) {
+  //     ilog( "Subjective CPU billing enabled" );
+  // } else {
+  //     if( my->_disable_subjective_p2p_billing ) ilog( "Subjective CPU billing of P2P trxs disabled " );
+  //     if( my->_disable_subjective_api_billing ) ilog( "Subjective CPU billing of API trxs disabled " );
+  // }
 
    auto thread_pool_size = options.at( "producer-threads" ).as<uint16_t>();
-   EOS_ASSERT( thread_pool_size > 0, plugin_config_exception,
+   DCD_ASSERT( thread_pool_size > 0, plugin_config_exception,
                "producer-threads ${num} must be greater than 0", ("num", thread_pool_size));
    my->_thread_pool.emplace( "prod", thread_pool_size );
 
@@ -892,7 +892,7 @@ void producer_plugin::plugin_initialize(const boost::program_options::variables_
          my->_snapshots_dir = sd;
       }
 
-      EOS_ASSERT( fc::is_directory(my->_snapshots_dir), snapshot_directory_not_found_exception,
+      DCD_ASSERT( fc::is_directory(my->_snapshots_dir), snapshot_directory_not_found_exception,
                   "No such directory '${dir}'", ("dir", my->_snapshots_dir.generic_string()) );
 
       if (auto resmon_plugin = app().find_plugin<resource_monitor_plugin>()) {
@@ -929,26 +929,26 @@ void producer_plugin::plugin_initialize(const boost::program_options::variables_
       return my->on_incoming_transaction_async(trx, persist_until_expired, next );
    });
 
-   if (options.count("greylist-account")) {
-      std::vector<std::string> greylist = options["greylist-account"].as<std::vector<std::string>>();
-      greylist_params param;
-      for (auto &a : greylist) {
-         param.accounts.push_back(account_name(a));
-      }
-      add_greylist_accounts(param);
-   }
+//   if (options.count("greylist-account")) {
+//      std::vector<std::string> greylist = options["greylist-account"].as<std::vector<std::string>>();
+//      greylist_params param;
+//      for (auto &a : greylist) {
+//         param.accounts.push_back(account_name(a));
+//      }
+//      add_greylist_accounts(param);
+//   }
 
-   {
-      uint32_t greylist_limit = options.at("greylist-limit").as<uint32_t>();
-      chain.set_greylist_limit( greylist_limit );
-   }
+//   {
+//      uint32_t greylist_limit = options.at("greylist-limit").as<uint32_t>();
+//      chain.set_greylist_limit( greylist_limit );
+//   }
 
-   if( options.count("disable-subjective-account-billing") ) {
-      std::vector<std::string> accounts = options["disable-subjective-account-billing"].as<std::vector<std::string>>();
-      for( const auto& a : accounts ) {
-         my->_subjective_billing.disable_account( account_name(a) );
-      }
-   }
+//   if( options.count("disable-subjective-account-billing") ) {
+//      std::vector<std::string> accounts = options["disable-subjective-account-billing"].as<std::vector<std::string>>();
+//      for( const auto& a : accounts ) {
+//         my->_subjective_billing.disable_account( account_name(a) );
+//      }
+//   }
 
 } FC_LOG_AND_RETHROW() }
 
@@ -960,13 +960,13 @@ void producer_plugin::plugin_startup()
    ilog("producer plugin:  plugin_startup() begin");
 
    chain::controller& chain = my->chain_plug->chain();
-   EOS_ASSERT( my->_producers.empty() || chain.get_read_mode() == chain::db_read_mode::SPECULATIVE, plugin_config_exception,
+   DCD_ASSERT( my->_producers.empty() || chain.get_read_mode() == chain::db_read_mode::SPECULATIVE, plugin_config_exception,
               "node cannot have any producer-name configured because block production is impossible when read_mode is not \"speculative\"" );
 
-   EOS_ASSERT( my->_producers.empty() || chain.get_validation_mode() == chain::validation_mode::FULL, plugin_config_exception,
+   DCD_ASSERT( my->_producers.empty() || chain.get_validation_mode() == chain::validation_mode::FULL, plugin_config_exception,
               "node cannot have any producer-name configured because block production is not safe when validation_mode is not \"full\"" );
 
-   EOS_ASSERT( my->_producers.empty() || my->chain_plug->accept_transactions(), plugin_config_exception,
+   DCD_ASSERT( my->_producers.empty() || my->chain_plug->accept_transactions(), plugin_config_exception,
               "node cannot have any producer-name configured because no block production is possible with no [api|p2p]-accepted-transactions" );
 
    my->_accepted_block_connection.emplace(chain.accepted_block.connect( [this]( const auto& bsp ){ my->on_block( bsp ); } ));
@@ -991,7 +991,7 @@ void producer_plugin::plugin_startup()
       }
    }
 
-   my->schedule_production_loop();
+   my->schedule_production_loop(); /// TODO: START 1
 
    ilog("producer plugin:  plugin_startup() end");
    } catch( ... ) {
@@ -1089,9 +1089,9 @@ void producer_plugin::update_runtime_options(const runtime_options& options) {
       chain.set_subjective_cpu_leeway(fc::microseconds(*options.subjective_cpu_leeway_us));
    }
 
-   if (options.greylist_limit) {
-      chain.set_greylist_limit(*options.greylist_limit);
-   }
+//   if (options.greylist_limit) {
+//      chain.set_greylist_limit(*options.greylist_limit);
+//   }
 }
 
 producer_plugin::runtime_options producer_plugin::get_runtime_options() const {
@@ -1104,35 +1104,35 @@ producer_plugin::runtime_options producer_plugin::get_runtime_options() const {
       my->chain_plug->chain().get_subjective_cpu_leeway() ?
             my->chain_plug->chain().get_subjective_cpu_leeway()->count() :
             std::optional<int32_t>(),
-      my->_incoming_defer_ratio,
-      my->chain_plug->chain().get_greylist_limit()
+      my->_incoming_defer_ratio/*,
+      my->chain_plug->chain().get_greylist_limit()*/
    };
 }
 
-void producer_plugin::add_greylist_accounts(const greylist_params& params) {
-   chain::controller& chain = my->chain_plug->chain();
-   for (auto &acc : params.accounts) {
-      chain.add_resource_greylist(acc);
-   }
-}
+//void producer_plugin::add_greylist_accounts(const greylist_params& params) {
+//   chain::controller& chain = my->chain_plug->chain();
+//   for (auto &acc : params.accounts) {
+//      chain.add_resource_greylist(acc);
+//   }
+//}
 
-void producer_plugin::remove_greylist_accounts(const greylist_params& params) {
-   chain::controller& chain = my->chain_plug->chain();
-   for (auto &acc : params.accounts) {
-      chain.remove_resource_greylist(acc);
-   }
-}
+//void producer_plugin::remove_greylist_accounts(const greylist_params& params) {
+//   chain::controller& chain = my->chain_plug->chain();
+//   for (auto &acc : params.accounts) {
+//      chain.remove_resource_greylist(acc);
+//   }
+//}
 
-producer_plugin::greylist_params producer_plugin::get_greylist() const {
-   chain::controller& chain = my->chain_plug->chain();
-   greylist_params result;
-   const auto& list = chain.get_resource_greylist();
-   result.accounts.reserve(list.size());
-   for (auto &acc: list) {
-      result.accounts.push_back(acc);
-   }
-   return result;
-}
+//producer_plugin::greylist_params producer_plugin::get_greylist() const {
+//   chain::controller& chain = my->chain_plug->chain();
+//   greylist_params result;
+//   const auto& list = chain.get_resource_greylist();
+//   result.accounts.reserve(list.size());
+//   for (auto &acc: list) {
+//      result.accounts.push_back(acc);
+//   }
+//   return result;
+//}
 
 producer_plugin::whitelist_blacklist producer_plugin::get_whitelist_blacklist() const {
    chain::controller& chain = my->chain_plug->chain();
@@ -1219,7 +1219,7 @@ void producer_plugin::create_snapshot(producer_plugin::next_function<producer_pl
 
          boost::system::error_code ec;
          bfs::rename(temp_path, snapshot_path, ec);
-         EOS_ASSERT(!ec, snapshot_finalization_exception,
+         DCD_ASSERT(!ec, snapshot_finalization_exception,
                "Unable to finalize valid snapshot of block number ${bn}: [code: ${ec}] ${message}",
                ("bn", head_block_num)
                ("ec", ec.value())
@@ -1254,7 +1254,7 @@ void producer_plugin::create_snapshot(producer_plugin::next_function<producer_pl
 
          boost::system::error_code ec;
          bfs::rename(temp_path, pending_path, ec);
-         EOS_ASSERT(!ec, snapshot_finalization_exception,
+         DCD_ASSERT(!ec, snapshot_finalization_exception,
                "Unable to promote temp snapshot to pending for block number ${bn}: [code: ${ec}] ${message}",
                ("bn", head_block_num)
                ("ec", ec.value())
@@ -1274,13 +1274,13 @@ void producer_plugin::schedule_protocol_feature_activations( const scheduled_pro
    const chain::controller& chain = my->chain_plug->chain();
    std::set<digest_type> set_of_features_to_activate( schedule.protocol_features_to_activate.begin(),
                                                       schedule.protocol_features_to_activate.end() );
-   EOS_ASSERT( set_of_features_to_activate.size() == schedule.protocol_features_to_activate.size(),
+   DCD_ASSERT( set_of_features_to_activate.size() == schedule.protocol_features_to_activate.size(),
                invalid_protocol_features_to_activate, "duplicate digests" );
    chain.validate_protocol_features( schedule.protocol_features_to_activate );
    const auto& pfs = chain.get_protocol_feature_manager().get_protocol_feature_set();
    for (auto &feature_digest : set_of_features_to_activate) {
       const auto& pf = pfs.get_protocol_feature(feature_digest);
-      EOS_ASSERT( !pf.preactivation_required, protocol_feature_exception,
+      DCD_ASSERT( !pf.preactivation_required, protocol_feature_exception,
                   "protocol feature requires preactivation: ${digest}",
                   ("digest", feature_digest));
    }
@@ -1326,49 +1326,49 @@ fc::variants producer_plugin::get_supported_protocol_features( const get_support
    return results;
 }
 
-producer_plugin::get_account_ram_corrections_result
-producer_plugin::get_account_ram_corrections( const get_account_ram_corrections_params& params ) const {
-   get_account_ram_corrections_result result;
-   const auto& db = my->chain_plug->chain().db();
+//producer_plugin::get_account_ram_corrections_result
+//producer_plugin::get_account_ram_corrections( const get_account_ram_corrections_params& params ) const {
+//   get_account_ram_corrections_result result;
+//   const auto& db = my->chain_plug->chain().db();
 
-   const auto& idx = db.get_index<chain::account_ram_correction_index, chain::by_name>();
-   account_name lower_bound_value{ std::numeric_limits<uint64_t>::lowest() };
-   account_name upper_bound_value{ std::numeric_limits<uint64_t>::max() };
+//   const auto& idx = db.get_index<chain::account_ram_correction_index, chain::by_name>();
+//   account_name lower_bound_value{ std::numeric_limits<uint64_t>::lowest() };
+//   account_name upper_bound_value{ std::numeric_limits<uint64_t>::max() };
 
-   if( params.lower_bound ) {
-      lower_bound_value = *params.lower_bound;
-   }
+//   if( params.lower_bound ) {
+//      lower_bound_value = *params.lower_bound;
+//   }
 
-   if( params.upper_bound ) {
-      upper_bound_value = *params.upper_bound;
-   }
+//   if( params.upper_bound ) {
+//      upper_bound_value = *params.upper_bound;
+//   }
 
-   if( upper_bound_value < lower_bound_value )
-      return result;
+//   if( upper_bound_value < lower_bound_value )
+//      return result;
 
-   auto walk_range = [&]( auto itr, auto end_itr ) {
-      for( unsigned int count = 0;
-           count < params.limit && itr != end_itr;
-           ++itr )
-      {
-         result.rows.push_back( fc::variant( *itr ) );
-         ++count;
-      }
-      if( itr != end_itr ) {
-         result.more = itr->name;
-      }
-   };
+//   auto walk_range = [&]( auto itr, auto end_itr ) {
+//      for( unsigned int count = 0;
+//           count < params.limit && itr != end_itr;
+//           ++itr )
+//      {
+//         result.rows.push_back( fc::variant( *itr ) );
+//         ++count;
+//      }
+//      if( itr != end_itr ) {
+//         result.more = itr->name;
+//      }
+//   };
 
-   auto lower = idx.lower_bound( lower_bound_value );
-   auto upper = idx.upper_bound( upper_bound_value );
-   if( params.reverse ) {
-      walk_range( boost::make_reverse_iterator(upper), boost::make_reverse_iterator(lower) );
-   } else {
-      walk_range( lower, upper );
-   }
+//   auto lower = idx.lower_bound( lower_bound_value );
+//   auto upper = idx.upper_bound( upper_bound_value );
+//   if( params.reverse ) {
+//      walk_range( boost::make_reverse_iterator(upper), boost::make_reverse_iterator(lower) );
+//   } else {
+//      walk_range( lower, upper );
+//   }
 
-   return result;
-}
+//   return result;
+//}
 
 std::optional<fc::time_point> producer_plugin_impl::calculate_next_block_time(const account_name& producer_name, const block_timestamp_type& current_block_time) const {
    chain::controller& chain = chain_plug->chain();
@@ -1451,7 +1451,7 @@ fc::time_point producer_plugin_impl::calculate_block_deadline( const fc::time_po
 producer_plugin_impl::start_block_result producer_plugin_impl::start_block() {
    chain::controller& chain = chain_plug->chain();
 
-   if( !chain_plug->accept_transactions() )
+   if( !chain_plug->accept_transactions() ) /// TODO: 3
       return start_block_result::waiting_for_block;
 
    const auto& hbs = chain.head_block_state();
@@ -1613,7 +1613,7 @@ producer_plugin_impl::start_block_result producer_plugin_impl::start_block() {
          }
       }
 
-      chain.start_block( block_time, blocks_to_confirm, features_to_activate );
+      chain.start_block( block_time, blocks_to_confirm, features_to_activate ); /// TODO: 4
    } LOG_AND_DROP();
 
    if( chain.is_building_block() ) {
@@ -1630,8 +1630,8 @@ producer_plugin_impl::start_block_result producer_plugin_impl::start_block() {
             return start_block_result::exhausted;
          if( !remove_expired_blacklisted_trxs( preprocess_deadline ) )
             return start_block_result::exhausted;
-         if( !_subjective_billing.remove_expired( _log, chain.pending_block_time(), fc::time_point::now(), preprocess_deadline ) )
-            return start_block_result::exhausted;
+         //if( !_subjective_billing.remove_expired( _log, chain.pending_block_time(), fc::time_point::now(), preprocess_deadline ) )
+         //   return start_block_result::exhausted;
 
          // limit execution of pending incoming to once per block
          size_t pending_incoming_process_limit = _unapplied_transactions.incoming_size();
@@ -1780,7 +1780,7 @@ public:
                   if( !reason.empty() ) reason += ", ";
                   reason += "tx_cpu_usage";
                }
-               if( e.second.is_eosio_assert() ) {
+               if( e.second.is_dcd_assert() ) {
                   if( !reason.empty() ) reason += ", ";
                   reason += "assert";
                }
@@ -1800,7 +1800,7 @@ private:
       enum class ex_fields : uint8_t {
          ex_deadline_exception = 1,
          ex_tx_cpu_usage_exceeded = 2,
-         ex_eosio_assert_exception = 4,
+         ex_dcd_assert_exception = 4,
          ex_other_exception = 8
       };
 
@@ -1809,9 +1809,9 @@ private:
             ex_flags = set_field( ex_flags, ex_fields::ex_tx_cpu_usage_exceeded );
          } else if( exception_code == deadline_exception::code_value ) {
             ex_flags = set_field( ex_flags, ex_fields::ex_deadline_exception );
-         } else if( exception_code == eosio_assert_message_exception::code_value ||
-                    exception_code == eosio_assert_code_exception::code_value ) {
-            ex_flags = set_field( ex_flags, ex_fields::ex_eosio_assert_exception );
+         } else if( exception_code == dcd_assert_message_exception::code_value ||
+                    exception_code == dcd_assert_code_exception::code_value ) {
+            ex_flags = set_field( ex_flags, ex_fields::ex_dcd_assert_exception );
          } else {
             ex_flags = set_field( ex_flags, ex_fields::ex_other_exception );
             fc_dlog( _log, "Failed trx, account: ${a}, reason: ${r}",
@@ -1821,7 +1821,7 @@ private:
 
       bool is_deadline() const { return has_field( ex_flags, ex_fields::ex_deadline_exception ); }
       bool is_tx_cpu_usage() const { return has_field( ex_flags, ex_fields::ex_tx_cpu_usage_exceeded ); }
-      bool is_eosio_assert() const { return has_field( ex_flags, ex_fields::ex_eosio_assert_exception ); }
+      bool is_dcd_assert() const { return has_field( ex_flags, ex_fields::ex_dcd_assert_exception ); }
       bool is_other() const { return has_field( ex_flags, ex_fields::ex_other_exception ); }
 
       uint32_t num_failures = 0;
@@ -1839,7 +1839,7 @@ bool producer_plugin_impl::process_unapplied_trxs( const fc::time_point& deadlin
    if( !_unapplied_transactions.empty() ) {
       account_failures account_fails;
       chain::controller& chain = chain_plug->chain();
-      const auto& rl = chain.get_resource_limits_manager();
+//      const auto& rl = chain.get_resource_limits_manager();
       int num_applied = 0, num_failed = 0, num_processed = 0;
       auto unapplied_trxs_size = _unapplied_transactions.size();
       // unapplied and persisted do not have a next method to call
@@ -1867,11 +1867,11 @@ bool producer_plugin_impl::process_unapplied_trxs( const fc::time_point& deadlin
             }
 
             auto prev_billed_cpu_time_us = trx->billed_cpu_time_us;
-            if(!_subjective_billing.is_disabled() && prev_billed_cpu_time_us > 0 && !rl.is_unlimited_cpu( first_auth )) {
-               auto prev_billed_plus100 = prev_billed_cpu_time_us + EOS_PERCENT( prev_billed_cpu_time_us, 100 * config::percent_1 );
-               auto trx_dl = start + fc::microseconds( prev_billed_plus100 );
-               if( trx_dl < trx_deadline ) trx_deadline = trx_dl;
-            }
+//            if(!_subjective_billing.is_disabled() && prev_billed_cpu_time_us > 0 && !rl.is_unlimited_cpu( first_auth )) {
+//               auto prev_billed_plus100 = prev_billed_cpu_time_us + DCD_PERCENT( prev_billed_cpu_time_us, 100 * config::percent_1 );
+//               auto trx_dl = start + fc::microseconds( prev_billed_plus100 );
+//               if( trx_dl < trx_deadline ) trx_deadline = trx_dl;
+//            }
             bool deadline_is_subjective = false;
             if( _max_transaction_time_ms < 0 ||
                 (_pending_block_mode == pending_block_mode::producing && deadline < trx_deadline) ) {
@@ -1882,7 +1882,7 @@ bool producer_plugin_impl::process_unapplied_trxs( const fc::time_point& deadlin
             const uint32_t sub_bill = 0;
 
             auto trace = chain.push_transaction( trx, trx_deadline, prev_billed_cpu_time_us, false, sub_bill );
-            fc_dlog( _trx_failed_trace_log, "Subjective unapplied bill for ${a}: ${b} prev ${t}us", ("a",first_auth)("b",prev_billed_cpu_time_us)("t",trace->elapsed));
+            fc_dlog( _trx_failed_trace_log, "Subjective unapplied bill for ${a}: prev ${t}us", ("a",first_auth)("t",trace->elapsed));
             if( trace->except ) {
                if( exception_is_exhausted( *trace->except, deadline_is_subjective ) ) {
                   if( block_is_exhausted() ) {
@@ -1892,15 +1892,15 @@ bool producer_plugin_impl::process_unapplied_trxs( const fc::time_point& deadlin
                   }
                   // don't erase, subjective failure so try again next time
                } else {
-                  fc_dlog( _trx_failed_trace_log, "Subjective unapplied bill for failed ${a}: ${b} prev ${t}us", ("a",first_auth)("b",prev_billed_cpu_time_us)("t",trace->elapsed));
+                  fc_dlog( _trx_failed_trace_log, "Subjective unapplied bill for failed ${a}: prev ${t}us", ("a",first_auth)("t",trace->elapsed));
                   auto failure_code = trace->except->code();
                   if( failure_code != tx_duplicate::code_value ) {
                      // this failed our configured maximum transaction time, we don't want to replay it
-                     fc_dlog( _log, "Failed ${c} trx, prev billed: ${p}us, ran: ${r}us, id: ${id}",
-                              ("c", trace->except->code())("p", prev_billed_cpu_time_us)
+                     fc_dlog( _log, "Failed ${c} trx, prev billed: ran: ${r}us, id: ${id}",
+                              ("c", trace->except->code())
                               ("r", fc::time_point::now() - start)("id", trx->id()) );
                      account_fails.add( first_auth, failure_code );
-                     _subjective_billing.subjective_bill_failure( first_auth, trace->elapsed, fc::time_point::now() );
+                     //_subjective_billing.subjective_bill_failure( first_auth, trace->elapsed, fc::time_point::now() );
                   }
                   ++num_failed;
                   if( itr->next ) itr->next( trace );
@@ -1908,10 +1908,10 @@ bool producer_plugin_impl::process_unapplied_trxs( const fc::time_point& deadlin
                   continue;
                }
             } else {
-               fc_dlog( _trx_successful_trace_log, "Subjective unapplied bill for success ${a}: ${b} prev ${t}us", ("a",first_auth)("b",prev_billed_cpu_time_us)("t",trace->elapsed));
+               fc_dlog( _trx_successful_trace_log, "Subjective unapplied bill for success ${a}: prev ${t}us", ("a",first_auth)("t",trace->elapsed));
                // if db_read_mode SPECULATIVE then trx is in the pending block and not immediately reverted
-               _subjective_billing.subjective_bill( trx->id(), trx->packed_trx()->expiration(), first_auth, trace->elapsed,
-                                                    chain.get_read_mode() == chain::db_read_mode::SPECULATIVE );
+               //_subjective_billing.subjective_bill( trx->id(), trx->packed_trx()->expiration(), first_auth, trace->elapsed,
+               //                                     chain.get_read_mode() == chain::db_read_mode::SPECULATIVE );
                ++num_applied;
                if( itr->trx_type != trx_enum_type::persisted ) {
                   if( itr->next ) itr->next( trace );
@@ -2067,14 +2067,14 @@ bool producer_plugin_impl::process_incoming_trxs( const fc::time_point& deadline
 }
 
 bool producer_plugin_impl::block_is_exhausted() const {
-   const chain::controller& chain = chain_plug->chain();
-   const auto& rl = chain.get_resource_limits_manager();
+//   const chain::controller& chain = chain_plug->chain();
+//   const auto& rl = chain.get_resource_limits_manager();
 
-   const uint64_t cpu_limit = rl.get_block_cpu_limit();
-   if( cpu_limit < _max_block_cpu_usage_threshold_us ) return true;
-   const uint64_t net_limit = rl.get_block_net_limit();
-   if( net_limit < _max_block_net_usage_threshold_bytes ) return true;
-   return false;
+//   const uint64_t cpu_limit = rl.get_block_cpu_limit();
+//   if( cpu_limit < _max_block_cpu_usage_threshold_us ) return true;
+//   const uint64_t net_limit = rl.get_block_net_limit();
+//   if( net_limit < _max_block_net_usage_threshold_bytes ) return true;
+   return false;///TODO: returntrue?
 }
 
 // Example:
@@ -2086,7 +2086,7 @@ bool producer_plugin_impl::block_is_exhausted() const {
 void producer_plugin_impl::schedule_production_loop() {
    _timer.cancel();
 
-   auto result = start_block();
+   auto result = start_block(); /// TODO: 2
 
    if (result == start_block_result::failed) {
       elog("Failed to start a pending block, will try again later");
@@ -2118,7 +2118,7 @@ void producer_plugin_impl::schedule_production_loop() {
    } else if (_pending_block_mode == pending_block_mode::speculating && !_producers.empty() && !production_disabled_by_policy()){
       chain::controller& chain = chain_plug->chain();
       fc_dlog(_log, "Speculative Block Created; Scheduling Speculative/Production Change");
-      EOS_ASSERT( chain.is_building_block(), missing_pending_block_state, "speculating without pending_block_state" );
+      DCD_ASSERT( chain.is_building_block(), missing_pending_block_state, "speculating without pending_block_state" );
       schedule_delayed_production_loop(weak_from_this(), calculate_producer_wake_up_time(chain.pending_block_time()));
    } else {
       fc_dlog(_log, "Speculative Block Created");
@@ -2126,7 +2126,7 @@ void producer_plugin_impl::schedule_production_loop() {
 }
 
 void producer_plugin_impl::schedule_maybe_produce_block( bool exhausted ) {
-   chain::controller& chain = chain_plug->chain();
+   chain::controller& chain = chain_plug->chain(); /// TODO: 7 after
 
    // we succeeded but block may be exhausted
    static const boost::posix_time::ptime epoch( boost::gregorian::date( 1970, 1, 1 ) );
@@ -2134,13 +2134,13 @@ void producer_plugin_impl::schedule_maybe_produce_block( bool exhausted ) {
 
    if( !exhausted && deadline > fc::time_point::now() ) {
       // ship this block off no later than its deadline
-      EOS_ASSERT( chain.is_building_block(), missing_pending_block_state,
+      DCD_ASSERT( chain.is_building_block(), missing_pending_block_state,
                   "producing without pending_block_state, start_block succeeded" );
       _timer.expires_at( epoch + boost::posix_time::microseconds( deadline.time_since_epoch().count() ) );
       fc_dlog( _log, "Scheduling Block Production on Normal Block #${num} for ${time}",
                ("num", chain.head_block_num() + 1)( "time", deadline ) );
    } else {
-      EOS_ASSERT( chain.is_building_block(), missing_pending_block_state, "producing without pending_block_state" );
+      DCD_ASSERT( chain.is_building_block(), missing_pending_block_state, "producing without pending_block_state" );
       _timer.expires_from_now( boost::posix_time::microseconds( 0 ) );
       fc_dlog( _log, "Scheduling Block Production on ${desc} Block #${num} immediately",
                ("num", chain.head_block_num() + 1)("desc", block_is_exhausted() ? "Exhausted" : "Deadline exceeded") );
@@ -2199,7 +2199,7 @@ void producer_plugin_impl::schedule_delayed_production_loop(const std::weak_ptr<
 }
 
 bool producer_plugin_impl::maybe_produce_block() {
-   auto reschedule = fc::make_scoped_exit([this]{
+   auto reschedule = fc::make_scoped_exit([this]{ /// TODO: 8 after
       schedule_production_loop();
    });
 
@@ -2261,10 +2261,10 @@ void block_only_sync::schedule() {
 }
 
 void block_only_sync::on_snapshot(const char*) {
-   EOS_THROW(producer_exception, "a snapshot");
+   DCD_THROW(producer_exception, "a snapshot");
 }
 
-void block_only_sync::on_block(eosio::chain::signed_block_ptr block) {
+void block_only_sync::on_block(dcd::chain::signed_block_ptr block) {
    try {
       bool connectivity_check = false; // use false right now, should investigate further after 3.0 rc
       _impl->on_sync_block(block, connectivity_check);
@@ -2276,9 +2276,9 @@ void block_only_sync::on_block(eosio::chain::signed_block_ptr block) {
 
 void producer_plugin_impl::produce_block() {
    //ilog("produce_block ${t}", ("t", fc::time_point::now())); // for testing _produce_time_offset_us
-   EOS_ASSERT(_pending_block_mode == pending_block_mode::producing, producer_exception, "called produce_block while not actually producing");
+   DCD_ASSERT(_pending_block_mode == pending_block_mode::producing, producer_exception, "called produce_block while not actually producing");
    chain::controller& chain = chain_plug->chain();
-   EOS_ASSERT(chain.is_building_block(), missing_pending_block_state, "pending_block_state does not exist but it should, another plugin may have corrupted it");
+   DCD_ASSERT(chain.is_building_block(), missing_pending_block_state, "pending_block_state does not exist but it should, another plugin may have corrupted it");
 
    const auto& auth = chain.pending_block_signing_authority();
    std::vector<std::reference_wrapper<const signature_provider_type>> relevant_providers;
@@ -2292,7 +2292,7 @@ void producer_plugin_impl::produce_block() {
       }
    });
 
-   EOS_ASSERT(relevant_providers.size() > 0, producer_priv_key_not_found, "Attempting to produce a block for which we don't have any relevant private keys");
+   DCD_ASSERT(relevant_providers.size() > 0, producer_priv_key_not_found, "Attempting to produce a block for which we don't have any relevant private keys");
 
    if (_protocol_features_signaled) {
       _protocol_features_to_activate.clear(); // clear _protocol_features_to_activate as it is already set in pending_block
@@ -2320,7 +2320,7 @@ void producer_plugin_impl::produce_block() {
       if (!f.get()) {
          _latest_rejected_block_num = pending_blk_state->block->block_num();
          _block_vault_resync.schedule();
-         EOS_ASSERT(false, block_validation_error, "Block rejected by block vault");
+         DCD_ASSERT(false, block_validation_error, "Block rejected by block vault");
       }
 
    }
@@ -2338,4 +2338,4 @@ void producer_plugin::log_failed_transaction(const transaction_id_type& trx_id, 
            ("txid", trx_id)("why", reason));
 }
 
-} // namespace eosio
+} // namespace dcd

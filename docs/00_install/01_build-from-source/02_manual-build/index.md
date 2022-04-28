@@ -1,21 +1,21 @@
 ---
-content_title: EOSIO Manual Build
+content_title: DCD Manual Build
 ---
 
 [[info | Manual Builds are for Advanced Developers]]
-| These manual instructions are intended for advanced developers. The [Shell Scripts](../01_shell-scripts/index.md) should be the preferred method to build EOSIO from source. If the script fails or your platform is not supported, continue with the instructions below.
+| These manual instructions are intended for advanced developers. The [Shell Scripts](../01_shell-scripts/index.md) should be the preferred method to build DCD from source. If the script fails or your platform is not supported, continue with the instructions below.
 
-## EOSIO Dependencies
+## DCD Dependencies
 
-When performing a manual build, it is necessary to install specific software packages that the EOSIO software depends on. To learn more about these dependencies, visit the [EOSIO Software Dependencies](00_eosio-dependencies.md) section.
+When performing a manual build, it is necessary to install specific software packages that the DCD software depends on. To learn more about these dependencies, visit the [DCD Software Dependencies](00_dcd-dependencies.md) section.
 
 ## Platforms
 
-Shell commands are available to manually download, build, install, test, and uninstall the EOSIO software and dependencies for these [platforms](03_platforms/index.md).
+Shell commands are available to manually download, build, install, test, and uninstall the DCD software and dependencies for these [platforms](03_platforms/index.md).
 
 ## Out-of-source Builds
 
-While building dependencies and EOSIO binaries, out-of-source builds are also supported. Refer to the `cmake` help for more information.
+While building dependencies and DCD binaries, out-of-source builds are also supported. Refer to the `cmake` help for more information.
 
 ## Other Compilers
 
