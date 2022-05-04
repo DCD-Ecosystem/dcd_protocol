@@ -490,23 +490,5 @@ BOOST_FIXTURE_TEST_CASE(account_results_voter_info_test, chain_plugin_tester) { 
 
 } FC_LOG_AND_RETHROW() }
 
-BOOST_FIXTURE_TEST_CASE(account_results_rex_info_test, chain_plugin_tester) { try {
-
-    produce_blocks(10);
-    setup_system_accounts();
-
-    create_account_with_resources("alice1111111"_n, config::system_account_name, core_from_string("1.0000"), false);
-
-    //stake more than 15% of total DCD supply to activate chain
-    transfer( name("dcd"), name("alice1111111"), core_from_string("650000000.0000"), name("dcd") );
-    deposit(name("alice1111111"), core_from_string("1000.0000"));
-    BOOST_CHECK_EQUAL( success(), buyrex(name("alice1111111"), core_from_string("100.0000")) );
-
-    read_only::get_account_results results = get_account_info(name("alice1111111"));
-    BOOST_CHECK(results.rex_info.get_type() != fc::variant::type_id::null_type);
-    BOOST_CHECK_EQUAL(core_from_string("100.0000"), results.rex_info["vote_stake"].as<asset>());
-    //BOOST_CHECK_EQUAL(0, results.rex_info["matured_rex"]);
-
-} FC_LOG_AND_RETHROW() }
 
 BOOST_AUTO_TEST_SUITE_END()

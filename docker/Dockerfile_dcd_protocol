@@ -85,7 +85,7 @@ RUN apt-get update && apt-get install -y nodejs && \
     rm -rf /var/lib/apt/lists/*
     
   
-###### build and nstall dcd_protocol #######
+###### build and install dcd_protocol #######
 # clone and build dcd.cdt
 RUN git clone --branch master https://github.com/DCD-Ecosystem/dcd_cdt.git dcd_cdt && \
   # build dcd.cdt  
@@ -94,7 +94,8 @@ RUN git clone --branch master https://github.com/DCD-Ecosystem/dcd_cdt.git dcd_c
     cmake --build . --target install -- -j $(nproc)
 
 # no cash
-RUN echo "$CACHE2"
+RUN echo "$CACHE4"
+
 # clone dcd_protocol
 RUN git clone --branch master https://github.com/DCD-Ecosystem/dcd_protocol.git dcd_protocol && \
     cd /dcd_protocol && \
@@ -118,5 +119,5 @@ RUN git clone --branch master https://github.com/DCD-Ecosystem/dcd_protocol.git 
     cp contracts/dcd.wrap/dcd.wrap.* /contracts/dcd.wrap/ && \
     cd / && \
     rm -rf /dcd_protocol
-
+  
 ENV PATH=${PATH}:/usr/local/dcd_protocol/bin
