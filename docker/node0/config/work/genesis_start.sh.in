@@ -38,11 +38,13 @@ fi
 --https-private-key-file $CURDIR/cert/privkey1.pem \
 --p2p-listen-endpoint 0.0.0.0:9010 \
 --access-control-allow-origin='*' \
---access-control-allow-credentials \
 --contracts-console \
 --http-validate-host=false \
 --verbose-http-errors \
 --enable-stale-production \
+--abi-serializer-max-time-ms 3000 \
+--http-max-response-time-ms 300 \
+--max-transaction-time 300 \
 --p2p-peer-address 172.19.0.2:9001 \
 --p2p-peer-address 172.19.0.3:9011 \
 --p2p-peer-address 172.19.0.4:9012 \

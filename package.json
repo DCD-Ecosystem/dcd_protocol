@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "dependencies": {
     "dcdjs": "^20.0.0",
-    "ws": "7.2.0",
+    "ws": "7.4.6",
     "commander": "4.0.1",
     "zlib": "1.0.5",
-    "node-fetch": "2.6.0",
+    "node-fetch": "2.6.7",
     "util": "^0.12.3"
   }
 }

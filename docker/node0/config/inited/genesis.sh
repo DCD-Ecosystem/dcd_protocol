@@ -119,9 +119,9 @@ dcdcmd create account dcd dcd.feebank $pubacckey $pubacckey
 dcdcmd set contract dcd.token $CONTR_tokn_DIR dcd.token.wasm dcd.token.abi
 
 # create sys token
-dcdcli --wallet-url $wdurl --url http://$dcdhost:$dcdport push action dcd.token create '[ "dcd", "350000000.00000 DCD" ]' -p dcd.token >> $logfile 2>&1
+dcdcli --wallet-url $wdurl --url http://$dcdhost:$dcdport push action dcd.token create '[ "dcd", "320000000.00000 DCD" ]' -p dcd.token >> $logfile 2>&1
 # push tokens into circulation
-dcdcli --wallet-url $wdurl --url http://$dcdhost:$dcdport push action dcd.token issue '[ "dcd", "350000000.00000 DCD", "memo" ]' -p dcd >> $logfile 2>&1
+dcdcli --wallet-url $wdurl --url http://$dcdhost:$dcdport push action dcd.token issue '[ "dcd", "320000000.00000 DCD", "memo" ]' -p dcd >> $logfile 2>&1
 
 # import dcd.msig contract
 dcdcmd set contract dcd.msig $CONTR_msig_DIR dcd.msig.wasm dcd.msig.abi
@@ -173,7 +173,7 @@ dcdcmd push action dcd activate '["4fca8bd82bbd181e714e283f83e1b45d95ca5af40fb89
 echo WTMSIG_BLOCK_SIGNATURES
 dcdcmd push action dcd activate '["299dcb6af692324b899b39f16d5a530a33062804e41f09dc97e9f156b4476707"]' -p dcd
 
-# Delay for the changes to apply 
+# Delay for the activation to take hold
 sleep 1
 
 # deploy dcd.system contract
@@ -186,7 +186,6 @@ dcdcli --wallet-url $wdurl --url http://$dcdhost:$dcdport push action dcd setpri
 
 # Initialize system account
 dcdcli --wallet-url $wdurl --url http://$dcdhost:$dcdport push action dcd init '["0", "5,DCD"]' -p dcd@active
-# dcdcli get account dcd, unique!!!
 
 createnewacgenesisconfig() {
     if [ -n "$1" ]; then
@@ -195,7 +194,6 @@ createnewacgenesisconfig() {
         echo "no account name, break."
         return -1
     fi
-
     
     # $2 - flag export configfile
     if [ -n "$2" ]; then
@@ -218,73 +216,89 @@ createnewacgenesisconfig() {
     done
 }
 
-echo CREATE ACCOUNT accountnum1o
+### NEW
+setprod () {
+    dcdcmd system regproducer $1 $2
+    dcdcmd system voteproducer prods accountnum1o $1
+}
+crootaccountcmd () {
+    dcdcmd system newaccount dcd --transfer $*
+    dcdcli --wallet-url $wdurl --url http://$dcdhost:$dcdport transfer dcd $1 "11300000.00000 DCD" "On stake root account" >> $logfile 2>&1
+    dcdcli --wallet-url $wdurl --url http://$dcdhost:$dcdport system delegatebw $1 $1 "5640000.00000 DCD" "5640000.00000 DCD" >> $logfile 2>&1
+    dcdcmd system regproducer $1 $2
+    dcdcmd system voteproducer prods $1 $1
+}
+
+
+echo CREATE ROOT ACCOUNT accountnum1o >> $logfile 2>&1
 createnewkeys accountnum1o
-cacmd accountnum1o $pubacckey
+crootaccountcmd accountnum1o $pubacckey
 createnewacgenesisconfig accountnum1o
 echo run local work node accountnum1o >> $logfile 2>&1
 $genesisaccdir/genesis_start.sh >> $logfile 2>&1
 
 
-echo CREATE PRODUCER ACCOUNTS
-createacclist="accountnum11 accountnum12 accountnum13"
+echo CREATE PRODUCER ACCOUNTS >> $logfile 2>&1
+createacclist="accountnum11 accountnum12"
 for createacc in $createacclist
 do
     createnewkeys $createacc
-    cacmd $createacc $pubacckey
+    dcdcmd create account dcd $createacc $pubacckey
     createnewacgenesisconfig $createacc y
+    echo transfer dcd->$createacc 1000 tokens >> $logfile 2>&1
+    dcdcli --wallet-url $wdurl --url http://$dcdhost:$dcdport transfer dcd $createacc "1000.00000 DCD" "on fee" >> $logfile 2>&1
+    echo stake $createacc 200 tokens >> $logfile 2>&1
+    dcdcli --wallet-url $wdurl --url http://$dcdhost:$dcdport system delegatebw $createacc $createacc "100.00000 DCD" "100.00000 DCD" >> $logfile 2>&1
+    echo setprod $createacc >> $logfile 2>&1
+    dcdcmd system regproducer $createacc $pubacckey
 done
-#dcdcmd system voteproducer prods accountnum1o accountnum1o accountnum11 accountnum12 accountnum13
+
+echo voite for accountnum1o accountnum11 accountnum12 >> $logfile 2>&1
+dcdcmd system voteproducer prods accountnum1o accountnum1o accountnum11 accountnum12
+
+echo CREATE ACCOUNTS FOR NODE
+createacclist="accountnum13 accountnum14 accountnum15"
+for createacc in $createacclist
+do
+    createnewkeys $createacc
+    dcdcmd create account dcd $createacc $pubacckey
+    createnewacgenesisconfig $createacc y
+    echo transfer dcd->$createacc 300 tokens >> $logfile 2>&1
+    dcdcli --wallet-url $wdurl --url http://$dcdhost:$dcdport transfer dcd $createacc "300.00000 DCD" "on fee" >> $logfile 2>&1
+done
+#### END NEW
+
 echo transfer dcd->accountnum11 30000 tokens >> $logfile 2>&1
 dcdcli --wallet-url $wdurl --url http://$dcdhost:$dcdport transfer dcd accountnum11 "30000.00000 DCD" "Hodl!" >> $logfile 2>&1
 
-echo CREATE NOT PRODUCTER ACCOUNT accountnum14 accountnum15
-createnewkeys accountnum14
-dcdcmd create account dcd accountnum14 $pubacckey $pubacckey
-dcdcli --wallet-url $wdurl --url http://$dcdhost:$dcdport transfer dcd accountnum14 "300.00000 DCD" "Comission!" >> $logfile 2>&1
-createnewacgenesisconfig accountnum14 y
-
-createnewkeys accountnum15
-dcdcmd create account dcd accountnum15 $pubacckey $pubacckey
-dcdcli --wallet-url $wdurl --url http://$dcdhost:$dcdport transfer dcd accountnum15 "300.00000 DCD" "Comission!" >> $logfile 2>&1
-createnewacgenesisconfig accountnum15 y
 
 ###################### FEE ##################################
 # register oracle
-echo push action dcd regoracle '[ "accountnum1o" ]' -p accountnum1o@active
+echo push action dcd regoracle '[ "accountnum1o" ]' -p accountnum1o@active >> $logfile 2>&1
 dcdcli --wallet-url $wdurl --url http://$dcdhost:$dcdport push action dcd regoracle '[ "accountnum1o" ]' -p accountnum1o@active >> $logfile 2>&1
 # voite oracle for rate usd/dcd
-echo push action dcd setrateorcl '[ "accountnum1o","0.5" ]' -p accountnum1o@active
-dcdcli --wallet-url $wdurl --url http://$dcdhost:$dcdport push action dcd setrateorcl '[ "accountnum1o","0.5" ]' -p accountnum1o@active >> $logfile 2>&1
+echo push action dcd setrateorcl '[ "accountnum1o","2" ]' -p accountnum1o@active >> $logfile 2>&1
+dcdcli --wallet-url $wdurl --url http://$dcdhost:$dcdport push action dcd setrateorcl '[ "accountnum1o","2" ]' -p accountnum1o@active >> $logfile 2>&1
 # set list fee from producers
 dcdcli --wallet-url $wdurl --url http://$dcdhost:$dcdport push action dcd propactfee '["accountnum1o", [["dcd.token", "transfer", "1.00000 USD"],["dcd", "defaultfee", "1.00000 USD"] ] ]' -p accountnum1o@active >> $logfile 2>&1
 dcdcli --wallet-url $wdurl --url http://$dcdhost:$dcdport push action dcd propactfee '["accountnum11", [["dcd.token", "transfer", "1.00000 USD"],["dcd", "defaultfee", "1.00000 USD"] ] ]' -p accountnum11@active >> $logfile 2>&1
 dcdcli --wallet-url $wdurl --url http://$dcdhost:$dcdport push action dcd propactfee '["accountnum12", [["dcd.token", "transfer", "1.00000 USD"],["dcd", "defaultfee", "1.00000 USD"] ] ]' -p accountnum12@active >> $logfile 2>&1
-dcdcli --wallet-url $wdurl --url http://$dcdhost:$dcdport push action dcd propactfee '["accountnum13", [["dcd.token", "transfer", "1.00000 USD"],["dcd", "defaultfee", "1.00000 USD"] ] ]' -p accountnum13@active >> $logfile 2>&1
 ###### voite producers for list with fee
 # producer accountnum1o
 dcdcli --wallet-url $wdurl --url http://$dcdhost:$dcdport push action dcd votefeeprop '["accountnum1o","accountnum11","1"]' -p accountnum1o@active >> $logfile 2>&1
 dcdcli --wallet-url $wdurl --url http://$dcdhost:$dcdport push action dcd votefeeprop '["accountnum1o","accountnum12","1"]' -p accountnum1o@active >> $logfile 2>&1
-dcdcli --wallet-url $wdurl --url http://$dcdhost:$dcdport push action dcd votefeeprop '["accountnum1o","accountnum13","1"]' -p accountnum1o@active >> $logfile 2>&1
 # producer accountnum11
 dcdcli --wallet-url $wdurl --url http://$dcdhost:$dcdport push action dcd votefeeprop '["accountnum11","accountnum1o","1"]' -p accountnum11@active >> $logfile 2>&1
 dcdcli --wallet-url $wdurl --url http://$dcdhost:$dcdport push action dcd votefeeprop '["accountnum11","accountnum12","1"]' -p accountnum11@active >> $logfile 2>&1
-dcdcli --wallet-url $wdurl --url http://$dcdhost:$dcdport push action dcd votefeeprop '["accountnum11","accountnum13","1"]' -p accountnum11@active >> $logfile 2>&1
 # producer accountnum12
 dcdcli --wallet-url $wdurl --url http://$dcdhost:$dcdport push action dcd votefeeprop '["accountnum12","accountnum1o","1"]' -p accountnum12@active >> $logfile 2>&1
 dcdcli --wallet-url $wdurl --url http://$dcdhost:$dcdport push action dcd votefeeprop '["accountnum12","accountnum11","1"]' -p accountnum12@active >> $logfile 2>&1
-dcdcli --wallet-url $wdurl --url http://$dcdhost:$dcdport push action dcd votefeeprop '["accountnum12","accountnum13","1"]' -p accountnum12@active >> $logfile 2>&1
-# producer accountnum13
-dcdcli --wallet-url $wdurl --url http://$dcdhost:$dcdport push action dcd votefeeprop '["accountnum13","accountnum1o","1"]' -p accountnum13@active >> $logfile 2>&1
-dcdcli --wallet-url $wdurl --url http://$dcdhost:$dcdport push action dcd votefeeprop '["accountnum13","accountnum11","1"]' -p accountnum13@active >> $logfile 2>&1
-dcdcli --wallet-url $wdurl --url http://$dcdhost:$dcdport push action dcd votefeeprop '["accountnum13","accountnum12","1"]' -p accountnum13@active >> $logfile 2>&1
-
 ########### END FEE ##############
 sleep 2
 
 
 
-# Waiting for the second work node to accept all incoming blocks
+# Waiting for the new node to accept all blocks
 pingworknode() {
     dcdcli --wallet-url $wdurl --url http://172.19.0.2:8010 get account accountnum1o 2>&1
 }
@@ -301,14 +315,14 @@ do
     echo . >> $logfile 2>&1
     repeat=$(( $repeat + 1 ))
 done
-echo accountnum1o is work!! >> $logfile 2>&1
+echo accountnum1o is working!! >> $logfile 2>&1
 
 dcdcmd create account dcd accounttest1 DCD5sK22SGYSWP3aaRr5GG1JxJodWbAtfsMV1zwMCJFKmpX5rJUoP
 wcmd import -n dcd --private-key 5J3Wxum2yXa6HXAZccNjbgVGaQ5iotUkZp2MiMw5ZiffbWDZaSs
 
 
 sleep 2
-echo shutting off dcd accounts >> $logfile 2>&1
+echo отключение аккаунтов dcd >> $logfile 2>&1
 dcdcli --wallet-url $wdurl --url http://$dcdhost:$dcdport push action dcd updateauth '{"account": "dcd", "permission": "owner", "parent": "", "auth": {"threshold": 1, "keys": [], "waits": [], "accounts": [{"weight": 1, "permission": {"actor": "dcd.prods", "permission": "active"}}]}}' -p dcd@owner >> $logfile 2>&1
 dcdcli --wallet-url $wdurl --url http://$dcdhost:$dcdport push action dcd updateauth '{"account": "dcd", "permission": "active", "parent": "owner", "auth": {"threshold": 1, "keys": [], "waits": [], "accounts": [{"weight": 1, "permission": {"actor": "dcd.prods", "permission": "active"}}]}}' -p dcd@active >> $logfile 2>&1
 

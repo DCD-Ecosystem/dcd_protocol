@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   node:    
-    image: dcd_prot_img    
+    image: dcd_prot_img
     tty: true
     command: bash -c "/node/config/genesis/run.sh; touch /node/log/dcdnode.log; tail -f /node/log/dcdnode.log"
     expose:
