@@ -1,6 +1,6 @@
 
-# DCD - The Most Powerful DCD protocol - Divide trust. Unite players
-Welcome to the DCD source code repository! This software is actively developed by the Graphene Lab team based on previous internal developments, as well as using a number of public technologies, including EOSIO, Ethereum and others.
+# DCD Protocol. Divide trust. Unite players
+Welcome to the DCD Ecosystem source code repository! This software is actively developed by the Graphene Lab team based on previous internal developments, as well as using a number of public technologies, including EOSIO, Ethereum and others.
 
 
 ## Software Installation From Scratch Ubuntu 18.04
@@ -69,3 +69,35 @@ Proceed to the provided docker folder and follow the instructions in the README 
 ## License
 
 DCD is released under the open source [MIT](./LICENSE) license and is offered “AS IS” without warranty of any kind, express or implied. Any security provided by the DCD software depends in part on how it is used, configured, and deployed. DCD is built upon many third-party libraries such as WABT (Apache License) and WAVM (BSD 3-clause) which are also provided “AS IS” without warranty of any kind. Without limiting the generality of the foregoing, Block.one makes no representation or guarantee that DCD or any third-party libraries will perform as intended or will be free of errors, bugs or faulty code. Both may fail in large or small ways that could completely or partially limit functionality or compromise computer systems. If you use or implement DCD, you do so at your own risk. In no event will Block.one be liable to any party for any damages whatsoever, even if it had been advised of the possibility of damage.  
+
+##DCD NODES SPECIFICATIONS 
+
+###PRODUCTION MAINNET NODES
+Processor: Intel® Core™ i7-8700 Hexa-Core (incl. Hyper-Threading Technology)
+RAM: 64 GB DDR4 RAM
+Storage: 2 x 1 TB NVMe SSD
+Connection: 1 GBit/s port
+
+###BACKUP/TESTNET PRODUCTION NODES
+Processor: Intel® Xeon® E3-1270 v6 Octa-Core (Hyper-Threading Technology)
+RAM: 32 GB DDR4 RAM
+Storage: 500 GB SSD
+Connection: 1 GBit/s port
+
+###API/HTTPS NODES
+Processor: Intel® Core™ i7-8700 Hexa-Core (incl. Hyper-Threading Technology)
+RAM: 64 GB DDR4 RAM
+Storage: 2 x 1 TB NVMe SSD
+Connection: 1 GBit/s port
+
+###BACKUP API/HTTPS NODES
+Processor: Intel® Xeon® E3-1270 v6 Octa-Core (Hyper-Threading Technology)
+RAM: 32 GB DDR4 RAM
+Storage: 500 GB SSD
+Connection: 1 GBit/s port
+
+###SEED NODES
+Processor: Intel® Xeon® E3-1270 v6 Octa-Core (Hyper-Threading Technology)
+RAM: 32 GB DDR4 RAM
+Storage: 500 GB SSD
+Connection: 1 GBit/s port
