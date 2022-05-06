@@ -78,10 +78,16 @@ DCD is released under the open source [MIT](./LICENSE) license and is offered �
 * Storage: 2 x 1 TB NVMe SSD
 * Connection: 1 GBit/s port
 
-### BACKUP/TESTNET PRODUCTION NODES
+### BACKUP PRODUCTION NODES
 * Processor: Intel® Xeon® E3-1270 v6 Octa-Core (Hyper-Threading Technology)
 * RAM: 32 GB DDR4 RAM
 * Storage: 500 GB SSD
+* Connection: 1 GBit/s port
+
+### TESTNET PRODUCTION NODES (SUPER MINIMAL)
+* Processor: Minimum 2 cores
+* RAM: Minimum 4-8 GB DDR4 RAM (better 8 GB)
+* Storage: 30 GB HDD
 * Connection: 1 GBit/s port
 
 ### API/HTTPS NODES
