@@ -107,4 +107,3 @@ DCD is released under the open source [MIT](./LICENSE) license and is offered â€
 * RAM: 32 GB DDR4 RAM
 * Storage: 500 GB SSD
 * Connection: 1 GBit/s port
-
