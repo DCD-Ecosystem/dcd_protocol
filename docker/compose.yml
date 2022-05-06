@@ -10,6 +10,7 @@ services:
       - "8110:8110"
       - "7000:7000"
       - "8899:8899"
+      - "9010:9010"
     networks:
       dcd_network:
           ipv4_address: 172.19.0.2
@@ -29,6 +30,7 @@ services:
       - "8011:8011"
       - "8111:8111"
       - "7001:7001"
+      - "9011:9011"
     networks:
       dcd_network:
           ipv4_address: 172.19.0.3
@@ -45,6 +47,7 @@ services:
       - "8012:8012"
       - "8112:8112"
       - "7002:7002"
+      - "9012:9012"
     networks:
       dcd_network:
           ipv4_address: 172.19.0.4
@@ -61,6 +64,7 @@ services:
       - "8013:8013"
       - "8113:8113"
       - "7003:7003"
+      - "9013:9013"
     networks:
       dcd_network:
           ipv4_address: 172.19.0.5
@@ -77,6 +81,7 @@ services:
       - "8014:8014"
       - "8114:8114"
       - "7004:7004"
+      - "9014:9014"
     networks:
       dcd_network:
           ipv4_address: 172.19.0.6
@@ -93,6 +98,7 @@ services:
       - "8015:8015"
       - "8115:8115"
       - "7005:7005"
+      - "9015:9015"
     networks:
       dcd_network:
           ipv4_address: 172.19.0.7
