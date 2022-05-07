@@ -1,115 +1,19 @@
 version: "3.7"
 services:
-  node0:
-    container_name: node0
+  node:
+    container_name: usernode
     extends:
       file: node.yml
       service: node
     ports:
-      - "8010:8010"
+      - "8888:8888"
       - "8110:8110"
       - "7000:7000"
       - "8899:8899"
       - "9010:9010"
-    networks:
-      dcd_network:
-          ipv4_address: 172.19.0.2
+     
+    network_mode: host
     volumes:
-      - ./node0/config:/node/config
-      - ./node0/log:/node/log
-      - ./node0/blockchain:/node/blockchain
-      - ./node0/worklog:/node/worklog
-      - ./node0/workblockchain:/node/workblockchain
-      - ./node0/dcd_wall:/node/dcd_wall
-  node1:
-    container_name: node1
-    extends:
-      file: node.yml
-      service: node
-    ports:
-      - "8011:8011"
-      - "8111:8111"
-      - "7001:7001"
-      - "9011:9011"
-    networks:
-      dcd_network:
-          ipv4_address: 172.19.0.3
-    volumes:
-      - ./accountnum11/config:/node/config
-      - ./accountnum11/log:/node/log
-      - ./accountnum11/blockchain:/node/blockchain
-  node2:
-    container_name: node2
-    extends:
-      file: node.yml
-      service: node
-    ports:
-      - "8012:8012"
-      - "8112:8112"
-      - "7002:7002"
-      - "9012:9012"
-    networks:
-      dcd_network:
-          ipv4_address: 172.19.0.4
-    volumes:
-      - ./accountnum12/config:/node/config
-      - ./accountnum12/log:/node/log
-      - ./accountnum12/blockchain:/node/blockchain      
-  node3:
-    container_name: node3
-    extends:
-      file: node.yml
-      service: node
-    ports:
-      - "8013:8013"
-      - "8113:8113"
-      - "7003:7003"
-      - "9013:9013"
-    networks:
-      dcd_network:
-          ipv4_address: 172.19.0.5
-    volumes:
-      - ./accountnum13/config:/node/config
-      - ./accountnum13/log:/node/log
-      - ./accountnum13/blockchain:/node/blockchain
-  node4:
-    container_name: node4
-    extends:
-      file: node.yml
-      service: node
-    ports:
-      - "8014:8014"
-      - "8114:8114"
-      - "7004:7004"
-      - "9014:9014"
-    networks:
-      dcd_network:
-          ipv4_address: 172.19.0.6
-    volumes:
-      - ./accountnum14/config:/node/config
-      - ./accountnum14/log:/node/log
-      - ./accountnum14/blockchain:/node/blockchain
-  node5:
-    container_name: node5
-    extends:
-      file: node.yml
-      service: node
-    ports:
-      - "8015:8015"
-      - "8115:8115"
-      - "7005:7005"
-      - "9015:9015"
-    networks:
-      dcd_network:
-          ipv4_address: 172.19.0.7
-    volumes:
-      - ./accountnum15/config:/node/config
-      - ./accountnum15/log:/node/log
-      - ./accountnum15/blockchain:/node/blockchain
-   
-networks:
-  dcd_network:
-    ipam:
-      driver: default
-      config:
-        - subnet: "172.19.0.0/24"
+      - ./config:/node/config
+      - ./log:/node/log
+      - ./blockchain:/node/blockchain

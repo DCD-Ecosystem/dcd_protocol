@@ -1,44 +1,44 @@
 #!/bin/bash
+ACCOUNTNAME=""
+PUBLICKEY=""
+PRIVATEKEY=""
+
 BASEDIR=$(dirname $(realpath "$0"))
-NODEDIR="$BASEDIR/node0"
-CONFIGDIR="$NODEDIR/config"
+CONFIGDIR="$BASEDIR/config"
 
 cd $BASEDIR
-if [ -f $CONFIGDIR/genesis/desabled.lock ]; then
-    sudo docker-compose up -d
-else 
+doexit=0
+if [ ! $ACCOUNTNAME ]; then
+   echo Enter a ACCOUNTNAME!
+   doexit=1
+fi
+if [ ! $PUBLICKEY ]; then
+   echo Enter a PUBLICKEY!
+   doexit=1
+fi
+if [ ! $PRIVATEKEY ]; then
+   echo Enter a PRIVATEKEY!
+   doexit=1
+fi
 
-sudo docker-compose up node0 -d
+if [ $doexit -eq 1 ]; then
+   echo Exit!
+   exit 1
+fi
 
-echo waiting for generate config files..
-while [ ! -f $CONFIGDIR/config_created.lock ]
-do
+if [ ! -f $CONFIGDIR/config_ready.lock ]; then
+  sudo docker-compose create node
+  sudo docker-compose run --rm -e ACC_NAME=$ACCOUNTNAME -e PRIV_KEY=$PRIVATEKEY -e PUB_KEY=$PUBLICKEY node /node/config/run.sh
+
+  echo waiting for generate config files..
+  while [ ! -f $CONFIGDIR/config_ready.lock ]
+  do
     echo -n "."
     sleep 1
-done
+  done
 
-echo copy config files..
-listfiles="genesis_start.sh hard_replay.sh start.sh"
-createacclist="accountnum11 accountnum12 accountnum13 accountnum14 accountnum15"
-for createacc in $createacclist
-do
-
-    echo "createacc: $createacc"
-    
-    for filename in $listfiles
-    do
-    
-        echo "filename: $filename"
-        
-        srcfile=$CONFIGDIR/$createacc/$filename;        
-        dstfile=$BASEDIR/$createacc/config/genesis/$filename
-        echo "srcfile: $srcfile"
-        echo "dstfile: $dstfile"
-        cp -f $srcfile $dstfile
-        chmod a+x $dstfile
-    done
-done
-
-echo run nodes
-sudo docker-compose up -d
+  sudo docker-compose stop node
 fi
+
+sudo docker-compose up -d
+echo Node is work.

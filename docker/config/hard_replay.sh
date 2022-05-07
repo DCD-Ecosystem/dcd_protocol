@@ -1,7 +1,7 @@
 #!/bin/bash
 DATADIR="/node/blockchain"
 LOGDIR="/node/log"
-ACCOUNT="accountnum11"
+ACCOUNT="accounttest1"
 
 if [ ! -d $DATADIR ]; then
   mkdir -p $DATADIR;
@@ -12,7 +12,7 @@ fi
 
 /usr/local/dcd_protocol/bin/dcdnode \
 --genesis-json $DATADIR"/../config/genesis.json" \
---signature-provider PUB_KEY=KEY:PRIV_KEY \
+--signature-provider DCD5sK22SGYSWP3aaRr5GG1JxJodWbAtfsMV1zwMCJFKmpX5rJUoP=KEY:5J3Wxum2yXa6HXAZccNjbgVGaQ5iotUkZp2MiMw5ZiffbWDZaSs \
 --plugin dcd::producer_plugin \
 --plugin dcd::producer_api_plugin \
 --plugin dcd::chain_plugin \
@@ -20,24 +20,19 @@ fi
 --plugin dcd::http_plugin \
 --plugin dcd::history_api_plugin \
 --plugin dcd::history_plugin \
---plugin dcd::trace_api_plugin \
---trace-no-abis \
 --data-dir $DATADIR"/data" \
 --blocks-dir $DATADIR"/blocks" \
 --config-dir $DATADIR"/config" \
 --producer-name $ACCOUNT \
---http-server-address 172.19.0.3:8011 \
---p2p-listen-endpoint 172.19.0.3:9011 \
+--http-server-address 0.0.0.0:8022 \
+--p2p-listen-endpoint 0.0.0.0:9022 \
 --access-control-allow-origin=* \
 --contracts-console \
 --http-validate-host=false \
 --verbose-http-errors \
 --enable-stale-production \
---p2p-peer-address 172.19.0.2:9001 \
---p2p-peer-address 172.19.0.2:9010 \
---p2p-peer-address 172.19.0.4:9012 \
---p2p-peer-address 172.19.0.5:9013 \
---p2p-peer-address 172.19.0.6:9014 \
+--p2p-peer-address 127.0.0.1:9010 \
+--hard-replay-blockchain \
 >> $LOGDIR"/dcdnode.log" 2>&1 & \
 echo $! > $DATADIR"/dcdd.pid"
 

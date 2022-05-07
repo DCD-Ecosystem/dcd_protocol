@@ -3,7 +3,7 @@ services:
   node:    
     image: dcd_prot_img
     tty: true
-    command: bash -c "/node/config/genesis/run.sh; touch /node/log/dcdnode.log; tail -f /node/log/dcdnode.log"
+    command: bash -c "/node/config/run.sh; touch /node/log/dcdnode.log; tail -f /node/log/dcdnode.log"
     expose:
       - "9001"
       - "9010"
@@ -12,16 +12,3 @@ services:
       - "9013"
       - "9014"
       - "9015"
-    networks:
-      dcd_network:
-        ipam:
-          driver: default
-          config:
-            - subnet: "172.19.0.0/24"
-
-#networks:
-#  dcd_network:
-    #ipam:
-    #  driver: default
-    #  config:
-    #    - subnet: "172.19.0.0/24"
