@@ -15,7 +15,3 @@ if [ -f $DATADIR"/dcdd.pid" ]; then
     done
     echo -ne "\rNode Stopped. \n"
 fi
-
-echo "pkill progerss.."
-     pkill -e dcdnode
-echo "pkill done."

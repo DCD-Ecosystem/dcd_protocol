@@ -6,7 +6,7 @@ if [ -f $curdir"/docker_build.pid" ]; then
     pid=`cat $curdir"/docker_build.pid"`
     echo $pid
     echo "2s"
-    kill $pid
+    sudo kill $pid
     rm -r $curdir"/docker_build.pid"
     echo -ne "Stoping docker build"
     while true; do
