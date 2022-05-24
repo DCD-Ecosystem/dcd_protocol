@@ -1426,11 +1426,7 @@ struct list_producers_subcommand {
                    row["owner"].as_string().c_str(),
                    row["producer_key"].as_string().c_str(),
                    row["url"].as_string().c_str(),
-                   row["total_votes"].as_double() / weight,
-                   row["fee_rate_time"].as_string().c_str(),
-                   row["fee_rate"].as_string().c_str(),
-                   row["confirmed"].as_string().c_str(),
-                   row["confirmed_time"].as_string().c_str());
+                   row["total_votes"].as_double() / weight);
          if ( !result.more.empty() )
             std::cout << "-L " << result.more << " for more" << std::endl;
       });

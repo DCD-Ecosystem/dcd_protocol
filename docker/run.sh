@@ -27,8 +27,8 @@ if [ $doexit -eq 1 ]; then
 fi
 
 if [ ! -f $CONFIGDIR/config_ready.lock ]; then
-  sudo docker-compose create node
-  sudo docker-compose run --rm -e ACC_NAME=$ACCOUNTNAME -e PRIV_KEY=$PRIVATEKEY -e PUB_KEY=$PUBLICKEY node /node/config/run.sh
+  sudo docker compose create node
+  sudo docker compose run --rm -e ACC_NAME=$ACCOUNTNAME -e PRIV_KEY=$PRIVATEKEY -e PUB_KEY=$PUBLICKEY node /node/config/run.sh
 
   echo waiting for generate config files..
   while [ ! -f $CONFIGDIR/config_ready.lock ]
@@ -37,8 +37,8 @@ if [ ! -f $CONFIGDIR/config_ready.lock ]; then
     sleep 1
   done
 
-  sudo docker-compose stop node
+  sudo docker compose stop node
 fi
 
-sudo docker-compose up -d
+sudo docker compose up -d
 echo Node is work.
