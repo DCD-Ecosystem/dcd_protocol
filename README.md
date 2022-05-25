@@ -5,84 +5,71 @@ Welcome to the DCD Ecosystem source code repository! This software is actively d
 ### Build dcd_protocol and setup yourself as a validator 
 
 ###### 0. Clone the repository 
-&nbsp;
 ```
 git clone https://github.com/DCD-Ecosystem/dcd_protocol.git
 ```
 
-######  1. Build and run the local node using docker instructions  from the docker/Readme.md (https://github.com/DCD-Ecosystem/dcd_protocol/blob/master/docker/Readme.md). In case the connection was established succesfuly you will see your node accepting the blocks in the log.
-&nbsp;
+#####  1. Build and run the local node using docker instructions  from the docker/Readme.md (https://github.com/DCD-Ecosystem/dcd_protocol/blob/master/docker/Readme.md). In case the connection was established succesfuly you will see your node accepting the blocks in the log.
 
-###### 2. Log in to your node container in in interactive mode
-&nbsp;
-
+##### 2. Log in to your node container in in interactive mode
 ```
 docker exec -it usernode bash
 ```
-###### 3. Run the wallet service
-&nbsp;
+##### 3. Run the wallet service
 ```
 dcdksd --data-dir path_to_data_dir --http-max-response-time-ms 99999 >> /node/log/dcdksd.log 2>&1 &
 ```
 **--data-dir path_to_data_dir** - path to save wallet to, may be ommited
 
-###### 4. Create a wallet to hold your private keys for transaction signing. You can have multiple wallets if required. 
+##### 4. Create a wallet to hold your private keys for transaction signing. You can have multiple wallets if required. 
 ```
 dcdcli wallet create -n name_wallet -f path_to_wall_password_file
 ```
 **name_wallet**  - desired wallet name to create
 **path_to_wall_password_file** - path to the file to store the password for your created wallet
 
-###### 5. Read the password into any local variable
-&nbsp;
+##### 5. Read the password into any local variable
 ```
 walletpasswd=$(cat path_to_wall_password_file)
 ```
 **path_to_wall_password_file** - path to the file to store the password for the wallet you want to use
 
-###### 6. Ensure your wallet is unlocked or unlock it 
-&nbsp;
+##### 6. Ensure your wallet is unlocked or unlock it 
 ```
 dcdcli wallet unlock -n name_wallet --password $walletpasswd
 ```
 **name_wallet** - name of the wallet to use
 
-###### 7.Import your private key into your created wallet
-&nbsp;
+##### 7.Import your private key into your created wallet
 ```
 dcdcli wallet import -n name_wallet --private-key acc_private_key
 ```
 **name_wallet** - name of the wallet to use
 **acc_private_key** - your private key received at account registration
 
-###### 8. Check your account balance
-&nbsp;
+##### 8. Check your account balance
 ```
 dcdcli --url http://127.0.0.1:8022 get account acc_name
 ```
 **acc_name** - your account name
 
-###### 9.Stake some amount of DCD tokens
-&nbsp;
+##### 9.Stake some amount of DCD tokens
 ```
 dcdcli --url http://127.0.0.1:8022 system delegatebw acc_name acc_name "100.00000 DCD" "100.00000 DCD"
 ```
 **acc_name** - your account name
 The amount of DCD can be different, note however to input full precision 0.00000
 
-###### 10. Register yourself as a validator inside blockchain
-&nbsp;
+##### 10. Register yourself as a validator inside blockchain
 ```
 dcdcli --url http://127.0.0.1:8022 system regproducer acc_name acc_public_key
 ```
 **acc_name** - your account name
 **acc_public_key** - your public key
 
-###### 11. Contact us and suggest your account name for a validator role
-&nbsp;
+##### 11. Contact us and suggest your account name for a validator role
 
-###### 12. After we vote for your account, you shoud your node producing the new blocks according to the global validator rating
-&nbsp;
+##### 12. After we vote for your account, you shoud your node producing the new blocks according to the global validator rating
 
 
 ## License
