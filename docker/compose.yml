@@ -7,11 +7,11 @@ services:
       service: node
     ports:
       - "8888:8888"
-      - "8110:8110"
+      - "8022:8022"
       - "7000:7000"
       - "8899:8899"
-      - "9010:9010"
-     
+      - "9022:9022"
+      - "9012:9012"
     network_mode: host
     volumes:
       - ./config:/node/config

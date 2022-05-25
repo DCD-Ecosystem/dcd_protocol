@@ -1465,21 +1465,60 @@ namespace dcdsystem {
           */
          [[dcd::action]]
          void powerup( const name& payer, const name& receiver, uint32_t days, int64_t net_frac, int64_t cpu_frac, const asset& max_payment );
-          
+
+         /**
+          * Register user as an oracle, upon users own request. The oracle will be able to submit 
+          * their USD/DCD rate suggestion to be included in the rate calcutation. 
+          *
+          * @param oracle - user name to set as oracle. Must be the same as the user invoking the call
+          */
+ 
          [[dcd::action]]
          void regoracle( const name& oracle );
 
+         /**
+          * Unregister user as an oracle, upon users own request. User will be deleted from the
+          * list of oracles and their rate suggestion will be removed on next recalculation
+          *
+          * @param oracle - user name to set as oracle. Must be the same as the user invoking the call
+          */
          [[dcd::action]]
          void unregoracle( const name& oracle );
          
+         /**
+          * Set oracles rate. The rate suggestion is reflecting the USD/DCD
+          * conversion coefficent and will be calculated as a median between all suggestions of the 
+          * registered oracles, from the suggestions that are greater then 0. Recalculation will take 
+          * time on a periodic basis
+          *
+          * @param oracle - user name to set as oracle. Must be the same as the user invoking the call
+          */
          [[dcd::action]]
          void setrateorcl( const name& oracle, const double fee_rate );
  
+          /**
+          * Propose a list of new commision fees for a set of actions in contracts
+          * The list will be added to the current suggestions table. 1 active suggestion set 
+          * per producer
+          *
+          * @param producer - producer proposing the set up for voting
+          * @param prop_fees - a list of proposed fees structures <contract_name, action_name, fee> 
+          */
+         [[dcd::action]]
+         void propactfee( const name& producer, std::vector <action_fee_prop> prop_fees );
+
+          /**
+          * Vote action for the producers to approve/disaprove the commision fee suggestions
+          * from the other producers. Each producer can vote once, the vote weight is equal 
+          * The approve/disaprove required percentage is 75% + 1 producer / 25%
+          *
+          * @param producer - producer voting for the fee proposals suggestion
+          * @param prod_suggestion - the producer, which has the suggestion in voting table
+          * @param accept - 1/0 to approve/disaprove the suggestion
+          */
          [[dcd::action]]
          void votefeeprop(const name& producer, const name& prod_suggestion , unsigned int accept);
 
-         [[dcd::action]]
-         void propactfee( const name& producer, std::vector <action_fee_prop> prop_fees );
 
 
          using init_action = dcd::action_wrapper<"init"_n, &system_contract::init>;

@@ -2,69 +2,75 @@
 # DCD Protocol. Divide trust. Unite players
 Welcome to the DCD Ecosystem source code repository! This software is actively developed by the Graphene Lab team based on previous internal developments, as well as using a number of public technologies, including EOSIO, Ethereum and others.
 
+### Build dcd_protocol and setup yourself as a validator 
 
-## Software Installation From Scratch Ubuntu 18.04
-### Install the pre-requisite packages
+###### 0. Clone the repository 
 ```
-apt-get update &&  apt-get upgrade -y && apt-get install -y git make  bzip2 automake libbz2-dev libssl-dev doxygen graphviz libgmp3-dev autotools-dev libicu-dev python2.7 python2.7-dev python3 python3-dev python-configparser python-requests python-pip  autoconf libtool g++ gcc curl zlib1g-dev sudo ruby libusb-1.0-0-dev    libcurl4-gnutls-dev pkg-config patch vim-common jq net-tools
-```
-
-### Install cmake
-```
-curl -LO https://cmake.org/files/v3.16/cmake-3.16.2.tar.gz &&  tar -xzf cmake-3.16.2.tar.gz &&  cd cmake-3.16.2 &&  ./bootstrap --prefix=/usr/local &&  make -j$(nproc) &&  make install 
+git clone https://github.com/DCD-Ecosystem/dcd_protocol.git
 ```
 
-### Build clang and modules
-```
-git clone --single-branch --branch llvmorg-10.0.0 https://github.com/llvm/llvm-project clang10 &&  mkdir -p clang10/build && cd clang10/build &&  cmake -G 'Unix Makefiles' -DCMAKE_INSTALL_PREFIX='/usr/local' -DLLVM_ENABLE_PROJECTS='lld;polly;clang;clang-tools-extra;libcxx;libcxxabi;libunwind;compiler-rt' -DLLVM_BUILD_LLVM_DYLIB=ON -DLLVM_ENABLE_RTTI=ON -DLLVM_INCLUDE_DOCS=OFF -DLLVM_TARGETS_TO_BUILD=host -DCMAKE_BUILD_TYPE=Release ../llvm && make -j $(nproc) &&  make install
-```
+#####  1. Build and run the local node using docker instructions  from the docker/Readme.md (https://github.com/DCD-Ecosystem/dcd_protocol/blob/master/docker/Readme.md). In case the connection was established succesfuly you will see your node accepting the blocks in the log.
 
-### Add the required config file
+##### 2. Log in to your node container in in interactive mode
 ```
-cp docker/clang.make /tmp/clang.cmake
+docker exec -it usernode bash
 ```
+##### 3. Run the wallet service
+```
+dcdksd --data-dir path_to_data_dir --http-max-response-time-ms 99999 >> /node/log/dcdksd.log 2>&1 &
+```
+**--data-dir path_to_data_dir** - path to save wallet to, may be ommited
 
-###  Build and install llvm using required config
+##### 4. Create a wallet to hold your private keys for transaction signing. You can have multiple wallets if required. 
 ```
-git clone --depth 1 --single-branch --branch llvmorg-10.0.0 https://github.com/llvm/llvm-project llvm && cd llvm/llvm && mkdir build && cd build &&  cmake -G 'Unix Makefiles' -DLLVM_TARGETS_TO_BUILD=host -DLLVM_BUILD_TOOLS=false -DLLVM_ENABLE_RTTI=1 -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_TOOLCHAIN_FILE=/tmp/clang.cmake -DCMAKE_EXE_LINKER_FLAGS=-pthread -DCMAKE_SHARED_LINKER_FLAGS=-pthread -DLLVM_ENABLE_PIC=NO -DLLVM_ENABLE_TERMINFO=OFF .. &&     make -j$(nproc) &&      make install
+dcdcli wallet create -n name_wallet -f path_to_wall_password_file
 ```
+**name_wallet**  - desired wallet name to create
+**path_to_wall_password_file** - path to the file to store the password for your created wallet
 
-### Install boost
+##### 5. Read the password into any local variable
 ```
-curl -LO https://boostorg.jfrog.io/artifactory/main/release/1.72.0/source/boost_1_72_0.tar.bz2 &&  tar -xjf boost_1_72_0.tar.bz2 &&  cd boost_1_72_0 &&  ./bootstrap.sh --with-toolset=clang --prefix=/usr/local && ./b2 toolset=clang cxxflags='-stdlib=libc++ -D__STRICT_ANSI__ -nostdinc++ -I/usr/local/include/c++/v1 -D_FORTIFY_SOURCE=2 -fstack-protector-strong -fpie' linkflags='-stdlib=libc++ -pie' link=static threading=multi --with-iostreams --with-date_time --with-filesystem --with-system --with-program_options --with-chrono --with-test -q -j$(nproc) install 
+walletpasswd=$(cat path_to_wall_password_file)
 ```
+**path_to_wall_password_file** - path to the file to store the password for the wallet you want to use
 
-### Install postgresql
+##### 6. Ensure your wallet is unlocked or unlock it 
 ```
-export TZ=Europe/Amsterdam
-ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone &&  echo "deb http://apt.postgresql.org/pub/repos/apt bionic-pgdg main" > /etc/apt/sources.list.d/pgdg.list &&  curl -sL https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - && apt-get update && apt-get -y install libpq-dev postgresql-13 &&    apt-get clean
+dcdcli wallet unlock -n name_wallet --password $walletpasswd
+```
+**name_wallet** - name of the wallet to use
 
+##### 7.Import your private key into your created wallet
 ```
-### Install libpqxx
-curl -L https://github.com/jtv/libpqxx/archive/7.2.1.tar.gz | tar zxvf - && cd  libpqxx-7.2.1  &&  cmake -DCMAKE_TOOLCHAIN_FILE=/tmp/clang.cmake -DSKIP_BUILD_TEST=ON -DPostgreSQL_TYPE_INCLUDE_DIR=/usr/include/postgresql -DCMAKE_BUILD_TYPE=Release -S . -B build &&  cmake --build build && cmake --install build
+dcdcli wallet import -n name_wallet --private-key acc_private_key
+```
+**name_wallet** - name of the wallet to use
+**acc_private_key** - your private key received at account registration
 
-### Install nvm
+##### 8. Check your account balance
+```
+dcdcli --url http://127.0.0.1:8022 get account acc_name
+```
+**acc_name** - your account name
 
+##### 9.Stake some amount of DCD tokens
 ```
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.0/install.sh | bash
-cp ~/.bashrc ~/.bashrc.bak && \ cat ~/.bashrc.bak | tail -3 > ~/.bashrc && \  cat ~/.bashrc.bak | head -n '-3' >> ~/.bashrc && \  rm ~/.bashrc.bak 
-bash -c '. ~/.bashrc; nvm install --lts=dubnium' && ln -s "/root/.nvm/versions/node/$(ls -p /root/.nvm/versions/node | sort -Vr | head -1)bin/node" /usr/local/bin/node 
+dcdcli --url http://127.0.0.1:8022 system delegatebw acc_name acc_name "100.00000 DCD" "100.00000 DCD"
 ```
+**acc_name** - your account name
+The amount of DCD can be different, note however to input full precision 0.00000
 
-### Install nodejs
+##### 10. Register yourself as a validator inside blockchain
 ```
-curl -sL https://deb.nodesource.com/setup_13.x | sudo -E bash -
-apt-get update && apt-get install -y nodejs 
+dcdcli --url http://127.0.0.1:8022 system regproducer acc_name acc_public_key
 ```
+**acc_name** - your account name
+**acc_public_key** - your public key
 
-### Build dcd_protocol 
-```
-git clone https://github.com/DCD-Ecosystem/dcd_protocol.git && cd dcd_protocol && mkdir -p build && cd build && cmake -G 'Unix Makefiles' -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local/dcd_protocol -DCMAKE_TOOLCHAIN_FILE='/tmp/clang.cmake' -DCMAKE_EXE_LINKER_FLAGS=-pthread -DCMAKE_SHARED_LINKER_FLAGS=-pthread .. && make -j10 && make install
-```
+##### 11. Contact us and suggest your account name for a validator role
 
+##### 12. After we vote for your account, you shoud your node producing the new blocks according to the global validator rating
 
-## Software Installation Using Docker
-Proceed to the provided docker folder and follow the instructions in the README included
 
 ## License
 
@@ -107,4 +113,3 @@ DCD is released under the open source [MIT](./LICENSE) license and is offered â€
 * RAM: 32 GB DDR4 RAM
 * Storage: 500 GB SSD
 * Connection: 1 GBit/s port
-

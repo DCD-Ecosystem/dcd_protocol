@@ -30,7 +30,11 @@ fi
 --http-validate-host=false \
 --verbose-http-errors \
 --enable-stale-production \
---p2p-peer-address 127.0.0.1:9010 \
+--p2p-peer-address node2.dcdp.io:9012 \
+--abi-serializer-max-time-ms 3000 \
+--http-max-response-time-ms 300 \
+--max-transaction-time 300 \
+--chain-state-db-size-mb 10048 \
 >> $LOGDIR"/dcdnode.log" 2>&1 & \
 echo $! > $DATADIR"/dcdd.pid"
 

@@ -263,11 +263,26 @@ namespace dcdsystem {
          [[dcd::action]]
          void setcode( const name& account, uint8_t vmtype, uint8_t vmversion, const std::vector<char>& code ) {}
 
+         /**
+          * Set commision fee for the specific action in the account.
+          *
+          * @param account - the account/contract name with the required action
+          * @param action - action from the contract to set fee for 
+          * @param fee - commision fee, in USD
+          
+          */
          [[dcd::action]]
          void setfee( const ignore<name> account, 
                       const ignore<name> action, 
                       const ignore<asset> fee ) {}
 
+         /**
+          * Set new USD/DCD rate in in the core
+          *
+          * @param new_rate - new USD/DCD rate to be set
+          * @param rate_time - new rate set time
+          
+          */
          [[dcd::action]]
          void setrate( const ignore<double> new_rate, dcd::time_point rate_time) {}
 
