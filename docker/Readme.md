@@ -31,7 +31,7 @@ then add the data from the created account into run.sh
 config files have been generated. The finalization for the process should be marked with : "Node is working" message
 
 ```
-./run.h
+./run.sh
 ```
 
 5. Check the node log running
